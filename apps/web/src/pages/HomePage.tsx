@@ -1,7 +1,7 @@
-import { TIME_PRESETS, type GameSummary, type LobbyView, type Me, type SeekView, type TimeControl } from '@ligungi/protocol';
+import { TIME_PRESETS, type GameSummary, type LeaderEntry, type LobbyView, type Me, type SeekView, type TimeControl } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
-import { SOURCE_URL } from '../app.tsx';
+import { SOURCE_URL } from '../source.ts';
 import { CreateGame, type CreateTarget } from '../components/CreateGame.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { icons } from '../icons.ts';
@@ -120,6 +120,85 @@ const OnlineFriends = () => {
   );
 };
 
+const LEADERBOARD_MODE = 'advanced';
+const HOME_LEADERBOARD_SIZE = 8;
+
+/** `undefined` while loading, `'error'` when the request failed. */
+type Loaded<T> = T | undefined | 'error';
+
+const LeaderboardBox = ({ entries }: { entries: Loaded<readonly LeaderEntry[]> }) => {
+  const t = useT();
+  return (
+    <div class="lobby__box ligungi-home-leaders">
+      <div class="lobby__box__top">
+        <h2 class="title text" data-icon={icons.Trophy}>
+          {t.ranking.title} · {t.modes[LEADERBOARD_MODE]}
+        </h2>
+        <a class="more" href={`/ranking/${LEADERBOARD_MODE}`}>
+          {t.home.more}
+        </a>
+      </div>
+      <div class="lobby__box__content">
+        {Array.isArray(entries) && entries.length > 0 ? (
+          <table>
+            <tbody>
+              {entries.map((entry, index) => (
+                <tr key={entry.user.id}>
+                  <td class="ligungi-home-leaders__rank">{index + 1}</td>
+                  <td>
+                    <a class={`user-link ${entry.online ? 'online' : 'offline'}`} href={`/@/${entry.user.name}`}>
+                      <i class="line" />
+                      {entry.user.name}
+                    </a>
+                  </td>
+                  <td class="ligungi-home-leaders__rating">{entry.rating}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p class="ligungi-notice ligungi-box-empty">
+            {entries === undefined ? t.common.loading : entries === 'error' ? t.genericError : t.ranking.empty}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const TvBox = ({ game }: { game: Loaded<GameSummary | null> }) => {
+  const t = useT();
+  return (
+    <div class="lobby__tv lobby__box ligungi-home-tv">
+      <div class="lobby__box__top">
+        <h2 class="title text" data-icon={icons.AnalogTv}>
+          {t.home.featured}
+        </h2>
+        <a class="more" href="/tv">
+          {t.home.more}
+        </a>
+      </div>
+      <div class="lobby__box__content">
+        {game && game !== 'error' ? (
+          <a class="ligungi-tv" href={`/${game.id}`}>
+            <span class="ligungi-tv__player">
+              <PlayerTag player={game.players.black} />
+            </span>
+            <MiniBoard fen={game.fen} />
+            <span class="ligungi-tv__player">
+              <PlayerTag player={game.players.white} />
+            </span>
+          </a>
+        ) : (
+          <p class="ligungi-notice ligungi-box-empty">
+            {game === undefined ? t.common.loading : game === 'error' ? t.genericError : t.home.noTv}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const Playing = ({ games }: { games: readonly GameSummary[] }) => {
   const t = useT();
   return (
@@ -148,7 +227,8 @@ export const HomePage = () => {
   const { search } = useLocation();
   const [lobby, setLobby] = useState<LobbyView | null>(null);
   const [me, setMe] = useState<Me | null>(null);
-  const [tv, setTv] = useState<GameSummary | null>(null);
+  const [tv, setTv] = useState<Loaded<GameSummary | null>>(undefined);
+  const [leaders, setLeaders] = useState<Loaded<readonly LeaderEntry[]>>(undefined);
   const [tab, setTab] = useState<Tab>('pools');
   const [create, setCreate] = useState<CreateTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -169,9 +249,13 @@ export const HomePage = () => {
     api.get<LobbyView>('/api/lobby').then(setLobby).catch(() => {});
     api.get<Me>('/api/me').then(setMe).catch(() => {});
     api
+      .get<LeaderEntry[]>(`/api/leaderboard/${LEADERBOARD_MODE}?limit=${HOME_LEADERBOARD_SIZE}`)
+      .then(setLeaders)
+      .catch(() => setLeaders('error'));
+    api
       .get<GameSummary[]>('/api/tv')
       .then((games) => setTv(games[0] ?? null))
-      .catch(() => {});
+      .catch(() => setTv('error'));
     return () => {
       unsubscribe();
       off();
@@ -275,28 +359,18 @@ export const HomePage = () => {
         </div>
       </div>
 
-      <div class="lobby__tv">
-        {tv ? (
-          <a class="ligungi-tv" href={`/${tv.id}`}>
-            <span class="ligungi-tv__player">
-              <PlayerTag player={tv.players.black} />
-            </span>
-            <MiniBoard fen={tv.fen} />
-            <span class="ligungi-tv__player">
-              <PlayerTag player={tv.players.white} />
-            </span>
-          </a>
-        ) : (
-          <a class="ligungi-tv ligungi-tv--empty" href="/tv">
-            {t.home.noTv}
-          </a>
-        )}
-      </div>
+      <TvBox game={tv} />
+      <LeaderboardBox entries={leaders} />
 
       <div class="lobby__about">
-        <a href="/learn">{t.home.rules}</a>
-        <a href={SOURCE_URL}>{t.home.source}</a>
-        <a href="/settings">{t.nav.settings}</a>
+        <a href="/about">{t.nav.about}</a>
+        <a href="/faq">{t.nav.faq}</a>
+        <a href="/contact">{t.nav.contact}</a>
+        <a href="/terms">{t.nav.terms}</a>
+        <a href="/privacy">{t.nav.privacy}</a>
+        <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer">
+          {t.home.source}
+        </a>
       </div>
 
       {create && <CreateGame target={create} onClose={() => setCreate(null)} />}

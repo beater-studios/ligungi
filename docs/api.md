@@ -25,7 +25,7 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 | `DELETE /api/users/:name/follow` | Unfollows. |
 | `GET /api/following` | Players the account follows (`FriendView`): online status, ongoing game and ratings. Requires an account. |
 | `GET /api/leaderboard` | Top 10 of each mode. |
-| `GET /api/leaderboard/:mode` | Top 100 of one mode. Only players with an established rating are listed (deviation up to 110, out of the provisional period). |
+| `GET /api/leaderboard/:mode?limit=<n>` | Top 100 of one mode, or the first `limit` (1 to 100). Only players with an established rating are listed (deviation up to 110, out of the provisional period). |
 | `GET /api/games/:id` | Full game state (`GameView`). |
 | `GET /api/games/:id/export` | The game as text, in the spirit of PGN: headers and one move per line, in both the rulebook and the machine notation. |
 | `GET /api/tv` | Ongoing games, strongest first. |

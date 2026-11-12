@@ -59,8 +59,24 @@ const HEARTBEAT_MS = 30_000;
 const SESSION_SWEEP_MS = 6 * 3_600_000;
 const MAX_TOPICS_PER_CLIENT = 32;
 const SITE_NAME = 'ligungi';
-const CSP =
-  "default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; worker-src 'self' blob:; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'";
+/** Cloudflare Web Analytics: no cookies, aggregate only; its edge injects this script into the HTML. */
+const ANALYTICS_SCRIPT = 'https://static.cloudflareinsights.com';
+const ANALYTICS_REPORT = 'https://cloudflareinsights.com';
+
+const contentSecurityPolicy = (analytics: boolean): string =>
+  [
+    "default-src 'self'",
+    `script-src 'self'${analytics ? ` ${ANALYTICS_SCRIPT}` : ''}`,
+    `connect-src 'self'${analytics ? ` ${ANALYTICS_REPORT}` : ''}`,
+    "img-src 'self' data:",
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self' data:",
+    "worker-src 'self' blob:",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+  ].join('; ');
 
 export interface App {
   readonly server: Server;
@@ -79,6 +95,7 @@ export const createApp = (config: ServerConfig): App => {
   const loginFailures = new RateLimiter(20, 15 * 60_000, config.now);
   /** New sessions per IP: each one is a database row. */
   const sessionLimiter = new RateLimiter(30, 60_000, config.now);
+  const csp = contentSecurityPolicy(config.cloudflareWebAnalytics);
   let closing = false;
 
   const toPlayer = (session: Session): Player => {
@@ -284,7 +301,8 @@ export const createApp = (config: ServerConfig): App => {
     .add('GET', '/api/leaderboard/:mode', (ctx) => {
       const mode = ctx.params.mode as Mode;
       if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
-      sendJson(ctx.res, 200, leaders(mode, LEADERBOARD_MAX, onlineUsers()));
+      const limit = Math.min(LEADERBOARD_MAX, Math.max(1, Math.trunc(Number(ctx.url.searchParams.get('limit'))) || LEADERBOARD_MAX));
+      sendJson(ctx.res, 200, leaders(mode, limit, onlineUsers()));
     })
     .add('GET', '/api/games/:id', (ctx) => {
       const room = games.get(ctx.params.id!);
@@ -378,7 +396,7 @@ export const createApp = (config: ServerConfig): App => {
     res.setHeader('x-content-type-options', 'nosniff');
     res.setHeader('referrer-policy', 'strict-origin-when-cross-origin');
     if (!url.pathname.startsWith('/api/')) {
-      res.setHeader('content-security-policy', CSP);
+      res.setHeader('content-security-policy', csp);
       if ((req.method === 'GET' || req.method === 'HEAD') && config.staticDir && serveStatic(config.staticDir, url.pathname, res, req.method === 'HEAD')) return;
       sendText(res, 404, 'Not found');
       return;

@@ -19,6 +19,7 @@ export const startServer = async (overrides: Partial<ServerConfig> = {}): Promis
     databasePath: ':memory:',
     staticDir: null,
     secureCookies: false,
+    cloudflareWebAnalytics: false,
     trustProxy: 'none',
     abortAfterMs: 60_000,
     claimAfterMs: 30_000,

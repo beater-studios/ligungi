@@ -17,6 +17,8 @@ export interface ServerConfig {
   /** Built web app to serve, if any. */
   readonly staticDir: string | null;
   readonly secureCookies: boolean;
+  /** Allow Cloudflare Web Analytics' beacon (injected by Cloudflare's edge) through the CSP. */
+  readonly cloudflareWebAnalytics: boolean;
   readonly trustProxy: TrustProxy;
   /** A game is aborted if a player does not make their first move in time. */
   readonly abortAfterMs: number;
@@ -37,6 +39,7 @@ export const loadConfig = (env: NodeJS.ProcessEnv = process.env): ServerConfig =
   databasePath: env.DATABASE_PATH ?? 'data/ligungi.db',
   staticDir: env.STATIC_DIR ?? null,
   secureCookies: env.SECURE_COOKIES === 'true',
+  cloudflareWebAnalytics: env.CLOUDFLARE_WEB_ANALYTICS === 'true',
   trustProxy: parseTrustProxy(env.TRUST_PROXY),
   abortAfterMs: Number(env.ABORT_AFTER_MS ?? 60_000),
   claimAfterMs: Number(env.CLAIM_AFTER_MS ?? 30_000),

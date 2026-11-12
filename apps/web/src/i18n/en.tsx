@@ -1,9 +1,7 @@
 import type { Color } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import type { Messages } from './pt.tsx';
-
-const LILA = 'https://github.com/lichess-org/lila';
-const STUDIO = 'https://beaterstudios.com/';
+import { LINKS, STUDIO } from './content/shared.tsx';
 
 const colorOf = (color: Color) => (color === 'white' ? 'White' : 'Black');
 
@@ -145,12 +143,17 @@ export const en: Messages = {
     community: 'Community',
     players: 'Leaderboard',
     friends: 'Friends',
+    about: 'About',
+    faq: 'FAQ',
+    contact: 'Contact',
+    terms: 'Terms of service',
+    privacy: 'Privacy',
   },
   notFound: { title: 'Page not found', back: 'Back to the home page' },
   footer: {
     source: (url) => (
       <>
-        ligungi is free software: <a href={url}>source code (AGPL-3.0)</a>. Look based on <a href={LILA}>lila</a>, the
+        ligungi is free software: <a href={url}>source code (AGPL-3.0)</a>. Look based on <a href={LINKS.lila}>lila</a>, the
         open source code of lichess.org.
       </>
     ),
@@ -160,6 +163,24 @@ export const en: Messages = {
         A <a href={STUDIO} target="_blank" rel="noopener noreferrer">Beater Studios</a> project
       </>
     ),
+  },
+
+  consent: {
+    title: 'Cookies and privacy',
+    text: (
+      <>
+        We use an essential cookie to keep your session and your games. With your permission, we also measure visits
+        anonymously, without cookies, to improve the site. <a href="/privacy">Learn more</a>
+      </>
+    ),
+    accept: 'Accept statistics',
+    reject: 'Essential only',
+    prefsTitle: 'Your cookie preferences',
+    prefsText: 'The session cookie is essential and cannot be turned off. Visit statistics are optional and you can change your choice at any time.',
+    statusLabel: 'Current status',
+    accepted: 'statistics accepted',
+    rejected: 'essential only',
+    undecided: 'you have not chosen yet',
   },
 
   common: {
@@ -215,7 +236,8 @@ export const en: Messages = {
     playersOnline: (n) => (n === 1 ? 'player online' : 'players online'),
     gamesPlaying: (n) => (n === 1 ? 'game in play' : 'games in play'),
     noTv: 'No live games right now.',
-    rules: 'Rules',
+    featured: 'Featured game',
+    more: 'More »',
     source: 'Source code',
   },
 
@@ -432,6 +454,7 @@ export const en: Messages = {
       </>
     ),
     movementTitle: 'How the pieces move',
+    sourcesTitle: 'Rule sources',
     tier: (n) => `tier ${n}`,
     notes: {
       marshal: 'If you have no safe move, you lose. Nothing can be stacked on it.',

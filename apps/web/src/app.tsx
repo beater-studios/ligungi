@@ -3,13 +3,16 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { MESSAGES, themeLabel, useT } from './i18n/index.ts';
 import logoUrl from './assets/logo.svg';
 import { icons } from './icons.ts';
+import { SOURCE_URL } from './source.ts';
 import { COMMIT, VERSION } from './version.ts';
 import { AnalysisPage } from './pages/AnalysisPage.tsx';
 import { AuthPage } from './pages/AuthPage.tsx';
 import { ChallengePage } from './pages/ChallengePage.tsx';
 import { ComputerPage } from './pages/ComputerPage.tsx';
+import { CookieBanner } from './components/Consent.tsx';
 import { DesignPage } from './pages/DesignPage.tsx';
 import { FriendsPage } from './pages/FriendsPage.tsx';
+import { INFO_KINDS, InfoPage, isInfoKind } from './pages/InfoPage.tsx';
 import { GamePage } from './pages/GamePage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LearnPage } from './pages/LearnPage.tsx';
@@ -24,8 +27,6 @@ import { logout, session } from './session.ts';
 import { socket } from './socket.ts';
 import { useStore } from './store.ts';
 
-export const SOURCE_URL =
-  (import.meta.env.VITE_SOURCE_URL as string | undefined) ?? 'https://github.com/beater-studios/ligungi';
 
 const ROUTES: Route<VNode>[] = [
   { pattern: /^\/$/, render: () => <HomePage /> },
@@ -36,6 +37,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/settings$/, render: () => <SettingsPage /> },
   { pattern: /^\/friends$/, render: () => <FriendsPage /> },
   { pattern: /^\/design$/, render: () => <DesignPage /> },
+  { pattern: new RegExp(`^/(${INFO_KINDS.join('|')})$`), render: ([kind]) => (isInfoKind(kind!) ? <InfoPage kind={kind} /> : <NotFound />) },
   { pattern: /^\/ranking$/, render: () => <RankingPage /> },
   { pattern: new RegExp(`^/ranking/(${MODES.join('|')})$`), render: ([mode]) => <RankingPage mode={mode as Mode} /> },
   { pattern: /^\/login$/, render: () => <AuthPage signup={false} /> },
@@ -283,6 +285,13 @@ export const SiteFooter = () => {
   const t = useT();
   return (
     <footer class="ligungi-footer">
+      <nav class="ligungi-footer__links">
+        {INFO_KINDS.map((kind) => (
+          <a key={kind} href={`/${kind}`}>
+            {t.nav[kind]}
+          </a>
+        ))}
+      </nav>
       <span>{t.footer.source(SOURCE_URL)}</span>
       <span>{t.footer.trademark}</span>
       <span class="ligungi-footer__studio">
@@ -329,6 +338,7 @@ export const App = () => {
         {matchRoute(ROUTES, path) ?? <NotFound />}
       </div>
       <SiteFooter />
+      <CookieBanner />
     </>
   );
 };

@@ -224,5 +224,13 @@ describe('headers', () => {
     expect(csp).toContain("connect-src 'self';");
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");
+    expect(csp).not.toContain('cloudflareinsights');
+  });
+
+  it('lets the Cloudflare Web Analytics beacon through only when enabled', async () => {
+    server = await startServer({ cloudflareWebAnalytics: true });
+    const csp = (await raw('/')).headers.get('content-security-policy') ?? '';
+    expect(csp).toContain("script-src 'self' https://static.cloudflareinsights.com;");
+    expect(csp).toContain("connect-src 'self' https://cloudflareinsights.com;");
   });
 });

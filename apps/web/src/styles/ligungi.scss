@@ -83,11 +83,6 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   gap: 0.4em;
   color: $c-font;
 
-  &--empty {
-    padding: 2em 1em;
-    text-align: center;
-    color: $c-font-dim;
-  }
 
   &__player {
     font-size: 0.9em;
@@ -166,16 +161,28 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   }
 }
 
-/* lila draws the lichess logo behind the lobby content; ligungi must not use it. */
+/* lila draws the lichess logo behind the lobby content; ligungi shows its own, faded, in the same place. */
 .lobby__app__content {
   background-image: none !important;
+  position: relative;
+  z-index: 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url('../assets/logo.svg') no-repeat center / min(55%, 22rem);
+    filter: grayscale(1);
+    opacity: 0.07;
+    pointer-events: none;
+  }
 }
 
 .lobby__counters {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.3em 1em;
+  flex-direction: column;
+  gap: 0.2em;
 }
 
 /* Gungi board inside lila's square .main-board (round and analysis pages). */
@@ -702,10 +709,6 @@ $wood: #e3c389;
   }
 }
 
-.lobby__tv .ligungi-tv {
-  max-width: 300px;
-  margin: 0 auto;
-}
 
 // Leaderboard overview: lila's community grid without the online column.
 .ligungi-ranking.community {
@@ -828,29 +831,29 @@ $wood: #e3c389;
 }
 
 .ligungi-check {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
   column-gap: 0.6rem;
   row-gap: 0.25rem;
 
   input[type='checkbox'] {
-    flex: none;
     width: 1.1rem;
     height: 1.1rem;
-    margin: 0;
+    margin: 0.15em 0 0;
     accent-color: $c-primary;
     cursor: pointer;
   }
 
+  // The label keeps its text width, so only the text toggles the box; long text wraps beside it.
   label {
+    justify-self: start;
     cursor: pointer;
   }
 
   .form-help {
-    flex-basis: 100%;
+    grid-column: 2;
     margin: 0;
-    padding-inline-start: 1.7rem;
   }
 
   &.is-disabled {
@@ -1068,5 +1071,184 @@ body:has(main.auth) .site-buttons .signin-or-signup {
 
   &__board {
     width: 14rem;
+  }
+}
+
+/* ===== Home boxes (lila's lobby__box) ===== */
+.ligungi-home-tv,
+.ligungi-home-leaders {
+  .lobby__box__top .title::before {
+    margin-inline-end: 0.4em;
+  }
+}
+
+.ligungi-home-tv .ligungi-tv {
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 0.8rem;
+}
+
+// Grid area only: lila's .lobby__feed adds an inner scroller whose gutter shortens the box header. The lobby row is
+// fit-content(0), where a scroll container measures zero; `clip` keeps the rounded corners without being one.
+.ligungi-home-leaders {
+  grid-area: feed;
+  overflow: clip;
+
+  .lobby__box__content {
+    overflow: visible;
+  }
+}
+
+.ligungi-home-leaders {
+  &__rank {
+    width: 2.5em;
+    color: $c-font-dim;
+    text-align: center;
+  }
+
+  &__rating {
+    text-align: end;
+    font-weight: bold;
+  }
+}
+
+.ligungi-box-empty {
+  margin: 0;
+  padding: 1.2rem 1rem;
+  text-align: center;
+}
+
+/* ===== About, FAQ, contact and legal pages ===== */
+.ligungi-info__body {
+  max-width: 48rem;
+  line-height: 1.6;
+
+  h2 {
+    font-size: 1.3em;
+    margin: 1.8rem 0 0.6rem;
+  }
+
+  p,
+  ul,
+  ol {
+    margin: 0 0 0.9rem;
+  }
+
+  ul,
+  ol {
+    padding-inline-start: 1.4rem;
+  }
+
+  ul li {
+    list-style: disc;
+  }
+
+  ol li {
+    list-style: decimal;
+  }
+
+  li {
+    margin-bottom: 0.35rem;
+  }
+}
+
+.ligungi-faq {
+  margin: 0;
+
+  > div {
+    padding: 1rem 0;
+    border-bottom: $border;
+  }
+
+  dt {
+    font-weight: bold;
+    font-size: 1.05em;
+    margin-bottom: 0.4rem;
+  }
+
+  dd {
+    margin: 0;
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.learn #sources {
+  ol li {
+    list-style: decimal inside;
+    margin-bottom: 0.35rem;
+  }
+}
+
+/* ===== Site footer links ===== */
+.ligungi-footer__links {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem 1.2rem;
+  font-weight: bold;
+
+  a {
+    color: $c-font-dim;
+
+    &:hover {
+      color: $c-link;
+    }
+  }
+}
+
+// The home has lila's own about row; the site-wide footer links would repeat it there.
+body:has(main.lobby) .ligungi-footer__links {
+  display: none;
+}
+
+.ligungi-home-tv {
+  align-self: start;
+}
+
+/* ===== Cookie notice and preferences (components/Consent.tsx) ===== */
+.ligungi-consent {
+  position: fixed;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  z-index: $z-modal-alert-200;
+  max-width: 46rem;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 1rem 1.2rem;
+  background: $c-bg-box;
+  border: $border;
+  border-radius: $box-radius-size;
+  @extend %box-shadow;
+
+  &__text {
+    flex: 1 1 22rem;
+
+    p {
+      margin: 0.3rem 0 0;
+      color: $c-font-dim;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+.ligungi-consent-prefs {
+  margin-top: 2rem;
+  padding-top: 0.5rem;
+  border-top: $border;
+
+  .ligungi-consent__actions {
+    margin-top: 0.8rem;
   }
 }

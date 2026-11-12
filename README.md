@@ -53,8 +53,11 @@ Server environment variables:
 | `STATIC_DIR` | (none) | Folder of the built site. |
 | `SECURE_COOKIES` | `false` | Use `true` behind HTTPS. |
 | `TRUST_PROXY` | `none` | Where the client IP comes from, for rate limiting: `none` (the TCP connection), `cloudflare` (`CF-Connecting-IP`) or `proxy` (last `X-Forwarded-For` entry, from one trusted reverse proxy). |
+| `CLOUDFLARE_WEB_ANALYTICS` | `false` | `true` lets Cloudflare Web Analytics' beacon through the CSP. |
 | `ABORT_AFTER_MS` | `60000` | Time for the first move before the game is aborted. |
 | `CLAIM_AFTER_MS` | `30000` | Time the opponent must be away before victory can be claimed. |
+
+Visit statistics are optional: build the site with `VITE_CF_ANALYTICS_TOKEN` (the public token of a Cloudflare Web Analytics site set up for manual install) and run the server with `CLOUDFLARE_WEB_ANALYTICS=true`. The site then asks for consent and only loads the beacon after the visitor accepts; without the token there is no notice and no analytics.
 
 The site footer links to the source code at https://github.com/beater-studios/ligungi (an AGPL requirement for anyone running the site publicly). If you publish a fork, point to your own code by setting `VITE_SOURCE_URL` at build time.
 

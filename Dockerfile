@@ -1,7 +1,10 @@
 FROM node:24.22.1-alpine AS build
 # Git commit of the build; .git is not in the context, so the deploy passes it in.
 ARG LIGUNGI_COMMIT=dev
-ENV LIGUNGI_COMMIT=$LIGUNGI_COMMIT
+# Public site token of Cloudflare Web Analytics; empty means no analytics and no cookie notice.
+ARG VITE_CF_ANALYTICS_TOKEN=
+ENV LIGUNGI_COMMIT=$LIGUNGI_COMMIT \
+    VITE_CF_ANALYTICS_TOKEN=$VITE_CF_ANALYTICS_TOKEN
 WORKDIR /app
 COPY package.json package-lock.json .npmrc tsconfig.base.json ./
 COPY packages ./packages

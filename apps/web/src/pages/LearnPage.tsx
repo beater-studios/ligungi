@@ -12,6 +12,7 @@ import {
 } from '@ligungi/engine';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PieceTrainer } from '../components/PieceTrainer.tsx';
+import { useContent } from '../i18n/content/index.ts';
 import { usePieceNames, useT } from '../i18n/index.ts';
 
 const CENTER = squareAt(4, 4);
@@ -49,6 +50,7 @@ export const LearnPage = () => {
   const t = useT();
   const l = t.learn;
   const pieceNames = usePieceNames();
+  const content = useContent();
   return (
     <main class="page-small box box-pad page learn">
       <h1 class="box__top">{l.title}</h1>
@@ -107,6 +109,11 @@ export const LearnPage = () => {
             </figure>
           ))}
         </div>
+      </section>
+
+      <section id="sources">
+        <h2>{l.sourcesTitle}</h2>
+        {content.sources}
       </section>
     </main>
   );

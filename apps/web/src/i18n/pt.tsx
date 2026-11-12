@@ -2,9 +2,7 @@ import type { Labels } from '@ligungi/board';
 import type { Color, Mode, Outcome, Role } from '@ligungi/engine';
 import { ERROR_MESSAGES, type ErrorCode } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
-
-const LILA = 'https://github.com/lichess-org/lila';
-const STUDIO = 'https://beaterstudios.com/';
+import { LINKS, STUDIO } from './content/shared.tsx';
 
 const colorOf = (color: Color) => (color === 'white' ? 'Branco' : 'Preto');
 
@@ -93,12 +91,17 @@ export const pt = {
     community: 'Comunidade',
     players: 'Ranking',
     friends: 'Amigos',
+    about: 'Sobre',
+    faq: 'FAQ',
+    contact: 'Contato',
+    terms: 'Condições de uso',
+    privacy: 'Privacidade',
   },
   notFound: { title: 'Página não encontrada', back: 'Voltar ao início' },
   footer: {
     source: (url: string) => (
       <>
-        ligungi é software livre: <a href={url}>código-fonte (AGPL-3.0)</a>. Visual baseado no <a href={LILA}>lila</a>, o
+        ligungi é software livre: <a href={url}>código-fonte (AGPL-3.0)</a>. Visual baseado no <a href={LINKS.lila}>lila</a>, o
         código aberto do lichess.org.
       </>
     ),
@@ -108,6 +111,24 @@ export const pt = {
         Um projeto <a href={STUDIO} target="_blank" rel="noopener noreferrer">Beater Studios</a>
       </>
     ),
+  },
+
+  consent: {
+    title: 'Cookies e privacidade',
+    text: (
+      <>
+        Usamos um cookie essencial para manter sua sessão e suas partidas. Com a sua permissão, também medimos visitas de
+        forma anônima, sem cookies, para melhorar o site. <a href="/privacy">Saiba mais</a>
+      </>
+    ),
+    accept: 'Aceitar estatísticas',
+    reject: 'Só o essencial',
+    prefsTitle: 'Suas preferências de cookies',
+    prefsText: 'O cookie de sessão é essencial e não pode ser desligado. As estatísticas de visita são opcionais e você pode mudar a sua escolha a qualquer momento.',
+    statusLabel: 'Situação atual',
+    accepted: 'estatísticas aceitas',
+    rejected: 'só o essencial',
+    undecided: 'você ainda não escolheu',
   },
 
   common: {
@@ -163,7 +184,8 @@ export const pt = {
     playersOnline: (n: number): string => (n === 1 ? 'jogador conectado' : 'jogadores conectados'),
     gamesPlaying: (n: number): string => (n === 1 ? 'partida em andamento' : 'partidas em andamento'),
     noTv: 'Nenhuma partida ao vivo agora.',
-    rules: 'Regras',
+    featured: 'Partida em destaque',
+    more: 'Mais »',
     source: 'Código-fonte',
   },
 
@@ -379,6 +401,7 @@ export const pt = {
       </>
     ),
     movementTitle: 'Movimento das peças',
+    sourcesTitle: 'Fontes das regras',
     tier: (n: number) => `nível ${n}`,
     notes: {
       marshal: 'Se ficar sem lance seguro, você perde. Nada pode ser empilhado sobre ele.',

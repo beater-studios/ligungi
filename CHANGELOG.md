@@ -4,6 +4,17 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- About, FAQ, contact, terms of service and privacy policy pages, in the three languages, linked from the home and the footer.
+- Rule sources on the learn page.
+- Leaderboard and featured game boxes on the home page.
+- Optional Cloudflare Web Analytics (no cookies), loaded only after the visitor accepts it in a cookie notice; the choice can be changed on the privacy page.
+
+### Changed
+
+- Home counters stacked under the game buttons, and ligungi's logo faded behind the quick game grid, as on lichess.
+
 ## [0.1.0] - 2026-11-12
 
 First public version.

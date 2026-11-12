@@ -284,6 +284,8 @@ describe('community', () => {
 
     const full = await a.request<LeaderEntry[]>('GET', '/api/leaderboard/advanced');
     expect(full.data).toHaveLength(2);
+    expect((await a.request<LeaderEntry[]>('GET', '/api/leaderboard/advanced?limit=1')).data.map((e) => e.user.name)).toEqual(['Netero']);
+    expect((await a.request<LeaderEntry[]>('GET', '/api/leaderboard/advanced?limit=abc')).data).toHaveLength(2);
     expect((await a.request('GET', '/api/leaderboard/blitz')).status).toBe(404);
 
     const zeno = (await a.request<UserProfile>('GET', '/api/users/zeno')).data;

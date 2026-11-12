@@ -1,9 +1,7 @@
 import type { Color } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import type { Messages } from './pt.tsx';
-
-const LILA = 'https://github.com/lichess-org/lila';
-const STUDIO = 'https://beaterstudios.com/';
+import { LINKS, STUDIO } from './content/shared.tsx';
 
 const sideOf = (color: Color) => (color === 'white' ? 'las blancas' : 'las negras');
 
@@ -145,12 +143,17 @@ export const es: Messages = {
     community: 'Comunidad',
     players: 'Clasificación',
     friends: 'Amigos',
+    about: 'Acerca de',
+    faq: 'FAQ',
+    contact: 'Contacto',
+    terms: 'Condiciones de uso',
+    privacy: 'Privacidad',
   },
   notFound: { title: 'Página no encontrada', back: 'Volver al inicio' },
   footer: {
     source: (url) => (
       <>
-        ligungi es software libre: <a href={url}>código fuente (AGPL-3.0)</a>. Diseño basado en <a href={LILA}>lila</a>,
+        ligungi es software libre: <a href={url}>código fuente (AGPL-3.0)</a>. Diseño basado en <a href={LINKS.lila}>lila</a>,
         el código abierto de lichess.org.
       </>
     ),
@@ -160,6 +163,24 @@ export const es: Messages = {
         Un proyecto de <a href={STUDIO} target="_blank" rel="noopener noreferrer">Beater Studios</a>
       </>
     ),
+  },
+
+  consent: {
+    title: 'Cookies y privacidad',
+    text: (
+      <>
+        Usamos una cookie esencial para mantener tu sesión y tus partidas. Con tu permiso, también medimos las visitas de
+        forma anónima, sin cookies, para mejorar el sitio. <a href="/privacy">Más información</a>
+      </>
+    ),
+    accept: 'Aceptar estadísticas',
+    reject: 'Solo lo esencial',
+    prefsTitle: 'Tus preferencias de cookies',
+    prefsText: 'La cookie de sesión es esencial y no se puede desactivar. Las estadísticas de visitas son opcionales y puedes cambiar tu elección en cualquier momento.',
+    statusLabel: 'Estado actual',
+    accepted: 'estadísticas aceptadas',
+    rejected: 'solo lo esencial',
+    undecided: 'todavía no has elegido',
   },
 
   common: {
@@ -215,7 +236,8 @@ export const es: Messages = {
     playersOnline: (n) => (n === 1 ? 'jugador conectado' : 'jugadores conectados'),
     gamesPlaying: (n) => (n === 1 ? 'partida en curso' : 'partidas en curso'),
     noTv: 'No hay partidas en vivo ahora.',
-    rules: 'Reglas',
+    featured: 'Partida destacada',
+    more: 'Más »',
     source: 'Código fuente',
   },
 
@@ -432,6 +454,7 @@ export const es: Messages = {
       </>
     ),
     movementTitle: 'Movimiento de las piezas',
+    sourcesTitle: 'Fuentes de las reglas',
     tier: (n) => `nivel ${n}`,
     notes: {
       marshal: 'Si te quedas sin jugada segura, pierdes. No se puede apilar nada sobre él.',

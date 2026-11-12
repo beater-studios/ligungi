@@ -1,4 +1,4 @@
-FROM node:24.22.1-alpine AS build
+FROM node:26.13.0-alpine AS build
 # Git commit of the build; .git is not in the context, so the deploy passes it in.
 ARG LIGUNGI_COMMIT=dev
 # Public site token of Cloudflare Web Analytics; empty means no analytics and no cookie notice.
@@ -12,7 +12,7 @@ COPY apps ./apps
 COPY scripts ./scripts
 RUN npm ci --ignore-scripts --no-audit --no-fund && npm run build
 
-FROM node:24.22.1-alpine
+FROM node:26.13.0-alpine
 ARG LIGUNGI_COMMIT=dev
 LABEL org.opencontainers.image.title="ligungi" \
       org.opencontainers.image.source="https://github.com/beater-studios/ligungi" \

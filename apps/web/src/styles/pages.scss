@@ -1,0 +1,13 @@
+// Page styles of lila (lichess.org). Each one is scoped to its page (main.lobby, main.round...).
+@import '../../vendor/lila/ui/lobby/css/build/lobby';
+@import '../../vendor/lila/ui/lobby/css/build/lobby.setup';
+@import '../../vendor/lila/ui/round/css/build/round';
+@import '../../vendor/lila/ui/round/css/build/round.zh';
+@import '../../vendor/lila/ui/analyse/css/build/analyse.free';
+@import '../../vendor/lila/ui/analyse/css/build/analyse.zh';
+@import '../../vendor/lila/ui/user/css/build/user.show';
+@import '../../vendor/lila/ui/user/css/build/user.account';
+@import '../../vendor/lila/ui/user/css/build/user.list';
+@import '../../vendor/lila/ui/bits/css/build/bits.auth';
+@import '../../vendor/lila/ui/bits/css/build/bits.tv.games';
+@import '../../vendor/lila/ui/bits/css/build/bits.page';

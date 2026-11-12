@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/beater-studios/ligungi/security/advisories/new
+    about: Report security issues privately. Do not open a public issue.
+  - name: Rules specification
+    url: https://github.com/beater-studios/ligungi/blob/main/docs/rules.md
+    about: How ligungi interprets the official rules, with sources.

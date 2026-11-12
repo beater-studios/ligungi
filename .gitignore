@@ -1,0 +1,50 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Deployment and infrastructure: kept local, never published
+/deploy/
+/infra/
+/ops/
+*.local
+*.local.*
+compose.override.y*ml
+docker-compose.override.y*ml
+
+# Runtime data and logs
+apps/server/data/
+/data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.log
+npm-debug.log*
+
+# Third-party reference material (only the index is versioned)
+references/*
+!references/README.md
+
+# Editors, OS and local tool settings
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+.claude/settings.local.json

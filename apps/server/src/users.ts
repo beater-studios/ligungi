@@ -1,0 +1,170 @@
+import { MODES, type Mode } from '@ligungi/engine';
+import type { RatingView, UserRef } from '@ligungi/protocol';
+import type { Db } from './db.ts';
+import { DEFAULT_RATING, PROVISIONAL_DEVIATION, type Rating } from './glicko.ts';
+import { randomId } from './ids.ts';
+
+export interface UserRecord extends UserRef {
+  readonly passwordHash: string;
+  readonly createdAt: number;
+}
+
+export const USERNAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{2,19}$/;
+
+interface UserRow {
+  id: string;
+  username: string;
+  password_hash: string;
+  created_at: number;
+}
+
+const toRecord = (row: UserRow): UserRecord => ({
+  id: row.id,
+  name: row.username,
+  passwordHash: row.password_hash,
+  createdAt: row.created_at,
+});
+
+export interface StoredRating extends Rating {
+  readonly games: number;
+}
+
+export class Users {
+  readonly #db: Db;
+  readonly #now: () => number;
+
+  constructor(db: Db, now: () => number) {
+    this.#db = db;
+    this.#now = now;
+  }
+
+  create(username: string, passwordHash: string): UserRecord | undefined {
+    if (this.findByName(username)) return undefined;
+    const record: UserRecord = { id: randomId(12), name: username, passwordHash, createdAt: this.#now() };
+    this.#db
+      .prepare('insert into users (id, username, username_key, password_hash, created_at) values (?, ?, ?, ?, ?)')
+      .run(record.id, username, username.toLowerCase(), passwordHash, record.createdAt);
+    return record;
+  }
+
+  findByName(username: string): UserRecord | undefined {
+    const row = this.#db
+      .prepare('select id, username, password_hash, created_at from users where username_key = ?')
+      .get(username.toLowerCase()) as UserRow | undefined;
+    return row && toRecord(row);
+  }
+
+  updatePasswordHash(userId: string, passwordHash: string): void {
+    this.#db.prepare('update users set password_hash = ? where id = ?').run(passwordHash, userId);
+  }
+
+  findById(id: string): UserRecord | undefined {
+    const row = this.#db
+      .prepare('select id, username, password_hash, created_at from users where id = ?')
+      .get(id) as UserRow | undefined;
+    return row && toRecord(row);
+  }
+
+  rating(userId: string, mode: Mode): StoredRating {
+    const row = this.#db
+      .prepare('select rating, deviation, volatility, games from ratings where user_id = ? and mode = ?')
+      .get(userId, mode) as StoredRating | undefined;
+    return row ? { ...row } : { ...DEFAULT_RATING, games: 0 };
+  }
+
+  saveRating(userId: string, mode: Mode, rating: StoredRating): void {
+    this.#db
+      .prepare(
+        `insert into ratings (user_id, mode, rating, deviation, volatility, games) values (?, ?, ?, ?, ?, ?)
+         on conflict (user_id, mode) do update set rating = excluded.rating, deviation = excluded.deviation,
+         volatility = excluded.volatility, games = excluded.games`,
+      )
+      .run(userId, mode, rating.rating, rating.deviation, rating.volatility, rating.games);
+  }
+
+  /** Returns false when the follow already existed. */
+  follow(userId: string, targetId: string): boolean {
+    const result = this.#db
+      .prepare('insert or ignore into follows (user_id, followed_id, created_at) values (?, ?, ?)')
+      .run(userId, targetId, this.#now());
+    return result.changes > 0;
+  }
+
+  unfollow(userId: string, targetId: string): void {
+    this.#db.prepare('delete from follows where user_id = ? and followed_id = ?').run(userId, targetId);
+  }
+
+  isFollowing(userId: string, targetId: string): boolean {
+    return Boolean(this.#db.prepare('select 1 from follows where user_id = ? and followed_id = ?').get(userId, targetId));
+  }
+
+  following(userId: string): UserRef[] {
+    const rows = this.#db
+      .prepare(
+        `select users.id, users.username from follows join users on users.id = follows.followed_id
+         where follows.user_id = ? order by users.username_key`,
+      )
+      .all(userId) as Array<{ id: string; username: string }>;
+    return rows.map((row) => ({ id: row.id, name: row.username }));
+  }
+
+  followCounts(userId: string): { followers: number; following: number } {
+    const row = this.#db
+      .prepare(
+        `select (select count(*) from follows where followed_id = ?1) as followers,
+                (select count(*) from follows where user_id = ?1) as following`,
+      )
+      .get(userId) as { followers: number; following: number };
+    return { followers: row.followers, following: row.following };
+  }
+
+  /** Established (non-provisional) players of a mode, best first. */
+  leaderboard(mode: Mode, limit: number): LeaderRow[] {
+    const rows = this.#db
+      .prepare(
+        `select users.id, users.username, ratings.rating, ratings.games from ratings
+         join users on users.id = ratings.user_id
+         where ratings.mode = ? and ratings.games > 0 and ratings.deviation <= ?
+         order by ratings.rating desc, ratings.games desc, users.username_key limit ?`,
+      )
+      .all(mode, PROVISIONAL_DEVIATION, limit) as Array<{ id: string; username: string; rating: number; games: number }>;
+    return rows.map((row) => ({ user: { id: row.id, name: row.username }, rating: Math.round(row.rating), games: row.games }));
+  }
+
+  /** Position on the leaderboard of a mode, or null when the player is not on it. */
+  rank(userId: string, mode: Mode): number | null {
+    const own = this.#db
+      .prepare('select rating, deviation, games from ratings where user_id = ? and mode = ?')
+      .get(userId, mode) as { rating: number; deviation: number; games: number } | undefined;
+    if (!own || own.games === 0 || own.deviation > PROVISIONAL_DEVIATION) return null;
+    const row = this.#db
+      .prepare(
+        `select count(*) as above from ratings
+         where mode = ? and games > 0 and deviation <= ? and rating > ?`,
+      )
+      .get(mode, PROVISIONAL_DEVIATION, own.rating) as { above: number };
+    return row.above + 1;
+  }
+
+  ratings(userId: string): Record<Mode, RatingView> {
+    return Object.fromEntries(
+      MODES.map((mode) => {
+        const rating = this.rating(userId, mode);
+        return [mode, toRatingView(rating)];
+      }),
+    ) as Record<Mode, RatingView>;
+  }
+}
+
+export interface LeaderRow {
+  readonly user: UserRef;
+  readonly rating: number;
+  readonly games: number;
+}
+
+export const toRatingView = (rating: StoredRating): RatingView => ({
+  rating: Math.round(rating.rating),
+  deviation: Math.round(rating.deviation),
+  games: rating.games,
+  provisional: rating.deviation > PROVISIONAL_DEVIATION,
+});

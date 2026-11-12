@@ -1,0 +1,40 @@
+name: Bug report
+description: Something on the site or in the code does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. For security issues, do not use this form: follow SECURITY.md instead.
+        If the problem is about a game rule, use the "Rule question" form.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: true
+  - type: input
+    id: game
+    attributes:
+      label: Game link or FEN
+      description: If the bug happened in a game, paste its link or the FEN from the analysis board.
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and device
+      placeholder: Firefox 140 on Windows, Safari on iPhone...
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or console errors

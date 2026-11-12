@@ -1,0 +1,228 @@
+import { opposite, type Color } from '@ligungi/engine';
+import {
+  sameTimeControl,
+  type ErrorCode,
+  type ChallengeView,
+  type GameSettings,
+  type Opponent,
+  type SeekView,
+} from '@ligungi/protocol';
+import type { Games, Player } from './games.ts';
+import { randomId } from './ids.ts';
+import type { GameRoom } from './room.ts';
+import type { Users } from './users.ts';
+
+interface Seek {
+  readonly id: string;
+  readonly settings: GameSettings;
+  owner: Player;
+  readonly createdAt: number;
+}
+
+export interface Challenge {
+  readonly id: string;
+  readonly settings: GameSettings;
+  owner: Player;
+  readonly createdAt: number;
+  status: 'open' | 'accepted' | 'canceled';
+  gameId: string | null;
+}
+
+export interface LobbyOptions {
+  readonly now: () => number;
+  readonly random: () => number;
+  readonly onSeeksChange: () => void;
+  readonly onChallengeChange: (challenge: Challenge) => void;
+  /** Sends both players to the new game. */
+  readonly onGameStart: (room: GameRoom) => void;
+}
+
+const MAX_SEEKS_PER_PLAYER = 3;
+const CHALLENGE_TTL = 2 * 60 * 60 * 1000;
+
+const samePerson = (a: Player, b: Player) => a.sessionId === b.sessionId || (a.userId !== null && a.userId === b.userId);
+
+export class Lobby {
+  readonly #seeks = new Map<string, Seek>();
+  readonly #challenges = new Map<string, Challenge>();
+  readonly #games: Games;
+  readonly #users: Users;
+  readonly #options: LobbyOptions;
+
+  constructor(games: Games, users: Users, options: LobbyOptions) {
+    this.#games = games;
+    this.#users = users;
+    this.#options = options;
+  }
+
+  /**
+   * Pairs with a compatible open seek, or opens a new one. `canWait` says whether the owner has a live connection:
+   * a waiting seek is removed when its owner disconnects, so one created without a connection would never expire.
+   */
+  createSeek(owner: Player, settings: GameSettings, canWait: boolean): { seekId: string } | { gameId: string } | ErrorCode {
+    if (settings.rated && !owner.userId) return 'loginForRated';
+    const match = [...this.#seeks.values()].find(
+      (seek) => !samePerson(seek.owner, owner) && compatible(seek.settings, settings),
+    );
+    if (match) {
+      this.#seeks.delete(match.id);
+      const merged: GameSettings = {
+        ...match.settings,
+        color: match.settings.color === 'random' && settings.color !== 'random' ? opposite(settings.color) : match.settings.color,
+        firstPlayer: match.settings.firstPlayer === 'random' ? settings.firstPlayer : match.settings.firstPlayer,
+      };
+      const room = this.#start(merged, match.owner, owner);
+      this.#options.onSeeksChange();
+      return { gameId: room.id };
+    }
+    if (!canWait) return 'connectionRequired';
+    const mine = [...this.#seeks.values()].filter((seek) => samePerson(seek.owner, owner));
+    if (mine.length >= MAX_SEEKS_PER_PLAYER) return 'tooManySeeks';
+    const seek: Seek = { id: randomId(8), settings, owner, createdAt: this.#options.now() };
+    this.#seeks.set(seek.id, seek);
+    this.#options.onSeeksChange();
+    return { seekId: seek.id };
+  }
+
+  acceptSeek(id: string, player: Player): { gameId: string } | ErrorCode {
+    const seek = this.#seeks.get(id);
+    if (!seek) return 'seekUnavailable';
+    if (samePerson(seek.owner, player)) return 'ownSeek';
+    if (seek.settings.rated && !player.userId) return 'loginForRated';
+    this.#seeks.delete(id);
+    const room = this.#start(seek.settings, seek.owner, player);
+    this.#options.onSeeksChange();
+    return { gameId: room.id };
+  }
+
+  cancelSeek(id: string, player: Player): boolean {
+    const seek = this.#seeks.get(id);
+    if (!seek || !samePerson(seek.owner, player)) return false;
+    this.#seeks.delete(id);
+    this.#options.onSeeksChange();
+    return true;
+  }
+
+  /** Moves anonymous seeks and challenges to a new session id after login, signup or logout. */
+  rebindSession(from: string, to: string): void {
+    for (const item of [...this.#seeks.values(), ...this.#challenges.values()]) {
+      if (item.owner.sessionId === from && item.owner.userId === null) item.owner = { ...item.owner, sessionId: to };
+    }
+  }
+
+  /** Seeks vanish when their owner leaves, as on lichess. */
+  removeSeeksOf(sessionId: string): void {
+    let changed = false;
+    for (const [id, seek] of this.#seeks) {
+      if (seek.owner.sessionId === sessionId) {
+        this.#seeks.delete(id);
+        changed = true;
+      }
+    }
+    if (changed) this.#options.onSeeksChange();
+  }
+
+  seekViews(viewer: Player): SeekView[] {
+    return [...this.#seeks.values()]
+      .sort((a, b) => a.createdAt - b.createdAt)
+      .map((seek) => ({
+        id: seek.id,
+        settings: seek.settings,
+        player: this.#opponent(seek.owner, seek.settings),
+        mine: samePerson(seek.owner, viewer),
+        createdAt: seek.createdAt,
+      }));
+  }
+
+  createChallenge(owner: Player, settings: GameSettings): Challenge | ErrorCode {
+    if (settings.rated && !owner.userId) return 'loginForRated';
+    this.#sweep();
+    const challenge: Challenge = {
+      id: randomId(8),
+      settings,
+      owner,
+      createdAt: this.#options.now(),
+      status: 'open',
+      gameId: null,
+    };
+    this.#challenges.set(challenge.id, challenge);
+    return challenge;
+  }
+
+  challenge(id: string): Challenge | undefined {
+    return this.#challenges.get(id);
+  }
+
+  acceptChallenge(id: string, player: Player): { gameId: string } | ErrorCode {
+    const challenge = this.#challenges.get(id);
+    if (!challenge || challenge.status !== 'open') return 'challengeUnavailable';
+    if (samePerson(challenge.owner, player)) return 'ownChallenge';
+    if (challenge.settings.rated && !player.userId) return 'loginForRated';
+    const room = this.#start(challenge.settings, challenge.owner, player);
+    challenge.status = 'accepted';
+    challenge.gameId = room.id;
+    this.#options.onChallengeChange(challenge);
+    return { gameId: room.id };
+  }
+
+  cancelChallenge(id: string, player: Player): boolean {
+    const challenge = this.#challenges.get(id);
+    if (!challenge || challenge.status !== 'open' || !samePerson(challenge.owner, player)) return false;
+    challenge.status = 'canceled';
+    this.#options.onChallengeChange(challenge);
+    return true;
+  }
+
+  challengeView(challenge: Challenge, viewer: Player): ChallengeView {
+    return {
+      id: challenge.id,
+      settings: challenge.settings,
+      challenger: this.#opponent(challenge.owner, challenge.settings),
+      mine: samePerson(challenge.owner, viewer),
+      status: challenge.status,
+      gameId: challenge.gameId,
+    };
+  }
+
+  get seekCount(): number {
+    return this.#seeks.size;
+  }
+
+  #opponent(player: Player, settings: GameSettings): Opponent {
+    const rating = player.userId ? Math.round(this.#users.rating(player.userId, settings.mode).rating) : null;
+    return { name: player.name, user: player.userId ? { id: player.userId, name: player.name } : null, rating };
+  }
+
+  #start(settings: GameSettings, owner: Player, acceptor: Player): GameRoom {
+    const pickColor = (choice: GameSettings['color']): Color =>
+      choice === 'random' ? (this.#options.random() < 0.5 ? 'white' : 'black') : choice;
+    const ownerColor = pickColor(settings.color);
+    const room = this.#games.create({
+      mode: settings.mode,
+      rated: settings.rated,
+      timeControl: settings.timeControl,
+      firstPlayer: pickColor(settings.firstPlayer),
+      freeDraft: settings.freeDraft,
+      players: ownerColor === 'white' ? { white: owner, black: acceptor } : { white: acceptor, black: owner },
+    });
+    // Players stop seeking once a game starts, so they are never paired into two games at once.
+    for (const [id, seek] of this.#seeks) {
+      if (samePerson(seek.owner, owner) || samePerson(seek.owner, acceptor)) this.#seeks.delete(id);
+    }
+    this.#options.onGameStart(room);
+    return room;
+  }
+
+  #sweep(): void {
+    const limit = this.#options.now() - CHALLENGE_TTL;
+    for (const [id, challenge] of this.#challenges) if (challenge.createdAt < limit) this.#challenges.delete(id);
+  }
+}
+
+const compatible = (a: GameSettings, b: GameSettings): boolean =>
+  a.mode === b.mode &&
+  a.rated === b.rated &&
+  a.freeDraft === b.freeDraft &&
+  sameTimeControl(a.timeControl, b.timeControl) &&
+  (a.color === 'random' || b.color === 'random' || a.color !== b.color) &&
+  (a.firstPlayer === 'random' || b.firstPlayer === 'random' || a.firstPlayer === b.firstPlayer);

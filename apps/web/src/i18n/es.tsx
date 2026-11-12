@@ -1,0 +1,441 @@
+import type { Color } from '@ligungi/engine';
+import type { ComponentChildren } from 'preact';
+import type { Messages } from './pt.tsx';
+
+const LILA = 'https://github.com/lichess-org/lila';
+const STUDIO = 'https://beaterstudios.com/';
+
+const sideOf = (color: Color) => (color === 'white' ? 'las blancas' : 'las negras');
+
+export const es: Messages = {
+  locale: 'es',
+  languageName: 'Español',
+  metaDescription: 'Juega Gungi, el juego de tablero de HUNTER×HUNTER, online y gratis, con las reglas oficiales.',
+
+  modes: {
+    intro: 'Introducción',
+    beginner: 'Principiante',
+    intermediate: 'Intermedio',
+    advanced: 'Avanzado',
+  },
+  modeDescriptions: {
+    intro: 'Posición fija, sin piezas especiales, torres de hasta 2.',
+    beginner: 'Posición fija, los arqueros son las únicas especiales, torres de hasta 2.',
+    intermediate: 'Colocación libre en el draft, todas las piezas, torres de hasta 2.',
+    advanced: 'Colocación libre en el draft, todas las piezas, torres de hasta 3. El juego completo.',
+  },
+  colors: { white: 'Blancas', black: 'Negras' },
+  colorChoices: { white: 'Blancas', black: 'Negras', random: 'Aleatorio' },
+
+  reasons: {
+    capture: 'captura del Mariscal',
+    mate: 'jaque mate',
+    resign: 'abandono',
+    timeout: 'tiempo agotado',
+    abandon: 'salida del rival',
+    repetition: 'repetición',
+    insufficient: 'material insuficiente',
+    agreement: 'acuerdo',
+  },
+  win: (winner, reason) => `Ganan ${sideOf(winner)} por ${reason}`,
+  draw: (reason) => `Tablas por ${reason}`,
+  aborted: 'Partida anulada',
+  ongoing: 'En curso',
+  turnStatus: (draft, color, note) =>
+    `${draft ? 'Draft' : 'Partida'}: juegan ${sideOf(color)}${note === 'you' ? ' (tú)' : note === 'thinking' ? ' (pensando...)' : ''}`,
+
+  noClock: 'Sin reloj',
+  rated: 'Puntuable',
+  casual: 'Casual',
+  freeDraftTag: 'draft libre',
+  freeDraft: 'Draft libre',
+  freeDraftHint: 'Cada jugador coloca piezas hasta declarar listo; el draft solo termina cuando los dos terminan.',
+  freeDraftLabel: 'Cada jugador termina su draft',
+  freeDraftRatedHint: 'Solo en partidas casuales. Las puntuables siguen la regla del libro.',
+  done: 'Listo',
+
+  errors: {
+    invalidSettings: 'Configuración no válida.',
+    invalidMode: 'Modo no válido.',
+    invalidRated: 'Indica si la partida es puntuable.',
+    invalidColor: 'Color no válido.',
+    invalidFirstPlayer: 'Primer jugador no válido.',
+    invalidInitialTime: 'El tiempo inicial debe estar entre 1 y 180 minutos.',
+    invalidIncrement: 'El incremento debe estar entre 0 y 180 segundos.',
+    unlimitedNotRated: 'Las partidas sin reloj no son puntuables.',
+    invalidDraftOption: 'Opción de draft no válida.',
+    ratedNeedsOfficialDraft: 'Las partidas puntuables siguen la regla oficial del draft.',
+    tooManyAttempts: 'Demasiados intentos. Espera un minuto.',
+    invalidUsername: 'Nombre de usuario: de 3 a 20 caracteres, letras, números, _ o -.',
+    invalidPassword: 'La contraseña necesita al menos 8 caracteres.',
+    usernameTaken: 'Ese nombre de usuario ya existe.',
+    wrongCredentials: 'Usuario o contraseña incorrectos.',
+    userNotFound: 'Usuario no encontrado.',
+    gameNotFound: 'Partida no encontrada.',
+    challengeNotFound: 'Desafío no encontrado.',
+    seekNotFound: 'Búsqueda no encontrada.',
+    routeNotFound: 'Ruta no encontrada.',
+    invalidJson: 'JSON no válido.',
+    requestTooLarge: 'Solicitud demasiado grande.',
+    forbidden: 'Solicitud rechazada.',
+    internal: 'Error interno.',
+    loginForRated: 'Inicia sesión para jugar partidas puntuables.',
+    seekUnavailable: 'Esa búsqueda ya no está disponible.',
+    ownSeek: 'No puedes aceptar tu propia búsqueda.',
+    tooManySeeks: 'Ya tienes demasiadas búsquedas abiertas.',
+    connectionRequired: 'Sin conexión con el servidor. Recarga la página e inténtalo de nuevo.',
+    challengeUnavailable: 'Ese desafío ya no está disponible.',
+    ownChallenge: 'Envía el enlace a otra persona.',
+    gameOver: 'La partida ya terminó.',
+    notYourTurn: 'No es tu turno.',
+    staleMove: 'Jugada desactualizada.',
+    invalidMove: 'Jugada no válida.',
+    illegalMove: 'Jugada ilegal.',
+    cannotAbort: 'La partida ya no se puede anular.',
+    cannotClaim: 'Todavía no puedes reclamar la victoria.',
+    drawUnavailable: 'Las tablas no están disponibles ahora.',
+    noDrawOffer: 'No hay oferta de tablas.',
+    rematchUnavailable: 'Revancha no disponible.',
+    noRematchOffer: 'No hay oferta de revancha.',
+    invalidTopic: 'Tema no válido.',
+    tooManySubscriptions: 'Demasiadas suscripciones en esta conexión.',
+    invalidGame: 'Partida no válida.',
+    notAPlayer: 'No estás jugando esta partida.',
+    invalidAction: 'Acción no válida.',
+    unknownMessage: 'Mensaje desconocido.',
+    loginRequired: 'Inicia sesión para continuar.',
+    cannotFollowSelf: 'No puedes seguirte a ti mismo.',
+    tooManyFollows: 'Ya sigues al máximo de jugadores.',
+    invalidFilter: 'Filtro no válido.',
+  },
+  genericError: 'Algo salió mal. Inténtalo de nuevo.',
+  offline: 'Sin conexión. Intentando reconectar...',
+
+  board: {
+    white: 'Blancas',
+    black: 'Negras',
+    capture: 'Capturar',
+    stack: 'Apilar',
+    betray: 'Traicionar',
+    drop: 'Colocar',
+    select: 'Seleccionar',
+    level: 'nivel',
+    tower: 'Torre',
+    hand: 'Mano',
+  },
+
+  nav: {
+    navigation: 'Navegación',
+    play: 'Jugar',
+    createGame: 'Crear partida',
+    playFriend: 'Jugar con un amigo',
+    playComputer: 'Jugar contra la computadora',
+    learn: 'Aprender',
+    rules: 'Reglas del Gungi',
+    watch: 'Ver',
+    liveGames: 'Partidas en vivo',
+    tools: 'Herramientas',
+    analysis: 'Tablero de análisis',
+    reconnecting: 'Reconectando',
+    signIn: 'Iniciar sesión',
+    signUp: 'Registrarse',
+    settings: 'Configuración',
+    signOut: 'Cerrar sesión',
+    language: 'Idioma',
+    community: 'Comunidad',
+    players: 'Clasificación',
+    friends: 'Amigos',
+  },
+  notFound: { title: 'Página no encontrada', back: 'Volver al inicio' },
+  footer: {
+    source: (url) => (
+      <>
+        ligungi es software libre: <a href={url}>código fuente (AGPL-3.0)</a>. Diseño basado en <a href={LILA}>lila</a>,
+        el código abierto de lichess.org.
+      </>
+    ),
+    trademark: 'Gungi y HUNTER×HUNTER pertenecen a sus propietarios. Proyecto de fans, sin afiliación oficial.',
+    studio: (
+      <>
+        Un proyecto de <a href={STUDIO}>Beater Studios</a>
+      </>
+    ),
+  },
+
+  common: {
+    online: 'Conectado',
+    offline: 'Desconectado',
+    close: 'Cerrar',
+    loading: 'Cargando...',
+    newGame: 'Nueva partida',
+    you: 'Tú',
+    anonymous: 'Anónimo',
+    yourColor: 'Tu color',
+    whoStarts: 'Quién empieza',
+    mode: 'Modo',
+    flip: 'Girar tablero',
+    first: 'Inicio',
+    prev: 'Anterior',
+    next: 'Siguiente',
+    last: 'Final',
+    analyse: 'Analizar',
+    takeback: 'Deshacer jugada',
+    startsGame: 'Empieza la partida',
+    yourTurn: 'Tu turno',
+  },
+
+  panels: {
+    tower: (n) => `Torre de ${n}`,
+    piece: 'Pieza',
+    towerHint: 'Pasa el ratón o toca una casilla para ver la torre.',
+    level: (n) => `nivel ${n}`,
+    draft: 'Draft',
+    draftCount: (board, hand) => `${board} en el tablero · ${hand} en la mano`,
+    draftDone: 'listo',
+    draftFreeNotice: 'Draft libre: termina cuando los dos declaren listo.',
+    draftBookNotice: 'El draft termina cuando el segundo jugador declara listo.',
+  },
+
+  home: {
+    title: 'Gungi online',
+    intro: 'El juego de tablero de HUNTER×HUNTER con las reglas oficiales de 2022. Gratis, sin anuncios, sin necesidad de cuenta.',
+    learnRules: 'Aprende las reglas',
+    custom: 'Personalizada',
+    player: 'Jugador',
+    rating: 'Puntuación',
+    time: 'Tiempo',
+    noSeeks: 'No hay partidas abiertas. Crea una o entra en una partida rápida.',
+    cancel: 'Cancelar',
+    join: 'Jugar',
+    noPlaying: 'No tienes partidas en curso.',
+    quickGame: 'Partida rápida',
+    lobby: 'Sala',
+    playing: 'En curso',
+    playersOnline: (n) => (n === 1 ? 'jugador conectado' : 'jugadores conectados'),
+    gamesPlaying: (n) => (n === 1 ? 'partida en curso' : 'partidas en curso'),
+    noTv: 'No hay partidas en vivo ahora.',
+    rules: 'Reglas',
+    source: 'Código fuente',
+  },
+
+  create: {
+    friendTitle: 'Jugar con un amigo',
+    lobbyTitle: 'Crear partida',
+    minutes: 'Minutos',
+    increment: 'Incremento (s)',
+    type: 'Tipo',
+    loginForRated: 'Inicia sesión para jugar partidas puntuables',
+    createLink: 'Crear enlace del desafío',
+    create: 'Crear partida',
+  },
+
+  challenge: {
+    title: 'Desafío',
+    challenger: 'Retador',
+    challengerColor: 'color del retador',
+    starts: 'empieza',
+    canceled: 'Este desafío fue cancelado.',
+    share: 'Envía este enlace a quien quieras desafiar. La partida empieza cuando la persona acepte.',
+    copy: 'Copiar',
+    copied: 'Copiado',
+    waiting: 'Esperando al rival...',
+    cancel: 'Cancelar desafío',
+    ratedLogin: (
+      <>
+        Esta partida es puntuable. <a href="/login">Inicia sesión</a> o <a href="/signup">crea una cuenta</a> para aceptar.
+      </>
+    ),
+    accept: 'Aceptar desafío',
+  },
+
+  auth: {
+    username: 'Nombre de usuario',
+    password: 'Contraseña',
+    passwordHelp: 'Al menos 8 caracteres.',
+    haveAccount: 'Ya tengo cuenta',
+    playAnonymous: 'Jugar sin cuenta',
+  },
+
+  game: {
+    notFound: 'Partida no encontrada',
+    titleFlash: '¡Tu turno! · ligungi',
+    confirmResign: '¿Abandonar?',
+    confirmDraw: '¿Ofrecer tablas?',
+    confirm: 'Confirmar',
+    cancel: 'Cancelar',
+    abort: 'Anular',
+    drawOffered: 'Tablas ofrecidas',
+    offerDraw: 'Ofrecer tablas',
+    resign: 'Abandonar',
+    decline: 'Rechazar',
+    accept: 'Aceptar',
+    opponentOffersDraw: 'El rival ofrece tablas',
+    opponentLeft: 'El rival salió de la partida.',
+    claimVictory: 'Reclamar la victoria',
+    goToRematch: 'Ir a la revancha',
+    opponentWantsRematch: 'El rival quiere la revancha',
+    rematchOffered: 'Revancha ofrecida',
+    rematch: 'Revancha',
+    premove: (move) => `Prejugada: ${move}. Haz clic en el tablero para cancelar.`,
+    export: 'Exportar',
+  },
+
+  computer: {
+    title: 'Jugar contra la computadora',
+    strength: 'Fuerza',
+    levels: { 1: 'Nivel 1 (aleatorio)', 2: 'Nivel 2 (codicioso)', 3: 'Nivel 3 (calcula 2 jugadas)' },
+    start: 'Empezar',
+    bot: (level) => `Computadora · nivel ${level}`,
+  },
+
+  analysis: {
+    title: 'Análisis',
+    invalidFen: 'FEN no válido. Revisa el texto pegado.',
+    fromGame: (link: ComponentChildren) => <>Partida {link}. Las jugadas nuevas crean una variante local.</>,
+    empty: 'Haz una jugada en el tablero.',
+    newPosition: 'Nueva posición',
+    pasteFen: 'Pegar FEN',
+    load: 'Cargar',
+  },
+
+  profile: {
+    abortedShort: 'anulada',
+    casualShort: 'casual',
+    games: (n) => (n === 1 ? 'partida' : 'partidas'),
+    memberSince: (date) => `Miembro desde ${date}`,
+    wins: (n) => (n === 1 ? 'victoria' : 'victorias'),
+    losses: (n) => (n === 1 ? 'derrota' : 'derrotas'),
+    draws: () => 'tablas',
+    playingNow: 'Jugando ahora',
+    noGames: 'Todavía no hay partidas terminadas.',
+    date: 'Fecha',
+    result: 'Resultado',
+    game: 'Partida',
+    loadMore: 'Cargar más',
+    rated: (n) => (n === 1 ? 'puntuable' : 'puntuables'),
+    follow: 'Seguir',
+    unfollow: 'Dejar de seguir',
+    followers: (n) => (n === 1 ? 'seguidor' : 'seguidores'),
+    following: 'siguiendo',
+    rank: (n) => `#${n} en la clasificación`,
+    loginToFollow: 'Inicia sesión para seguir jugadores',
+    allModes: 'Todos los modos',
+    anyColor: 'Cualquier color',
+    opponent: 'Rival',
+    filter: 'Filtrar',
+    clearFilters: 'Quitar filtros',
+    noMatch: 'Ninguna partida coincide con estos filtros.',
+    vsLink: 'Partidas contra este jugador',
+  },
+
+  ranking: {
+    title: 'Clasificación',
+    overview: 'Resumen',
+    top: (n) => `Top ${n}`,
+    player: 'Jugador',
+    rating: 'Puntuación',
+    games: 'Partidas',
+    empty: 'Todavía no hay nadie en la clasificación de este modo.',
+    rule: 'Entran en la clasificación los jugadores con puntuación establecida, después del periodo provisional (marcado con ? junto a la puntuación).',
+  },
+
+  friends: {
+    title: 'Amigos',
+    following: (n) => `Siguiendo a ${n}`,
+    empty: 'Todavía no sigues a nadie. Abre el perfil de un jugador y haz clic en Seguir.',
+    login: (
+      <>
+        <a href="/login">Inicia sesión</a> o <a href="/signup">crea una cuenta</a> para seguir jugadores y ver cuándo están conectados.
+      </>
+    ),
+    status: 'Estado',
+    playing: 'Jugando',
+    watch: 'Ver',
+    onlineBox: 'Amigos conectados',
+    noneOnline: 'No hay amigos conectados ahora.',
+  },
+
+  tv: { empty: 'No hay partidas en curso ahora.' },
+
+  settings: {
+    title: 'Preferencias',
+    language: 'Idioma',
+    auto: 'Automático',
+    pieceNames: 'Nombres de las piezas',
+    pieceNamesLocal: 'Español (Lancero, Ninja...)',
+    pieceNamesJapanese: 'Japonés (Yari, Shinobi...)',
+    theme: 'Tema',
+    light: 'Claro',
+    dark: 'Oscuro',
+    boardSize: 'Tamaño del tablero',
+    sound: 'Sonido',
+    on: 'Activado',
+    off: 'Desactivado',
+    test: 'Probar',
+    coordinates: 'Coordenadas del tablero',
+    show: 'Mostrar',
+    hide: 'Ocultar',
+    hoverReach: 'Mostrar alcance al pasar el ratón',
+    dontShow: 'No mostrar',
+    hoverReachHelp: 'Al pasar el ratón sobre cualquier pieza, incluso del rival, se marcan las casillas que alcanza.',
+    animation: 'Animación de las piezas',
+    animationOn: 'Activada',
+    animationOff: 'Desactivada',
+    saved: 'Las preferencias se guardan en este navegador.',
+  },
+
+  trainer: {
+    hint: 'Haz clic en la pieza para ver sus destinos y muévela libremente.',
+    level: (n) => `Nivel ${n}`,
+    enemies: 'Poner otras piezas (para practicar captura, apilamiento y la regla de altura)',
+    restart: 'Reiniciar',
+  },
+
+  learn: {
+    title: 'Cómo jugar Gungi',
+    lead: 'Gungi (軍儀) es el juego de tablero de HUNTER×HUNTER. Aquí usamos las reglas oficiales publicadas en 2022. La especificación completa, con fuentes e interpretaciones, está en el repositorio del proyecto.',
+    tryIt: 'Pruébalo',
+    objectiveTitle: 'Objetivo',
+    objective: (
+      <>
+        Capturar el Mariscal (帥) rival. En la práctica, la partida termina en <b>mate</b>: cuando el jugador al que le toca
+        no tiene ninguna jugada que deje a salvo a su propio Mariscal, pierde, aunque el Mariscal no esté atacado en ese
+        momento. También termina por abandono, tiempo, repetición de la misma posición 4 veces (tablas) o acuerdo.
+      </>
+    ),
+    boardTitle: 'Tablero y piezas',
+    board: 'Tablero de 9×9, 25 piezas por jugador. Las tres filas más cercanas a ti son tu territorio inicial. Las piezas capturadas salen del juego para siempre.',
+    towersTitle: 'Torres (ツケ)',
+    towers: [
+      'En lugar de capturar, puedes apilar tu pieza sobre otra, tuya o del rival. Las torres tienen hasta 3 piezas (2 en los modos más simples).',
+      'Solo se mueve la pieza de arriba, y su nivel (la altura de la torre) aumenta su alcance: +1 casilla en cada dirección en el nivel 2, +2 en el nivel 3.',
+      'Para capturar o apilar, tu pieza debe estar en un nivel igual o mayor que la altura de la torre de destino.',
+      'Al capturar una torre, todas sus piezas rivales salen del juego; las tuyas se quedan, con la pieza que capturó arriba.',
+      'No se puede apilar nada sobre el Mariscal.',
+    ],
+    handTitle: 'Piezas en la mano (新)',
+    hand: 'Las piezas que no colocaste en el draft se quedan en la mano. En tu turno, en lugar de mover, puedes colocar una de ellas en una casilla vacía o sobre una pieza tuya, en cualquier fila hasta la de tu pieza más avanzada.',
+    setupTitle: 'Preparación',
+    setup: (
+      <>
+        En los modos Introducción y Principiante, la posición inicial es fija. En los modos Intermedio y Avanzado, los
+        jugadores se turnan para colocar piezas en su propio territorio, empezando por el Mariscal. Quien no quiera colocar
+        más piezas declara <b>済み (listo)</b>. Si el primer jugador declara, el segundo puede seguir; cuando el segundo
+        declara, el draft termina para los dos. En partidas casuales, quien crea la partida puede elegir la opción{' '}
+        <b>draft libre</b>, en la que cada jugador coloca piezas hasta declarar listo y el draft solo termina cuando los dos
+        terminan.
+      </>
+    ),
+    movementTitle: 'Movimiento de las piezas',
+    tier: (n) => `nivel ${n}`,
+    notes: {
+      marshal: 'Si te quedas sin jugada segura, pierdes. No se puede apilar nada sobre él.',
+      general: 'Líneas rectas ilimitadas, no cambian con el nivel.',
+      lieutenant: 'Diagonales ilimitadas, no cambian con el nivel.',
+      cannon: 'Salta hacia adelante sobre torres de altura igual o menor.',
+      archer: 'Dispara en línea recta hacia adelante y por las diagonales delanteras, por encima de torres de altura igual o menor.',
+      musketeer: 'Salta hacia adelante sobre torres de altura igual o menor.',
+      tactician: 'Puede traicionar: al apilar sobre piezas rivales, las cambia todas por piezas iguales de tu mano.',
+    },
+  },
+};

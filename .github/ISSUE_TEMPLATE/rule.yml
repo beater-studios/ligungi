@@ -1,0 +1,30 @@
+name: Rule question
+description: A move or result that seems to contradict the official rules.
+labels: [rules]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ligungi follows the official 2022 rules. Sources, in order of authority: the official rulebook, the official Universal Music FAQ, then everything else.
+        Please read docs/rules.md first, especially section 11 (interpreted points): the behavior you found may be a documented decision.
+  - type: textarea
+    id: what
+    attributes:
+      label: What the site does
+      description: The move, position or result, and what you expected instead.
+    validations:
+      required: true
+  - type: input
+    id: position
+    attributes:
+      label: Game link or FEN
+      description: Paste the game link or the FEN from the analysis board.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: Where the rule comes from (rulebook page, FAQ question number, link). Rule changes are only accepted with a source.
+    validations:
+      required: true

@@ -1,0 +1,23 @@
+# Only what the image needs goes into the build context; secrets and local infra never do.
+**/node_modules
+**/dist
+**/coverage
+.git
+.github
+references
+deploy
+infra
+ops
+data
+apps/server/data
+.env
+.env.*
+*.pem
+*.key
+*.db
+*.db-*
+*.log
+.vscode
+.idea
+.claude
+.DS_Store

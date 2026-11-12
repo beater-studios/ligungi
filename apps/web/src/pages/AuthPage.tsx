@@ -1,4 +1,5 @@
 import { useState } from 'preact/hooks';
+import { SubmitButton } from '../components/ui.tsx';
 import { useT } from '../i18n/index.ts';
 import { navigate } from '../router.ts';
 import { login } from '../session.ts';
@@ -60,9 +61,7 @@ export const AuthPage = ({ signup }: { signup: boolean }) => {
           {signup && <small class="form-help">{t.auth.passwordHelp}</small>}
         </div>
         {error && <p class="error">{error}</p>}
-        <button type="submit" class="submit button text button-fat" disabled={busy}>
-          {signup ? t.nav.signUp : t.nav.signIn}
-        </button>
+        <SubmitButton disabled={busy}>{signup ? t.nav.signUp : t.nav.signIn}</SubmitButton>
       </form>
       <div class="alternative">
         {signup ? <a href="/login">{t.auth.haveAccount}</a> : <a href="/signup">{t.nav.signUp}</a>}

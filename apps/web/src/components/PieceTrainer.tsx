@@ -15,6 +15,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { usePieceNames, useT } from '../i18n/index.ts';
 import { BoardView } from './BoardView.tsx';
+import { Checkbox, RadioGroup } from './ui.tsx';
 
 const ENEMIES: Record<string, Piece[]> = {
   d7: [{ role: 'soldier', color: 'black' }],
@@ -85,20 +86,8 @@ export const PieceTrainer = () => {
         <p>
           <strong>{pieceName(role, pieceNames)}</strong>. {t.trainer.hint}
         </p>
-        <group class="radio">
-          {[1, 2, 3].map((n) => (
-            <div key={n}>
-              <input type="radio" id={`trainer-level-${n}`} name="trainer-level" checked={level === n} onChange={() => setLevel(n)} />
-              <label for={`trainer-level-${n}`}>{t.trainer.level(n)}</label>
-            </div>
-          ))}
-        </group>
-        <div class="form-check">
-          <input type="checkbox" id="trainer-enemies" class="form-check-input" checked={enemies} onChange={(e) => setEnemies((e.target as HTMLInputElement).checked)} />
-          <label for="trainer-enemies" class="form-check-label">
-            {t.trainer.enemies}
-          </label>
-        </div>
+        <RadioGroup name="trainer-level" value={level} options={[1, 2, 3].map((n) => ({ value: n, label: t.trainer.level(n) }))} onChange={setLevel} />
+        <Checkbox id="trainer-enemies" checked={enemies} onChange={setEnemies} label={t.trainer.enemies} />
         <button type="button" class="button button-empty" onClick={() => (setPosition(setup(role, level, enemies)), setLastMove(null))}>
           {t.trainer.restart}
         </button>

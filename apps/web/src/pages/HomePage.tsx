@@ -223,6 +223,19 @@ export const HomePage = () => {
             <p>
               <a href="/learn">{t.home.learnRules}</a>
             </p>
+            {!user && (
+              <div class="ligungi-account-pitch">
+                <p>{t.home.accountPitch}</p>
+                <div class="ligungi-account-pitch__actions">
+                  <a href="/signup" class="button">
+                    {t.nav.signUp}
+                  </a>
+                  <a href="/login" class="button button-empty">
+                    {t.nav.signIn}
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <OnlineFriends />

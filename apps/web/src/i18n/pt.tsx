@@ -105,7 +105,7 @@ export const pt = {
     trademark: 'Gungi e HUNTER×HUNTER pertencem aos seus detentores. Projeto de fãs, sem afiliação oficial.',
     studio: (
       <>
-        Um projeto <a href={STUDIO}>Beater Studios</a>
+        Um projeto <a href={STUDIO} target="_blank" rel="noopener noreferrer">Beater Studios</a>
       </>
     ),
   },
@@ -148,6 +148,7 @@ export const pt = {
     title: 'Gungi online',
     intro: 'O jogo de tabuleiro de HUNTER×HUNTER com as regras oficiais de 2022. Grátis, sem anúncios, sem precisar de conta.',
     learnRules: 'Aprenda as regras',
+    accountPitch: 'Crie uma conta grátis para jogar partidas ranqueadas, entrar no ranking e seguir amigos.',
     custom: 'Personalizado',
     player: 'Jogador',
     rating: 'Rating',
@@ -316,6 +317,10 @@ export const pt = {
     light: 'Claro',
     dark: 'Escuro',
     boardSize: 'Tamanho do tabuleiro',
+    sizeSmall: 'Pequeno',
+    sizeMedium: 'Médio',
+    sizeLarge: 'Grande',
+    sizeMax: 'Máximo',
     sound: 'Som',
     on: 'Ligado',
     off: 'Desligado',

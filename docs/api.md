@@ -14,6 +14,7 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 
 | Method and path | Description |
 |---|---|
+| `GET /api/version` | `{ version, commit }`: the project version and the git commit of the running build. |
 | `GET /api/me` | The session's user and their ongoing games. |
 | `POST /api/signup` `{ username, password }` | Creates an account and signs in. |
 | `POST /api/login` `{ username, password }` | Signs in. |

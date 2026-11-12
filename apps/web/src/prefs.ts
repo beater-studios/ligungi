@@ -1,6 +1,13 @@
 import { createStore } from './store.ts';
 
 export type Lang = 'pt' | 'en' | 'es';
+export type Theme = Prefs['theme'];
+export const THEMES: readonly Theme[] = ['auto', 'light', 'dark'];
+/** lila zoom values (0 to 100) offered as board sizes. */
+export const BOARD_SIZES = [40, 60, 80, 100] as const;
+
+const nearestBoardSize = (zoom: unknown): number =>
+  BOARD_SIZES.reduce((best, size) => (Math.abs(size - Number(zoom)) < Math.abs(best - Number(zoom)) ? size : best), 80);
 export const LANGS: readonly Lang[] = ['pt', 'en', 'es'];
 
 export interface Prefs {
@@ -36,6 +43,8 @@ const load = (): Prefs => {
     return {
       ...merged,
       pieceNames: stored.pieceNames === 'ja' ? 'ja' : 'local',
+      // Older versions had a free 0-100 slider; snap those values to the sizes offered today.
+      zoom: Number.isFinite(Number(stored.zoom)) ? nearestBoardSize(stored.zoom) : DEFAULTS.zoom,
       lang: merged.lang === 'auto' || LANGS.includes(merged.lang) ? merged.lang : 'auto',
     };
   } catch {

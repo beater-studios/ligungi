@@ -3,8 +3,9 @@ import { MODES, MODE_RULES, initialPosition, legalMoves, moveToString, opposite,
 import type { ColorChoice } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
+import { Checkbox, Field, RadioGroup, Select, SubmitButton } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
-import { outcomeText, useT } from '../i18n/index.ts';
+import { colorChoiceOptions, outcomeText, useT } from '../i18n/index.ts';
 import { useLocalGame } from '../localGame.ts';
 import { playSound } from '../sound.ts';
 
@@ -79,57 +80,29 @@ export const ComputerPage = () => {
     playSound('notify');
   };
 
-  const choice = (name: string, current: ColorChoice, set: (c: ColorChoice) => void) => (
-    <group class="radio">
-      {(['white', 'random', 'black'] as const).map((c) => (
-        <div key={c}>
-          <input type="radio" id={`${name}-${c}`} name={name} checked={current === c} onChange={() => set(c)} />
-          <label for={`${name}-${c}`}>{t.colorChoices[c]}</label>
-        </div>
-      ))}
-    </group>
-  );
+  const colorOptions = colorChoiceOptions(t);
 
   if (!me) {
     return (
       <main class="page-small box box-pad page ligungi-setup">
         <h1 class="box__top">{t.computer.title}</h1>
         <form class="form3" onSubmit={(e) => (e.preventDefault(), start())}>
-          <div class="form-group">
-            <label class="form-label" for="ai-mode">{t.common.mode}</label>
-            <select id="ai-mode" class="form-control" value={mode} onChange={(e) => setMode((e.target as HTMLSelectElement).value as Mode)}>
-              {MODES.map((m) => (
-                <option key={m} value={m}>{t.modes[m]}</option>
-              ))}
-            </select>
-            <small class="form-help">{t.modeDescriptions[mode]}</small>
-          </div>
+          <Field label={t.common.mode} htmlFor="ai-mode" help={t.modeDescriptions[mode]}>
+            <Select id="ai-mode" value={mode} options={MODES.map((m) => ({ value: m, label: t.modes[m] }))} onChange={setMode} />
+          </Field>
           {MODE_RULES[mode].draft && (
-            <div class="form-group form-check">
-              <input type="checkbox" id="ai-free" class="form-check-input" checked={freeDraft} onChange={(e) => setFreeDraft((e.target as HTMLInputElement).checked)} />
-              <label for="ai-free" class="form-check-label">{t.freeDraftLabel}</label>
-              <small class="form-help">{t.freeDraftHint}</small>
-            </div>
+            <Checkbox id="ai-free" checked={freeDraft} onChange={setFreeDraft} label={t.freeDraftLabel} help={t.freeDraftHint} />
           )}
-          <div class="form-group">
-            <label class="form-label" for="ai-level">{t.computer.strength}</label>
-            <select id="ai-level" class="form-control" value={level} onChange={(e) => setLevel(Number((e.target as HTMLSelectElement).value) as BotLevel)}>
-              {BOT_LEVELS.map((l) => (
-                <option key={l} value={l}>{t.computer.levels[l]}</option>
-              ))}
-            </select>
-          </div>
-          <div class="form-group">
-            <span class="form-label">{t.common.yourColor}</span>
-            {choice('color', colorChoice, setColorChoice)}
-          </div>
-          <div class="form-group">
-            <span class="form-label">{t.common.whoStarts}</span>
-            {choice('first', firstChoice, setFirstChoice)}
-          </div>
-          <div class="form-actions single">
-            <button type="submit" class="button button-fat">{t.computer.start}</button>
-          </div>
+          <Field label={t.computer.strength} htmlFor="ai-level">
+            <Select id="ai-level" value={level} options={BOT_LEVELS.map((l) => ({ value: l, label: t.computer.levels[l] }))} onChange={setLevel} />
+          </Field>
+          <Field label={t.common.yourColor}>
+            <RadioGroup name="ai-color" value={colorChoice} options={colorOptions} onChange={setColorChoice} />
+          </Field>
+          <Field label={t.common.whoStarts}>
+            <RadioGroup name="ai-first" value={firstChoice} options={colorOptions} onChange={setFirstChoice} />
+          </Field>
+          <SubmitButton>{t.computer.start}</SubmitButton>
         </form>
       </main>
     );

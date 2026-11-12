@@ -10,6 +10,7 @@ import {
 } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { Select } from '../components/ui.tsx';
 import { formatDate, outcomeText, playerName, resultSymbol, timeControlText, useT, type Messages } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { navigate, useLocation } from '../router.ts';
@@ -73,29 +74,22 @@ const FilterForm = ({ name, filters }: { name: string; filters: GameFilters }) =
         go({ vs: vs.trim() || undefined });
       }}
     >
-      <select
-        class="form-control"
-        aria-label={t.common.mode}
+      <Select
+        ariaLabel={t.common.mode}
         value={filters.mode ?? ''}
-        onChange={(e) => go({ mode: ((e.target as HTMLSelectElement).value || undefined) as Mode | undefined })}
-      >
-        <option value="">{t.profile.allModes}</option>
-        {MODES.map((mode) => (
-          <option key={mode} value={mode}>
-            {t.modes[mode]}
-          </option>
-        ))}
-      </select>
-      <select
-        class="form-control"
-        aria-label={t.common.yourColor}
+        options={[{ value: '', label: t.profile.allModes }, ...MODES.map((mode) => ({ value: mode, label: t.modes[mode] }))]}
+        onChange={(value) => go({ mode: (value || undefined) as Mode | undefined })}
+      />
+      <Select
+        ariaLabel={t.common.yourColor}
         value={filters.color ?? ''}
-        onChange={(e) => go({ color: ((e.target as HTMLSelectElement).value || undefined) as GameFilters['color'] })}
-      >
-        <option value="">{t.profile.anyColor}</option>
-        <option value="white">{t.colors.white}</option>
-        <option value="black">{t.colors.black}</option>
-      </select>
+        options={[
+          { value: '', label: t.profile.anyColor },
+          { value: 'white', label: t.colors.white },
+          { value: 'black', label: t.colors.black },
+        ]}
+        onChange={(value) => go({ color: (value || undefined) as GameFilters['color'] })}
+      />
       <input
         class="form-control"
         placeholder={t.profile.opponent}

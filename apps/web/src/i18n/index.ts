@@ -1,7 +1,8 @@
 import type { PieceNames } from '@ligungi/board';
 import type { Outcome } from '@ligungi/engine';
 import { formatTimeControl, isErrorCode, type GameSettings, type TimeControl } from '@ligungi/protocol';
-import { prefs, resolveLang, type Lang } from '../prefs.ts';
+import type { ColorChoice } from '@ligungi/protocol';
+import { prefs, resolveLang, type Lang, type Theme } from '../prefs.ts';
 import { useStore } from '../store.ts';
 import { en } from './en.tsx';
 import { es } from './es.tsx';
@@ -24,6 +25,12 @@ export const usePieceNames = (): PieceNames => {
 /** Players without an account are stored with a placeholder name; show it in the reader's language. */
 export const playerName = (t: Messages, player: { readonly name: string; readonly user: unknown }): string =>
   player.user ? player.name : t.common.anonymous;
+
+export const themeLabel = (t: Messages, theme: Theme): string =>
+  ({ auto: t.settings.auto, light: t.settings.light, dark: t.settings.dark })[theme];
+
+export const colorChoiceOptions = (t: Messages): { value: ColorChoice; label: string }[] =>
+  (['white', 'random', 'black'] as const).map((value) => ({ value, label: t.colorChoices[value] }));
 
 export const errorText = (t: Messages, code: unknown, fallback?: string): string =>
   isErrorCode(code) ? t.errors[code] : (fallback ?? t.genericError);

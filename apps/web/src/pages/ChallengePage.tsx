@@ -82,7 +82,7 @@ export const ChallengePage = ({ id }: { id: string }) => {
           {challenge.settings.rated && !user ? (
             <p class="ligungi-notice">{t.challenge.ratedLogin}</p>
           ) : (
-            <button type="button" class="button button-fat" onClick={accept}>
+            <button type="button" class="button ligungi-submit" onClick={accept}>
               {t.challenge.accept}
             </button>
           )}

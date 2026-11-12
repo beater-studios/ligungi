@@ -157,7 +157,7 @@ export const en: Messages = {
     trademark: 'Gungi and HUNTER×HUNTER belong to their owners. Fan project, not officially affiliated.',
     studio: (
       <>
-        A <a href={STUDIO}>Beater Studios</a> project
+        A <a href={STUDIO} target="_blank" rel="noopener noreferrer">Beater Studios</a> project
       </>
     ),
   },
@@ -200,6 +200,7 @@ export const en: Messages = {
     title: 'Gungi online',
     intro: 'The HUNTER×HUNTER board game with the official 2022 rules. Free, no ads, no account needed.',
     learnRules: 'Learn the rules',
+    accountPitch: 'Create a free account to play rated games, join the leaderboard and follow friends.',
     custom: 'Custom',
     player: 'Player',
     rating: 'Rating',
@@ -368,6 +369,10 @@ export const en: Messages = {
     light: 'Light',
     dark: 'Dark',
     boardSize: 'Board size',
+    sizeSmall: 'Small',
+    sizeMedium: 'Medium',
+    sizeLarge: 'Large',
+    sizeMax: 'Maximum',
     sound: 'Sound',
     on: 'On',
     off: 'Off',

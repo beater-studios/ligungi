@@ -16,6 +16,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { BoardView } from '../components/BoardView.tsx';
 import { DraftPanel, TowerPanel } from '../components/Panels.tsx';
+import { Select } from '../components/ui.tsx';
 import { outcomeText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { useLocalGame } from '../localGame.ts';
@@ -199,13 +200,7 @@ export const AnalysisPage = () => {
             </button>
           )}
           <div class="form3 ligungi-row">
-            <select class="form-control" value={mode} onChange={(e) => setMode((e.target as HTMLSelectElement).value as Mode)}>
-              {MODES.map((m) => (
-                <option key={m} value={m}>
-                  {t.modes[m]}
-                </option>
-              ))}
-            </select>
+            <Select ariaLabel={t.common.mode} value={mode} options={MODES.map((m) => ({ value: m, label: t.modes[m] }))} onChange={setMode} />
             <button type="button" class="button" onClick={() => (local.reset(initialPosition(mode)), setSource(null))}>
               {t.analysis.newPosition}
             </button>

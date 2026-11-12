@@ -30,6 +30,7 @@ import {
   verifyPassword,
   type Session,
 } from './auth.ts';
+import { BUILD } from './build.ts';
 import type { ServerConfig } from './config.ts';
 import { openDatabase, type Db } from './db.ts';
 import { exportGame } from './export.ts';
@@ -306,6 +307,7 @@ export const createApp = (config: ServerConfig): App => {
         .map((room) => room.summary());
       sendJson(ctx.res, 200, list);
     })
+    .add('GET', '/api/version', (ctx) => sendJson(ctx.res, 200, BUILD))
     .add('GET', '/api/lobby', (ctx) => sendJson(ctx.res, 200, lobbyView(ctx.player)))
     .add('POST', '/api/seeks', async (ctx) => {
       const settings = parseSettings(await ctx.body());

@@ -42,6 +42,16 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   }
 }
 
+.ligungi-footer__version {
+  color: $c-font-dimmer;
+
+  a {
+    color: inherit;
+    font-weight: normal;
+    font-family: monospace;
+  }
+}
+
 .ligungi-error {
   color: $c-bad;
   margin: 0.5em 0;
@@ -713,7 +723,7 @@ $wood: #e3c389;
   width: 3em;
 }
 
-.sub-ratings .ligungi-rank {
+.ligungi-rank {
   color: $c-brag;
   font-size: 0.85em;
 }
@@ -791,4 +801,272 @@ $wood: #e3c389;
 
 .ligungi-friends td:nth-child(n + 3) {
   text-align: center;
+}
+
+/* ===== Forms: styles of the shared components in components/ui.tsx ===== */
+
+// lila's form-group margin (3rem) suits long account pages; ligungi forms are short and denser.
+.form3 .ligungi-field,
+.form3 .ligungi-check {
+  margin-bottom: 1.6rem;
+}
+
+.ligungi-modal .form3 .ligungi-field,
+.ligungi-modal .form3 .ligungi-check {
+  margin-bottom: 1.1rem;
+}
+
+.ligungi-field .form-help {
+  display: block;
+  margin-top: 0.35rem;
+}
+
+.ligungi-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  column-gap: 1rem;
+}
+
+.ligungi-check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.6rem;
+  row-gap: 0.25rem;
+
+  input[type='checkbox'] {
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    accent-color: $c-primary;
+    cursor: pointer;
+  }
+
+  label {
+    cursor: pointer;
+  }
+
+  .form-help {
+    flex-basis: 100%;
+    margin: 0;
+    padding-inline-start: 1.7rem;
+  }
+
+  &.is-disabled {
+    opacity: 0.6;
+
+    input,
+    label {
+      cursor: not-allowed;
+    }
+  }
+}
+
+// The native arrow sits against the border; draw our own with room around it.
+select.ligungi-select {
+  appearance: none;
+  padding-inline-end: 2.4rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23999' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 0.75rem;
+  cursor: pointer;
+}
+
+.ligungi-actions {
+  margin-top: 1.6rem;
+}
+
+.ligungi-submit {
+  width: 100%;
+}
+
+/* ===== Analysis board: Gungi hands need two rows, lila's crazyhouse pockets assume one (60px) ===== */
+.analyse.variant-crazyhouse {
+  @include mq-at-least-col2 {
+    grid-template-rows: min-content auto min-content;
+  }
+
+  @include mq-at-least-col3 {
+    grid-template-rows: min-content auto auto min-content;
+  }
+}
+
+.analyse__controls {
+  .features,
+  .jumps {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .fbt {
+    font-size: 1.25rem;
+    padding: 0.45rem 0.9rem;
+  }
+}
+
+/* ===== Leaderboards: room below the last row ===== */
+.ligungi-ranking.community {
+  margin-bottom: 1.5rem;
+}
+
+/* ===== Home ===== */
+.lobby__box__content.ligungi-intro {
+  padding: 0.9rem 1rem 1rem;
+
+  p {
+    margin: 0 0 0.6rem;
+  }
+}
+
+.ligungi-account-pitch {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: $border;
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .button {
+      flex: 1 1 auto;
+      text-align: center;
+    }
+  }
+}
+
+.ligungi-friend-box .lobby__box__content {
+  padding: 0.6rem 1rem;
+}
+
+/* ===== Header ===== */
+// lila hides these on its auth pages through a stylesheet loaded only there; ligungi bundles all CSS.
+.site-buttons .signin-or-signup {
+  display: flex;
+  margin-inline-end: 0.5rem;
+}
+
+body:has(main.auth) .site-buttons .signin-or-signup {
+  display: none;
+}
+
+.ligungi-dasher {
+  width: 240px;
+
+  .subs .sub {
+    gap: 0.4em;
+
+    &::after {
+      margin-inline-start: 0.5em;
+    }
+  }
+
+  &__value {
+    margin-inline-start: auto;
+    color: $c-font-dim;
+    font-size: 0.9em;
+  }
+
+  .sub:hover &__value {
+    color: inherit;
+  }
+
+  .langs form button {
+    border: 0;
+    background: none;
+    color: $c-header-dropdown;
+    cursor: pointer;
+  }
+}
+
+/* ===== Design system page (/design) ===== */
+.ligungi-ds {
+  &__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    group.radio {
+      width: auto;
+      min-width: 16rem;
+    }
+  }
+
+  &__section {
+    padding: 1.5rem 0;
+    border-top: $border;
+
+    h2 {
+      font-size: 1.4em;
+      margin: 0 0 0.75rem;
+    }
+  }
+
+  &__list li {
+    margin-bottom: 0.5rem;
+    list-style: disc inside;
+  }
+
+  &__swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+  }
+
+  &__swatch {
+    display: grid;
+    gap: 0.2rem;
+
+    span {
+      height: 3rem;
+      border-radius: $box-radius-size;
+      border: $border;
+    }
+
+    small {
+      color: $c-font-dim;
+    }
+  }
+
+  &__example {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.75rem 0;
+
+    @media (max-width: 700px) {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+    }
+  }
+
+  &__label {
+    color: $c-font-dim;
+    font-size: 0.85em;
+  }
+
+  & &__inline {
+    margin: 0;
+    padding: 0;
+  }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__form {
+    max-width: 36rem;
+  }
+
+  &__board {
+    width: 14rem;
+  }
 }

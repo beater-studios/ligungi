@@ -1,9 +1,14 @@
 import { defineConfig } from 'vite';
+import { buildCommit, buildVersion } from '../../scripts/build-info.ts';
 
 const server = process.env.LIGUNGI_SERVER ?? 'http://localhost:4000';
 
 export default defineConfig({
   esbuild: { jsx: 'automatic', jsxImportSource: 'preact' },
+  define: {
+    __LIGUNGI_VERSION__: JSON.stringify(buildVersion()),
+    __LIGUNGI_COMMIT__: JSON.stringify(buildCommit()),
+  },
   css: {
     preprocessorOptions: {
       scss: {

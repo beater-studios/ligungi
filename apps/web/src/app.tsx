@@ -1,12 +1,14 @@
 import type { VNode } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { MESSAGES, useT } from './i18n/index.ts';
+import { MESSAGES, themeLabel, useT } from './i18n/index.ts';
 import logoUrl from './assets/logo.svg';
 import { icons } from './icons.ts';
+import { COMMIT, VERSION } from './version.ts';
 import { AnalysisPage } from './pages/AnalysisPage.tsx';
 import { AuthPage } from './pages/AuthPage.tsx';
 import { ChallengePage } from './pages/ChallengePage.tsx';
 import { ComputerPage } from './pages/ComputerPage.tsx';
+import { DesignPage } from './pages/DesignPage.tsx';
 import { FriendsPage } from './pages/FriendsPage.tsx';
 import { GamePage } from './pages/GamePage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
@@ -16,7 +18,7 @@ import { RankingPage } from './pages/RankingPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
 import { TvPage } from './pages/TvPage.tsx';
 import { MODES, type Mode } from '@ligungi/engine';
-import { LANGS, prefs, resolveLang, updatePrefs } from './prefs.ts';
+import { LANGS, THEMES, prefs, resolveLang, updatePrefs } from './prefs.ts';
 import { matchRoute, navigate, useLocation, type Route } from './router.ts';
 import { logout, session } from './session.ts';
 import { socket } from './socket.ts';
@@ -33,6 +35,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/tv$/, render: () => <TvPage /> },
   { pattern: /^\/settings$/, render: () => <SettingsPage /> },
   { pattern: /^\/friends$/, render: () => <FriendsPage /> },
+  { pattern: /^\/design$/, render: () => <DesignPage /> },
   { pattern: /^\/ranking$/, render: () => <RankingPage /> },
   { pattern: new RegExp(`^/ranking/(${MODES.join('|')})$`), render: ([mode]) => <RankingPage mode={mode as Mode} /> },
   { pattern: /^\/login$/, render: () => <AuthPage signup={false} /> },
@@ -54,37 +57,16 @@ const NotFound = () => {
   );
 };
 
-const LanguagePicker = () => {
-  const t = useT();
-  const current = resolveLang(useStore(prefs).lang);
-  return (
-    <div class="langs">
-      <form role="group" aria-label={t.nav.language} onSubmit={(e) => e.preventDefault()}>
-        {LANGS.map((lang) => (
-          <button
-            key={lang}
-            type="button"
-            lang={MESSAGES[lang].locale}
-            class={lang === current ? 'current' : ''}
-            aria-pressed={lang === current}
-            onClick={() => updatePrefs({ lang })}
-          >
-            {MESSAGES[lang].languageName}
-          </button>
-        ))}
-      </form>
-    </div>
-  );
-};
-
 /** Closes a header dropdown when clicking anywhere else, like lila's top bar. */
 const useDropdown = () => {
   const [shown, setShown] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!shown) return;
+    // composedPath is fixed at dispatch time, so clicks on elements that the click itself removed (switching a
+    // dropdown panel) still count as inside.
     const close = (event: MouseEvent) => {
-      if (!ref.current?.contains(event.target as Node)) setShown(false);
+      if (ref.current && !event.composedPath().includes(ref.current)) setShown(false);
     };
     document.addEventListener('click', close);
     return () => document.removeEventListener('click', close);
@@ -92,16 +74,35 @@ const useDropdown = () => {
   return { shown, setShown, ref };
 };
 
+type DasherView = 'main' | 'language' | 'theme';
+
+/**
+ * lila's dasher: account and settings links on top, then submenus that open a second panel with a back button,
+ * so the language and theme choices never hide the link to the full settings page.
+ */
 const Dasher = () => {
   const t = useT();
   const { user } = useStore(session);
+  const current = useStore(prefs);
   const { shown, setShown, ref } = useDropdown();
+  const [view, setView] = useState<DasherView>('main');
   const { path } = useLocation();
   useEffect(() => setShown(false), [path]);
+  useEffect(() => {
+    if (!shown) setView('main');
+  }, [shown]);
+  const lang = resolveLang(current.lang);
+
+  const back = (label: string) => (
+    <button type="button" class="head text" data-icon={icons.LessThan} onClick={() => setView('main')}>
+      {label}
+    </button>
+  );
+
   return (
     <div class={`dasher${shown ? ' shown' : ''}`} ref={ref}>
       {user ? (
-        <button id="user_tag" type="button" class="toggle link" onClick={() => setShown(!shown)}>
+        <button id="user_tag" type="button" class="toggle link" aria-expanded={shown} onClick={() => setShown(!shown)}>
           {user.name}
         </button>
       ) : (
@@ -110,40 +111,86 @@ const Dasher = () => {
           class="toggle anon link"
           title={t.nav.settings}
           aria-label={t.nav.settings}
+          aria-expanded={shown}
           data-icon={icons.Gear}
           onClick={() => setShown(!shown)}
         />
       )}
       {shown && (
-        <div id="dasher_app" class="dropdown">
-          <div class="links">
-            {user && (
-              <a class="user-link online text" href={`/@/${user.name}`} data-icon={icons.User}>
-                {user.name}
-              </a>
-            )}
-            {user && (
-              <a class="text" href="/friends" data-icon={icons.Group}>
-                {t.nav.friends}
-              </a>
-            )}
-            <a class="text" href="/settings" data-icon={icons.Gear}>
-              {t.nav.settings}
-            </a>
-            {user && (
-              <form class="logout" onSubmit={(e) => e.preventDefault()}>
-                <button
-                  type="button"
-                  class="text"
-                  data-icon={icons.Power}
-                  onClick={() => void logout().then(() => navigate('/'))}
-                >
-                  {t.nav.signOut}
+        <div id="dasher_app" class="dropdown ligungi-dasher">
+          {view === 'main' && (
+            <>
+              <div class="links">
+                {user && (
+                  <>
+                    <a class="user-link online text" href={`/@/${user.name}`} data-icon={icons.User}>
+                      {user.name}
+                    </a>
+                    <a class="text" href="/friends" data-icon={icons.Group}>
+                      {t.nav.friends}
+                    </a>
+                  </>
+                )}
+                <a class="text" href="/settings" data-icon={icons.Gear}>
+                  {t.nav.settings}
+                </a>
+                {user && (
+                  <form class="logout" onSubmit={(e) => e.preventDefault()}>
+                    <button type="button" class="text" data-icon={icons.Power} onClick={() => void logout().then(() => navigate('/'))}>
+                      {t.nav.signOut}
+                    </button>
+                  </form>
+                )}
+              </div>
+              <div class="subs">
+                <button type="button" class="sub" data-icon={icons.Language} onClick={() => setView('language')}>
+                  <span>{t.nav.language}</span>
+                  <span class="ligungi-dasher__value">{MESSAGES[lang].languageName}</span>
                 </button>
+                <button type="button" class="sub" data-icon={icons.Switch} onClick={() => setView('theme')}>
+                  <span>{t.settings.theme}</span>
+                  <span class="ligungi-dasher__value">{themeLabel(t, current.theme)}</span>
+                </button>
+              </div>
+            </>
+          )}
+          {view === 'language' && (
+            <div class="langs">
+              {back(t.nav.language)}
+              <form role="group" aria-label={t.nav.language} onSubmit={(e) => e.preventDefault()}>
+                {(['auto', ...LANGS] as const).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    lang={option === 'auto' ? undefined : MESSAGES[option].locale}
+                    class={current.lang === option ? 'current' : ''}
+                    aria-pressed={current.lang === option}
+                    onClick={() => updatePrefs({ lang: option })}
+                  >
+                    {option === 'auto' ? t.settings.auto : MESSAGES[option].languageName}
+                  </button>
+                ))}
               </form>
-            )}
-          </div>
-          <LanguagePicker />
+            </div>
+          )}
+          {view === 'theme' && (
+            <div class="langs">
+              {back(t.settings.theme)}
+              <form role="group" aria-label={t.settings.theme} onSubmit={(e) => e.preventDefault()}>
+                {THEMES.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    class={current.theme === option ? 'current' : ''}
+                    aria-pressed={current.theme === option}
+                    onClick={() => updatePrefs({ theme: option })}
+                  >
+                    {themeLabel(t, option)}
+                  </button>
+                ))}
+              </form>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -238,7 +285,24 @@ export const SiteFooter = () => {
     <footer class="ligungi-footer">
       <span>{t.footer.source(SOURCE_URL)}</span>
       <span>{t.footer.trademark}</span>
-      <span class="ligungi-footer__studio">{t.footer.studio}</span>
+      <span class="ligungi-footer__studio">
+        {t.footer.studio}
+        <span class="ligungi-footer__version">
+          {' · '}v{VERSION}
+          {COMMIT !== 'dev' &&
+            (COMMIT.endsWith('-dirty') ? (
+              ` (${COMMIT})`
+            ) : (
+              <>
+                {' '}(
+                <a href={`${SOURCE_URL}/commit/${COMMIT}`} target="_blank" rel="noopener noreferrer">
+                  {COMMIT}
+                </a>
+                )
+              </>
+            ))}
+        </span>
+      </span>
     </footer>
   );
 };

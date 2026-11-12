@@ -68,6 +68,7 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 - Screens reuse lila's markup and class names so the vendored CSS applies. lila's custom tags (`i5d`, `bo3`, `app`, `z7yx`, `qzm`, `move`, `index`, `group`, `rating`, `name`, `line`) must be written in lowercase and declared in `src/lila-elements.d.ts`.
 - Never hardcode user-facing text. Use `useT()` and the dictionaries in `src/i18n/`: `pt.tsx` is the source, and `en.tsx` and `es.tsx` share its type, so a missing key fails the typecheck. Always add all three languages.
 - Piece names come from `usePieceNames()` and board labels from `t.board`, so they follow the chosen language.
+- Forms are built only with the components in `src/components/ui.tsx` (Field, FieldRow, Select, Checkbox, RadioGroup, SubmitButton). The `/design` page (not linked in the menus) shows every component, color token and pattern; check it before building a screen and add new patterns there.
 - For UI changes, check both themes and at least two languages.
 
 ## Assets and legal
@@ -75,6 +76,10 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 - License: AGPL-3.0-or-later. Any new asset (image, font, sound, code) must be AGPL-compatible.
 - Never add HUNTER×HUNTER characters, artwork or logos, nor the lichess name, logo or favicon.
 - `references/` holds third-party material and is git-ignored except its README. Never commit its content.
+
+## Versions
+
+- One version for the whole project, in the root `package.json` (semver). Do not bump it unless asked; add user-visible changes under `[Unreleased]` in `CHANGELOG.md`.
 
 ## Git
 

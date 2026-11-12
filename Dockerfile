@@ -1,4 +1,7 @@
 FROM node:24.22.1-alpine AS build
+# Git commit of the build; .git is not in the context, so the deploy passes it in.
+ARG LIGUNGI_COMMIT=dev
+ENV LIGUNGI_COMMIT=$LIGUNGI_COMMIT
 WORKDIR /app
 COPY package.json package-lock.json .npmrc tsconfig.base.json ./
 COPY packages ./packages
@@ -7,8 +10,14 @@ COPY scripts ./scripts
 RUN npm ci --ignore-scripts --no-audit --no-fund && npm run build
 
 FROM node:24.22.1-alpine
+ARG LIGUNGI_COMMIT=dev
+LABEL org.opencontainers.image.title="ligungi" \
+      org.opencontainers.image.source="https://github.com/beater-studios/ligungi" \
+      org.opencontainers.image.licenses="AGPL-3.0-or-later" \
+      org.opencontainers.image.revision="$LIGUNGI_COMMIT"
 WORKDIR /app
-ENV NODE_ENV=production \
+ENV LIGUNGI_COMMIT=$LIGUNGI_COMMIT \
+    NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=4000 \
     STATIC_DIR=/app/apps/web/dist \
@@ -16,6 +25,7 @@ ENV NODE_ENV=production \
 COPY --from=build /app/package.json /app/package-lock.json /app/.npmrc ./
 COPY --from=build /app/packages ./packages
 COPY --from=build /app/apps/server ./apps/server
+COPY --from=build /app/scripts/build-info.ts ./scripts/build-info.ts
 COPY --from=build /app/apps/web/package.json ./apps/web/package.json
 COPY --from=build /app/apps/web/dist ./apps/web/dist
 # Production dependencies of the server only (the equivalent of a pruned tree). Then the npm cache and the

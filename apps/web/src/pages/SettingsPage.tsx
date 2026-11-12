@@ -1,27 +1,20 @@
-import { MESSAGES, useT } from '../i18n/index.ts';
-import { LANGS, prefs, updatePrefs, type Prefs } from '../prefs.ts';
+import { MESSAGES, themeLabel, useT } from '../i18n/index.ts';
+import { BOARD_SIZES, LANGS, THEMES, prefs, updatePrefs, type Prefs } from '../prefs.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
+import { RadioGroup } from '../components/ui.tsx';
 
 export const SettingsPage = () => {
   const t = useT();
   const s = t.settings;
   const current = useStore(prefs);
   const radio = <K extends keyof Prefs>(key: K, options: Array<[Prefs[K], string]>) => (
-    <group class="radio">
-      {options.map(([value, label]) => (
-        <div key={String(value)}>
-          <input
-            type="radio"
-            id={`pref-${key}-${String(value)}`}
-            name={key}
-            checked={current[key] === value}
-            onChange={() => updatePrefs({ [key]: value } as Partial<Prefs>)}
-          />
-          <label for={`pref-${key}-${String(value)}`}>{label}</label>
-        </div>
-      ))}
-    </group>
+    <RadioGroup
+      name={`pref-${key}`}
+      value={current[key]}
+      options={options.map(([value, label]) => ({ value, label }))}
+      onChange={(value) => updatePrefs({ [key]: value } as Partial<Prefs>)}
+    />
   );
   return (
     <main class="account page-menu">
@@ -46,22 +39,16 @@ export const SettingsPage = () => {
           </section>
           <section>
             <h2>{s.theme}</h2>
-            {radio('theme', [
-              ['auto', s.auto],
-              ['light', s.light],
-              ['dark', s.dark],
-            ])}
+            {radio('theme', THEMES.map((theme) => [theme, themeLabel(t, theme)]))}
           </section>
           <section>
             <h2>{s.boardSize}</h2>
-            <input
-              type="range"
-              class="range"
-              min={0}
-              max={100}
-              value={current.zoom}
-              onInput={(e) => updatePrefs({ zoom: Number((e.target as HTMLInputElement).value) })}
-            />
+            {radio('zoom', [
+              [BOARD_SIZES[0], s.sizeSmall],
+              [BOARD_SIZES[1], s.sizeMedium],
+              [BOARD_SIZES[2], s.sizeLarge],
+              [BOARD_SIZES[3], s.sizeMax],
+            ])}
           </section>
           <section>
             <h2>{s.sound}</h2>

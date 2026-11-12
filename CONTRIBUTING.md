@@ -45,6 +45,7 @@ npm run build
 - **Server dependencies:** the server has a single runtime dependency (`ws`). Discuss in an issue before adding another one, since each dependency is more surface to keep secure.
 - **Text shown to users** goes through the dictionaries in `apps/web/src/i18n/`: `pt.tsx` is the source, and `en.tsx` and `es.tsx` share its type, so TypeScript reports any missing key. Add the text in all three languages. If you cannot translate one, open the pull request anyway and say so.
 - **Server errors** are stable codes in `packages/protocol/src/errors.ts`, translated by the site. Never send free-form error text that the client has to display.
+- **UI components:** forms use the shared components in `apps/web/src/components/ui.tsx`. Run the site and open `/design` to see every component, color and pattern before building a screen.
 - **Look and feel:** the site reuses lichess's styles. The SCSS in `apps/web/vendor/lila` is copied unmodified from lila (see its `NOTICE.md`). Our own styles live in `apps/web/src/styles/ligungi.scss`.
 - **Assets:** never add HUNTER×HUNTER characters, artwork or logos, nor the lichess name, logo or favicon. Any new asset (image, font, sound) must have a license compatible with the AGPL.
 
@@ -65,6 +66,12 @@ In the pull request:
 - describe what changed and why, and link the issue;
 - add tests for changes to the engine, the protocol or the server;
 - add screenshots for visual changes, in both the light and dark themes when relevant.
+
+## Versions and releases
+
+The site and the server share one version, in the root `package.json`, following [Semantic Versioning](https://semver.org/): bump the patch for fixes, the minor for new features and the major for breaking changes (for example to the API or to stored data). Each build records its version and git commit; the site shows them in the footer and the server answers them at `GET /api/version`.
+
+Every user-visible change gets a line under `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md). A release moves those lines under the new version, bumps `package.json` and is tagged `vX.Y.Z`.
 
 ## License
 

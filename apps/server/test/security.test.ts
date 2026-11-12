@@ -208,6 +208,15 @@ describe('static files', () => {
   });
 });
 
+describe('version', () => {
+  it('reports the project version and the build commit', async () => {
+    server = await startServer();
+    const data = (await (await raw('/api/version')).json()) as { version: string; commit: string };
+    expect(data.version).toMatch(/^\d+\.\d+\.\d+/);
+    expect(typeof data.commit).toBe('string');
+  });
+});
+
 describe('headers', () => {
   it('sends a CSP that only allows connections to the same origin', async () => {
     server = await startServer();

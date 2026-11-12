@@ -62,7 +62,11 @@ Behind HTTPS (a reverse proxy or a CDN in front of the server), use `SECURE_COOK
 
 Set `TRUST_PROXY` to match how traffic reaches the server, otherwise rate limits see every user as the same IP (behind a proxy) or can be bypassed with forged headers. Use `cloudflare` only when the origin accepts traffic from Cloudflare alone (Cloudflare Tunnel or a firewall limited to Cloudflare's IP ranges); if the origin is reachable directly, anyone can forge `CF-Connecting-IP`.
 
-There is a [Dockerfile](Dockerfile) that builds an image with the server and the site, with the database in `/data`.
+There is a [Dockerfile](Dockerfile) that builds an image with the server and the site, with the database in `/data`. The build context has no `.git`, so pass the commit for the footer and `/api/version`: `docker build --build-arg LIGUNGI_COMMIT=$(git rev-parse --short HEAD) .`
+
+## Versions
+
+The site and the server share one version, following semver; see [CHANGELOG.md](CHANGELOG.md). The footer of the site shows the running version and commit.
 
 ## Contributing
 

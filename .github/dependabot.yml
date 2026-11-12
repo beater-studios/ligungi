@@ -17,6 +17,10 @@ updates:
       dev-dependencies:
         dependency-type: development
         update-types: [minor, patch]
+    ignore:
+      # Types follow the Node runtime pinned in .nvmrc; bump them together with it.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
@@ -32,6 +36,10 @@ updates:
     directory: /
     schedule:
       interval: daily
+    ignore:
+      # A new Node major changes .nvmrc, engines and the image together; do it by hand.
+      - dependency-name: node
+        update-types: ['version-update:semver-major']
     commit-message:
       prefix: chore
       include: scope

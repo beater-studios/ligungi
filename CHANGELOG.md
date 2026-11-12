@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-12
+
 ### Added
 
 - About, FAQ, contact, terms of service and privacy policy pages, in the three languages, linked from the home and the footer.
@@ -14,6 +16,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 ### Changed
 
 - Home counters stacked under the game buttons, and ligungi's logo faded behind the quick game grid, as on lichess.
+- Pages are sent with `Cache-Control: no-transform`, so a CDN cannot inject scripts (such as analytics) before the visitor consents.
 
 ## [0.1.0] - 2026-11-12
 
@@ -28,5 +31,6 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/beater-studios/ligungi/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/beater-studios/ligungi/releases/tag/v0.1.0

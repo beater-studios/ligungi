@@ -163,7 +163,8 @@ export const serveStatic = (root: string, pathname: string, res: ServerResponse,
  */
 const cacheControl = (pathname: string, file: string): string => {
   if (pathname.startsWith('/assets/')) return 'public, max-age=31536000, immutable';
-  if (extname(file) === '.html') return 'no-cache';
+  // no-transform: CDNs must not rewrite the page (Cloudflare would inject its analytics beacon before consent).
+  if (extname(file) === '.html') return 'no-cache, no-transform';
   return 'public, max-age=604800, stale-while-revalidate=2592000';
 };
 

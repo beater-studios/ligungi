@@ -202,8 +202,8 @@ describe('static files', () => {
     };
     expect(await head('/assets/index-abc123.js')).toEqual(['public, max-age=31536000, immutable', 'text/javascript; charset=utf-8']);
     expect(await head('/assets/Move-abc123.ogg')).toEqual(['public, max-age=31536000, immutable', 'audio/ogg']);
-    expect((await head('/'))[0]).toBe('no-cache');
-    expect((await head('/ranking'))[0]).toBe('no-cache');
+    expect((await head('/'))[0]).toBe('no-cache, no-transform');
+    expect((await head('/ranking'))[0]).toBe('no-cache, no-transform');
     expect((await head('/favicon.svg'))[0]).toBe('public, max-age=604800, stale-while-revalidate=2592000');
   });
 });

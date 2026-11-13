@@ -18,6 +18,8 @@ export const ERROR_MESSAGES = {
   invalidPassword: 'A senha precisa ter pelo menos 8 caracteres.',
   usernameTaken: 'Esse nome de usuário já existe.',
   wrongCredentials: 'Usuário ou senha incorretos.',
+  wrongPassword: 'Senha atual incorreta.',
+  activeGame: 'Termine suas partidas em andamento antes de excluir a conta.',
   userNotFound: 'Usuário não encontrado.',
   gameNotFound: 'Partida não encontrada.',
   challengeNotFound: 'Desafio não encontrado.',

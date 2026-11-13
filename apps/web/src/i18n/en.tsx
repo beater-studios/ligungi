@@ -68,6 +68,8 @@ export const en: Messages = {
     invalidPassword: 'The password needs at least 8 characters.',
     usernameTaken: 'That username is already taken.',
     wrongCredentials: 'Wrong username or password.',
+    wrongPassword: 'Current password is incorrect.',
+    activeGame: 'Finish your ongoing games before deleting your account.',
     userNotFound: 'User not found.',
     gameNotFound: 'Game not found.',
     challengeNotFound: 'Challenge not found.',
@@ -147,6 +149,7 @@ export const en: Messages = {
     faq: 'FAQ',
     contact: 'Contact',
     terms: 'Terms of service',
+    account: 'Account',
     privacy: 'Privacy',
   },
   notFound: { title: 'Page not found', back: 'Back to the home page' },
@@ -181,6 +184,28 @@ export const en: Messages = {
     accepted: 'statistics accepted',
     rejected: 'essential only',
     undecided: 'you have not chosen yet',
+  },
+
+  search: {
+    label: 'Search players',
+    placeholder: 'Player name',
+    noResults: 'No players found.',
+  },
+
+  account: {
+    title: 'Account',
+    loginNeeded: 'Sign in to manage your account.',
+    passwordTitle: 'Change password',
+    current: 'Current password',
+    next: 'New password',
+    confirm: 'Confirm the new password',
+    mismatch: 'The new passwords do not match.',
+    change: 'Change password',
+    changed: 'Password changed. Other devices must sign in again.',
+    deleteTitle: 'Delete account',
+    deleteText: 'Deletes the account, its ratings and who you follow. Games already played stay in the history, as "Anonymous". This cannot be undone.',
+    deleteConfirm: 'I understand that deletion is permanent',
+    deleteButton: 'Delete my account',
   },
 
   common: {

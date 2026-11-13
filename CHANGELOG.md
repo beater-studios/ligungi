@@ -4,6 +4,22 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-12
+
+### Added
+
+- Account page (from the user menu or the settings page): change the password, which signs out the other devices, and delete the account. Finished games stay in the history as "Anonymous".
+- Player search in the header.
+- `GET /api/health` for uptime monitoring.
+
+### Changed
+
+- Empty required form fields are no longer outlined in red before the user types in them.
+
+### Fixed
+
+- Icons of the analysis board controls were drawn below the center of their buttons.
+
 ### Security
 
 - Test tooling upgraded to vitest 5.1.0, clearing the advisories in vitest, tinypool and @vitest/mocker (development only; production dependencies were not affected).
@@ -35,6 +51,7 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/beater-studios/ligungi/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/beater-studios/ligungi/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/beater-studios/ligungi/releases/tag/v0.1.0

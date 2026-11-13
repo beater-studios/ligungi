@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { ChallengeView, FriendView, GameSummary, GameView, LeaderEntry, Leaderboard, LobbyView, Me, UserProfile } from '@ligungi/protocol';
+import type { ChallengeView, FriendView, GameSummary, GameView, LeaderEntry, Leaderboard, LobbyView, Me, UserProfile, UserSearchResult } from '@ligungi/protocol';
 import { Client, firstMove, startServer, type TestServer } from './helpers.ts';
 
 const casual = { mode: 'intro', rated: false, timeControl: { initial: 600, increment: 5 }, color: 'white', firstPlayer: 'white' };
@@ -426,6 +426,81 @@ describe('sessions, lobby and robustness', () => {
     for (let i = 0; i < 600; i++) expect(server.app.games.get(`old${String(i).padStart(5, '0')}`)).toBeDefined();
     expect(server.app.games.cachedCount).toBe(500);
     expect(server.app.games.get('old00000')?.status).toBe('ended');
+  });
+});
+
+describe('account', () => {
+  it('changes the password, signs other devices out and keeps the current one signed in', async () => {
+    server = await startServer();
+    const laptop = client();
+    const phone = client();
+    await signup(laptop, 'Kurapika');
+    expect((await phone.request('POST', '/api/login', { username: 'kurapika', password: 'segredo123' })).status).toBe(200);
+    expect((await laptop.request<{ code: string }>('POST', '/api/account/password', { current: 'wrong-one', next: 'chains1234' })).data.code).toBe('wrongPassword');
+    expect((await laptop.request<{ code: string }>('POST', '/api/account/password', { current: 'segredo123', next: 'short' })).data.code).toBe('invalidPassword');
+    expect((await laptop.request('POST', '/api/account/password', { current: 'segredo123', next: 'chains1234' })).status).toBe(200);
+    expect((await laptop.request<Me>('GET', '/api/me')).data.user?.name).toBe('Kurapika');
+    expect((await phone.request<Me>('GET', '/api/me')).data.user).toBeNull();
+    const fresh = client();
+    expect((await fresh.request('POST', '/api/login', { username: 'kurapika', password: 'segredo123' })).status).toBe(401);
+    expect((await fresh.request('POST', '/api/login', { username: 'kurapika', password: 'chains1234' })).status).toBe(200);
+  });
+
+  it('deletes an account, keeping its finished games anonymous', async () => {
+    server = await startServer();
+    const a = client();
+    const b = client();
+    await signup(a, 'Pitou');
+    await signup(b, 'Pouf');
+    await a.request('POST', '/api/users/pouf/follow');
+    await b.request('POST', '/api/users/pitou/follow');
+    const { id } = await startGame(a, b);
+    expect((await a.request<{ code: string }>('POST', '/api/account/delete', { password: 'segredo123' })).data.code).toBe('activeGame');
+    a.send({ t: 'abort', game: id });
+    await a.waitGame(id, (g) => g.status === 'aborted');
+    expect((await a.request<{ code: string }>('POST', '/api/account/delete', { password: 'nope-nope' })).data.code).toBe('wrongPassword');
+    expect((await a.request('POST', '/api/account/delete', { password: 'segredo123' })).status).toBe(200);
+
+    expect((await a.request<Me>('GET', '/api/me')).data.user).toBeNull();
+    expect((await b.request('GET', '/api/users/pitou')).status).toBe(404);
+    expect((await b.request<UserProfile>('GET', '/api/users/pouf')).data).toMatchObject({ followers: 0, following: 0 });
+    const game = (await b.request<GameView>('GET', `/api/games/${id}`)).data;
+    expect(game.players.white).toMatchObject({ name: 'Anonymous', user: null });
+    expect(game.players.black.user?.name).toBe('Pouf');
+    expect((await client().request('POST', '/api/login', { username: 'pitou', password: 'segredo123' })).status).toBe(401);
+    expect((await client().request('POST', '/api/signup', { username: 'Pitou', password: 'segredo123' })).status).toBe(200);
+  });
+
+  it('requires a signed-in user for account actions', async () => {
+    server = await startServer();
+    const anon = client();
+    expect((await anon.request<{ code: string }>('POST', '/api/account/delete', { password: 'x' })).data.code).toBe('loginRequired');
+    expect((await anon.request<{ code: string }>('POST', '/api/account/password', { current: 'x', next: 'yyyyyyyy' })).data.code).toBe('loginRequired');
+  });
+});
+
+describe('search and health', () => {
+  it('finds players by name prefix, case-insensitive, with presence', async () => {
+    server = await startServer();
+    const a = client();
+    for (const name of ['Gon', 'Gotoh', 'Genthru', 'Killua']) await signup(client(), name);
+    await signup(a, 'Goreinu');
+    await a.connect();
+    const search = async (q: string) => (await a.request<UserSearchResult[]>('GET', `/api/users?q=${encodeURIComponent(q)}`)).data;
+    expect((await search('go')).map((r) => r.user.name)).toEqual(['Gon', 'Goreinu', 'Gotoh']);
+    expect((await search('GO')).map((r) => r.user.name)).toEqual(['Gon', 'Goreinu', 'Gotoh']);
+    expect((await search('gor'))[0]).toMatchObject({ user: { name: 'Goreinu' }, online: true });
+    expect(await search('g')).toEqual([]);
+    expect(await search("go'; drop table users")).toEqual([]);
+    expect(await search('zzz')).toEqual([]);
+  });
+
+  it('reports health with the build', async () => {
+    server = await startServer();
+    const res = await client().request<{ ok: boolean; version: string }>('GET', '/api/health');
+    expect(res.status).toBe(200);
+    expect(res.data.ok).toBe(true);
+    expect(res.data.version).toMatch(/^\d+\.\d+\.\d+/);
   });
 });
 

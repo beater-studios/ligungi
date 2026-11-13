@@ -82,6 +82,30 @@ export class Users {
       .run(userId, mode, rating.rating, rating.deviation, rating.volatility, rating.games);
   }
 
+  /** Usernames starting with `prefix` (case-insensitive), alphabetical. */
+  search(prefix: string, limit: number): UserRef[] {
+    const key = prefix.toLowerCase();
+    const rows = this.#db
+      .prepare('select id, username from users where username_key >= ? and username_key < ? order by username_key limit ?')
+      .all(key, `${key}\uffff`, limit) as Array<{ id: string; username: string }>;
+    return rows.map((row) => ({ id: row.id, name: row.username }));
+  }
+
+  /** Removes the account and everything tied to it except finished games, which the caller anonymizes. */
+  delete(userId: string): void {
+    this.#db.exec('begin');
+    try {
+      this.#db.prepare('delete from follows where user_id = ? or followed_id = ?').run(userId, userId);
+      this.#db.prepare('delete from ratings where user_id = ?').run(userId);
+      this.#db.prepare('delete from sessions where user_id = ?').run(userId);
+      this.#db.prepare('delete from users where id = ?').run(userId);
+      this.#db.exec('commit');
+    } catch (error) {
+      this.#db.exec('rollback');
+      throw error;
+    }
+  }
+
   /** Returns false when the follow already existed. */
   follow(userId: string, targetId: string): boolean {
     const result = this.#db

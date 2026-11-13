@@ -121,6 +121,11 @@ export class Sessions {
     return { id, userId: null };
   }
 
+  /** Signs a user out everywhere except the given session (after a password change). */
+  deleteOtherSessions(userId: string, keep: string): void {
+    this.#db.prepare('delete from sessions where user_id = ? and id != ?').run(userId, keep);
+  }
+
   /** Logging in or out rotates the session id to prevent fixation. */
   rotate(previous: string, userId: string | null): Session {
     this.#db.prepare('delete from sessions where id = ?').run(previous);

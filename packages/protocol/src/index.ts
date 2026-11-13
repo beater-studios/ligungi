@@ -163,6 +163,11 @@ export interface UserProfile {
   readonly recent: readonly GameSummary[];
 }
 
+export interface UserSearchResult {
+  readonly user: UserRef;
+  readonly online: boolean;
+}
+
 /** A followed player, as listed on the friends page. */
 export interface FriendView {
   readonly user: UserRef;

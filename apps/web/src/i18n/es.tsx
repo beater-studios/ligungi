@@ -68,6 +68,8 @@ export const es: Messages = {
     invalidPassword: 'La contraseña necesita al menos 8 caracteres.',
     usernameTaken: 'Ese nombre de usuario ya existe.',
     wrongCredentials: 'Usuario o contraseña incorrectos.',
+    wrongPassword: 'La contraseña actual es incorrecta.',
+    activeGame: 'Termina tus partidas en curso antes de eliminar la cuenta.',
     userNotFound: 'Usuario no encontrado.',
     gameNotFound: 'Partida no encontrada.',
     challengeNotFound: 'Desafío no encontrado.',
@@ -147,6 +149,7 @@ export const es: Messages = {
     faq: 'FAQ',
     contact: 'Contacto',
     terms: 'Condiciones de uso',
+    account: 'Cuenta',
     privacy: 'Privacidad',
   },
   notFound: { title: 'Página no encontrada', back: 'Volver al inicio' },
@@ -181,6 +184,28 @@ export const es: Messages = {
     accepted: 'estadísticas aceptadas',
     rejected: 'solo lo esencial',
     undecided: 'todavía no has elegido',
+  },
+
+  search: {
+    label: 'Buscar jugador',
+    placeholder: 'Nombre del jugador',
+    noResults: 'No se encontró ningún jugador.',
+  },
+
+  account: {
+    title: 'Cuenta',
+    loginNeeded: 'Inicia sesión para gestionar tu cuenta.',
+    passwordTitle: 'Cambiar contraseña',
+    current: 'Contraseña actual',
+    next: 'Nueva contraseña',
+    confirm: 'Confirma la nueva contraseña',
+    mismatch: 'Las contraseñas nuevas no coinciden.',
+    change: 'Cambiar contraseña',
+    changed: 'Contraseña cambiada. Los demás dispositivos deben iniciar sesión de nuevo.',
+    deleteTitle: 'Eliminar cuenta',
+    deleteText: 'Borra la cuenta, las puntuaciones y a quién sigues. Las partidas ya jugadas quedan en el historial, como "Anónimo". No se puede deshacer.',
+    deleteConfirm: 'Entiendo que la eliminación es permanente',
+    deleteButton: 'Eliminar mi cuenta',
   },
 
   common: {

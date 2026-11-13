@@ -78,6 +78,10 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 - Never add HUNTER×HUNTER characters, artwork or logos, nor the lichess name, logo or favicon.
 - `references/` holds third-party material and is git-ignored except its README. Never commit its content.
 
+## Planning
+
+- `docs/backlog.md` lists candidate work (ideas, gaps, features seen on other lila-based sites). Only items the maintainer confirms move to `docs/roadmap.md`. Never move an item to the roadmap on your own.
+
 ## Versions
 
 - One version for the whole project, in the root `package.json` (semver). Do not bump it unless asked; add user-visible changes under `[Unreleased]` in `CHANGELOG.md`.

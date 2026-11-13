@@ -28,6 +28,7 @@ docker-compose.override.y*ml
 # Runtime data and logs
 apps/server/data/
 /data/
+/backups/
 *.db
 *.db-shm
 *.db-wal
@@ -35,6 +36,7 @@ apps/server/data/
 *.sqlite3
 *.log
 npm-debug.log*
+*.eml
 
 # Third-party reference material (only the index is versioned)
 references/*

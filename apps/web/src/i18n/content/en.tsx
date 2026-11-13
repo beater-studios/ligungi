@@ -288,7 +288,8 @@ export const en: Content = {
       <h2>Your rights</h2>
       <p>
         Under the LGPD you may request access to, correction or deletion of your data, and information about how it is
-        processed. Write to <Mail /> with the subject "Privacy", including your username. Deleting your account removes your
+        processed. You can change your password or delete your account yourself on the <a href="/account">Account</a> page;
+        for anything else, write to <Mail /> with the subject "Privacy", including your username. Deleting your account removes your
         personal data; games already played may remain in the history anonymously.
       </p>
       <h2>Changes</h2>

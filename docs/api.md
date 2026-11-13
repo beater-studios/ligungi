@@ -15,10 +15,14 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 | Method and path | Description |
 |---|---|
 | `GET /api/version` | `{ version, commit }`: the project version and the git commit of the running build. |
+| `GET /api/health` | `{ ok: true, version, commit }` after a database query succeeds, `503` otherwise. Meant for uptime monitors. |
 | `GET /api/me` | The session's user and their ongoing games. |
 | `POST /api/signup` `{ username, password }` | Creates an account and signs in. |
 | `POST /api/login` `{ username, password }` | Signs in. |
 | `POST /api/logout` | Signs out. |
+| `POST /api/account/password` `{ current, next }` | Changes the password (`wrongPassword` when `current` does not match). Signs out every other session and rotates the current one. |
+| `POST /api/account/delete` `{ password }` | Deletes the account: ratings, follows and sessions are removed, seeks and challenges cancelled, and finished games keep the moves with the player shown as `Anonymous`. Refused with `409 activeGame` while the player has an ongoing game. Returns `{ user: null }`. |
+| `GET /api/users?q=<prefix>` | Up to 10 players whose username starts with `prefix` (2 to 20 characters, case-insensitive), alphabetical, each as `{ user, online }`. Any other query returns `[]`. |
 | `GET /api/users/:name` | Profile: online status, rating and leaderboard rank per mode, counts, followers, whether the requester follows the player, ongoing and recent games. |
 | `GET /api/users/:name/games` | Finished games, 20 per page, newest first. Optional query filters: `mode`, `result` (`win`, `loss`, `draw`, from the player's point of view), `rated` (`1` or `0`), `color` (`white` or `black`), `vs` (opponent username) and `before` (ms, for paging). An unknown value returns `invalidFilter`. |
 | `POST /api/users/:name/follow` | Follows the player (requires an account, up to 400). Returns `{ followed, followers, following }` of the followed player. |

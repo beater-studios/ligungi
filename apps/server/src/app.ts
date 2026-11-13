@@ -18,6 +18,7 @@ import {
   type Me,
   type Topic,
   type UserProfile,
+  type UserSearchResult,
 } from '@ligungi/protocol';
 import { WebSocketServer, type WebSocket } from 'ws';
 import {
@@ -58,6 +59,7 @@ export const ANONYMOUS_NAME = 'Anonymous';
 const HEARTBEAT_MS = 30_000;
 const SESSION_SWEEP_MS = 6 * 3_600_000;
 const MAX_TOPICS_PER_CLIENT = 32;
+const SEARCH_LIMIT = 10;
 const SITE_NAME = 'ligungi';
 /** Cloudflare Web Analytics: no cookies, aggregate only; its edge injects this script into the HTML. */
 const ANALYTICS_SCRIPT = 'https://static.cloudflareinsights.com';
@@ -192,6 +194,12 @@ export const createApp = (config: ServerConfig): App => {
     }
   };
 
+  const closeUserSockets = (userId: string): void => {
+    for (const client of hub.clients()) {
+      if (client.player.userId === userId) client.socket.close(4001, 'session changed');
+    }
+  };
+
   const router = new Router();
   const userPayload = (session: Session) => {
     const player = toPlayer(session);
@@ -234,6 +242,55 @@ export const createApp = (config: ServerConfig): App => {
     .add('POST', '/api/logout', (ctx) => {
       rotateSession(ctx, null);
       sendJson(ctx.res, 200, { user: null });
+    })
+    .add('POST', '/api/account/password', async (ctx) => {
+      const userId = requireUser(ctx);
+      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
+      const { current, next } = (await ctx.body()) as { current?: unknown; next?: unknown };
+      const user = users.findById(userId);
+      if (!user || typeof current !== 'string' || !(await verifyPassword(current, user.passwordHash))) {
+        throw new HttpError(401, 'wrongPassword');
+      }
+      if (typeof next !== 'string' || next.length < 8 || next.length > 200) throw new HttpError(400, 'invalidPassword');
+      users.updatePasswordHash(userId, await hashPassword(next));
+      // Every other device must sign in again with the new password.
+      sessions.deleteOtherSessions(userId, ctx.session.id);
+      closeUserSockets(userId);
+      rotateSession(ctx, userId);
+      sendJson(ctx.res, 200, { ok: true });
+    })
+    .add('POST', '/api/account/delete', async (ctx) => {
+      const userId = requireUser(ctx);
+      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
+      const { password } = (await ctx.body()) as { password?: unknown };
+      const user = users.findById(userId);
+      if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
+        throw new HttpError(401, 'wrongPassword');
+      }
+      if (games.hasOngoing(userId)) throw new HttpError(409, 'activeGame');
+      lobby.removeUser(userId);
+      games.anonymizeUser(userId, ANONYMOUS_NAME);
+      users.delete(userId);
+      closeUserSockets(userId);
+      rotateSession(ctx, null);
+      sendJson(ctx.res, 200, { user: null });
+    })
+    .add('GET', '/api/users', (ctx) => {
+      const query = ctx.url.searchParams.get('q')?.trim() ?? '';
+      if (!/^[A-Za-z0-9_-]{2,20}$/.test(query)) return sendJson(ctx.res, 200, []);
+      const online = onlineUsers();
+      const results: UserSearchResult[] = users
+        .search(query, SEARCH_LIMIT)
+        .map((user) => ({ user, online: online.has(user.id) }));
+      sendJson(ctx.res, 200, results);
+    })
+    .add('GET', '/api/health', (ctx) => {
+      try {
+        db.prepare('select 1').get();
+        sendJson(ctx.res, 200, { ok: true, ...BUILD });
+      } catch {
+        sendJson(ctx.res, 503, { ok: false, ...BUILD });
+      }
     })
     .add('GET', '/api/users/:name', (ctx) => {
       const user = findUser(ctx.params.name!);

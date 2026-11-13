@@ -877,6 +877,11 @@ select.ligungi-select {
   cursor: pointer;
 }
 
+// lila marks every :invalid control red, so an empty required field is red before the user typed anything.
+.form3 .form-group:not(.is-invalid) .form-control:invalid:not(:user-invalid) {
+  border-color: $c-border;
+}
+
 .ligungi-actions {
   margin-top: 1.6rem;
 }
@@ -903,9 +908,18 @@ select.ligungi-select {
     gap: 0.25rem;
   }
 
+  // The icon is 1.2em with lila's 1.5 line-height, taller than the button's own line, and vertical-align: middle
+  // then drops it below the center. A 1.25 line-height on the icon keeps the button height.
   .fbt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 1.25rem;
     padding: 0.45rem 0.9rem;
+
+    &::before {
+      line-height: 1.25;
+    }
   }
 }
 
@@ -951,7 +965,8 @@ select.ligungi-select {
   margin-inline-end: 0.5rem;
 }
 
-body:has(main.auth) .site-buttons .signin-or-signup {
+body:has(main.auth) .site-buttons .signin-or-signup,
+body:has(main.auth) #clinput {
   display: none;
 }
 
@@ -981,6 +996,72 @@ body:has(main.auth) .site-buttons .signin-or-signup {
     background: none;
     color: $c-header-dropdown;
     cursor: pointer;
+  }
+}
+
+// Player search: lila's #clinput (the input grows while body.clinput is set) plus our own results list. Like the
+// sign-in buttons above, lila's auth stylesheet hides it everywhere once bundled, so show it again outside auth pages.
+#clinput {
+  display: flex;
+  position: relative;
+
+  button.link {
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  input::-webkit-search-cancel-button {
+    display: none;
+  }
+}
+
+.ligungi-search__results {
+  @extend %dropdown-shadow;
+
+  position: absolute;
+  top: $site-header-height;
+  inset-inline-start: 0;
+  min-width: 100%;
+  margin: 0;
+  padding: 0.3em 0;
+  list-style: none;
+  background: $c-bg-header-dropdown;
+  border-radius: 0 0 $box-radius-size $box-radius-size;
+  z-index: $z-dropdown-109;
+
+  .user-link {
+    display: flex;
+    align-items: center;
+    padding: 0.5em 1em;
+    color: $c-header-dropdown;
+    white-space: nowrap;
+
+    &.active {
+      background: $c-primary;
+      color: $c-over;
+    }
+  }
+}
+
+.ligungi-search__empty {
+  padding: 0.5em 1em;
+  color: $c-font-dim;
+  white-space: nowrap;
+}
+
+/* ===== Account page ===== */
+.account section + section {
+  margin-top: 3rem;
+}
+
+.ligungi-success {
+  color: $c-good;
+}
+
+.ligungi-danger-zone {
+  h2 {
+    color: $c-bad;
   }
 }
 

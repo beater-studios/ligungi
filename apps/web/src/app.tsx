@@ -19,6 +19,8 @@ import { LearnPage } from './pages/LearnPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { RankingPage } from './pages/RankingPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
+import { AccountPage } from './pages/AccountPage.tsx';
+import { HeaderSearch } from './components/HeaderSearch.tsx';
 import { TvPage } from './pages/TvPage.tsx';
 import { MODES, type Mode } from '@ligungi/engine';
 import { LANGS, THEMES, prefs, resolveLang, updatePrefs } from './prefs.ts';
@@ -35,6 +37,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/learn$/, render: () => <LearnPage /> },
   { pattern: /^\/tv$/, render: () => <TvPage /> },
   { pattern: /^\/settings$/, render: () => <SettingsPage /> },
+  { pattern: /^\/account$/, render: () => <AccountPage /> },
   { pattern: /^\/friends$/, render: () => <FriendsPage /> },
   { pattern: /^\/design$/, render: () => <DesignPage /> },
   { pattern: new RegExp(`^/(${INFO_KINDS.join('|')})$`), render: ([kind]) => (isInfoKind(kind!) ? <InfoPage kind={kind} /> : <NotFound />) },
@@ -136,6 +139,11 @@ const Dasher = () => {
                 <a class="text" href="/settings" data-icon={icons.Gear}>
                   {t.nav.settings}
                 </a>
+                {user && (
+                  <a class="text" href="/account" data-icon={icons.AccountCircle}>
+                    {t.nav.account}
+                  </a>
+                )}
                 {user && (
                   <form class="logout" onSubmit={(e) => e.preventDefault()}>
                     <button type="button" class="text" data-icon={icons.Power} onClick={() => void logout().then(() => navigate('/'))}>
@@ -265,6 +273,7 @@ const Header = () => {
         {status !== 'open' && (
           <span class="link ligungi-reconnecting" title={t.nav.reconnecting} data-icon={icons.ChasingArrows} />
         )}
+        <HeaderSearch />
         {!user && (
           <div class="signin-or-signup">
             <a href="/login" class="button button-empty signin">

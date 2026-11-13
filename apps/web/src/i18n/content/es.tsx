@@ -290,7 +290,8 @@ export const es: Content = {
       <h2>Tus derechos</h2>
       <p>
         Según la LGPD, puedes pedir acceso, corrección o eliminación de tus datos, e información sobre su tratamiento.
-        Escribe a <Mail /> con el asunto "Privacidad", indicando tu nombre de usuario. Eliminar la cuenta borra tus datos
+        Puedes cambiar la contraseña o eliminar la cuenta tú mismo en la página <a href="/account">Cuenta</a>; para lo demás,
+        escribe a <Mail /> con el asunto "Privacidad", indicando tu nombre de usuario. Eliminar la cuenta borra tus datos
         personales; las partidas ya jugadas pueden quedar en el historial de forma anónima.
       </p>
       <h2>Cambios</h2>

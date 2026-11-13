@@ -146,6 +146,25 @@ export class Games {
     return this.#rooms.size;
   }
 
+  hasOngoing(userId: string): boolean {
+    return this.ongoing().some((room) => Object.values(room.seats).some((seat) => seat.userId === userId));
+  }
+
+  /** Detaches a deleted account from its finished games: they stay in the history under an anonymous name. */
+  anonymizeUser(userId: string, anonymousName: string): void {
+    for (const color of ['white', 'black'] as const) {
+      this.#db
+        .prepare(`update games set ${color}_user = null, ${color}_name = ? where ${color}_user = ?`)
+        .run(anonymousName, userId);
+    }
+    for (const [id, room] of this.#rooms) {
+      if (room.status !== 'started' && Object.values(room.seats).some((seat) => seat.userId === userId)) {
+        room.dispose();
+        this.#rooms.delete(id);
+      }
+    }
+  }
+
   /** Moves anonymous seats to a new session id after login, signup or logout. */
   rebindSession(from: string, to: string): void {
     for (const room of this.#rooms.values()) room.rebindSession(from, to);

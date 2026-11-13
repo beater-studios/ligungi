@@ -289,7 +289,7 @@ export const pt: Content = {
       <h2>Seus direitos</h2>
       <p>
         Pela LGPD, você pode pedir acesso, correção ou exclusão dos seus dados, além de informações sobre o tratamento.
-        Escreva para <Mail /> com o assunto "Privacidade", informando o seu nome de usuário. A exclusão da conta remove
+        Você mesmo pode trocar a senha ou excluir a conta na página <a href="/account">Conta</a>; para o resto, escreva para <Mail /> com o assunto "Privacidade", informando o seu nome de usuário. A exclusão da conta remove
         os seus dados pessoais; as partidas já jogadas podem continuar no histórico de forma anônima.
       </p>
       <h2>Mudanças</h2>

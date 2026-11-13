@@ -110,6 +110,18 @@ export class Lobby {
     }
   }
 
+  /** Drops everything a deleted account had open in the lobby. */
+  removeUser(userId: string): void {
+    for (const [id, seek] of this.#seeks) if (seek.owner.userId === userId) this.#seeks.delete(id);
+    for (const challenge of this.#challenges.values()) {
+      if (challenge.owner.userId === userId && challenge.status === 'open') {
+        challenge.status = 'canceled';
+        this.#options.onChallengeChange(challenge);
+      }
+    }
+    this.#options.onSeeksChange();
+  }
+
   /** Seeks vanish when their owner leaves, as on lichess. */
   removeSeeksOf(sessionId: string): void {
     let changed = false;

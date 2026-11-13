@@ -95,6 +95,7 @@ export const pt = {
     faq: 'FAQ',
     contact: 'Contato',
     terms: 'Condições de uso',
+    account: 'Conta',
     privacy: 'Privacidade',
   },
   notFound: { title: 'Página não encontrada', back: 'Voltar ao início' },
@@ -129,6 +130,28 @@ export const pt = {
     accepted: 'estatísticas aceitas',
     rejected: 'só o essencial',
     undecided: 'você ainda não escolheu',
+  },
+
+  search: {
+    label: 'Buscar jogador',
+    placeholder: 'Nome do jogador',
+    noResults: 'Nenhum jogador encontrado.',
+  },
+
+  account: {
+    title: 'Conta',
+    loginNeeded: 'Entre na sua conta para gerenciá-la.',
+    passwordTitle: 'Trocar senha',
+    current: 'Senha atual',
+    next: 'Nova senha',
+    confirm: 'Confirme a nova senha',
+    mismatch: 'As senhas novas não são iguais.',
+    change: 'Trocar senha',
+    changed: 'Senha trocada. Os outros aparelhos precisam entrar de novo.',
+    deleteTitle: 'Excluir conta',
+    deleteText: 'Apaga a conta, os ratings e quem você segue. As partidas já jogadas continuam no histórico, como "Anônimo". Não dá para desfazer.',
+    deleteConfirm: 'Entendo que a exclusão é permanente',
+    deleteButton: 'Excluir minha conta',
   },
 
   common: {

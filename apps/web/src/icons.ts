@@ -1,6 +1,7 @@
 /** Code points of lila's icon font (src/assets/font/lichess.woff2), used through `data-icon`. */
 export const icons = {
   AccountCircle: '\ue079',
+  Search: '\ue057',
   Language: '\ue06e',
   LessThan: '\ue027',
   Switch: '\ue07b',

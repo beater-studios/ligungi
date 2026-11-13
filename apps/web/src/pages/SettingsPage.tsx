@@ -3,6 +3,7 @@ import { BOARD_SIZES, LANGS, THEMES, prefs, updatePrefs, type Prefs } from '../p
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
 import { RadioGroup } from '../components/ui.tsx';
+import { SettingsMenu } from './AccountPage.tsx';
 
 export const SettingsPage = () => {
   const t = useT();
@@ -18,11 +19,7 @@ export const SettingsPage = () => {
   );
   return (
     <main class="account page-menu">
-      <nav class="page-menu__menu subnav">
-        <a class="active" href="/settings">
-          {s.title}
-        </a>
-      </nav>
+      <SettingsMenu active="settings" />
       <div class="page-menu__content box box-pad">
         <h1 class="box__top">{s.title}</h1>
         <form class="form3" onSubmit={(e) => e.preventDefault()}>

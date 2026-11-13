@@ -107,6 +107,11 @@ export const es: Messages = {
     cannotFollowSelf: 'No puedes seguirte a ti mismo.',
     tooManyFollows: 'Ya sigues al máximo de jugadores.',
     invalidFilter: 'Filtro no válido.',
+    cannotChallengeSelf: 'No puedes desafiarte a ti mismo.',
+    challengeRefused: 'Este jugador no acepta tus desafíos.',
+    tooManyChallenges: 'Hay demasiados desafíos pendientes. Espera a que respondan alguno.',
+    notYourChallenge: 'Este desafío es para otro jugador.',
+    invalidChallengePolicy: 'Opción de desafíos no válida.',
   },
   genericError: 'Algo salió mal. Inténtalo de nuevo.',
   offline: 'Sin conexión. Intentando reconectar...',
@@ -137,6 +142,8 @@ export const es: Messages = {
     tools: 'Herramientas',
     analysis: 'Tablero de análisis',
     reconnecting: 'Reconectando',
+    challenges: 'Desafíos',
+    noChallenges: 'Ningún desafío recibido.',
     signIn: 'Iniciar sesión',
     signUp: 'Registrarse',
     settings: 'Configuración',
@@ -217,6 +224,12 @@ export const es: Messages = {
     deleteText: 'Borra la cuenta, las puntuaciones y a quién sigues. Las partidas ya jugadas quedan en el historial, como "Anónimo". No se puede deshacer.',
     deleteConfirm: 'Entiendo que la eliminación es permanente',
     deleteButton: 'Eliminar mi cuenta',
+    challengesTitle: 'Desafíos',
+    challengesText: 'Quién puede desafiarte desde tu página de perfil. Los enlaces de desafío siguen funcionando para cualquiera.',
+    policyEveryone: 'Cualquier jugador con cuenta',
+    policyFollowing: 'Solo quienes sigo',
+    policyNobody: 'Nadie',
+    challengesSaved: 'Preferencia guardada.',
   },
 
   common: {
@@ -292,6 +305,8 @@ export const es: Messages = {
     loginForRated: 'Inicia sesión para jugar partidas puntuables',
     createLink: 'Crear enlace del desafío',
     create: 'Crear partida',
+    challengeTitle: (name: string) => `Desafiar a ${name}`,
+    sendChallenge: 'Enviar desafío',
   },
 
   challenge: {
@@ -311,6 +326,13 @@ export const es: Messages = {
       </>
     ),
     accept: 'Aceptar desafío',
+    decline: 'Rechazar',
+    to: 'Para',
+    waitingFor: (name: string) => `Esperando la respuesta de ${name}. Si sales del sitio, el desafío se cancela.`,
+    declined: 'Este desafío fue rechazado.',
+    declinedBy: (name: string) => `${name} rechazó el desafío.`,
+    forSomeoneElse: 'Este desafío es para otro jugador.',
+    loginToAnswer: 'Inicia sesión para responder a este desafío.',
   },
 
   auth: {
@@ -391,6 +413,8 @@ export const es: Messages = {
     clearFilters: 'Quitar filtros',
     noMatch: 'Ninguna partida coincide con estos filtros.',
     vsLink: 'Partidas contra este jugador',
+    challenge: 'Desafiar',
+    challengeRefused: 'Este jugador no acepta tus desafíos.',
   },
 
   ranking: {

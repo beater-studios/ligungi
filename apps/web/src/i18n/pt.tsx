@@ -82,6 +82,8 @@ export const pt = {
     tools: 'Ferramentas',
     analysis: 'Tabuleiro de análise',
     reconnecting: 'Reconectando',
+    challenges: 'Desafios',
+    noChallenges: 'Nenhum desafio recebido.',
     signIn: 'Entrar',
     signUp: 'Criar conta',
     settings: 'Configurações',
@@ -162,6 +164,12 @@ export const pt = {
     deleteText: 'Apaga a conta, os ratings e quem você segue. As partidas já jogadas continuam no histórico, como "Anônimo". Não dá para desfazer.',
     deleteConfirm: 'Entendo que a exclusão é permanente',
     deleteButton: 'Excluir minha conta',
+    challengesTitle: 'Desafios',
+    challengesText: 'Quem pode desafiar você pela sua página de perfil. Links de desafio continuam valendo para qualquer pessoa.',
+    policyEveryone: 'Qualquer jogador com conta',
+    policyFollowing: 'Só quem eu sigo',
+    policyNobody: 'Ninguém',
+    challengesSaved: 'Preferência salva.',
   },
 
   common: {
@@ -237,6 +245,8 @@ export const pt = {
     loginForRated: 'Entre na sua conta para jogar ranqueadas',
     createLink: 'Criar link do desafio',
     create: 'Criar partida',
+    challengeTitle: (name: string) => `Desafiar ${name}`,
+    sendChallenge: 'Enviar desafio',
   },
 
   challenge: {
@@ -256,6 +266,13 @@ export const pt = {
       </>
     ),
     accept: 'Aceitar desafio',
+    decline: 'Recusar',
+    to: 'Para',
+    waitingFor: (name: string) => `Aguardando ${name} responder. Se você sair do site, o desafio é cancelado.`,
+    declined: 'Este desafio foi recusado.',
+    declinedBy: (name: string) => `${name} recusou o desafio.`,
+    forSomeoneElse: 'Este desafio é para outro jogador.',
+    loginToAnswer: 'Entre na sua conta para responder a este desafio.',
   },
 
   auth: {
@@ -336,6 +353,8 @@ export const pt = {
     clearFilters: 'Limpar filtros',
     noMatch: 'Nenhuma partida com esses filtros.',
     vsLink: 'Partidas contra este jogador',
+    challenge: 'Desafiar',
+    challengeRefused: 'Este jogador não aceita desafios seus.',
   },
 
   ranking: {

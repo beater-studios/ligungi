@@ -107,6 +107,11 @@ export const en: Messages = {
     cannotFollowSelf: 'You cannot follow yourself.',
     tooManyFollows: 'You already follow the maximum number of players.',
     invalidFilter: 'Invalid filter.',
+    cannotChallengeSelf: 'You cannot challenge yourself.',
+    challengeRefused: 'This player does not accept challenges from you.',
+    tooManyChallenges: 'Too many pending challenges. Wait for one to be answered.',
+    notYourChallenge: 'This challenge is for another player.',
+    invalidChallengePolicy: 'Invalid challenge option.',
   },
   genericError: 'Something went wrong. Try again.',
   offline: 'No connection. Trying to reconnect...',
@@ -137,6 +142,8 @@ export const en: Messages = {
     tools: 'Tools',
     analysis: 'Analysis board',
     reconnecting: 'Reconnecting',
+    challenges: 'Challenges',
+    noChallenges: 'No challenges received.',
     signIn: 'Sign in',
     signUp: 'Sign up',
     settings: 'Settings',
@@ -217,6 +224,12 @@ export const en: Messages = {
     deleteText: 'Deletes the account, its ratings and who you follow. Games already played stay in the history, as "Anonymous". This cannot be undone.',
     deleteConfirm: 'I understand that deletion is permanent',
     deleteButton: 'Delete my account',
+    challengesTitle: 'Challenges',
+    challengesText: 'Who can challenge you from your profile page. Challenge links still work for anyone.',
+    policyEveryone: 'Any player with an account',
+    policyFollowing: 'Only players I follow',
+    policyNobody: 'Nobody',
+    challengesSaved: 'Preference saved.',
   },
 
   common: {
@@ -292,6 +305,8 @@ export const en: Messages = {
     loginForRated: 'Sign in to play rated games',
     createLink: 'Create challenge link',
     create: 'Create game',
+    challengeTitle: (name: string) => `Challenge ${name}`,
+    sendChallenge: 'Send challenge',
   },
 
   challenge: {
@@ -311,6 +326,13 @@ export const en: Messages = {
       </>
     ),
     accept: 'Accept challenge',
+    decline: 'Decline',
+    to: 'To',
+    waitingFor: (name: string) => `Waiting for ${name} to answer. If you leave the site, the challenge is canceled.`,
+    declined: 'This challenge was declined.',
+    declinedBy: (name: string) => `${name} declined the challenge.`,
+    forSomeoneElse: 'This challenge is for another player.',
+    loginToAnswer: 'Sign in to answer this challenge.',
   },
 
   auth: {
@@ -391,6 +413,8 @@ export const en: Messages = {
     clearFilters: 'Clear filters',
     noMatch: 'No games match these filters.',
     vsLink: 'Games against this player',
+    challenge: 'Challenge',
+    challengeRefused: 'This player does not accept challenges from you.',
   },
 
   ranking: {

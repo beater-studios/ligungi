@@ -546,6 +546,7 @@ describe('sessions and data export', () => {
     const text = await res.text();
     const data = JSON.parse(text) as {
       account: { username: string };
+      settings: { challengePolicy: string };
       following: string[];
       followers: string[];
       sessions: Array<{ current: boolean }>;
@@ -553,6 +554,7 @@ describe('sessions and data export', () => {
       ratings: Record<string, unknown>;
     };
     expect(data.account.username).toBe('Knuckle');
+    expect(data.settings).toEqual({ challengePolicy: 'everyone' });
     expect(data.following).toEqual(['Shoot']);
     expect(data.followers).toEqual(['Shoot']);
     expect(data.sessions).toEqual([expect.objectContaining({ current: true })]);
@@ -561,6 +563,86 @@ describe('sessions and data export', () => {
     expect(text).not.toContain(a.cookie.split('=')[1]!);
     expect(text).not.toContain(b.cookie.split('=')[1]!);
     expect((await client().request<{ code: string }>('GET', '/api/account/export')).data.code).toBe('loginRequired');
+  });
+});
+
+describe('challenges from a profile', () => {
+  const directed = { ...casual, to: 'Leorio' };
+  const incoming = (c: Client, match: (list: readonly ChallengeView[]) => boolean) =>
+    c.waitFor((m) => m.t === 'incoming' && match(m.challenges)) as Promise<{ t: 'incoming'; challenges: readonly ChallengeView[] }>;
+
+  it('reaches the player in real time, and only they can accept', async () => {
+    server = await startServer();
+    const gon = client();
+    const leorio = client();
+    const other = client();
+    await signup(gon, 'Gon');
+    await signup(leorio, 'Leorio');
+    await signup(other, 'Zushi');
+    await Promise.all([gon.connect(), leorio.connect(), other.connect()]);
+    expect((await gon.request<UserProfile>('GET', '/api/users/leorio')).data.canChallenge).toBe(true);
+    expect((await gon.request<UserProfile>('GET', '/api/users/gon')).data.canChallenge).toBe(false);
+    const created = await gon.request<ChallengeView>('POST', '/api/challenges', directed);
+    expect(created.status).toBe(200);
+    expect(created.data.destination?.user?.name).toBe('Leorio');
+    const notice = await incoming(leorio, (list) => list.length === 1);
+    expect(notice.challenges[0]).toMatchObject({ id: created.data.id, challenger: { name: 'Gon' }, mine: false });
+    expect((await other.request<{ code: string }>('POST', `/api/challenges/${created.data.id}/accept`)).data.code).toBe('notYourChallenge');
+    const accepted = await leorio.request<{ gameId: string }>('POST', `/api/challenges/${created.data.id}/accept`);
+    expect(accepted.status).toBe(200);
+    await incoming(leorio, (list) => list.length === 0);
+    await gon.waitFor((m) => m.t === 'redirect' && m.path === `/${accepted.data.gameId}`);
+  });
+
+  it('can be declined, and is withdrawn when the sender leaves', async () => {
+    server = await startServer();
+    const gon = client();
+    const leorio = client();
+    await signup(gon, 'Gon');
+    await signup(leorio, 'Leorio');
+    await Promise.all([gon.connect(), leorio.connect()]);
+    gon.send({ t: 'sub', topic: 'lobby' });
+    const has = (id: string) => (list: readonly ChallengeView[]) => list.some((c) => c.id === id);
+    const first = (await gon.request<ChallengeView>('POST', '/api/challenges', directed)).data;
+    gon.send({ t: 'sub', topic: `challenge:${first.id}` });
+    await incoming(leorio, has(first.id));
+    expect((await leorio.request('POST', `/api/challenges/${first.id}/decline`)).status).toBe(200);
+    await gon.waitFor((m) => m.t === 'challenge' && m.challenge.id === first.id && m.challenge.status === 'declined');
+    await incoming(leorio, (list) => !has(first.id)(list));
+    const second = (await gon.request<ChallengeView>('POST', '/api/challenges', directed)).data;
+    await incoming(leorio, has(second.id));
+    gon.disconnect();
+    await incoming(leorio, (list) => !has(second.id)(list));
+    expect((await leorio.request<ChallengeView>('GET', `/api/challenges/${second.id}`)).data.status).toBe('canceled');
+  });
+
+  it('respects who may challenge and limits pending challenges', async () => {
+    server = await startServer();
+    const gon = client();
+    const leorio = client();
+    await signup(gon, 'Gon');
+    await signup(leorio, 'Leorio');
+    const anon = client();
+    expect((await anon.request<{ code: string }>('POST', '/api/challenges', directed)).data.code).toBe('loginRequired');
+    expect((await gon.request<{ code: string }>('POST', '/api/challenges', directed)).data.code).toBe('connectionRequired');
+    await gon.connect();
+    expect((await gon.request<{ code: string }>('POST', '/api/challenges', { ...casual, to: 'gon' })).data.code).toBe('cannotChallengeSelf');
+    expect((await gon.request<{ code: string }>('POST', '/api/challenges', { ...casual, to: 'nobody-here' })).data.code).toBe('userNotFound');
+
+    expect((await leorio.request<{ challengePolicy: string }>('GET', '/api/account/settings')).data.challengePolicy).toBe('everyone');
+    expect((await leorio.request<{ code: string }>('POST', '/api/account/settings', { challengePolicy: 'maybe' })).data.code).toBe('invalidChallengePolicy');
+    await leorio.request('POST', '/api/account/settings', { challengePolicy: 'nobody' });
+    expect((await gon.request<UserProfile>('GET', '/api/users/leorio')).data.canChallenge).toBe(false);
+    expect((await gon.request<{ code: string }>('POST', '/api/challenges', directed)).data.code).toBe('challengeRefused');
+    await leorio.request('POST', '/api/account/settings', { challengePolicy: 'following' });
+    expect((await gon.request<{ code: string }>('POST', '/api/challenges', directed)).data.code).toBe('challengeRefused');
+    await leorio.request('POST', '/api/users/gon/follow');
+    expect((await gon.request<UserProfile>('GET', '/api/users/leorio')).data.canChallenge).toBe(true);
+
+    for (let i = 0; i < 3; i++) expect((await gon.request('POST', '/api/challenges', directed)).status).toBe(200);
+    const fourth = await gon.request<{ code: string }>('POST', '/api/challenges', directed);
+    expect([fourth.status, fourth.data.code]).toEqual([429, 'tooManyChallenges']);
+    expect((await gon.request('POST', '/api/challenges', casual)).status).toBe(200);
   });
 });
 

@@ -18,7 +18,9 @@ import {
   type Me,
   type Topic,
   type UserProfile,
+  CHALLENGE_POLICIES,
   type SessionView,
+  type UserRef,
   type UserSearchResult,
 } from '@ligungi/protocol';
 import { WebSocketServer, type WebSocket } from 'ws';
@@ -133,11 +135,13 @@ export const createApp = (config: ServerConfig): App => {
     now: config.now,
     random: Math.random,
     onSeeksChange: publishLobby,
-    onChallengeChange: (challenge) =>
+    onChallengeChange: (challenge) => {
       hub.publish(`challenge:${challenge.id}`, (client) => ({
         t: 'challenge',
         challenge: lobby.challengeView(challenge, client.player),
-      })),
+      }));
+      if (challenge.destination) sendIncoming(challenge.destination.id);
+    },
     onGameStart: (room) => {
       for (const seat of Object.values(room.seats)) {
         hub.toSession(seat.sessionId, seat.userId, { t: 'redirect', path: `/${room.id}` });
@@ -195,6 +199,15 @@ export const createApp = (config: ServerConfig): App => {
     ctx.setSession(next);
     for (const client of hub.clients()) {
       if (client.player.sessionId === previous) client.socket.close(4001, 'session changed');
+    }
+  };
+
+  /** Sends a user, on every device, the open challenges they received. */
+  const sendIncoming = (userId: string): void => {
+    for (const client of hub.clients()) {
+      if (client.player.userId !== userId) continue;
+      const challenges = lobby.incomingFor(userId).map((challenge) => lobby.challengeView(challenge, client.player));
+      hub.send(client, { t: 'incoming', challenges });
     }
   };
 
@@ -317,9 +330,10 @@ export const createApp = (config: ServerConfig): App => {
       if (!user) throw new HttpError(401, 'loginRequired');
       const iso = (ms: number) => new Date(ms).toISOString();
       const data = {
-        about: 'Personal data held by ligungi for this account (LGPD access right). Preferences live only in your browser.',
+        about: 'Personal data held by ligungi for this account (LGPD access right). Display preferences live only in your browser.',
         exportedAt: iso(config.now()),
         account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
+        settings: { challengePolicy: users.challengePolicy(userId) },
         ratings: users.ratings(userId),
         following: users.following(userId).map((entry) => entry.name),
         followers: users.followers(userId).map((entry) => entry.name),
@@ -363,6 +377,7 @@ export const createApp = (config: ServerConfig): App => {
         counts: games.counts(user.id),
         ...users.followCounts(user.id),
         followed: ctx.session.userId ? users.isFollowing(ctx.session.userId, user.id) : false,
+        canChallenge: ctx.session.userId ? users.canChallenge(ctx.session.userId, user.id) : false,
         playing: games.ongoing().filter((room) => room.colorOf('', user.id)).map((room) => room.summary()),
         recent: games.recentFor(user.id, 20),
       };
@@ -461,11 +476,41 @@ export const createApp = (config: ServerConfig): App => {
       sendJson(ctx.res, 200, { ok: true });
     })
     .add('POST', '/api/challenges', async (ctx) => {
-      const settings = parseSettings(await ctx.body());
+      const body = await ctx.body();
+      const settings = parseSettings(body);
       if (isErrorCode(settings)) throw new HttpError(400, settings);
-      const challenge = lobby.createChallenge(ctx.player, settings);
-      if (isErrorCode(challenge)) throw new HttpError(400, challenge);
+      const to = (body as { to?: unknown }).to;
+      let destination: UserRef | null = null;
+      if (to !== undefined) {
+        // A challenge from a profile: the sender needs an account and a live connection (it is withdrawn when they leave).
+        const userId = requireUser(ctx);
+        const target = typeof to === 'string' ? users.findByName(to) : undefined;
+        if (!target) throw new HttpError(404, 'userNotFound');
+        if (target.id === userId) throw new HttpError(400, 'cannotChallengeSelf');
+        if (!users.canChallenge(userId, target.id)) throw new HttpError(403, 'challengeRefused');
+        if (!hub.hasSession(ctx.session.id)) throw new HttpError(409, 'connectionRequired');
+        destination = { id: target.id, name: target.name };
+      }
+      const challenge = lobby.createChallenge(ctx.player, settings, destination);
+      if (isErrorCode(challenge)) throw new HttpError(challenge === 'tooManyChallenges' ? 429 : 400, challenge);
+      if (destination) sendIncoming(destination.id);
       sendJson(ctx.res, 200, lobby.challengeView(challenge, ctx.player));
+    })
+    .add('POST', '/api/challenges/:id/decline', (ctx) => {
+      if (!lobby.declineChallenge(ctx.params.id!, ctx.player)) throw new HttpError(404, 'challengeNotFound');
+      sendJson(ctx.res, 200, { ok: true });
+    })
+    .add('GET', '/api/account/settings', (ctx) => {
+      const userId = requireUser(ctx);
+      sendJson(ctx.res, 200, { challengePolicy: users.challengePolicy(userId) });
+    })
+    .add('POST', '/api/account/settings', async (ctx) => {
+      const userId = requireUser(ctx);
+      const { challengePolicy } = (await ctx.body()) as { challengePolicy?: unknown };
+      const policy = CHALLENGE_POLICIES.find((value) => value === challengePolicy);
+      if (!policy) throw new HttpError(400, 'invalidChallengePolicy');
+      users.setChallengePolicy(userId, policy);
+      sendJson(ctx.res, 200, { challengePolicy: policy });
     })
     .add('GET', '/api/challenges/:id', (ctx) => {
       const challenge = lobby.challenge(ctx.params.id!);
@@ -474,7 +519,7 @@ export const createApp = (config: ServerConfig): App => {
     })
     .add('POST', '/api/challenges/:id/accept', (ctx) => {
       const result = lobby.acceptChallenge(ctx.params.id!, ctx.player);
-      if (isErrorCode(result)) throw new HttpError(409, result);
+      if (isErrorCode(result)) throw new HttpError(result === 'notYourChallenge' ? 403 : 409, result);
       sendJson(ctx.res, 200, result);
     })
     .add('DELETE', '/api/challenges/:id', (ctx) => {
@@ -593,9 +638,13 @@ export const createApp = (config: ServerConfig): App => {
           if (room) updatePresence(room);
         }
       }
-      if (!hub.hasSession(player.sessionId)) lobby.removeSeeksOf(player.sessionId);
+      if (!hub.hasSession(player.sessionId)) {
+        lobby.removeSeeksOf(player.sessionId);
+        lobby.cancelDirectedOf(player.sessionId);
+      }
       publishLobby();
     });
+    if (player.userId) sendIncoming(player.userId);
     publishLobby();
   };
 

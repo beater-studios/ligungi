@@ -121,10 +121,16 @@ export interface ChallengeView {
   readonly id: string;
   readonly settings: GameSettings;
   readonly challenger: Opponent;
+  /** The player a challenge from a profile is meant for; `null` for an open link anyone can accept. */
+  readonly destination: Opponent | null;
   readonly mine: boolean;
-  readonly status: 'open' | 'accepted' | 'canceled';
+  readonly status: 'open' | 'accepted' | 'canceled' | 'declined';
   readonly gameId: string | null;
 }
+
+/** Who may challenge a player from their profile. */
+export const CHALLENGE_POLICIES = ['everyone', 'following', 'nobody'] as const;
+export type ChallengePolicy = (typeof CHALLENGE_POLICIES)[number];
 
 export interface LobbyView {
   readonly seeks: readonly SeekView[];
@@ -159,6 +165,8 @@ export interface UserProfile {
   readonly following: number;
   /** Whether the viewer follows this user. */
   readonly followed: boolean;
+  /** Whether the viewer may challenge this user from the profile (signed in, not themselves, allowed by them). */
+  readonly canChallenge: boolean;
   readonly playing: readonly GameSummary[];
   readonly recent: readonly GameSummary[];
 }
@@ -274,6 +282,8 @@ export type ServerMessage =
   | { readonly t: 'game'; readonly game: GameView }
   | { readonly t: 'lobby'; readonly lobby: LobbyView }
   | { readonly t: 'challenge'; readonly challenge: ChallengeView }
+  /** The open challenges sent to the user, on connecting and after every change. */
+  | { readonly t: 'incoming'; readonly challenges: readonly ChallengeView[] }
   | { readonly t: 'redirect'; readonly path: string }
   | { readonly t: 'error'; readonly code: ErrorCode; readonly message: string }
   | { readonly t: 'pong' };

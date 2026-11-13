@@ -25,9 +25,11 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 | `GET /api/account/sessions` | The account's signed-in sessions (`SessionView`), most recently active first: a public handle (never the session secret), whether it is the current one, sign-in and last-use times (to the day) and the browser's user agent. |
 | `DELETE /api/account/sessions` | Signs out every other session of the account and closes their sockets. Returns `{ revoked }`. |
 | `DELETE /api/account/sessions/:id` | Signs out one other session by its handle (`sessionNotFound` for an unknown handle or the current session). |
-| `GET /api/account/export` | Downloads the account's data as JSON (`Content-Disposition: attachment`): account, ratings, following, followers, sessions (without secrets) and every game with its moves. Up to 5 per minute per account. |
+| `GET /api/account/settings` | Account settings kept on the server: `{ challengePolicy }`. |
+| `POST /api/account/settings` `{ challengePolicy }` | Who may challenge the player from their profile: `everyone` (any signed-in player), `following` (only players they follow) or `nobody` (`invalidChallengePolicy` otherwise). Challenge links are not affected. |
+| `GET /api/account/export` | Downloads the account's data as JSON (`Content-Disposition: attachment`): account, settings, ratings, following, followers, sessions (without secrets) and every game with its moves. Up to 5 per minute per account. |
 | `GET /api/users?q=<prefix>` | Up to 10 players whose username starts with `prefix` (2 to 20 characters, case-insensitive), alphabetical, each as `{ user, online }`. Any other query returns `[]`. |
-| `GET /api/users/:name` | Profile: online status, rating and leaderboard rank per mode, counts, followers, whether the requester follows the player, ongoing and recent games. |
+| `GET /api/users/:name` | Profile: online status, rating and leaderboard rank per mode, counts, followers, whether the requester follows the player, whether the requester may challenge them (`canChallenge`), ongoing and recent games. |
 | `GET /api/users/:name/games` | Finished games, 20 per page, newest first. Optional query filters: `mode`, `result` (`win`, `loss`, `draw`, from the player's point of view), `rated` (`1` or `0`), `color` (`white` or `black`), `vs` (opponent username) and `before` (ms, for paging). An unknown value returns `invalidFilter`. |
 | `POST /api/users/:name/follow` | Follows the player (requires an account, up to 400). Returns `{ followed, followers, following }` of the followed player. |
 | `DELETE /api/users/:name/follow` | Unfollows. |
@@ -41,9 +43,10 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 | `POST /api/seeks` (`GameSettings`) | Creates a seek, or returns `{ gameId }` if it pairs immediately. A seek that has to wait needs a live WebSocket from the same session (otherwise `409 connectionRequired`), and it disappears when that connection closes or when the player starts any game. |
 | `POST /api/seeks/:id/accept` | Accepts a seek. |
 | `DELETE /api/seeks/:id` | Cancels your own seek. |
-| `POST /api/challenges` (`GameSettings`) | Creates a challenge link. |
+| `POST /api/challenges` (`GameSettings`, optional `to`) | Creates a challenge link. With `to` (a username) it is a challenge from a profile: only that player can accept it, it needs a signed-in sender with a live WebSocket (`connectionRequired`) and is withdrawn when the sender's last socket closes. Refused with `userNotFound`, `cannotChallengeSelf`, `challengeRefused` (403, the player's policy) or `tooManyChallenges` (429: at most 3 pending sent per player, 10 pending received). |
 | `GET /api/challenges/:id` | Challenge state. |
-| `POST /api/challenges/:id/accept` | Accepts the challenge and returns `{ gameId }`. |
+| `POST /api/challenges/:id/accept` | Accepts the challenge and returns `{ gameId }`. A challenge from a profile answers `403 notYourChallenge` to anyone but its destination. |
+| `POST /api/challenges/:id/decline` | The destination declines a challenge from a profile; its status becomes `declined`. |
 | `DELETE /api/challenges/:id` | Cancels your own challenge. |
 
 `GameSettings`: `{ mode, rated, timeControl: { initial, increment } | null, color, firstPlayer, freeDraft }`, with `color` and `firstPlayer` in `white`, `black` or `random`. Times in seconds. Games without a clock cannot be rated, and rated games require an account. `freeDraft` (default `false`) makes the draft end only when both players declare done; it applies only to draft modes and is not accepted in rated games. Seeks only pair with seeks that use the same draft rule.
@@ -71,5 +74,6 @@ Server to client:
 | `{ t: 'game', game }` | Any change in a subscribed game (full state). |
 | `{ t: 'lobby', lobby }` | A change in the lobby. |
 | `{ t: 'challenge', challenge }` | A change in a subscribed challenge. |
+| `{ t: 'incoming', challenges }` | To a signed-in player, on every socket: the open challenges sent to them from profiles. Sent on connecting and after each change. |
 | `{ t: 'redirect', path }` | A game of yours started (rematches included). |
 | `{ t: 'error', code, message }` | Action refused. After a refused move, the server resends the game state. |

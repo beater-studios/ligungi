@@ -44,6 +44,9 @@ export const ChallengePage = ({ id }: { id: string }) => {
     }
   };
   const cancel = () => api.delete(`/api/challenges/${id}`).catch(() => {});
+  const decline = () => api.post(`/api/challenges/${id}/decline`).catch((err: Error) => setError(err.message));
+  const { destination } = challenge;
+  const forMe = Boolean(destination?.user && destination.user.id === user?.id);
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(link);
@@ -61,8 +64,37 @@ export const ChallengePage = ({ id }: { id: string }) => {
         {t.challenge.challenger}: <PlayerTag player={{ ...challenge.challenger, ratingDiff: null }} /> · {t.challenge.challengerColor}:{' '}
         {t.colorChoices[challenge.settings.color]} · {t.challenge.starts}: {t.colorChoices[challenge.settings.firstPlayer]}
       </p>
+      {destination && (
+        <p>
+          {t.challenge.to}: <PlayerTag player={{ ...destination, ratingDiff: null }} />
+        </p>
+      )}
       {challenge.status === 'canceled' && <p class="ligungi-notice">{t.challenge.canceled}</p>}
-      {challenge.status === 'open' && challenge.mine && (
+      {challenge.status === 'declined' && (
+        <p class="ligungi-notice">{challenge.mine && destination ? t.challenge.declinedBy(destination.name) : t.challenge.declined}</p>
+      )}
+      {challenge.status === 'open' && challenge.mine && destination && (
+        <>
+          <p class="ligungi-notice">{t.challenge.waitingFor(destination.name)}</p>
+          <button type="button" class="button button-empty button-red" onClick={cancel}>
+            {t.challenge.cancel}
+          </button>
+        </>
+      )}
+      {challenge.status === 'open' && !challenge.mine && destination && !forMe && (
+        <p class="ligungi-notice">{user ? t.challenge.forSomeoneElse : t.challenge.loginToAnswer}</p>
+      )}
+      {challenge.status === 'open' && forMe && (
+        <div class="ligungi-actions">
+          <button type="button" class="button ligungi-submit" onClick={accept}>
+            {t.challenge.accept}
+          </button>
+          <button type="button" class="button button-empty button-red" onClick={decline}>
+            {t.challenge.decline}
+          </button>
+        </div>
+      )}
+      {challenge.status === 'open' && challenge.mine && !destination && (
         <>
           <p>{t.challenge.share}</p>
           <div class="copy-me">
@@ -77,7 +109,7 @@ export const ChallengePage = ({ id }: { id: string }) => {
           </button>
         </>
       )}
-      {challenge.status === 'open' && !challenge.mine && (
+      {challenge.status === 'open' && !challenge.mine && !destination && (
         <>
           {challenge.settings.rated && !user ? (
             <p class="ligungi-notice">{t.challenge.ratedLogin}</p>

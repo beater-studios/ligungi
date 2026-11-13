@@ -10,6 +10,7 @@ import {
 } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { CreateGame } from '../components/CreateGame.tsx';
 import { Select } from '../components/ui.tsx';
 import { formatDate, outcomeText, playerName, resultSymbol, timeControlText, useT, type Messages } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
@@ -122,6 +123,7 @@ export const ProfilePage = ({ name }: { name: string }) => {
   const [error, setError] = useState<string | null>(null);
   const [more, setMore] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [challenging, setChallenging] = useState(false);
 
   useEffect(() => {
     setProfile(null);
@@ -231,15 +233,11 @@ export const ProfilePage = ({ name }: { name: string }) => {
             <i class="line" title={profile.online ? t.common.online : t.common.offline} />
             {profile.user.name}
           </h1>
-          <div class="ligungi-relation">
-            <span class="ligungi-notice">
-              <strong>{profile.followers}</strong> {t.profile.followers(profile.followers)} · <strong>{profile.following}</strong>{' '}
-              {t.profile.following}
-            </span>
+          <div class="ligungi-profile-actions">
             {!isMe && me && (
               <button
                 type="button"
-                class={`button ${profile.followed ? 'button-empty' : ''}`}
+                class={`button text ${profile.followed ? 'button-empty' : ''}`}
                 data-icon={profile.followed ? icons.X : icons.User}
                 disabled={busy}
                 onClick={toggleFollow}
@@ -247,15 +245,35 @@ export const ProfilePage = ({ name }: { name: string }) => {
                 {profile.followed ? t.profile.unfollow : t.profile.follow}
               </button>
             )}
+            {!isMe && me && (
+              <button
+                type="button"
+                class="button text"
+                data-icon={icons.Swords}
+                disabled={!profile.canChallenge}
+                title={profile.canChallenge ? '' : t.profile.challengeRefused}
+                onClick={() => setChallenging(true)}
+              >
+                {t.profile.challenge}
+              </button>
+            )}
             {!isMe && !me && (
-              <a class="button button-empty" href="/login" title={t.profile.loginToFollow} data-icon={icons.User}>
+              <a class="button button-empty text" href="/login" title={t.profile.loginToFollow} data-icon={icons.User}>
                 {t.profile.follow}
               </a>
             )}
           </div>
         </div>
-        <div class="box__pad ligungi-profile-meta">
-          <span class="ligungi-notice">{t.profile.memberSince(formatDate(t, profile.createdAt))}</span>
+        <div class="ligungi-profile-facts">
+          <ul>
+            <li>{t.profile.memberSince(formatDate(t, profile.createdAt))}</li>
+            <li>
+              <strong>{profile.followers}</strong> {t.profile.followers(profile.followers)}
+            </li>
+            <li>
+              <strong>{profile.following}</strong> {t.profile.following}
+            </li>
+          </ul>
           {!isMe && me && (
             <a href={hrefFor(me.name, { vs: profile.user.name })} data-icon={icons.Swords} class="text">
               {t.profile.vsLink}
@@ -263,7 +281,7 @@ export const ProfilePage = ({ name }: { name: string }) => {
           )}
         </div>
         {profile.playing.length > 0 && (
-          <p class="box__pad">
+          <p class="ligungi-profile-playing">
             {t.profile.playingNow}:{' '}
             {profile.playing.map((g) => (
               <a key={g.id} href={`/${g.id}`}>
@@ -310,6 +328,7 @@ export const ProfilePage = ({ name }: { name: string }) => {
           </div>
         )}
       </div>
+      {challenging && <CreateGame target="friend" to={profile.user.name} onClose={() => setChallenging(false)} />}
     </main>
   );
 };

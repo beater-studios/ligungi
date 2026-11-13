@@ -1,7 +1,7 @@
-import type { SessionView } from '@ligungi/protocol';
+import type { ChallengePolicy, SessionView } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
-import { Checkbox, Field, SubmitButton } from '../components/ui.tsx';
+import { Checkbox, Field, RadioGroup, SubmitButton } from '../components/ui.tsx';
 import { formatDate, useT } from '../i18n/index.ts';
 import { describeUserAgent } from '../userAgent.ts';
 import { navigate } from '../router.ts';
@@ -139,6 +139,50 @@ const Sessions = () => {
   );
 };
 
+const ChallengeSettings = () => {
+  const t = useT();
+  const [policy, setPolicy] = useState<ChallengePolicy | null>(null);
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  useEffect(() => {
+    api
+      .get<{ challengePolicy: ChallengePolicy }>('/api/account/settings')
+      .then((settings) => setPolicy(settings.challengePolicy))
+      .catch((err: Error) => setMessage({ ok: false, text: err.message }));
+  }, []);
+
+  const change = async (next: ChallengePolicy) => {
+    const previous = policy;
+    setPolicy(next);
+    setMessage(null);
+    try {
+      await api.post('/api/account/settings', { challengePolicy: next });
+      setMessage({ ok: true, text: t.account.challengesSaved });
+    } catch (err) {
+      setPolicy(previous);
+      setMessage({ ok: false, text: (err as Error).message });
+    }
+  };
+
+  return (
+    <form class="form3" onSubmit={(e) => e.preventDefault()}>
+      <p>{t.account.challengesText}</p>
+      {policy && (
+        <RadioGroup
+          name="acc-challenges"
+          value={policy}
+          options={[
+            { value: 'everyone' as const, label: t.account.policyEveryone },
+            { value: 'following' as const, label: t.account.policyFollowing },
+            { value: 'nobody' as const, label: t.account.policyNobody },
+          ]}
+          onChange={(next) => void change(next)}
+        />
+      )}
+      {message && <p class={message.ok ? 'ligungi-success' : 'error'}>{message.text}</p>}
+    </form>
+  );
+};
+
 const DeleteForm = () => {
   const t = useT();
   const [password, setPassword] = useState('');
@@ -203,6 +247,10 @@ export const AccountPage = () => {
             <section>
               <h2>{t.account.passwordTitle}</h2>
               <PasswordForm />
+            </section>
+            <section>
+              <h2>{t.account.challengesTitle}</h2>
+              <ChallengeSettings />
             </section>
             <section>
               <h2>{t.account.sessionsTitle}</h2>

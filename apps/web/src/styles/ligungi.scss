@@ -436,6 +436,39 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   gap: 0.5em;
 }
 
+// lila hides the mode names on narrow screens because each mode has an icon there; ours have none, so keep the name.
+.sub-ratings {
+  @include mq-topnav-hidden {
+    h3 {
+      display: block;
+    }
+  }
+
+  @include mq-subnav-top {
+    a {
+      padding: 0.6em 0.3em;
+    }
+
+    a > span {
+      min-width: 0;
+      align-items: center;
+    }
+
+    h3 {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.8em;
+      letter-spacing: 0;
+    }
+  }
+}
+
+// Without this, a short menu page stretches its rows to the page height (a tall empty band above the content on mobile).
+main.page-menu {
+  align-content: start;
+}
+
 /* Side panels: draft progress and fixed tower composition */
 .ligungi-panels {
   margin-top: $block-gap;
@@ -712,17 +745,48 @@ $wood: #e3c389;
   }
 }
 
-.ligungi-relation {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.ligungi-profile-meta {
+.ligungi-profile-actions {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.6rem;
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+// Member since and follow counts on one quiet line under the name, the head-to-head link on the right.
+.ligungi-profile-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
+  gap: 0.6rem 1.5rem;
+  padding: 1rem $box-padding 1.2rem;
+  color: $c-font-dim;
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  strong {
+    color: $c-font;
+  }
+
+  a.text {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.ligungi-profile-playing {
+  padding: 0 $box-padding 1.2rem;
 }
 
 .ligungi-history-filters {
@@ -1319,6 +1383,95 @@ body:has(main.auth) #clinput {
   white-space: nowrap;
 }
 
+// Challenges received from a profile: lila's challenge toggle (icon with a count badge) and its dropdown.
+.ligungi-challenges {
+  position: relative;
+
+  > button.toggle {
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .data-count::after {
+    top: -8px;
+    inset-inline-end: -12px;
+  }
+
+  &__list {
+    width: 20rem;
+    max-width: calc(100vw - 2rem);
+    max-height: 70vh;
+    overflow-y: auto;
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .error {
+      padding: 0 1em 0.8em;
+      margin: 0;
+    }
+  }
+
+  &__empty {
+    padding: 1.5em 1em;
+    margin: 0;
+    color: $c-font-dim;
+    text-align: center;
+  }
+}
+
+.ligungi-challenge {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  padding: 0.8em 1em;
+
+  & + & {
+    border-top: $border;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    flex: 1;
+    min-width: 0;
+
+    a {
+      color: $c-header-dropdown;
+    }
+
+    > a:hover {
+      color: $c-link;
+    }
+
+    small {
+      color: $c-font-dim;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.4em;
+
+    .button {
+      padding: 0.5em 0.7em;
+
+      &:not(.button-empty) {
+        color: $c-over;
+      }
+
+      &::before {
+        margin: 0;
+      }
+    }
+  }
+}
+
 /* ===== Account page ===== */
 .account section + section {
   margin-top: 3rem;
@@ -1722,4 +1875,15 @@ body:has(main.auth) #clinput {
   .ligungi-consent__actions {
     margin-top: 0.8rem;
   }
+}
+
+.account .radio + .ligungi-success,
+.account .radio + .error {
+  margin-top: 0.8em;
+}
+
+// lila loads each page's stylesheet on its own; with all of them in one bundle, the game layout's
+// `---main-max-width: auto` would reach every page and size menu pages to their content.
+#main-wrap:has(> main.page-menu) {
+  ---main-max-width: #{$main-max-width};
 }

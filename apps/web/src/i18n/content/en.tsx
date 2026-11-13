@@ -245,7 +245,8 @@ export const en: Content = {
         </li>
         <li>
           <b>Games and activity:</b> moves, results, ratings, players you follow and your account creation date. This data
-          appears on your public profile.
+          appears on your public profile. Who may challenge you from your profile is saved with your account.
+          Challenges sent from a profile are kept only in the server's memory while they wait for an answer.
         </li>
         <li>
           <b>Session cookie (sid):</b> an essential cookie that identifies your browser to keep you signed in and keep your

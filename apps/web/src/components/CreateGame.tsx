@@ -14,7 +14,8 @@ const INCREMENTS = [0, 1, 2, 3, 5, 10, 15, 20, 30, 45, 60];
 
 export type CreateTarget = 'lobby' | 'friend';
 
-export const CreateGame = ({ target, onClose }: { target: CreateTarget; onClose: () => void }) => {
+/** `to` turns the friend form into a challenge sent to that player from their profile. */
+export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?: string; onClose: () => void }) => {
   const t = useT();
   const { user } = useStore(session);
   const [mode, setMode] = useState<Mode>('advanced');
@@ -45,7 +46,7 @@ export const CreateGame = ({ target, onClose }: { target: CreateTarget; onClose:
     };
     try {
       if (target === 'friend') {
-        const challenge = await api.post<ChallengeView>('/api/challenges', settings);
+        const challenge = await api.post<ChallengeView>('/api/challenges', to ? { ...settings, to } : settings);
         onClose();
         navigate(`/challenge/${challenge.id}`);
       } else {
@@ -63,7 +64,7 @@ export const CreateGame = ({ target, onClose }: { target: CreateTarget; onClose:
   const colorOptions = colorChoiceOptions(t);
 
   return (
-    <Modal title={target === 'friend' ? t.create.friendTitle : t.create.lobbyTitle} onClose={onClose}>
+    <Modal title={to ? t.create.challengeTitle(to) : target === 'friend' ? t.create.friendTitle : t.create.lobbyTitle} onClose={onClose}>
       <form class="form3 create-game" onSubmit={submit}>
         <Field label={t.common.mode} htmlFor="cg-mode" help={t.modeDescriptions[mode]}>
           <Select id="cg-mode" value={mode} options={MODES.map((m) => ({ value: m, label: t.modes[m] }))} onChange={setMode} />
@@ -111,7 +112,7 @@ export const CreateGame = ({ target, onClose }: { target: CreateTarget; onClose:
           <RadioGroup name="cg-first" value={firstPlayer} options={colorOptions} onChange={setFirstPlayer} />
         </Field>
         {error && <p class="error">{error}</p>}
-        <SubmitButton disabled={busy}>{target === 'friend' ? t.create.createLink : t.create.create}</SubmitButton>
+        <SubmitButton disabled={busy}>{to ? t.create.sendChallenge : target === 'friend' ? t.create.createLink : t.create.create}</SubmitButton>
       </form>
     </Modal>
   );

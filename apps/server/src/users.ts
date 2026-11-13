@@ -1,5 +1,5 @@
 import { MODES, type Mode } from '@ligungi/engine';
-import type { RatingView, UserRef } from '@ligungi/protocol';
+import { CHALLENGE_POLICIES, type ChallengePolicy, type RatingView, type UserRef } from '@ligungi/protocol';
 import type { Db } from './db.ts';
 import { DEFAULT_RATING, PROVISIONAL_DEVIATION, type Rating } from './glicko.ts';
 import { randomId } from './ids.ts';
@@ -104,6 +104,22 @@ export class Users {
       this.#db.exec('rollback');
       throw error;
     }
+  }
+
+  challengePolicy(userId: string): ChallengePolicy {
+    const row = this.#db.prepare('select challenge_policy from users where id = ?').get(userId) as { challenge_policy: string } | undefined;
+    return CHALLENGE_POLICIES.find((policy) => policy === row?.challenge_policy) ?? 'everyone';
+  }
+
+  setChallengePolicy(userId: string, policy: ChallengePolicy): void {
+    this.#db.prepare('update users set challenge_policy = ? where id = ?').run(policy, userId);
+  }
+
+  /** Whether `fromId` may challenge `toId` from the profile, by `toId`'s policy. */
+  canChallenge(fromId: string, toId: string): boolean {
+    if (fromId === toId) return false;
+    const policy = this.challengePolicy(toId);
+    return policy === 'everyone' || (policy === 'following' && this.isFollowing(toId, fromId));
   }
 
   /** Returns false when the follow already existed. */

@@ -6,6 +6,7 @@ import {
   type GameSettings,
   type Opponent,
   type SeekView,
+  type UserRef,
 } from '@ligungi/protocol';
 import type { Games, Player } from './games.ts';
 import { randomId } from './ids.ts';
@@ -23,8 +24,10 @@ export interface Challenge {
   readonly id: string;
   readonly settings: GameSettings;
   owner: Player;
+  /** Set for a challenge sent from a profile: only this user may accept or decline it. */
+  readonly destination: UserRef | null;
   readonly createdAt: number;
-  status: 'open' | 'accepted' | 'canceled';
+  status: 'open' | 'accepted' | 'canceled' | 'declined';
   gameId: string | null;
 }
 
@@ -38,6 +41,9 @@ export interface LobbyOptions {
 }
 
 const MAX_SEEKS_PER_PLAYER = 3;
+/** Challenges sent from profiles that may wait at once, per sender and per receiver: keeps spam bounded. */
+const MAX_DIRECTED_SENT = 3;
+const MAX_DIRECTED_RECEIVED = 10;
 const CHALLENGE_TTL = 2 * 60 * 60 * 1000;
 
 const samePerson = (a: Player, b: Player) => a.sessionId === b.sessionId || (a.userId !== null && a.userId === b.userId);
@@ -114,7 +120,7 @@ export class Lobby {
   removeUser(userId: string): void {
     for (const [id, seek] of this.#seeks) if (seek.owner.userId === userId) this.#seeks.delete(id);
     for (const challenge of this.#challenges.values()) {
-      if (challenge.owner.userId === userId && challenge.status === 'open') {
+      if ((challenge.owner.userId === userId || challenge.destination?.id === userId) && challenge.status === 'open') {
         challenge.status = 'canceled';
         this.#options.onChallengeChange(challenge);
       }
@@ -146,13 +152,19 @@ export class Lobby {
       }));
   }
 
-  createChallenge(owner: Player, settings: GameSettings): Challenge | ErrorCode {
+  createChallenge(owner: Player, settings: GameSettings, destination: UserRef | null = null): Challenge | ErrorCode {
     if (settings.rated && !owner.userId) return 'loginForRated';
     this.#sweep();
+    if (destination) {
+      const open = [...this.#challenges.values()].filter((c) => c.status === 'open' && c.destination);
+      if (open.filter((c) => samePerson(c.owner, owner)).length >= MAX_DIRECTED_SENT) return 'tooManyChallenges';
+      if (open.filter((c) => c.destination!.id === destination.id).length >= MAX_DIRECTED_RECEIVED) return 'tooManyChallenges';
+    }
     const challenge: Challenge = {
       id: randomId(8),
       settings,
       owner,
+      destination,
       createdAt: this.#options.now(),
       status: 'open',
       gameId: null,
@@ -169,6 +181,7 @@ export class Lobby {
     const challenge = this.#challenges.get(id);
     if (!challenge || challenge.status !== 'open') return 'challengeUnavailable';
     if (samePerson(challenge.owner, player)) return 'ownChallenge';
+    if (challenge.destination && challenge.destination.id !== player.userId) return 'notYourChallenge';
     if (challenge.settings.rated && !player.userId) return 'loginForRated';
     const room = this.#start(challenge.settings, challenge.owner, player);
     challenge.status = 'accepted';
@@ -185,11 +198,45 @@ export class Lobby {
     return true;
   }
 
+  /** The receiver turns down a challenge sent from a profile. */
+  declineChallenge(id: string, player: Player): boolean {
+    const challenge = this.#challenges.get(id);
+    if (!challenge || challenge.status !== 'open' || !challenge.destination || challenge.destination.id !== player.userId) return false;
+    challenge.status = 'declined';
+    this.#options.onChallengeChange(challenge);
+    return true;
+  }
+
+  /** Open challenges sent to a user, oldest first. */
+  incomingFor(userId: string): Challenge[] {
+    const limit = this.#options.now() - CHALLENGE_TTL;
+    return [...this.#challenges.values()].filter(
+      (challenge) => challenge.status === 'open' && challenge.destination?.id === userId && challenge.createdAt >= limit,
+    );
+  }
+
+  /**
+   * A challenge sent from a profile needs its sender around to start the game, so it is withdrawn when the sender
+   * leaves (like seeks). Links stay: they are meant to be shared and opened later.
+   */
+  cancelDirectedOf(sessionId: string): void {
+    for (const challenge of this.#challenges.values()) {
+      if (challenge.status === 'open' && challenge.destination && challenge.owner.sessionId === sessionId) {
+        challenge.status = 'canceled';
+        this.#options.onChallengeChange(challenge);
+      }
+    }
+  }
+
   challengeView(challenge: Challenge, viewer: Player): ChallengeView {
+    const destination = challenge.destination;
     return {
       id: challenge.id,
       settings: challenge.settings,
       challenger: this.#opponent(challenge.owner, challenge.settings),
+      destination: destination
+        ? { name: destination.name, user: destination, rating: Math.round(this.#users.rating(destination.id, challenge.settings.mode).rating) }
+        : null,
       mine: samePerson(challenge.owner, viewer),
       status: challenge.status,
       gameId: challenge.gameId,

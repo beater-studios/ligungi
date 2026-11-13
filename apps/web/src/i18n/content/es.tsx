@@ -248,7 +248,9 @@ export const es: Content = {
         </li>
         <li>
           <b>Partidas y actividad:</b> jugadas, resultados, puntuaciones, jugadores que sigues y la fecha de creación de la
-          cuenta. Estos datos aparecen en tu perfil público.
+          cuenta. Estos datos aparecen en tu perfil público. La opción de quién puede desafiarte desde el perfil se guarda en la
+          cuenta. Los desafíos enviados desde el perfil solo se guardan en la memoria del servidor mientras
+          esperan respuesta.
         </li>
         <li>
           <b>Cookie de sesión (sid):</b> una cookie esencial que identifica tu navegador para mantener la sesión y tus

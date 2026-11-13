@@ -20,7 +20,9 @@ import { ProfilePage } from './pages/ProfilePage.tsx';
 import { RankingPage } from './pages/RankingPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
 import { AccountPage } from './pages/AccountPage.tsx';
+import { ChallengeBell } from './components/ChallengeBell.tsx';
 import { HeaderSearch } from './components/HeaderSearch.tsx';
+import { useDropdown } from './components/useDropdown.ts';
 import { TvPage } from './pages/TvPage.tsx';
 import { MODES, type Mode } from '@ligungi/engine';
 import { LANGS, THEMES, prefs, resolveLang, updatePrefs } from './prefs.ts';
@@ -62,23 +64,6 @@ const NotFound = () => {
       </p>
     </main>
   );
-};
-
-/** Closes a header dropdown when clicking anywhere else, like lila's top bar. */
-const useDropdown = () => {
-  const [shown, setShown] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!shown) return;
-    // composedPath is fixed at dispatch time, so clicks on elements that the click itself removed (switching a
-    // dropdown panel) still count as inside.
-    const close = (event: MouseEvent) => {
-      if (ref.current && !event.composedPath().includes(ref.current)) setShown(false);
-    };
-    document.addEventListener('click', close);
-    return () => document.removeEventListener('click', close);
-  }, [shown]);
-  return { shown, setShown, ref };
 };
 
 type DasherView = 'main' | 'language' | 'theme';
@@ -276,6 +261,7 @@ const Header = () => {
           <span class="link ligungi-reconnecting" title={t.nav.reconnecting} data-icon={icons.ChasingArrows} />
         )}
         <HeaderSearch />
+        {user && <ChallengeBell />}
         {!user && (
           <div class="signin-or-signup">
             <a href="/login" class="button button-empty signin">

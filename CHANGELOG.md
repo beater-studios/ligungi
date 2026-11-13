@@ -9,12 +9,20 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 - Movement indicators: marks around each piece show how it moves (a dot for each square of reach, an arrow for an unlimited line, a ring where jumping pieces land). On by default for new visitors; Preferences has the switch.
 - Illustrated piece style: an icon for each piece (crown, rank stars, katana, spear, horse, shuriken, castle, jingasa, cannon, bow, musket, compass), the default for new visitors; players who saved preferences before keep the kanji. The kanji style stays in Preferences, under Piece style, with a live preview. In the illustrated style the piece panel shows the icon, the name and the kanji together, and the opponent's icons stay upright.
 - Move notation choice in Preferences: the rulebook's (`3-2-2 槍新`), the same with the piece name (`3-2-2 +Lancer`, with `+` for a piece from the hand, `×` capture and `⇄` betrayal; the default for new visitors) or the machine notation used in exports.
+- Challenge a player from their profile: the Challenge button opens the usual game settings and the player gets the challenge right away in a new challenges menu in the header (with a sound), where they can accept or decline. The challenge is withdrawn if you leave the site. The Account page sets who may challenge you: anyone, only players you follow, or nobody.
 - A "New to Gungi?" box beside the board in your first games, to switch the illustrated pieces, the movement indicators and the reach on hover, with a link to the rules.
 
 ### Changed
 
 - Preferences page redesigned: settings grouped (General, Pieces on the board, Game record, Board), each with a short explanation and switches for on/off options. The piece settings show a corner of the board and the record settings a sample move list, both updating as you change them. Board size links to the board to see it.
 - Showing a piece's reach on hover is now on by default for new visitors.
+- The privacy policy now mentions the challenge setting kept with the account, and the data download includes it.
+- Profile header reorganized: Follow and Challenge beside the name, and member since and follow counts on one line below with the head-to-head link.
+
+### Fixed
+
+- Pages with a side menu (profile, account, ranking, friends, TV, info pages) kept changing width with their content, for example when switching the profile tabs.
+- On phones, the ratings at the top of a profile showed only the numbers, without the mode names, above a tall empty band.
 
 ## [0.1.4] - 2026-11-13
 

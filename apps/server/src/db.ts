@@ -80,6 +80,9 @@ const MIGRATIONS = [
   alter table sessions add column user_agent text;
   create index sessions_user on sessions(user_id);
   `,
+  `
+  alter table users add column challenge_policy text not null default 'everyone';
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

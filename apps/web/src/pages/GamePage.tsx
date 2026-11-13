@@ -1,5 +1,5 @@
 import { legalMoves, moveToString, opposite, type Color, type Move } from '@ligungi/engine';
-import type { GameView } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, type GameView } from '@ligungi/protocol';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
@@ -19,13 +19,16 @@ export const GamePage = ({ id }: { id: string }) => {
   const [flipped, setFlipped] = useState(false);
   const [premove, setPremove] = useState<Move | null>(null);
   const [confirming, setConfirming] = useState<'resign' | 'draw' | null>(null);
-  const previous = useRef<{ plies: number; status: string } | null>(null);
+  const previous = useRef<Pick<GameView, 'status' | 'drawOffer' | 'takebackOffer' | 'rematchOffer'> & { plies: number } | null>(null);
+  /** The opponent turned down the viewer's offer: said once, until the next move or offer. */
+  const [declined, setDeclined] = useState<'draw' | 'takeback' | 'rematch' | null>(null);
 
   useEffect(() => {
     setView(null);
     setPly(null);
     setPremove(null);
     setError(null);
+    setDeclined(null);
     previous.current = null;
     let alive = true;
     api
@@ -53,18 +56,40 @@ export const GamePage = ({ id }: { id: string }) => {
     };
   }, [id]);
 
+  // Keyed on the last move too: after a takeback the list can come back with the same length but other moves.
   const replay = useMemo(
     () => (view ? replayGame(view.mode, view.firstPlayer, view.freeDraft, view.moves) : null),
-    [view?.id, view?.moves.length],
+    [view?.id, view?.moves.length, view?.moves[view.moves.length - 1]],
   );
 
   useEffect(() => {
     if (!view || !replay) return;
     const before = previous.current;
-    previous.current = { plies: view.moves.length, status: view.status };
+    previous.current = {
+      plies: view.moves.length,
+      status: view.status,
+      drawOffer: view.drawOffer,
+      takebackOffer: view.takebackOffer,
+      rematchOffer: view.rematchOffer,
+    };
     if (!before) {
       if (view.status === 'started' && view.moves.length === 0) playSound('notify');
       return;
+    }
+    // An offer of ours that vanished with no move and no result was declined (a move by the opponent also clears a
+    // draw offer, as on lichess, and needs no message).
+    const me = view.you;
+    if (me) {
+      const samePly = view.moves.length === before.plies;
+      if (before.drawOffer === me && !view.drawOffer && samePly && view.status === 'started') setDeclined('draw');
+      else if (before.takebackOffer === me && !view.takebackOffer && samePly && view.status === 'started') setDeclined('takeback');
+      else if (before.rematchOffer === me && !view.rematchOffer && !view.rematchId) setDeclined('rematch');
+      else if (view.drawOffer === me || view.takebackOffer === me || view.rematchOffer === me || !samePly) setDeclined(null);
+    }
+    if (view.moves.length < before.plies) {
+      // A takeback: a browsed move may be gone, and a queued premove was meant for the position that no longer is.
+      setPly(null);
+      setPremove(null);
     }
     if (view.moves.length > before.plies) {
       const last = replay.moves[replay.moves.length - 1];
@@ -81,7 +106,7 @@ export const GamePage = ({ id }: { id: string }) => {
 
   const live = ply === null;
   const you = view?.you ?? null;
-  const position = replay ? (live ? replay.game.position : replay.positions[ply]!) : null;
+  const position = replay ? (live ? replay.game.position : (replay.positions[ply] ?? replay.game.position)) : null;
   const myTurn = Boolean(view && you && view.status === 'started' && position?.turn === you && live);
 
   const moves = useMemo(() => (replay && myTurn ? legalMoves(replay.game.position) : []), [replay, myTurn]);
@@ -144,7 +169,10 @@ export const GamePage = ({ id }: { id: string }) => {
   const started = view.status === 'started';
   const turn = replay.game.position.turn;
   const action = (kind: 'resign' | 'abort' | 'claim') => socket.send({ t: kind, game: view.id });
-  const offer = (kind: 'draw' | 'rematch', act: 'offer' | 'accept' | 'decline') => socket.send({ t: kind, game: view.id, action: act });
+  const offer = (kind: 'draw' | 'rematch' | 'takeback', act: 'offer' | 'accept' | 'decline') => socket.send({ t: kind, game: view.id, action: act });
+  const giveTime = view.canGiveTime
+    ? { label: t.game.giveTime(EXTRA_TIME_SECONDS), onClick: () => socket.send({ t: 'moretime', game: view.id }) }
+    : null;
   const doneAvailable = myTurn && position.phase === 'draft' && moves.some((m) => m.kind === 'done');
 
   const player = (color: Color): RoundPlayer => {
@@ -162,8 +190,8 @@ export const GamePage = ({ id }: { id: string }) => {
 
   const clocks = view.clock
     ? {
-        white: { ms: view.clock.white, since: receivedAt, running: started && view.clock.running === 'white', mine: you === 'white' },
-        black: { ms: view.clock.black, since: receivedAt, running: started && view.clock.running === 'black', mine: you === 'black' },
+        white: { ms: view.clock.white, since: receivedAt, running: started && view.clock.running === 'white', mine: you === 'white', giveTime: opponent === 'white' ? giveTime : null },
+        black: { ms: view.clock.black, since: receivedAt, running: started && view.clock.running === 'black', mine: you === 'black', giveTime: opponent === 'black' ? giveTime : null },
       }
     : null;
 
@@ -177,7 +205,7 @@ export const GamePage = ({ id }: { id: string }) => {
         <div class="ricons">
           {doneAvailable && (
             <button type="button" class="fbt text strong glowing ligungi-done" onClick={() => send({ kind: 'done' })}>
-              済み {t.done}
+              {t.done}
             </button>
           )}
           {confirming ? (
@@ -185,7 +213,7 @@ export const GamePage = ({ id }: { id: string }) => {
               <span class="ligungi-confirm-text">{confirming === 'resign' ? t.game.confirmResign : t.game.confirmDraw}</span>
               <button
                 type="button"
-                class="fbt yes active"
+                class="fbt yes"
                 title={t.game.confirm}
                 data-icon={icons.Checkmark}
                 onClick={() => {
@@ -200,6 +228,16 @@ export const GamePage = ({ id }: { id: string }) => {
             <button type="button" class="fbt abort" title={t.game.abort} data-icon={icons.X} onClick={() => action('abort')} />
           ) : (
             <>
+              {view.canTakeback && view.takebackOffer !== opponent && (
+                <button
+                  type="button"
+                  class="fbt takeback-yes"
+                  title={view.takebackOffer === you ? t.game.takebackProposed : t.game.proposeTakeback}
+                  disabled={view.takebackOffer === you}
+                  data-icon={icons.Back}
+                  onClick={() => offer('takeback', 'offer')}
+                />
+              )}
               <button
                 type="button"
                 class="fbt draw-yes"
@@ -215,10 +253,32 @@ export const GamePage = ({ id }: { id: string }) => {
       )}
       {you && started && view.drawOffer === opponent && (
         <div class="question">
-          <button type="button" class="fbt no" title={t.game.decline} data-icon={icons.X} onClick={() => offer('draw', 'decline')} />
+          <button type="button" class="no" title={t.game.decline} data-icon={icons.X} onClick={() => offer('draw', 'decline')} />
           <p>{t.game.opponentOffersDraw}</p>
-          <button type="button" class="fbt yes draw-yes" title={t.game.accept} data-icon={icons.Checkmark} onClick={() => offer('draw', 'accept')} />
+          <button type="button" class="yes" title={t.game.accept} data-icon={icons.Checkmark} onClick={() => offer('draw', 'accept')} />
         </div>
+      )}
+      {you && started && view.takebackOffer === opponent && (
+        <div class="question">
+          <button type="button" class="no" title={t.game.decline} data-icon={icons.X} onClick={() => offer('takeback', 'decline')} />
+          <p>{t.game.opponentProposesTakeback}</p>
+          <button type="button" class="yes" title={t.game.accept} data-icon={icons.Checkmark} onClick={() => offer('takeback', 'accept')} />
+        </div>
+      )}
+      {you && started && view.drawOffer === you && (
+        <div class="pending">
+          <p>{t.game.drawPending}</p>
+        </div>
+      )}
+      {you && started && view.takebackOffer === you && (
+        <div class="pending">
+          <p>{t.game.takebackPending}</p>
+        </div>
+      )}
+      {declined && (
+        <p class="ligungi-declined" role="status">
+          {{ draw: t.game.drawDeclined, takeback: t.game.takebackDeclined, rematch: t.game.rematchDeclined }[declined]}
+        </p>
       )}
       {view.canClaimVictory && (
         <div class="suggestion">
@@ -236,9 +296,9 @@ export const GamePage = ({ id }: { id: string }) => {
             </a>
           ) : you && view.status === 'ended' && view.rematchOffer === opponent ? (
             <div class="question">
-              <button type="button" class="fbt no" title={t.game.decline} data-icon={icons.X} onClick={() => offer('rematch', 'decline')} />
+              <button type="button" class="no" title={t.game.decline} data-icon={icons.X} onClick={() => offer('rematch', 'decline')} />
               <p>{t.game.opponentWantsRematch}</p>
-              <button type="button" class="fbt yes" title={t.game.accept} data-icon={icons.Checkmark} onClick={() => offer('rematch', 'accept')} />
+              <button type="button" class="yes" title={t.game.accept} data-icon={icons.Checkmark} onClick={() => offer('rematch', 'accept')} />
             </div>
           ) : you && view.status === 'ended' ? (
             <button
@@ -281,7 +341,11 @@ export const GamePage = ({ id }: { id: string }) => {
               ) : (
                 playerName(t, view.players[color])
               )}
-              {view.firstPlayer === color && <span class="ligungi-first">先</span>}
+              {view.firstPlayer === color && (
+                <span class="ligungi-first" title={t.common.startsGame}>
+                  {t.common.firstShort}
+                </span>
+              )}
             </div>
           ))}
         </div>

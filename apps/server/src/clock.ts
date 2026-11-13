@@ -31,6 +31,11 @@ export class Clock {
     this.start(next, now);
   }
 
+  /** Extra time for `color`, also while their clock runs. */
+  add(color: Color, ms: number): void {
+    this.remaining[color] += ms;
+  }
+
   stop(now: number): void {
     if (this.running) this.remaining[this.running] = this.timeLeft(this.running, now);
     this.running = null;

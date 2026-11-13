@@ -65,6 +65,8 @@ Client to server:
 | `{ t: 'move', game, move, ply }` | Plays a move. `ply` is the number of moves already played. |
 | `{ t: 'resign' \| 'abort' \| 'claim', game }` | Resigns, aborts or claims victory. |
 | `{ t: 'draw' \| 'rematch', game, action }` | `action`: `offer`, `accept` or `decline`. |
+| `{ t: 'takeback', game, action }` | Asks to take back your last move (and the opponent's reply, if they already answered), with the same actions, except that only `accept` answers the opponent's request (asking back is refused, since it would be about another move). Casual games only, never the first two moves (`canTakeback` in the game view); a pending request (`takebackOffer`) is dropped by any move. The time already spent stays spent. |
+| `{ t: 'moretime', game }` | Gives the opponent 15 seconds (`EXTRA_TIME_SECONDS`), in any game with a clock (`canGiveTime`). |
 | `{ t: 'ping' }` | Answers `pong`. |
 
 Server to client:

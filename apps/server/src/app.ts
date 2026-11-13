@@ -701,10 +701,13 @@ export const createApp = (config: ServerConfig): App => {
         } else if (message.t === 'resign') result = room.resign(color);
         else if (message.t === 'abort') result = room.abort(color);
         else if (message.t === 'claim') result = room.claim(color);
-        else if (message.t === 'draw' || message.t === 'rematch') {
+        else if (message.t === 'moretime') result = room.giveTime(color);
+        else if (message.t === 'draw' || message.t === 'rematch' || message.t === 'takeback') {
           const action = message.action;
           if (action !== 'offer' && action !== 'accept' && action !== 'decline') result = 'invalidAction';
-          else result = message.t === 'draw' ? room.draw(color, action) : room.rematch(color, action);
+          else if (message.t === 'draw') result = room.draw(color, action);
+          else if (message.t === 'takeback') result = room.takeback(color, action);
+          else result = room.rematch(color, action);
         } else result = 'unknownMessage';
         if (result) {
           error(result);

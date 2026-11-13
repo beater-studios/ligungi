@@ -25,6 +25,8 @@ export interface RoundClock {
   readonly since: number;
   readonly running: boolean;
   readonly mine: boolean;
+  /** Shown on the opponent's clock when the viewer may give them extra time, as lila's "+" button. */
+  readonly giveTime?: { readonly label: string; readonly onClick: () => void } | null;
 }
 
 interface RoundLayoutProps {
@@ -70,6 +72,16 @@ const ClockBox = ({ color, position, clock }: { color: Color; position: 'top' | 
   return (
     <div class={classes.join(' ')}>
       <div class={`time${left >= 3_600_000 ? ' hour' : ''}`}>{formatClock(left)}</div>
+      {clock.giveTime && (
+        <button
+          type="button"
+          class="moretime"
+          title={clock.giveTime.label}
+          aria-label={clock.giveTime.label}
+          data-icon={icons.PlusButton}
+          onClick={clock.giveTime.onClick}
+        />
+      )}
     </div>
   );
 };
@@ -99,7 +111,7 @@ const UserBox = ({ player, position, myTurn = false }: { player: RoundPlayer; po
     )}
     {player.first && (
       <span class="ligungi-first" title={t.common.startsGame}>
-        先
+        {t.common.firstShort}
       </span>
     )}
     {myTurn && <span class="ligungi-turn-badge">{t.common.yourTurn}</span>}

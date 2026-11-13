@@ -27,6 +27,7 @@ export const icons = {
   Microscope: '',
   OneHalf: '',
   PlayTriangle: '',
+  PlusButton: '\ue02d',
   Power: '',
   RandomColor: '',
   Reload: '',

@@ -4,6 +4,21 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Takebacks in casual games: ask to take back your last move, and the opponent accepts or declines. Not available in rated games or for the first two moves.
+- Give your opponent 15 seconds with the + button on their clock, in any game with a clock.
+- When you offer a draw or a takeback, a line says it is waiting for your opponent, and another tells you if they decline (also for rematches).
+
+### Changed
+
+- The first player mark beside a name is now "1st" instead of the kanji 先, and the done button in the draft shows only "Done".
+- In games, the rating sits right after the player's name on wide screens too, instead of at the far end of the row.
+
+### Fixed
+
+- The draw confirmation (Offer a draw?) had its buttons out of place, and the answer buttons to an offer did not look like the rest of the game controls.
+
 ## [0.2.0] - 2026-11-13
 
 ### Added

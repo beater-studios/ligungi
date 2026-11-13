@@ -9,7 +9,7 @@ import {
   type Mode,
   type Outcome,
 } from '@ligungi/engine';
-import type { ErrorCode, GameStatus, GameSummary, GameView, PlayerView, TimeControl } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, type ErrorCode, type GameStatus, type GameSummary, type GameView, type PlayerView, type TimeControl } from '@ligungi/protocol';
 import { Clock } from './clock.ts';
 
 export interface Seat {
@@ -68,6 +68,7 @@ export class GameRoom {
   status: GameStatus;
   outcome: Outcome | null;
   drawOffer: Color | null = null;
+  takebackOffer: Color | null = null;
   rematchOffer: Color | null = null;
   rematchId: string | null;
   endedAt: number | null;
@@ -154,6 +155,8 @@ export class GameRoom {
     }
     this.#turnStartedAt = now;
     if (this.drawOffer && this.drawOffer !== color) this.drawOffer = null;
+    // A takeback request is about the position it was made in; any move makes it moot.
+    this.takebackOffer = null;
     if (this.game.outcome) this.#end(this.game.outcome);
     else this.#changed();
     return null;
@@ -191,6 +194,70 @@ export class GameRoom {
     if (action === 'offer') this.drawOffer = color;
     else if (action === 'decline' && opponentOffered) this.drawOffer = null;
     else return 'noDrawOffer';
+    this.#changed();
+    return null;
+  }
+
+  /**
+   * How many moves a takeback by `color` removes: back to just before their last move, so it is their turn again.
+   * Usually one (they just moved) or two (the opponent replied); in the draft a player may have placed several pieces
+   * in a row after the opponent declared done, and only the last one goes.
+   */
+  #takebackCount(color: Color): number {
+    const { moves, positions } = this.game;
+    for (let i = moves.length - 1; i >= 0; i--) if (positions[i]!.turn === color) return moves.length - i;
+    return 0;
+  }
+
+  /**
+   * Casual games only, so a rating never depends on a favor. The first two moves stay: before them the game can still
+   * be aborted and the clocks have not started, and taking back into that state would reopen both.
+   */
+  canTakeback(color: Color): boolean {
+    if (this.rated || this.status !== 'started') return false;
+    const count = this.#takebackCount(color);
+    return count > 0 && this.plies - count >= 2;
+  }
+
+  takeback(color: Color, action: Action): ErrorCode | null {
+    if (this.status !== 'started') return 'takebackUnavailable';
+    const requester = opposite(color);
+    // Unlike a draw, asking while the opponent asks is not an answer: each request is about a different move.
+    if (action === 'accept' && this.takebackOffer === requester) {
+      this.takebackOffer = null;
+      if (!this.canTakeback(requester)) {
+        this.#changed();
+        return 'takebackUnavailable';
+      }
+      this.#undo(requester);
+      return null;
+    }
+    if (action === 'offer') {
+      if (this.takebackOffer === requester || !this.canTakeback(color)) return 'takebackUnavailable';
+      this.takebackOffer = color;
+    } else if (action === 'decline' && this.takebackOffer === requester) {
+      this.takebackOffer = null;
+    } else {
+      return 'noTakebackOffer';
+    }
+    this.#changed();
+    return null;
+  }
+
+  canGiveTime(_color: Color): boolean {
+    return this.status === 'started' && this.clock !== null;
+  }
+
+  /** Adds a few seconds to the opponent's clock, as lichess's "give more time". Allowed in rated games too: it only helps the opponent. */
+  giveTime(color: Color): ErrorCode | null {
+    if (!this.canGiveTime(color)) return 'extraTimeUnavailable';
+    // An opponent whose flag already fell is not saved by a gift that arrives before the timer fires.
+    const running = this.clock!.running;
+    if (running && this.clock!.timeLeft(running, this.#hooks.now()) <= 0) {
+      this.tick();
+      return 'gameOver';
+    }
+    this.clock!.add(opposite(color), EXTRA_TIME_SECONDS * 1000);
     this.#changed();
     return null;
   }
@@ -277,11 +344,14 @@ export class GameRoom {
       outcome: this.outcome,
       clock: this.clock?.view(now) ?? null,
       drawOffer: this.drawOffer,
+      takebackOffer: this.takebackOffer,
       rematchOffer: this.rematchOffer,
       rematchId: this.rematchId,
       you,
       canAbort: you !== null && this.canAbort(),
       canClaimVictory: you !== null && this.canClaim(you),
+      canTakeback: you !== null && this.canTakeback(you),
+      canGiveTime: you !== null && this.canGiveTime(you),
       createdAt: this.createdAt,
       endedAt: this.endedAt,
     };
@@ -320,6 +390,20 @@ export class GameRoom {
     };
   }
 
+  /** Takes back `color`'s last move and anything after it. The time already spent stays spent, as on lichess. */
+  #undo(color: Color): void {
+    const count = this.#takebackCount(color);
+    for (let i = 0; i < count; i++) this.game.undo();
+    const now = this.#hooks.now();
+    if (this.clock?.running) {
+      this.clock.stop(now);
+      this.clock.start(this.game.position.turn, now);
+    }
+    this.#turnStartedAt = now;
+    this.drawOffer = null;
+    this.#changed();
+  }
+
   #end(outcome: Outcome): void {
     this.#finish('ended', outcome);
   }
@@ -330,6 +414,7 @@ export class GameRoom {
     this.outcome = outcome;
     this.endedAt = now;
     this.drawOffer = null;
+    this.takebackOffer = null;
     this.clock?.stop(now);
     this.dispose();
     if (status === 'ended') this.#hooks.onEnd(this);

@@ -79,12 +79,18 @@ export interface GameView {
   readonly outcome: Outcome | null;
   readonly clock: ClockView | null;
   readonly drawOffer: Color | null;
+  /** The player asking to take back their last move (casual games only). */
+  readonly takebackOffer: Color | null;
   readonly rematchOffer: Color | null;
   readonly rematchId: string | null;
   /** Color of the viewer in this game, if any. */
   readonly you: Color | null;
   readonly canAbort: boolean;
   readonly canClaimVictory: boolean;
+  /** Whether the viewer may ask to take back their last move now. */
+  readonly canTakeback: boolean;
+  /** Whether the viewer may give the opponent extra time now (a game with a clock, in progress). */
+  readonly canGiveTime: boolean;
   readonly createdAt: number;
   readonly endedAt: number | null;
 }
@@ -268,6 +274,9 @@ export interface Me {
   readonly playing: readonly GameSummary[];
 }
 
+/** Seconds a player gives the opponent with the "extra time" button, as on lichess. */
+export const EXTRA_TIME_SECONDS = 15;
+
 export type Topic = 'lobby' | `game:${string}` | `challenge:${string}`;
 
 export type ClientMessage =
@@ -275,7 +284,9 @@ export type ClientMessage =
   | { readonly t: 'unsub'; readonly topic: Topic }
   | { readonly t: 'move'; readonly game: string; readonly move: string; readonly ply: number }
   | { readonly t: 'resign' | 'abort' | 'claim'; readonly game: string }
-  | { readonly t: 'draw' | 'rematch'; readonly game: string; readonly action: 'offer' | 'accept' | 'decline' }
+  | { readonly t: 'draw' | 'rematch' | 'takeback'; readonly game: string; readonly action: 'offer' | 'accept' | 'decline' }
+  /** Adds `EXTRA_TIME_SECONDS` to the opponent's clock. */
+  | { readonly t: 'moretime'; readonly game: string }
   | { readonly t: 'ping' };
 
 export type ServerMessage =

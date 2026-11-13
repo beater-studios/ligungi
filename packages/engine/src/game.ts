@@ -69,6 +69,25 @@ export class Game {
     return next;
   }
 
+  /**
+   * Takes back the last move (a takeback agreed by both players). Only for a game still in progress: the result of a
+   * finished game stays. The repetition count of the removed position goes back too.
+   */
+  undo(): Move {
+    if (this.#outcome) throw new IllegalMoveError('Game is over');
+    const move = this.#moves.pop();
+    if (!move) throw new IllegalMoveError('No move to take back');
+    const removed = this.#positions.pop()!;
+    if (removed.phase === 'play') {
+      const key = repetitionKey(removed);
+      const count = (this.#seen.get(key) ?? 1) - 1;
+      if (count > 0) this.#seen.set(key, count);
+      else this.#seen.delete(key);
+    }
+    this.#legal = undefined;
+    return move;
+  }
+
   resign(color: Color): void {
     if (!this.#outcome) this.#outcome = { winner: opposite(color), reason: 'resign' };
   }

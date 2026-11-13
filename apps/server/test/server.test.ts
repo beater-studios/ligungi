@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { ChallengeView, FriendView, GameSummary, GameView, LeaderEntry, Leaderboard, LobbyView, Me, SessionView, UserProfile, UserSearchResult } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type SessionView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { Client, firstMove, startServer, type TestServer } from './helpers.ts';
 
@@ -215,6 +215,100 @@ describe('playing online', () => {
     expect(claimable.players.black.online).toBe(false);
     a.send({ t: 'claim', game: id });
     expect((await a.waitGame(id, (g) => g.status === 'ended')).outcome).toEqual({ winner: 'white', reason: 'abandon' });
+  });
+
+  it('takes back moves in casual games when the opponent agrees', async () => {
+    let now = 1_000_000;
+    server = await startServer({ now: () => now });
+    const a = client();
+    const b = client();
+    const error = (c: Client, code: string) => c.waitFor((m) => m.t === 'error' && m.code === code);
+    let { id, view } = await startGame(a, b);
+    view = await play(a, b, view);
+    view = await play(b, a, view);
+    expect(view.canTakeback).toBe(false);
+    view = await play(a, b, view);
+    expect(view.canTakeback).toBe(true);
+
+    a.send({ t: 'takeback', game: id, action: 'offer' });
+    await b.waitGame(id, (g) => g.takebackOffer === 'white');
+    // Asking back is not accepting: it would take back the other player's move.
+    b.send({ t: 'takeback', game: id, action: 'offer' });
+    await error(b, 'takebackUnavailable');
+    b.send({ t: 'takeback', game: id, action: 'decline' });
+    await a.waitGame(id, (g) => g.takebackOffer === null);
+    a.send({ t: 'takeback', game: id, action: 'offer' });
+    await b.waitGame(id, (g) => g.takebackOffer === 'white');
+    now += 4000;
+    b.send({ t: 'takeback', game: id, action: 'accept' });
+    view = await a.waitGame(id, (g) => g.moves.length === 2);
+    expect(view).toMatchObject({ takebackOffer: null, clock: { running: 'white' } });
+    // The clocks start after the second move. The time Black spent before agreeing stays spent; White's clock is
+    // as it was after their move.
+    expect(view.clock).toMatchObject({ white: 600_000 + 5000, black: 600_000 - 4000 });
+
+    // On their own turn, the takeback also removes the opponent's reply.
+    view = await play(a, b, view);
+    view = await play(b, a, view);
+    a.send({ t: 'takeback', game: id, action: 'offer' });
+    await b.waitGame(id, (g) => g.takebackOffer === 'white');
+    b.send({ t: 'takeback', game: id, action: 'accept' });
+    view = await a.waitGame(id, (g) => g.moves.length === 2 && g.takebackOffer === null);
+
+    // The first two moves stay, and a move cancels a pending request.
+    b.send({ t: 'takeback', game: id, action: 'offer' });
+    await error(b, 'takebackUnavailable');
+    view = await play(a, b, view);
+    view = await play(b, a, view);
+    b.send({ t: 'takeback', game: id, action: 'offer' });
+    await a.waitGame(id, (g) => g.takebackOffer === 'black');
+    view = await play(a, b, view);
+    expect(view.takebackOffer).toBeNull();
+    a.send({ t: 'takeback', game: id, action: 'accept' });
+    await error(a, 'noTakebackOffer');
+
+    // Both could ask now; Black asking while White's request is pending must not take back White's move.
+    a.send({ t: 'takeback', game: id, action: 'offer' });
+    await b.waitGame(id, (g) => g.takebackOffer === 'white');
+    b.send({ t: 'takeback', game: id, action: 'offer' });
+    await error(b, 'takebackUnavailable');
+    view = await b.waitGame(id, (g) => g.takebackOffer === 'white');
+    expect(view.moves).toHaveLength(5);
+  });
+
+  it('does not take back moves in rated games', async () => {
+    server = await startServer();
+    const a = client();
+    const b = client();
+    await signup(a, 'Gon');
+    await signup(b, 'Killua');
+    let { id, view } = await startGame(a, b, { ...casual, rated: true });
+    view = await play(a, b, view);
+    view = await play(b, a, view);
+    view = await play(a, b, view);
+    expect(view.canTakeback).toBe(false);
+    a.send({ t: 'takeback', game: id, action: 'offer' });
+    await a.waitFor((m) => m.t === 'error' && m.code === 'takebackUnavailable');
+  });
+
+  it('gives the opponent extra time, only in games with a clock', async () => {
+    let now = 1_000_000;
+    server = await startServer({ now: () => now });
+    const a = client();
+    const b = client();
+    let { id, view } = await startGame(a, b);
+    expect(view.canGiveTime).toBe(true);
+    view = await play(a, b, view);
+    view = await play(b, a, view);
+    now += 2000;
+    b.send({ t: 'moretime', game: id });
+    view = await a.waitGame(id, (g) => g.clock!.white > 600_000);
+    expect(view.clock!.white).toBe(600_000 - 2000 + EXTRA_TIME_SECONDS * 1000);
+
+    ({ id, view } = await startGame(a, b, { ...casual, timeControl: null }));
+    expect(view.canGiveTime).toBe(false);
+    a.send({ t: 'moretime', game: id });
+    await a.waitFor((m) => m.t === 'error' && m.code === 'extraTimeUnavailable');
   });
 
   it('flags the player whose clock runs out', async () => {

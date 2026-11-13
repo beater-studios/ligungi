@@ -154,6 +154,31 @@ describe('end of game', () => {
     expect(game.outcome).toEqual({ winner: null, reason: 'repetition' });
   });
 
+  it('takes back moves, including their repetition count', () => {
+    const game = new Game(build({ a1: 'M', i9: 'm', a3: 'P', i7: 'p' }));
+    const start = toFen(game.position);
+    for (let i = 0; i < 2; i++) {
+      for (const move of ['a3a4', 'i7i6', 'a4a3', 'i6i7']) game.play(move);
+    }
+    game.play('a3a4');
+    expect(game.undo()).toEqual(parseMove('a3a4'));
+    expect(toFen(game.position)).toBe(start);
+    // Two cycles plus the start: one more full cycle reaches the fourth occurrence, but not after taking one back.
+    for (const move of ['a3a4', 'i7i6', 'a4a3', 'i6i7']) game.play(move);
+    expect(game.outcome).toEqual({ winner: null, reason: 'repetition' });
+    expect(() => game.undo()).toThrow();
+    // Third time on the same position, taken back and played again: still the third, not the fourth.
+    const again = new Game(build({ a1: 'M', i9: 'm', a3: 'P', i7: 'p' }));
+    for (let i = 0; i < 2; i++) {
+      for (const move of ['a3a4', 'i7i6', 'a4a3', 'i6i7']) again.play(move);
+    }
+    for (const move of ['a3a4', 'i7i6', 'a4a3']) again.play(move);
+    again.undo();
+    again.play('a4a3');
+    expect(again.outcome).toBeUndefined();
+    expect(() => new Game(initialPosition('intro')).undo()).toThrow();
+  });
+
   it('draws when only the marshals remain', () => {
     const game = new Game(build({ a1: 'M', i9: 'm', b2: 'p' }));
     game.play('a1b2x');

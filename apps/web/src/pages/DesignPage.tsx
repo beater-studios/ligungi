@@ -221,7 +221,7 @@ export const DesignPage = () => {
             <span class="ligungi-turn-badge">Your turn</span>
           </Example>
           <Example label="First player mark">
-            <span class="ligungi-first">先</span>
+            <span class="ligungi-first">1st</span>
           </Example>
           <Example label="Rank">
             <span class="ligungi-rank">#3 on the leaderboard</span>

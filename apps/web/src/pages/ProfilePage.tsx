@@ -323,9 +323,9 @@ export const ProfilePage = ({ name }: { name: string }) => {
       </section>
 
       {profile.playing.map((game) => (
-        <section key={game.id} class="ligungi-card ligungi-profile__live">
+        <section key={game.id} class="ligungi-card ligungi-live-strip">
           <span class="ligungi-live-badge">{t.profile.live}</span>
-          <span class="ligungi-profile__live-text">
+          <span class="ligungi-live-strip__text">
             {playerName(t, game.players.white)} × {playerName(t, game.players.black)} · {t.modes[game.mode]} ·{' '}
             {timeControlText(t, game.timeControl)}
           </span>

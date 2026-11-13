@@ -25,38 +25,6 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   margin: 0.5em 0;
 }
 
-.ligungi-intro p {
-  margin-bottom: 0.8em;
-}
-
-.lobby__app__empty {
-  padding: 2em;
-  text-align: center;
-  color: $c-font-dim;
-}
-
-.lobby .now-playing {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1em;
-  padding: 1em;
-
-  a {
-    color: $c-font;
-  }
-}
-
-.ligungi-tv {
-  display: grid;
-  gap: 0.4em;
-  color: $c-font;
-
-
-  &__player {
-    font-size: 0.9em;
-  }
-}
-
 /* Static mini board (TV, lists, diagrams) */
 
 .gg-mini {
@@ -129,30 +97,6 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
     border-radius: 999px;
     padding: 0 0.25em;
   }
-}
-
-/* lila draws the lichess logo behind the lobby content; ligungi shows its own, faded, in the same place. */
-.lobby__app__content {
-  background-image: none !important;
-  position: relative;
-  z-index: 0;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: url('../assets/logo.svg') no-repeat center / min(55%, 22rem);
-    filter: grayscale(1);
-    opacity: 0.07;
-    pointer-events: none;
-  }
-}
-
-.lobby__counters {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2em;
 }
 
 /* Gungi board inside lila's square .main-board (round and analysis pages). */
@@ -754,37 +698,6 @@ html.light {
 }
 
 
-// Leaderboard overview: lila's community grid without the online column.
-
-.ligungi-friend-box {
-  margin-top: 1rem;
-
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.3rem 0;
-  }
-
-  .more {
-    color: $c-font-dim;
-  }
-}
-
-.ligungi-friend-box__watch {
-  color: $c-font-dim;
-
-  &:hover {
-    color: $c-link;
-  }
-}
-
 .ligungi-friends td:nth-child(n + 3) {
   text-align: center;
 }
@@ -907,11 +820,6 @@ select.ligungi-select {
 }
 
 /* ===== Waiting for an opponent (home) ===== */
-// The faded logo behind the lobby grid would sit right under the spinner.
-.lobby__app__content.ligungi-waiting::before {
-  display: none;
-}
-
 .ligungi-waiting {
   display: flex;
   flex-direction: column;
@@ -1243,36 +1151,6 @@ select.ligungi-select {
   }
 }
 
-/* ===== Home ===== */
-.lobby__box__content.ligungi-intro {
-  padding: 0.9rem 1rem 1rem;
-
-  p {
-    margin: 0 0 0.6rem;
-  }
-}
-
-.ligungi-account-pitch {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: $border;
-
-  &__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-
-    .button {
-      flex: 1 1 auto;
-      text-align: center;
-    }
-  }
-}
-
-.ligungi-friend-box .lobby__box__content {
-  padding: 0.6rem 1rem;
-}
-
 /* ===== Header ===== */
 // lila hides these on its auth pages through a stylesheet loaded only there; ligungi bundles all CSS.
 .site-buttons .signin-or-signup {
@@ -1601,50 +1479,6 @@ body:has(main.auth) #clinput {
   }
 }
 
-/* ===== Home boxes (lila's lobby__box) ===== */
-.ligungi-home-tv,
-.ligungi-home-leaders {
-  .lobby__box__top .title::before {
-    margin-inline-end: 0.4em;
-  }
-}
-
-.ligungi-home-tv .ligungi-tv {
-  max-width: 300px;
-  margin: 0 auto;
-  padding: 0.8rem;
-}
-
-// Grid area only: lila's .lobby__feed adds an inner scroller whose gutter shortens the box header. The lobby row is
-// fit-content(0), where a scroll container measures zero; `clip` keeps the rounded corners without being one.
-.ligungi-home-leaders {
-  grid-area: feed;
-  overflow: clip;
-
-  .lobby__box__content {
-    overflow: visible;
-  }
-}
-
-.ligungi-home-leaders {
-  &__rank {
-    width: 2.5em;
-    color: $c-font-dim;
-    text-align: center;
-  }
-
-  &__rating {
-    text-align: end;
-    font-weight: bold;
-  }
-}
-
-.ligungi-box-empty {
-  margin: 0;
-  padding: 1.2rem 1rem;
-  text-align: center;
-}
-
 /* ===== About, FAQ, contact and legal pages ===== */
 .ligungi-info__body {
   max-width: 48rem;
@@ -1809,10 +1643,6 @@ body:has(main.auth) #clinput {
   &__version a {
     font-family: monospace;
   }
-}
-
-.ligungi-home-tv {
-  align-self: start;
 }
 
 /* ===== Cookie notice and preferences (components/Consent.tsx) ===== */
@@ -2219,6 +2049,473 @@ body:has(main.auth) #clinput {
     &--large &__tick,
     &--large &__marker {
       font-size: 20px;
+    }
+  }
+}
+
+/* ===== Home ===== */
+// Two columns: quick pairing and open games on the left, the actions and the side cards on the right.
+.ligungi-home__layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.ligungi-home__main {
+  flex: 999 1 34rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ligungi-home__quick {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.4rem;
+}
+
+.ligungi-home__quick-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+
+  h1 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.6rem;
+    font-weight: 500;
+  }
+}
+
+.ligungi-pools {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.ligungi-pool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 7.5rem;
+  padding: 0.5rem;
+  border: 1px solid $c-border;
+  border-radius: 6px;
+  background: $c-bg-zebra;
+  color: $c-font-clear;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $c-primary;
+    background: color-mix(in srgb, #{$c-primary} 10%, #{$c-bg-zebra});
+  }
+
+  &__clock {
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1.2;
+  }
+
+  &__kind {
+    color: $c-font-dim;
+    font-size: 0.9em;
+  }
+
+  &__waiting {
+    color: $c-font-dim;
+    font-size: 0.8em;
+
+    &.is-waiting {
+      color: $c-good;
+      font-weight: 600;
+    }
+  }
+}
+
+.ligungi-home__hint {
+  margin: 0;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-home__error {
+  margin: 0;
+}
+
+.ligungi-home__side {
+  flex: 1 1 18rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.ligungi-home__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.5rem;
+  }
+
+  .button-empty {
+    box-shadow: inset 0 0 0 1px $c-border;
+    color: $c-font-clear;
+  }
+}
+
+.ligungi-home__account {
+  padding: 1.1rem;
+
+  p {
+    margin: 0 0 0.75rem;
+  }
+}
+
+.ligungi-home__account-actions {
+  display: flex;
+  gap: 0.5rem;
+
+  .button {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .button-empty {
+    box-shadow: inset 0 0 0 1px $c-border;
+  }
+}
+
+.ligungi-home__learn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem;
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+.ligungi-home__counters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem;
+
+  strong {
+    color: $c-font-clear;
+    font-size: 1.25em;
+  }
+
+  .ligungi-home__online {
+    color: $c-good;
+  }
+}
+
+.ligungi-home__friends {
+  padding: 1rem 1.1rem;
+
+  ul {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+  }
+}
+
+.ligungi-home__friend-watch {
+  color: $c-font-dim;
+
+  &:hover {
+    color: $c-link;
+  }
+}
+
+.ligungi-home__card-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+}
+
+.ligungi-home__card-note {
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-home__open {
+  padding-bottom: 0.5rem;
+
+  .ligungi-home__card-head {
+    padding: 1rem 1.25rem;
+    border-bottom: $border;
+  }
+
+  > .ligungi-notice {
+    margin: 0;
+    padding: 1rem 1.25rem;
+  }
+}
+
+.ligungi-seeks {
+  margin: 0;
+  padding: 0.4rem 0.5rem 0;
+  list-style: none;
+}
+
+.ligungi-seek {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.5rem 9rem 7rem auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+
+  &:hover {
+    background: $c-bg-zebra;
+  }
+
+  &--mine {
+    background: color-mix(in srgb, #{$c-primary} 8%, transparent);
+  }
+
+  &__player {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  &__name {
+    overflow: hidden;
+    color: $c-font-clear;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__rating,
+  &__kind {
+    color: $c-font-dim;
+  }
+
+  &__rating {
+    font-size: 0.9em;
+  }
+
+  &__meta {
+    display: none;
+  }
+
+  &__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: 0 0.9rem;
+    font-size: 0.85em;
+  }
+}
+
+.ligungi-home__live {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.1rem;
+
+  > .ligungi-notice {
+    margin: 0;
+  }
+}
+
+.ligungi-home__live-games {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.ligungi-home__live-game {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  color: $c-font;
+
+  &:hover {
+    color: $c-link;
+  }
+}
+
+.ligungi-home__live-players {
+  overflow: hidden;
+  color: $c-font-clear;
+  font-size: 0.85em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ligungi-home__live-mode {
+  color: $c-font-dim;
+  font-size: 0.8em;
+}
+
+// Phones: one column in the mockup's order, quick pairing first and the learning card last.
+@media (max-width: at-most($small)) {
+  .ligungi-home__layout,
+  .ligungi-home__main,
+  .ligungi-home__side {
+    display: contents;
+  }
+
+  .ligungi-home__quick {
+    order: 1;
+    padding: 1rem;
+  }
+
+  .ligungi-home__error {
+    order: 2;
+  }
+
+  .ligungi-home__actions {
+    order: 3;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+
+    .button {
+      min-height: 3rem;
+      padding-inline: 0.5rem;
+      font-size: 0.85em;
+    }
+
+    .button:first-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .ligungi-home__account {
+    order: 4;
+  }
+
+  .ligungi-home__open {
+    order: 5;
+  }
+
+  .ligungi-home__live {
+    order: 6;
+  }
+
+  .ligungi-home__counters {
+    order: 7;
+  }
+
+  .ligungi-home__friends {
+    order: 8;
+  }
+
+  .ligungi-home__learn {
+    order: 9;
+  }
+
+  .ligungi-home__modes {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .ligungi-pools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .ligungi-pool {
+    min-height: 5.5rem;
+
+    &__clock {
+      font-size: 1.6rem;
+    }
+  }
+
+  .ligungi-seek {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.1rem 0.75rem;
+
+    &__time,
+    &__mode,
+    &__kind {
+      display: none;
+    }
+
+    &__meta {
+      display: block;
+      grid-column: 1;
+      grid-row: 2;
+      color: $c-font-dim;
+      font-size: 0.8em;
+    }
+
+    &__action {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      min-height: 2.5rem;
+    }
+  }
+
+  // Boards are too small to read here: the live games become rows.
+  .ligungi-home__live-games {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .ligungi-home__live-game {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 4px;
+    background: $c-bg-zebra;
+
+    .gg-mini {
+      display: none;
     }
   }
 }
@@ -2745,6 +3042,12 @@ body:has(main.auth) #clinput {
     &.active {
       background: $c-bg-zebra2;
       color: $c-font-clear;
+
+      // On the light page background zebra2 barely differs; a raised white tab reads as selected.
+      @include if-light {
+        background: $c-bg-box;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+      }
     }
   }
 }
@@ -2949,14 +3252,15 @@ body:has(main.auth) #clinput {
   }
 }
 
-.ligungi-profile__live {
+// A game in progress on a page: the profile's player, or the viewer's own games on the home page.
+.ligungi-live-strip {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.25rem;
 
-  .ligungi-profile__live-text {
+  &__text {
     flex: 1 1 16rem;
     color: $c-font-clear;
   }

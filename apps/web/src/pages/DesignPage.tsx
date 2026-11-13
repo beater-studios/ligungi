@@ -308,6 +308,47 @@ export const DesignPage = () => {
               </li>
             </ul>
           </Example>
+          <Example label="Quick pairing (.ligungi-pools, .ligungi-pool)">
+            <div class="ligungi-pools" style={{ maxWidth: '30rem' }}>
+              <button type="button" class="ligungi-pool">
+                <span class="ligungi-pool__clock">10+5</span>
+                <span class="ligungi-pool__kind">Rated</span>
+                <span class="ligungi-pool__waiting is-waiting">2 waiting</span>
+              </button>
+              <button type="button" class="ligungi-pool">
+                <span class="ligungi-pool__clock">30+20</span>
+                <span class="ligungi-pool__kind">Rated</span>
+                <span class="ligungi-pool__waiting">nobody waiting</span>
+              </button>
+            </div>
+          </Example>
+          <Example label="Open game row (.ligungi-seek)">
+            <ul class="ligungi-card ligungi-seeks">
+              <li class="ligungi-seek">
+                <span class="ligungi-seek__player">
+                  <span class="is is2 color-icon random" />
+                  <span class="ligungi-seek__name">Netero</span>
+                  <span class="ligungi-seek__rating">2100</span>
+                </span>
+                <span class="ligungi-seek__time">15+10</span>
+                <span class="ligungi-seek__mode">Advanced</span>
+                <span class="ligungi-seek__kind">Rated</span>
+                <span class="ligungi-seek__meta">Advanced · 15+10 · Rated</span>
+                <button type="button" class="button ligungi-button-good ligungi-seek__action">
+                  Join
+                </button>
+              </li>
+            </ul>
+          </Example>
+          <Example label="Game in progress (.ligungi-live-strip)">
+            <section class="ligungi-card ligungi-live-strip">
+              <span class="ligungi-live-badge">Your game</span>
+              <span class="ligungi-live-strip__text">Gon × Killua · Advanced · 10+5</span>
+              <a class="button" href="#pages">
+                Back to the game
+              </a>
+            </section>
+          </Example>
           <Example label="Ranking rows with medals and the viewer's row (.ligungi-ranking-row)">
             <ol class="ligungi-card ligungi-ranking-list">
               <li class="ligungi-ranking-row">

@@ -755,21 +755,6 @@ html.light {
 
 
 // Leaderboard overview: lila's community grid without the online column.
-.ligungi-ranking.community {
-  grid-template-columns: 1fr;
-  grid-template-areas: 'leaders';
-
-  .leaderboards li.ligungi-notice {
-    justify-content: center;
-    white-space: normal;
-  }
-}
-
-.ligungi-leaders__rank {
-  color: $c-font-dim;
-  width: 3em;
-}
-
 
 .ligungi-friend-box {
   margin-top: 1rem;
@@ -1256,11 +1241,6 @@ select.ligungi-select {
   @media (max-width: at-most($small)) {
     grid-template-columns: 2.4em minmax(0, 1fr) minmax(0, 1fr);
   }
-}
-
-/* ===== Leaderboards: room below the last row ===== */
-.ligungi-ranking.community {
-  margin-bottom: 1.5rem;
 }
 
 /* ===== Home ===== */
@@ -2239,6 +2219,449 @@ body:has(main.auth) #clinput {
     &--large &__tick,
     &--large &__marker {
       font-size: 20px;
+    }
+  }
+}
+
+/* ===== Ranking ===== */
+.ligungi-ranking-page__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.ligungi-ranking-page__modes {
+  flex: 1 1 15rem;
+  max-width: 18rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+}
+
+.ligungi-ranking-page__rule {
+  margin: 0.5rem 0.9rem;
+  color: $c-font-dim;
+  font-size: 0.8em;
+}
+
+.ligungi-ranking-mode {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.15rem 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 4px;
+  color: $c-font;
+
+  &:hover {
+    background: $c-bg-zebra;
+    color: $c-font;
+  }
+
+  &.active {
+    background: $c-bg-zebra2;
+    box-shadow: inset 3px 0 0 $c-brag;
+  }
+
+  &__name {
+    color: $c-font-clear;
+    font-weight: 500;
+  }
+
+  &__count {
+    color: $c-font-dim;
+    font-size: 0.8em;
+    text-align: right;
+  }
+
+  &__you {
+    flex: 1 1 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.85em;
+
+    strong {
+      color: $c-font-clear;
+    }
+  }
+
+  &__rank {
+    color: $c-brag;
+  }
+
+  &__provisional {
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-ranking-page__table {
+  flex: 999 1 36rem;
+  min-width: 0;
+  transition: opacity 0.15s;
+
+  &.is-loading {
+    opacity: 0.6;
+  }
+}
+
+.ligungi-ranking-page__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: $border;
+
+  h1 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.6rem;
+    font-weight: 500;
+  }
+
+  // lila's form-group keeps a bottom margin that would lift the checkbox above the rest of the row.
+  .ligungi-check {
+    margin: 0 0 0 auto;
+  }
+
+  .form-control {
+    flex: 0 1 14rem;
+    width: auto;
+  }
+}
+
+.ligungi-ranking-page__count {
+  color: $c-font-dim;
+  font-size: 0.9em;
+}
+
+.ligungi-ranking-page__empty {
+  padding: 1rem 1.25rem;
+}
+
+.ligungi-ranking-list {
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+}
+
+.ligungi-ranking-row {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) 6rem 6rem 9rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 1.25rem;
+  border-bottom: 1px solid $c-border;
+  scroll-margin: 5rem;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &--head {
+    padding-block: 0.5rem;
+    color: $c-font-dim;
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  &--me {
+    background: color-mix(in srgb, #{$c-brag} 12%, transparent);
+  }
+
+  &__rank {
+    justify-self: start;
+    min-width: 1.9rem;
+    color: $c-font-dim;
+    text-align: center;
+  }
+
+  &--me &__rank {
+    color: $c-brag;
+    font-weight: 700;
+  }
+
+  // Medals: a filled disc with dark text reads in both themes.
+  &__rank--1,
+  &__rank--2,
+  &__rank--3 {
+    border-radius: 1em;
+    color: #1d1b19;
+    font-weight: 700;
+    line-height: 1.9rem;
+  }
+
+  &__rank--1 {
+    background: #e0a43a;
+  }
+
+  &__rank--2 {
+    background: #c3c9cf;
+  }
+
+  &__rank--3 {
+    background: #c58a57;
+  }
+
+  &__player {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+
+    .user-link {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__rating {
+    color: $c-font-clear;
+  }
+
+  &__games,
+  &__record {
+    color: $c-font-dim;
+  }
+
+  &__win {
+    color: $c-good;
+  }
+
+  &__loss {
+    color: $c-bad;
+  }
+
+  &__meta {
+    display: none;
+  }
+
+  // Phones: rank, name with games and record below, rating on the right.
+  @media (max-width: at-most($small)) {
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    gap: 0.1rem 0.6rem;
+    padding-inline: 0.75rem;
+
+    &--head,
+    &__games,
+    &__record {
+      display: none;
+    }
+
+    &__rank {
+      grid-row: 1 / span 2;
+    }
+
+    &__rating {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+      font-size: 1.05em;
+    }
+
+    &__meta {
+      display: block;
+      grid-column: 2;
+      grid-row: 2;
+      color: $c-font-dim;
+      font-size: 0.8em;
+    }
+  }
+}
+
+.ligungi-ranking-page__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-top: $border;
+}
+
+.ligungi-ranking-page__range {
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-ranking-pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin-inline-start: auto;
+
+  button {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    padding: 0 0.75rem;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: $c-font;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: $c-bg-zebra2;
+    }
+
+    &:disabled {
+      color: $c-font-dimmer;
+      cursor: default;
+    }
+
+    &.active {
+      background: $c-bg-zebra2;
+      color: $c-font-clear;
+      font-weight: 600;
+    }
+  }
+
+  &__gap {
+    padding: 0 0.25rem;
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-ranking-you {
+  display: none;
+}
+
+@media (max-width: at-most($small)) {
+  .ligungi-ranking-page__modes {
+    flex: 1 1 100%;
+    max-width: none;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+
+    // The current mode first, so it is in view without scrolling the row.
+    .ligungi-ranking-mode {
+      flex: none;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: stretch;
+      width: 10.5rem;
+      background: $c-bg-box;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+      &.active {
+        order: -1;
+        background: $c-bg-zebra2;
+        box-shadow: inset 0 3px 0 $c-brag;
+      }
+    }
+
+    .ligungi-ranking-mode__count {
+      text-align: left;
+    }
+
+    .ligungi-ranking-mode__you {
+      flex: none;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 0 0.4rem;
+    }
+  }
+
+  .ligungi-ranking-page__rule {
+    display: none;
+  }
+
+  .ligungi-ranking-page__head {
+    padding: 0.75rem;
+
+    h1 {
+      font-size: 1.3rem;
+    }
+
+    .ligungi-check {
+      margin: 0;
+    }
+
+    .form-control {
+      flex: 1 1 100%;
+      order: 3;
+    }
+  }
+
+  // Page numbers do not fit: previous, the range and next on one line.
+  .ligungi-ranking-page__foot {
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .ligungi-ranking-page__range {
+    order: 2;
+  }
+
+  .ligungi-ranking-pages {
+    display: contents;
+
+    .ligungi-ranking-pages__number,
+    .ligungi-ranking-pages__gap {
+      display: none;
+    }
+
+    .ligungi-ranking-pages__step:first-child {
+      order: 1;
+    }
+
+    .ligungi-ranking-pages__step:last-child {
+      order: 3;
+    }
+  }
+
+  .ligungi-ranking-page__mine {
+    display: none;
+  }
+
+  // On phones the shortcut to the viewer's place stays in reach at the bottom of the screen.
+  .ligungi-ranking-you {
+    position: sticky;
+    bottom: 0.75rem;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    border: 0;
+    border-radius: 6px;
+    background: $c-bg-box;
+    box-shadow:
+      0 0 0 1px $c-brag,
+      0 6px 16px rgba(0, 0, 0, 0.35);
+    color: $c-font;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &__rank {
+      color: $c-brag;
+      font-size: 1.25em;
+      font-weight: 700;
+    }
+
+    &__text {
+      flex: 1;
+
+      strong {
+        color: $c-font-clear;
+      }
+    }
+
+    &__link {
+      color: $c-link;
+      font-size: 0.85em;
     }
   }
 }

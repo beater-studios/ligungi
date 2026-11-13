@@ -20,9 +20,13 @@ import {
   type UserProfile,
   CHALLENGE_POLICIES,
   ONLINE_LIST_MAX,
+  RANKING_PAGE_SIZE,
+  RANKING_QUERY_MAX,
   RATING_BAND,
+  type ModeStanding,
   type OnlinePlayer,
   type PlayersView,
+  type RankingView,
   type SessionView,
   type UserRef,
   type UserSearchResult,
@@ -197,6 +201,50 @@ export const createApp = (config: ServerConfig): App => {
     distribution: PlayersView['distribution'];
     ranks: Record<Mode, Map<string, number>>;
   } | null = null;
+
+  const RANKING_PAGE_LIMIT = 100_000;
+
+  const rankingView = (requested: Mode | null, params: URLSearchParams, viewerId: string | null): RankingView => {
+    const counts = users.rankedCounts();
+    const standings = viewerId ? users.ratings(viewerId) : null;
+    const modes = Object.fromEntries(
+      MODES.map((m) => {
+        const own = standings?.[m];
+        const you: ModeStanding | null =
+          viewerId && own && own.games > 0
+            ? { rating: own.rating, provisional: own.provisional, games: own.games, rank: users.rank(viewerId, m) }
+            : null;
+        return [m, { players: counts[m], you }];
+      }),
+    ) as RankingView['modes'];
+    // Without a mode: the viewer's most played one, otherwise the one with the most ranked players (the hardest on a tie).
+    const fallback = [...MODES].reverse().reduce((best, m) => (counts[m] > counts[best] ? m : best), 'advanced' as Mode);
+    const mine = MODES.filter((m) => modes[m].you).sort((a, b) => modes[b].you!.games - modes[a].you!.games)[0];
+    const mode = requested ?? mine ?? fallback;
+    // Capped so the offset stays an integer SQLite accepts; pages past the end simply come back empty.
+    const page = Math.min(RANKING_PAGE_LIMIT, Math.max(1, Math.trunc(Number(params.get('page'))) || 1));
+    const query = (params.get('q') ?? '').trim().slice(0, RANKING_QUERY_MAX);
+    const followerId = viewerId && params.get('followed') === '1' ? viewerId : null;
+    const { rows, total } = users.rankingPage(mode, { query, followerId }, (page - 1) * RANKING_PAGE_SIZE, RANKING_PAGE_SIZE);
+    const records = games.recordsIn(mode, rows.map((row) => row.user.id));
+    const online = onlineUsers();
+    const followed = new Set(viewerId ? users.following(viewerId).map((user) => user.id) : []);
+    const place = viewerId ? users.rankingPlace(viewerId, mode) : null;
+    return {
+      mode,
+      rows: rows.map((row) => ({
+        ...row,
+        record: records.get(row.user.id) ?? { wins: 0, draws: 0, losses: 0 },
+        online: online.has(row.user.id),
+        followed: followed.has(row.user.id),
+      })),
+      total,
+      page,
+      pageSize: RANKING_PAGE_SIZE,
+      modes,
+      you: place ? { rank: place.rank, page: Math.ceil(place.row / RANKING_PAGE_SIZE) } : null,
+    };
+  };
 
   const playersView = (viewerId: string | null): PlayersView => {
     const now = config.now();
@@ -495,6 +543,12 @@ export const createApp = (config: ServerConfig): App => {
       sendJson(ctx.res, 200, list);
     })
     .add('GET', '/api/players', (ctx) => sendJson(ctx.res, 200, playersView(ctx.session.userId)))
+    .add('GET', '/api/ranking', (ctx) => sendJson(ctx.res, 200, rankingView(null, ctx.url.searchParams, ctx.session.userId)))
+    .add('GET', '/api/ranking/:mode', (ctx) => {
+      const mode = ctx.params.mode as Mode;
+      if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
+      sendJson(ctx.res, 200, rankingView(mode, ctx.url.searchParams, ctx.session.userId));
+    })
     .add('GET', '/api/leaderboard', (ctx) => {
       const online = onlineUsers();
       const board = Object.fromEntries(MODES.map((mode) => [mode, leaders(mode, LEADERBOARD_TOP, online)])) as unknown as Leaderboard;

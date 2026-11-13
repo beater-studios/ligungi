@@ -202,11 +202,19 @@ const Header = () => {
   const status = useStore(socket.status);
   const toggle = useRef<HTMLInputElement>(null);
   const { path } = useLocation();
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     if (toggle.current) toggle.current.checked = false;
   }, [path]);
+  // lila's sticky header only gets a background with this class, which its own scripts set while the page is scrolled.
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 0);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
+  }, []);
   return (
-    <header id="top">
+    <header id="top" class={scrolled ? 'scrolled' : undefined}>
       <div class="site-title-nav">
         <input type="checkbox" id="tn-tg" class="topnav-toggle fullscreen-toggle" autocomplete="off" aria-label={t.nav.navigation} ref={toggle} />
         <label for="tn-tg" class="fullscreen-mask" />

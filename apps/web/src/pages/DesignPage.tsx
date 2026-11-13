@@ -308,6 +308,55 @@ export const DesignPage = () => {
               </li>
             </ul>
           </Example>
+          <Example label="Ranking rows with medals and the viewer's row (.ligungi-ranking-row)">
+            <ol class="ligungi-card ligungi-ranking-list">
+              <li class="ligungi-ranking-row">
+                <span class="ligungi-ranking-row__rank ligungi-ranking-row__rank--1">1</span>
+                <span class="ligungi-ranking-row__player">
+                  <a class="user-link online" href="#pages">
+                    <i class="line" />
+                    Netero
+                  </a>
+                </span>
+                <strong class="ligungi-ranking-row__rating">2100</strong>
+                <span class="ligungi-ranking-row__games">40</span>
+                <span class="ligungi-ranking-row__record">
+                  <span class="ligungi-ranking-row__win">25</span> · 3 · <span class="ligungi-ranking-row__loss">12</span>
+                </span>
+                <span class="ligungi-ranking-row__meta">40 games · 25 W · 3 D · 12 L</span>
+              </li>
+              <li class="ligungi-ranking-row ligungi-ranking-row--me">
+                <span class="ligungi-ranking-row__rank">27</span>
+                <span class="ligungi-ranking-row__player">
+                  <a class="user-link offline" href="#pages">
+                    <i class="line" />
+                    Gon
+                  </a>
+                  <span class="ligungi-tag">you</span>
+                </span>
+                <strong class="ligungi-ranking-row__rating">1580</strong>
+                <span class="ligungi-ranking-row__games">15</span>
+                <span class="ligungi-ranking-row__record">
+                  <span class="ligungi-ranking-row__win">9</span> · 2 · <span class="ligungi-ranking-row__loss">4</span>
+                </span>
+                <span class="ligungi-ranking-row__meta">15 games · 9 W · 2 D · 4 L</span>
+              </li>
+            </ol>
+          </Example>
+          <Example label="Pagination (.ligungi-ranking-pages)">
+            <nav class="ligungi-ranking-pages" aria-label="Pages" style={{ marginInlineStart: 0 }}>
+              <button type="button" class="ligungi-ranking-pages__step" disabled>
+                Previous
+              </button>
+              <button type="button" class="ligungi-ranking-pages__number active" aria-current="page">
+                1
+              </button>
+              <button type="button" class="ligungi-ranking-pages__number">2</button>
+              <span class="ligungi-ranking-pages__gap">…</span>
+              <button type="button" class="ligungi-ranking-pages__number">9</button>
+              <button type="button" class="ligungi-ranking-pages__step">Next</button>
+            </nav>
+          </Example>
         </Section>
 
         <Section id="data" title="Data">

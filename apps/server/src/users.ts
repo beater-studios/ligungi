@@ -141,6 +141,47 @@ export class Users {
     return new Map(rows.map((row) => [row.user_id, row.position]));
   }
 
+  /** Established players per mode, the ones on the leaderboard. */
+  rankedCounts(): Record<Mode, number> {
+    const rows = this.#db
+      .prepare('select mode, count(*) as players from ratings where games > 0 and deviation <= ? group by mode')
+      .all(PROVISIONAL_DEVIATION) as Array<{ mode: Mode; players: number }>;
+    const counts = Object.fromEntries(MODES.map((mode) => [mode, 0])) as Record<Mode, number>;
+    for (const row of rows) counts[row.mode] = row.players;
+    return counts;
+  }
+
+  /**
+   * One page of a mode's full leaderboard, in the same order as `leaderboard`, with the position `rank` gives.
+   * `query` keeps names containing it; `followerId` keeps that player and the ones they follow.
+   */
+  rankingPage(
+    mode: Mode,
+    filters: { query: string; followerId: string | null },
+    offset: number,
+    limit: number,
+  ): { rows: Array<LeaderRow & { rank: number }>; total: number } {
+    const where = `where (?3 = '' or instr(username_key, ?3) > 0)
+      and (?4 is null or user_id = ?4 or user_id in (select followed_id from follows where user_id = ?4))`;
+    const args = [mode, PROVISIONAL_DEVIATION, filters.query.toLowerCase(), filters.followerId] as const;
+    const rows = this.#db
+      .prepare(`with ranked as (${RANKED}) select user_id, username, rating, games, position from ranked ${where} order by row limit ?5 offset ?6`)
+      .all(...args, limit, offset) as Array<{ user_id: string; username: string; rating: number; games: number; position: number }>;
+    const { total } = this.#db.prepare(`with ranked as (${RANKED}) select count(*) as total from ranked ${where}`).get(...args) as { total: number };
+    return {
+      rows: rows.map((row) => ({ user: { id: row.user_id, name: row.username }, rating: Math.round(row.rating), games: row.games, rank: row.position })),
+      total,
+    };
+  }
+
+  /** A player's position and row number (1-based, for paging) on a mode's leaderboard; null when not on it. */
+  rankingPlace(userId: string, mode: Mode): { rank: number; row: number } | null {
+    const place = this.#db
+      .prepare(`with ranked as (${RANKED}) select position, row from ranked where user_id = ?3`)
+      .get(mode, PROVISIONAL_DEVIATION, userId) as { position: number; row: number } | undefined;
+    return place ? { rank: place.position, row: place.row } : null;
+  }
+
   /** Each user's rating in every mode they have rated games in. */
   playedRatings(userIds: readonly string[]): Map<string, Array<{ mode: Mode; rating: number; provisional: boolean; games: number }>> {
     const result = new Map<string, Array<{ mode: Mode; rating: number; provisional: boolean; games: number }>>();
@@ -250,6 +291,13 @@ export class Users {
     ) as Record<Mode, RatingView>;
   }
 }
+
+/** Every established player of mode ?1 (deviation up to ?2): position as `rank` computes it and row order as `leaderboard`. */
+const RANKED = `select ratings.user_id, users.username, users.username_key, ratings.rating, ratings.games,
+    rank() over (order by ratings.rating desc) as position,
+    row_number() over (order by ratings.rating desc, ratings.games desc, users.username_key) as row
+  from ratings join users on users.id = ratings.user_id
+  where ratings.mode = ?1 and ratings.games > 0 and ratings.deviation <= ?2`;
 
 export interface LeaderRow {
   readonly user: UserRef;

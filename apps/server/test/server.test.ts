@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type SessionView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type SessionView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { Client, firstMove, startServer, type TestServer } from './helpers.ts';
 
@@ -431,6 +431,71 @@ describe('community', () => {
     const zeno = (await a.request<UserProfile>('GET', '/api/users/zeno')).data;
     expect(zeno.ranks).toEqual({ intro: null, beginner: null, intermediate: null, advanced: 2 });
     expect((await a.request<UserProfile>('GET', '/api/users/isaac')).data.ranks.advanced).toBeNull();
+  });
+
+  it('pages the full ranking of a mode with records, search, follows and the viewer place', async () => {
+    server = await startServer();
+    const a = client();
+    for (const name of ['Netero', 'Zeno', 'Meruem', 'Isaac', 'Gon']) await signup(a, name);
+    const { db } = server.app;
+    const set = (name: string, mode: string, rating: number, deviation: number, games: number) =>
+      db
+        .prepare('insert into ratings (user_id, mode, rating, deviation, volatility, games) select id, ?, ?, ?, 0.06, ? from users where username = ?')
+        .run(mode, rating, deviation, games, name);
+    set('Netero', 'advanced', 2100, 60, 40);
+    set('Zeno', 'advanced', 1950, 80, 25);
+    set('Meruem', 'advanced', 1950, 80, 10);
+    set('Isaac', 'advanced', 2400, 200, 3);
+    set('Gon', 'advanced', 1800, 90, 20);
+    set('Gon', 'intro', 1500, 250, 3);
+    const id = (name: string) => (db.prepare('select id from users where username = ?').get(name) as { id: string }).id;
+    const game = db.prepare(
+      `insert into games (id, mode, rated, first_player, white_session, white_user, white_name, black_session, black_user, black_name, status, winner, reason, created_at, updated_at)
+       values (?, ?, ?, 'white', 's', ?, ?, 's', ?, ?, 'ended', ?, 'resign', 1, 1)`,
+    );
+    game.run('g1', 'advanced', 1, id('Netero'), 'Netero', id('Zeno'), 'Zeno', 'white');
+    game.run('g2', 'advanced', 1, id('Gon'), 'Gon', id('Netero'), 'Netero', null);
+    game.run('g3', 'advanced', 1, id('Gon'), 'Gon', id('Zeno'), 'Zeno', 'black');
+    game.run('g4', 'advanced', 0, id('Gon'), 'Gon', id('Zeno'), 'Zeno', 'white');
+    game.run('g5', 'intro', 1, id('Gon'), 'Gon', id('Zeno'), 'Zeno', 'white');
+
+    const view = async (query: string) => (await a.request<RankingView>('GET', `/api/ranking${query}`)).data;
+    const advanced = await view('/advanced');
+    expect(advanced.rows.map((row) => [row.rank, row.user.name])).toEqual([
+      [1, 'Netero'],
+      [2, 'Zeno'],
+      [2, 'Meruem'],
+      [4, 'Gon'],
+    ]);
+    expect(advanced.rows.map((row) => row.record)).toEqual([
+      { wins: 1, draws: 1, losses: 0 },
+      { wins: 1, draws: 0, losses: 1 },
+      { wins: 0, draws: 0, losses: 0 },
+      { wins: 0, draws: 1, losses: 1 },
+    ]);
+    expect(advanced).toMatchObject({ mode: 'advanced', total: 4, page: 1, you: { rank: 4, page: 1 } });
+    expect(advanced.modes.advanced).toEqual({ players: 4, you: { rating: 1800, provisional: false, games: 20, rank: 4 } });
+    expect(advanced.modes.intro).toEqual({ players: 0, you: { rating: 1500, provisional: true, games: 3, rank: null } });
+    expect(advanced.modes.beginner).toEqual({ players: 0, you: null });
+    expect((await view('')).mode).toBe('advanced');
+
+    expect((await view('/advanced?q=ZE')).rows.map((row) => [row.rank, row.user.name])).toEqual([[2, 'Zeno']]);
+    expect((await view('/advanced?followed=1')).rows.map((row) => row.user.name)).toEqual(['Gon']);
+    expect((await a.request('POST', '/api/users/zeno/follow')).status).toBe(200);
+    const followed = await view('/advanced?followed=1');
+    expect(followed.rows.map((row) => [row.user.name, row.followed])).toEqual([
+      ['Zeno', true],
+      ['Gon', false],
+    ]);
+    expect(followed.total).toBe(2);
+    expect(await view('/advanced?page=2')).toMatchObject({ rows: [], total: 4, page: 2 });
+    expect(await view('/advanced?page=abc')).toMatchObject({ page: 1, total: 4 });
+    for (const page of ['1e20', 'Infinity']) expect((await a.request('GET', `/api/ranking/advanced?page=${page}`)).status).toBe(200);
+    expect((await a.request('GET', '/api/ranking/blitz')).status).toBe(404);
+
+    const anonymous = (await client().request<RankingView>('GET', '/api/ranking?followed=1')).data;
+    expect(anonymous).toMatchObject({ mode: 'advanced', total: 4, you: null });
+    expect(anonymous.modes.advanced.you).toBeNull();
   });
 
   it('filters the game history by mode, result, rating, color and opponent', async () => {

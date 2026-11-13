@@ -422,13 +422,27 @@ export const pt = {
 
   ranking: {
     title: 'Ranking',
-    overview: 'Visão geral',
-    top: (n: number) => `Top ${n}`,
     player: 'Jogador',
     rating: 'Rating',
     games: 'Partidas',
     empty: 'Ninguém no ranking deste modo ainda.',
-    rule: 'Entram no ranking os jogadores com rating estabelecido, depois do período provisório (marcado com ? no rating).',
+    rule: 'Só entra no ranking quem já tem rating estabelecido, depois do período provisório (marcado com ? no rating).',
+    modes: 'Modos',
+    inRanking: (n: number) => (n === 0 ? 'ninguém ainda' : `${n} no ranking`),
+    playerCount: (n: number) => `${n} ${n === 1 ? 'jogador' : 'jogadores'} no ranking`,
+    you: 'Você',
+    provisional: 'provisório',
+    record: 'V · E · D',
+    recordLabel: 'Vitórias, empates e derrotas',
+    detail: (games: number, wins: number, draws: number, losses: number) =>
+      `${games} ${games === 1 ? 'partida' : 'partidas'} · ${wins} V · ${draws} E · ${losses} D`,
+    noMatch: 'Ninguém no ranking com esses filtros.',
+    range: (from: number, to: number, total: number) => `${from} a ${to} de ${total}`,
+    pages: 'Páginas',
+    previous: 'Anterior',
+    next: 'Próxima',
+    myPosition: 'Ir para a minha posição',
+    seeMine: 'Ver minha posição',
   },
 
   friends: {

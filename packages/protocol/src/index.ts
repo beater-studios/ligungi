@@ -272,6 +272,36 @@ export interface PlayersView {
   readonly you: Readonly<Partial<Record<Mode, number>>> | null;
 }
 
+/** One row of a mode's full ranking. */
+export interface RankingRow {
+  /** Leaderboard position; tied ratings share it. */
+  readonly rank: number;
+  readonly user: UserRef;
+  readonly rating: number;
+  readonly games: number;
+  readonly record: ModeRecord;
+  readonly online: boolean;
+  /** Whether the viewer follows this player. */
+  readonly followed: boolean;
+}
+
+export interface RankingView {
+  readonly mode: Mode;
+  /** Rows of the requested page, after the search and follow filters. */
+  readonly rows: readonly RankingRow[];
+  /** Rows matching the filters, over every page. */
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+  /** Players on each mode's ranking, and the viewer's standing there when they have rated games in it. */
+  readonly modes: Readonly<Record<Mode, { readonly players: number; readonly you: ModeStanding | null }>>;
+  /** The viewer's place in this mode's unfiltered ranking and the page it is on; null when not ranked. */
+  readonly you: { readonly rank: number; readonly page: number } | null;
+}
+
+export const RANKING_PAGE_SIZE = 50;
+export const RANKING_QUERY_MAX = 30;
+
 export const ONLINE_LIST_MAX = 100;
 export const LEADERBOARD_MAX = 100;
 export const MAX_FOLLOWS = 400;

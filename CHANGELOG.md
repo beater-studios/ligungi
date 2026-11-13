@@ -17,9 +17,11 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 - Profile redesigned: a header card with the player's initial, status, follow counts and the Challenge and Follow buttons; one card per mode with rating, leaderboard position and a wins, draws and losses bar; the live game in its own strip; and the game history as rows showing the result, the opponent, how the game ended, the rating change and the date, with mode chips and tabs above. On phones the cards sit two by two and the tabs scroll sideways.
 - The first player mark beside a name is now "1st" instead of the kanji 先, and the done button in the draft shows only "Done".
 - In games, the rating sits right after the player's name on wide screens too, instead of at the far end of the row.
+- Leaderboard redesigned: the modes on the side with your rating and position in each, and the full leaderboard of the chosen mode in pages of 50, with wins, draws and losses, who is online, a name search, a filter for the people you follow and a button to jump to your own position. On phones the modes become cards and your position stays at the bottom of the screen.
 
 ### Fixed
 
+- The site header got no background when the page was scrolled, so the content showed through it.
 - Secondary buttons no longer look see-through on hover in the light theme: they get a tinted background and an outline in both themes.
 - The draw confirmation (Offer a draw?) had its buttons out of place, and the answer buttons to an offer did not look like the rest of the game controls.
 

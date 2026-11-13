@@ -322,6 +322,33 @@ export class Games {
     return records;
   }
 
+  /** Results of several players' rated games in one mode, as `records` counts them. */
+  recordsIn(mode: Mode, userIds: readonly string[]): Map<string, ModeRecord> {
+    const result = new Map<string, ModeRecord>();
+    if (userIds.length === 0) return result;
+    // Only the number of placeholders is built here; the ids themselves are bound.
+    const ids = userIds.map(() => '?').join(', ');
+    const rows = this.#db
+      .prepare(
+        `select user_id, sum(win) as wins, sum(draw) as draws, sum(loss) as losses from (
+           select white_user as user_id,
+             case when winner = 'white' then 1 else 0 end as win,
+             case when winner is null then 1 else 0 end as draw,
+             case when winner = 'black' then 1 else 0 end as loss
+           from games where mode = ? and rated = 1 and status = 'ended' and white_user in (${ids})
+           union all
+           select black_user,
+             case when winner = 'black' then 1 else 0 end,
+             case when winner is null then 1 else 0 end,
+             case when winner = 'white' then 1 else 0 end
+           from games where mode = ? and rated = 1 and status = 'ended' and black_user in (${ids})
+         ) group by user_id`,
+      )
+      .all(mode, ...userIds, mode, ...userIds) as Array<{ user_id: string; wins: number; draws: number; losses: number }>;
+    for (const row of rows) result.set(row.user_id, { wins: row.wins, draws: row.draws, losses: row.losses });
+    return result;
+  }
+
   /** Summary of a stored game without keeping its room in memory. */
   #summaryOf(row: GameRow): GameSummary {
     const cached = this.#rooms.get(row.id);

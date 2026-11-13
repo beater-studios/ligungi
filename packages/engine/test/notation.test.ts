@@ -4,6 +4,7 @@ import {
   initialPosition,
   legalMoves,
   moveToRulebook,
+  rulebookParts,
   moveToString,
   parseFen,
   parseMove,
@@ -44,6 +45,16 @@ describe('move notation', () => {
     expect(moveToRulebook(stack, parseMove('f2f3=')!)).toBe('4-7-2 侍');
     const drop = build({ a1: 'M', f3: 'P' }, { hands: { white: { spy: 1 } } });
     expect(moveToRulebook(drop, parseMove('Y*f3')!)).toBe('4-7-2 忍新');
+  });
+
+  it('gives the parts of a rulebook move for other notations', () => {
+    const stack = build({ f2: 'S', f3: 'P' });
+    expect(rulebookParts(stack, parseMove('f2f3=')!)).toEqual({
+      done: false, column: 4, row: 7, level: 2, role: 'samurai', drop: false, capture: false, betray: false,
+    });
+    const drop = build({ a1: 'M', f3: 'P' }, { hands: { white: { spy: 1 } } });
+    expect(rulebookParts(drop, parseMove('Y*f3')!)).toMatchObject({ level: 2, role: 'spy', drop: true });
+    expect(rulebookParts(drop, { kind: 'done' })).toEqual({ done: true });
   });
 
   it('plays a few opening moves of the intro setup', () => {

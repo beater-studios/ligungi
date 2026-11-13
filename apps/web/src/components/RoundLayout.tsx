@@ -1,7 +1,8 @@
-import { moveToRulebook, type Color, type Move, type Position } from '@ligungi/engine';
+import type { Color, Move, Position } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { formatClock, useT } from '../i18n/index.ts';
+import { useMoveText } from '../notation.ts';
 import { icons } from '../icons.ts';
 import { playSound } from '../sound.ts';
 import { BeginnerHint } from './BeginnerHint.tsx';
@@ -109,6 +110,7 @@ const UserBox = ({ player, position, myTurn = false }: { player: RoundPlayer; po
 /** Move list with lila's markup: navigation buttons, then index + moves, two plies per row. */
 const MoveTable = ({ positions, moves, ply, onPly, onFlip, analysisHref, status }: Pick<RoundLayoutProps, 'positions' | 'moves' | 'ply' | 'onPly' | 'onFlip' | 'analysisHref' | 'status'>) => {
   const t = useT();
+  const moveText = useMoveText();
   const list = useRef<HTMLElement>(null);
   const current = ply ?? moves.length;
   const go = (next: number) => {
@@ -146,7 +148,7 @@ const MoveTable = ({ positions, moves, ply, onPly, onFlip, analysisHref, status 
       }
       rows.push(
         <z7yx key={`m${j}`} class={j + 1 === current ? 'a1t' : ''} onClick={() => go(j + 1)}>
-          {moveToRulebook(positions[j]!, move)}
+          {moveText(positions[j]!, move)}
         </z7yx>,
       );
     }

@@ -1,10 +1,26 @@
+import type { ComponentChildren } from 'preact';
+import { MoveListPreview } from '../components/MoveListPreview.tsx';
+import { PiecePreview } from '../components/PiecePreview.tsx';
+import { RadioGroup, SettingRow, Toggle } from '../components/ui.tsx';
 import { MESSAGES, themeLabel, useT } from '../i18n/index.ts';
 import { BOARD_SIZES, LANGS, THEMES, prefs, updatePrefs, type Prefs } from '../prefs.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
-import { RadioGroup } from '../components/ui.tsx';
 import { SettingsMenu } from './AccountPage.tsx';
-import { PiecePreview } from '../components/PiecePreview.tsx';
+
+/** A titled group of settings; with a preview, the rows sit on the left and the preview on the right. */
+const Group = ({ title, help, preview, children }: { title: string; help?: string; preview?: ComponentChildren; children: ComponentChildren }) => (
+  <section class={`ligungi-prefs-group${preview ? ' ligungi-prefs-group--preview' : ''}`}>
+    <h2>{title}</h2>
+    {help && <p class="ligungi-prefs-group__help">{help}</p>}
+    <div class="ligungi-prefs-group__body">
+      <div class="ligungi-prefs-group__rows">{children}</div>
+      {preview && <div class="ligungi-prefs-group__preview">{preview}</div>}
+    </div>
+  </section>
+);
+
+type BooleanPref = { [K in keyof Prefs]: Prefs[K] extends boolean ? K : never }[keyof Prefs];
 
 export const SettingsPage = () => {
   const t = useT();
@@ -18,84 +34,83 @@ export const SettingsPage = () => {
       onChange={(value) => updatePrefs({ [key]: value } as Partial<Prefs>)}
     />
   );
+  const toggle = (key: BooleanPref, title: string, help?: string) => (
+    <SettingRow title={title} htmlFor={`pref-${key}`} {...(help ? { help } : {})}>
+      <Toggle id={`pref-${key}`} checked={current[key]} label={title} onChange={(value) => updatePrefs({ [key]: value })} />
+    </SettingRow>
+  );
+
   return (
     <main class="account page-menu">
       <SettingsMenu active="settings" />
       <div class="page-menu__content box box-pad">
         <h1 class="box__top">{s.title}</h1>
-        <form class="form3" onSubmit={(e) => e.preventDefault()}>
-          <section>
-            <h2>{s.language}</h2>
-            {radio('lang', [['auto', s.auto], ...LANGS.map((lang): [Prefs['lang'], string] => [lang, MESSAGES[lang].languageName])])}
-          </section>
-          <section>
-            <h2>{s.pieceNames}</h2>
-            {radio('pieceNames', [
-              ['local', s.pieceNamesLocal],
-              ['ja', s.pieceNamesJapanese],
-            ])}
-          </section>
-          <section>
-            <h2>{s.pieceStyle}</h2>
-            {radio('pieceStyle', [
-              ['illustrated', s.pieceStyleIllustrated],
-              ['kanji', s.pieceStyleKanji],
-            ])}
-          </section>
-          <section>
-            <h2>{s.moveGuides}</h2>
-            {radio('moveGuides', [
-              [true, s.show],
-              [false, s.dontShow],
-            ])}
-            <small class="form-help">{s.moveGuidesHelp}</small>
-            <PiecePreview />
-          </section>
-          <section>
-            <h2>{s.theme}</h2>
-            {radio('theme', THEMES.map((theme) => [theme, themeLabel(t, theme)]))}
-          </section>
-          <section>
-            <h2>{s.boardSize}</h2>
-            {radio('zoom', [
-              [BOARD_SIZES[0], s.sizeSmall],
-              [BOARD_SIZES[1], s.sizeMedium],
-              [BOARD_SIZES[2], s.sizeLarge],
-              [BOARD_SIZES[3], s.sizeMax],
-            ])}
-          </section>
-          <section>
-            <h2>{s.sound}</h2>
-            {radio('sound', [
-              [true, s.on],
-              [false, s.off],
-            ])}
-            <button type="button" class="button button-empty" onClick={() => playSound('move')}>
-              {s.test}
-            </button>
-          </section>
-          <section>
-            <h2>{s.coordinates}</h2>
-            {radio('coordinates', [
-              [true, s.show],
-              [false, s.hide],
-            ])}
-          </section>
-          <section>
-            <h2>{s.hoverReach}</h2>
-            {radio('hoverReach', [
-              [true, s.show],
-              [false, s.dontShow],
-            ])}
-            <small class="form-help">{s.hoverReachHelp}</small>
-          </section>
-          <section>
-            <h2>{s.animation}</h2>
-            {radio('animation', [
-              [true, s.animationOn],
-              [false, s.animationOff],
-            ])}
-          </section>
+        <form class="form3 ligungi-prefs" onSubmit={(e) => e.preventDefault()}>
+          <Group title={s.groupGeneral}>
+            <SettingRow title={s.language} stacked>
+              {radio('lang', [['auto', s.auto], ...LANGS.map((lang): [Prefs['lang'], string] => [lang, MESSAGES[lang].languageName])])}
+            </SettingRow>
+            <SettingRow title={s.theme} stacked>
+              {radio('theme', THEMES.map((theme) => [theme, themeLabel(t, theme)]))}
+            </SettingRow>
+            <SettingRow title={s.sound} htmlFor="pref-sound" help={s.soundHelp}>
+              <div class="ligungi-setting__inline">
+                <button type="button" class="button button-empty" onClick={() => playSound('move')}>
+                  {s.test}
+                </button>
+                <Toggle id="pref-sound" checked={current.sound} label={s.sound} onChange={(sound) => updatePrefs({ sound })} />
+              </div>
+            </SettingRow>
+          </Group>
+
+          <Group title={s.groupPieces} help={s.groupPiecesHelp} preview={<PiecePreview />}>
+            <SettingRow title={s.pieceStyle} stacked>
+              {radio('pieceStyle', [
+                ['illustrated', s.pieceStyleIllustrated],
+                ['kanji', s.pieceStyleKanji],
+              ])}
+            </SettingRow>
+            {toggle('moveGuides', s.moveGuides, s.moveGuidesHelp)}
+          </Group>
+
+          <Group title={s.groupRecord} help={s.groupRecordHelp} preview={<MoveListPreview />}>
+            <SettingRow title={s.pieceNames} help={s.pieceNamesHelp} stacked>
+              {radio('pieceNames', [
+                ['local', s.pieceNamesLocal],
+                ['ja', s.pieceNamesJapanese],
+              ])}
+            </SettingRow>
+            <SettingRow title={s.notation} help={s.notationHelp} stacked>
+              {radio('notation', [
+                ['named', s.notationNamed],
+                ['rulebook', s.notationRulebook],
+                ['machine', s.notationMachine],
+              ])}
+            </SettingRow>
+          </Group>
+
+          <Group title={s.groupBoard}>
+            <SettingRow
+              title={s.boardSize}
+              help={
+                <a href="/analysis" target="_blank" rel="noopener">
+                  {s.viewOnBoard}
+                </a>
+              }
+              stacked
+            >
+              {radio('zoom', [
+                [BOARD_SIZES[0], s.sizeSmall],
+                [BOARD_SIZES[1], s.sizeMedium],
+                [BOARD_SIZES[2], s.sizeLarge],
+                [BOARD_SIZES[3], s.sizeMax],
+              ])}
+            </SettingRow>
+            {toggle('coordinates', s.coordinates, s.coordinatesHelp)}
+            {toggle('hoverReach', s.hoverReach, s.hoverReachHelp)}
+            {toggle('animation', s.animation, s.animationHelp)}
+          </Group>
+
         </form>
         <p class="ligungi-notice">{s.saved}</p>
       </div>

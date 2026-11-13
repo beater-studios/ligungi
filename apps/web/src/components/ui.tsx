@@ -124,3 +124,55 @@ export const SubmitButton = ({ children, disabled = false }: { children: Compone
     </button>
   </div>
 );
+
+interface ToggleProps {
+  readonly id: string;
+  readonly checked: boolean;
+  readonly onChange: (checked: boolean) => void;
+  /** Accessible name; the visible label is usually a `SettingRow` title pointing at `id`. */
+  readonly label: string;
+  readonly disabled?: boolean;
+}
+
+/** On/off switch (lila's cmn-toggle) for settings that are simply on or off. */
+export const Toggle = ({ id, checked, onChange, label, disabled = false }: ToggleProps) => (
+  <span class="cmn-toggle">
+    <input
+      type="checkbox"
+      role="switch"
+      id={id}
+      checked={checked}
+      disabled={disabled}
+      aria-label={label}
+      onChange={(event) => onChange((event.target as HTMLInputElement).checked)}
+    />
+    <label for={id} title={label} />
+  </span>
+);
+
+interface SettingRowProps {
+  readonly title: ComponentChildren;
+  readonly help?: ComponentChildren;
+  /** Id of the control, so the title also toggles it (switches). */
+  readonly htmlFor?: string;
+  /** Puts the control under the text, for wide controls such as option groups. */
+  readonly stacked?: boolean;
+  readonly children: ComponentChildren;
+}
+
+/** One setting: its name and a short explanation, with the control beside them (or below, when `stacked`). */
+export const SettingRow = ({ title, help, htmlFor, stacked = false, children }: SettingRowProps) => (
+  <div class={`ligungi-setting${stacked ? ' ligungi-setting--stacked' : ''}`}>
+    <div class="ligungi-setting__text">
+      {htmlFor ? (
+        <label class="ligungi-setting__title" for={htmlFor}>
+          {title}
+        </label>
+      ) : (
+        <span class="ligungi-setting__title">{title}</span>
+      )}
+      {help !== undefined && <small class="ligungi-setting__help">{help}</small>}
+    </div>
+    <div class="ligungi-setting__control">{children}</div>
+  </div>
+);

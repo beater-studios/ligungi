@@ -212,7 +212,7 @@ Drops count as moves that can save the Marshal.
 
 ## 10. Notation
 
-Rulebook notation (for display): `column-row-tier piece`, and `新` for a drop. Examples: `4-7-2 侍` (a Samurai from 4-8 stacked on the Soldier at 4-7, ending at tier 2) and `4-7-2 忍新` (a Ninja dropped on 4-7, tier 2). The machine notation (the equivalent of FEN/SFEN), with its own markers for capture and betrayal, is described in [api.md](api.md).
+Rulebook notation (for display): `column-row-tier piece`, and `新` for a drop. Examples: `4-7-2 侍` (a Samurai from 4-8 stacked on the Soldier at 4-7, ending at tier 2) and `4-7-2 忍新` (a Ninja dropped on 4-7, tier 2). The machine notation (the equivalent of FEN/SFEN), with its own markers for capture and betrayal, is described in [api.md](api.md). The site can also show the rulebook notation with the piece name in the player's language instead of the kanji, `+` for a piece from the hand, `×` for a capture and `⇄` for a betrayal (`4-7-2 +Ninja`); it is a display option, not a separate notation.
 
 ## 11. Interpreted points
 

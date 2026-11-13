@@ -2,7 +2,6 @@ import {
   MODES,
   initialPosition,
   legalMoves,
-  moveToRulebook,
   opposite,
   parseFen,
   parseMove,
@@ -18,6 +17,7 @@ import { BoardView } from '../components/BoardView.tsx';
 import { DraftPanel, TowerPanel } from '../components/Panels.tsx';
 import { Select } from '../components/ui.tsx';
 import { outcomeText, useT } from '../i18n/index.ts';
+import { useMoveText } from '../notation.ts';
 import { icons } from '../icons.ts';
 import { useLocalGame } from '../localGame.ts';
 import { useLocation } from '../router.ts';
@@ -113,6 +113,7 @@ export const AnalysisPage = () => {
   };
 
   const rows = [];
+  const moveText = useMoveText();
   for (let i = 0; i < replay.moves.length; i += 2) {
     rows.push(<index key={`i${i}`}>{i / 2 + 1}</index>);
     for (const j of [i, i + 1]) {
@@ -120,7 +121,7 @@ export const AnalysisPage = () => {
       if (!move) continue;
       rows.push(
         <move key={`m${j}`} class={j + 1 === current ? 'active' : ''} onClick={() => go(j + 1)}>
-          {moveToRulebook(replay.positions[j]!, move)}
+          {moveText(replay.positions[j]!, move)}
         </move>,
       );
     }

@@ -1014,7 +1014,7 @@ select.ligungi-select {
   }
 }
 
-/* ===== Piece glyphs outside the board (components/PieceGlyph.tsx, PiecePreview.tsx) ===== */
+/* ===== Piece glyphs outside the board (components/PieceGlyph.tsx) ===== */
 .ligungi-glyph:has(.gg-icon) {
   position: absolute;
   inset: 0;
@@ -1026,34 +1026,169 @@ select.ligungi-select {
   font-weight: bold;
 }
 
-.ligungi-piece-preview {
-  margin: 1rem 0 0;
+/* ===== Preferences page: groups of setting rows, some with a preview on the right ===== */
+.ligungi-prefs-group {
+  & + & {
+    margin-top: 2.6rem;
+  }
+
+  h2 {
+    margin-bottom: 0.4rem;
+  }
+
+  &__help {
+    margin: 0 0 0.6rem;
+    color: $c-font-dim;
+  }
+
+  &--preview &__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2.5rem;
+    align-items: start;
+
+    @media (max-width: at-most($small)) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.2rem;
+    }
+  }
+
+  &__preview {
+    padding-top: 0.9rem;
+
+    @media (max-width: at-most($small)) {
+      padding-top: 0;
+      justify-self: center;
+    }
+  }
+}
+
+.ligungi-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem 1.5rem;
+  padding: 0.9rem 0;
+
+  & + & {
+    border-top: $border;
+  }
+
+  &--stacked {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  &__title {
+    font-weight: bold;
+  }
+
+  label#{&}__title {
+    cursor: pointer;
+  }
+
+  &__help {
+    color: $c-font-dim;
+    font-size: 0.88em;
+    line-height: 1.45;
+
+    // lila's account pages set `.account section a { color: inherit }`.
+    .account & a {
+      color: $c-link;
+    }
+  }
+
+  &__control {
+    flex-shrink: 0;
+
+    group.radio {
+      margin: 0;
+    }
+  }
+
+  &__inline {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.ligungi-preview {
+  margin: 0;
 
   figcaption {
-    margin-bottom: 0.4rem;
+    margin-top: 0.4rem;
     color: $c-font-dim;
     font-size: 0.85em;
+    text-align: center;
   }
+}
 
-  &__row {
-    display: inline-flex;
-    border: 1px solid rgba(0, 0, 0, 0.35);
-  }
+// A 3x3 corner of the board, square, with the board's own wood and lines.
+.ligungi-board-preview {
+  display: grid;
+  grid-template-columns: repeat(3, 5rem);
+  grid-template-rows: repeat(3, 5rem);
+  background: var(--gg-board);
+  border: 1px solid var(--gg-board-edge);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 
   &__sq {
     position: relative;
-    width: 4.4rem;
-    height: 4.4rem;
     container-type: inline-size;
-    background: #e3c290;
+    border-right: 1px solid var(--gg-line);
+    border-bottom: 1px solid var(--gg-line);
 
-    & + & {
-      border-inline-start: 1px solid rgba(0, 0, 0, 0.25);
+    &:nth-child(3n) {
+      border-right: 0;
+    }
+
+    &:nth-child(n + 7) {
+      border-bottom: 0;
     }
 
     .gg-piece {
       font-size: 44cqw;
     }
+  }
+}
+
+// Same proportions as the move list beside the board: move number, then white and black.
+.ligungi-moves-preview {
+  display: grid;
+  grid-template-columns: 2.4em max-content max-content;
+  background: $c-bg-box;
+  border: $border;
+  border-radius: $box-radius-size;
+  overflow: hidden;
+  font-size: 0.95em;
+
+  &__index {
+    padding: 0.35em 0;
+    background: $c-bg-zebra;
+    color: $c-font-dim;
+    text-align: center;
+  }
+
+  &__move {
+    padding: 0.35em 0.9em 0.35em 0.6em;
+    white-space: nowrap;
+
+    &.active {
+      background: color-mix(in srgb, #{$c-primary} 25%, transparent);
+      font-weight: bold;
+    }
+  }
+
+  @media (max-width: at-most($small)) {
+    grid-template-columns: 2.4em minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 

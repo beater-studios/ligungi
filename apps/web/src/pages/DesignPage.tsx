@@ -3,7 +3,7 @@ import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PlayerTag } from '../components/PlayerTag.tsx';
-import { Checkbox, Field, FieldRow, RadioGroup, Select, SubmitButton } from '../components/ui.tsx';
+import { Checkbox, Field, FieldRow, RadioGroup, Select, SettingRow, SubmitButton, Toggle } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
@@ -50,6 +50,7 @@ export const DesignPage = () => {
   const { theme } = useStore(prefs);
   const [mode, setMode] = useState('advanced');
   const [minutes, setMinutes] = useState(10);
+  const [switched, setSwitched] = useState(true);
   const [checked, setChecked] = useState(true);
   const [choice, setChoice] = useState<'white' | 'random' | 'black'>('random');
   const sections = [
@@ -194,6 +195,25 @@ export const DesignPage = () => {
             </Field>
             <SubmitButton>SubmitButton</SubmitButton>
           </form>
+          <Example label="Settings rows (SettingRow + Toggle), as on the preferences page">
+            <div class="form3" style={{ width: '100%' }}>
+              <SettingRow title="Toggle setting" help="Simple on or off settings use a switch; the title toggles it too." htmlFor="ds-switch">
+                <Toggle id="ds-switch" checked={switched} onChange={setSwitched} label="Toggle setting" />
+              </SettingRow>
+              <SettingRow title="Stacked setting" help="Wide controls, such as option groups, go under the text." stacked>
+                <RadioGroup
+                  name="ds-stacked"
+                  value={choice}
+                  options={[
+                    { value: 'white', label: 'White' },
+                    { value: 'random', label: 'Random' },
+                    { value: 'black', label: 'Black' },
+                  ]}
+                  onChange={setChoice}
+                />
+              </SettingRow>
+            </div>
+          </Example>
         </Section>
 
         <Section id="feedback" title="Feedback">

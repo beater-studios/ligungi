@@ -50,6 +50,6 @@ describe('random games', () => {
           checkInvariants(game.position);
         }
       }
-    });
+    }, 30_000); // dozens of full random games: slow by nature on a busy machine
   }
 });

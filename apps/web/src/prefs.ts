@@ -18,6 +18,8 @@ export interface Prefs {
   readonly moveGuides: boolean;
   /** `illustrated` draws an icon per piece; `kanji` the character, as on the physical game. */
   readonly pieceStyle: 'illustrated' | 'kanji';
+  /** Move list notation: the rulebook's (kanji), the same with piece names, or the machine notation. */
+  readonly notation: 'rulebook' | 'named' | 'machine';
   readonly sound: boolean;
   readonly theme: 'auto' | 'light' | 'dark';
   readonly coordinates: boolean;
@@ -34,6 +36,7 @@ const DEFAULTS: Prefs = {
   pieceNames: 'local',
   moveGuides: true,
   pieceStyle: 'illustrated',
+  notation: 'named',
   sound: true,
   theme: 'auto',
   coordinates: true,
@@ -55,6 +58,12 @@ const load = (): Prefs => {
       moveGuides: typeof stored.moveGuides === 'boolean' ? stored.moveGuides : !returning && DEFAULTS.moveGuides,
       pieceStyle:
         stored.pieceStyle === 'kanji' || stored.pieceStyle === 'illustrated' ? stored.pieceStyle : returning ? 'kanji' : DEFAULTS.pieceStyle,
+      notation:
+        stored.notation === 'rulebook' || stored.notation === 'named' || stored.notation === 'machine'
+          ? stored.notation
+          : returning
+            ? 'rulebook'
+            : DEFAULTS.notation,
       // Older versions had a free 0-100 slider; snap those values to the sizes offered today.
       zoom: Number.isFinite(Number(stored.zoom)) ? nearestBoardSize(stored.zoom) : DEFAULTS.zoom,
       lang: merged.lang === 'auto' || LANGS.includes(merged.lang) ? merged.lang : 'auto',

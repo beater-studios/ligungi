@@ -1,7 +1,7 @@
 import { parseSquare, squareName, toRulebook } from './board.ts';
 import { topOf } from './position.ts';
 import { ROLE_INFO, roleFromLetter } from './roles.ts';
-import type { BoardAction, Move, Position } from './types.ts';
+import type { BoardAction, Move, Position, Role } from './types.ts';
 
 const ACTION_SUFFIX: Record<BoardAction, string> = { move: '', stack: '=', capture: 'x' };
 
@@ -35,17 +35,30 @@ export const parseMove = (text: string): Move | undefined => {
   return { kind: 'move', from: parseSquare(from!)!, to: parseSquare(to!)!, action, ...betray };
 };
 
-/**
- * Rulebook notation "column-row-level piece", with 新 for pieces from the hand, e.g. `4-7-2 侍`
- * or `4-7-2 忍新`. Captures add 取 and betrayals 返. Needs the position before the move.
- */
-export const moveToRulebook = (position: Position, move: Move): string => {
-  if (move.kind === 'done') return '済み';
+/** The pieces of a rulebook move, shared by the rulebook notation and its variants (piece names instead of kanji). */
+export type RulebookParts =
+  | { readonly done: true }
+  | {
+      readonly done: false;
+      readonly column: number;
+      readonly row: number;
+      /** Tier the piece ends on (1 to 3). */
+      readonly level: number;
+      readonly role: Role;
+      /** The piece comes from the hand (新). */
+      readonly drop: boolean;
+      readonly capture: boolean;
+      readonly betray: boolean;
+    };
+
+/** Needs the position before the move. */
+export const rulebookParts = (position: Position, move: Move): RulebookParts => {
+  if (move.kind === 'done') return { done: true };
   const { column, row } = toRulebook(move.to);
   const target = position.board[move.to]!;
-  const betray = move.betray?.length ? '返' : '';
+  const betray = Boolean(move.betray?.length);
   if (move.kind === 'drop') {
-    return `${column}-${row}-${target.length + 1} ${ROLE_INFO[move.role].kanji}新${betray}`;
+    return { done: false, column, row, level: target.length + 1, role: move.role, drop: true, capture: false, betray };
   }
   const piece = topOf(position.board[move.from]!)!;
   const level =
@@ -54,6 +67,16 @@ export const moveToRulebook = (position: Position, move: Move): string => {
       : move.action === 'capture'
         ? target.filter((p) => p.color === piece.color).length + 1
         : target.length + 1;
-  const capture = move.action === 'capture' ? '取' : '';
-  return `${column}-${row}-${level} ${ROLE_INFO[piece.role].kanji}${capture}${betray}`;
+  return { done: false, column, row, level, role: piece.role, drop: false, capture: move.action === 'capture', betray };
+};
+
+/**
+ * Rulebook notation "column-row-level piece", with 新 for pieces from the hand, e.g. `4-7-2 侍`
+ * or `4-7-2 忍新`. Captures add 取 and betrayals 返. Needs the position before the move.
+ */
+export const moveToRulebook = (position: Position, move: Move): string => {
+  const parts = rulebookParts(position, move);
+  if (parts.done) return '済み';
+  const marks = `${parts.drop ? '新' : ''}${parts.capture ? '取' : ''}${parts.betray ? '返' : ''}`;
+  return `${parts.column}-${parts.row}-${parts.level} ${ROLE_INFO[parts.role].kanji}${marks}`;
 };

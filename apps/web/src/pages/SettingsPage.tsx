@@ -4,6 +4,7 @@ import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
 import { RadioGroup } from '../components/ui.tsx';
 import { SettingsMenu } from './AccountPage.tsx';
+import { PiecePreview } from '../components/PiecePreview.tsx';
 
 export const SettingsPage = () => {
   const t = useT();
@@ -33,6 +34,22 @@ export const SettingsPage = () => {
               ['local', s.pieceNamesLocal],
               ['ja', s.pieceNamesJapanese],
             ])}
+          </section>
+          <section>
+            <h2>{s.pieceStyle}</h2>
+            {radio('pieceStyle', [
+              ['illustrated', s.pieceStyleIllustrated],
+              ['kanji', s.pieceStyleKanji],
+            ])}
+          </section>
+          <section>
+            <h2>{s.moveGuides}</h2>
+            {radio('moveGuides', [
+              [true, s.show],
+              [false, s.dontShow],
+            ])}
+            <small class="form-help">{s.moveGuidesHelp}</small>
+            <PiecePreview />
           </section>
           <section>
             <h2>{s.theme}</h2>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { formatClock, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { playSound } from '../sound.ts';
+import { BeginnerHint } from './BeginnerHint.tsx';
 import { BoardView, type BoardProps } from './BoardView.tsx';
 import { DraftPanel, TowerPanel } from './Panels.tsx';
 
@@ -189,6 +190,7 @@ export const RoundLayout = (props: RoundLayoutProps) => {
     <main class="round">
       <aside class="round__side">
         {props.side}
+        <BeginnerHint />
         <div class="ligungi-panels box">
           {props.board.position && (
             <DraftPanel

@@ -1,4 +1,5 @@
-import { ROLE_INFO, parseFen, topOf, type Color, type Position, type Square } from '@ligungi/engine';
+import { parseFen, topOf, type Color, type Position, type Square } from '@ligungi/engine';
+import { PieceGlyph } from './PieceGlyph.tsx';
 import { visualSquares as visualOrder } from '@ligungi/board';
 
 interface MiniBoardProps {
@@ -22,7 +23,7 @@ export const MiniBoard = ({ position, fen, orientation = 'white', marks }: MiniB
           <div key={square} class={`gg-mini-sq ${marks?.get(square) ?? ''}`}>
             {top && (
               <span class={`gg-mini-piece ${top.color}${top.color !== orientation ? ' flipped' : ''}`}>
-                <span>{ROLE_INFO[top.role].kanji}</span>
+                <PieceGlyph role={top.role} />
                 {tower.length > 1 && <i>{tower.length}</i>}
               </span>
             )}

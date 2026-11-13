@@ -14,6 +14,10 @@ export interface Prefs {
   readonly lang: 'auto' | Lang;
   /** `local` follows the interface language; `ja` uses the Japanese readings. */
   readonly pieceNames: 'local' | 'ja';
+  /** Marks around each piece showing how it moves. */
+  readonly moveGuides: boolean;
+  /** `illustrated` draws an icon per piece; `kanji` the character, as on the physical game. */
+  readonly pieceStyle: 'illustrated' | 'kanji';
   readonly sound: boolean;
   readonly theme: 'auto' | 'light' | 'dark';
   readonly coordinates: boolean;
@@ -28,21 +32,29 @@ const KEY = 'ligungi.prefs';
 const DEFAULTS: Prefs = {
   lang: 'auto',
   pieceNames: 'local',
+  moveGuides: true,
+  pieceStyle: 'illustrated',
   sound: true,
   theme: 'auto',
   coordinates: true,
   animation: true,
   zoom: 80,
-  hoverReach: false,
+  hoverReach: true,
 };
 
 const load = (): Prefs => {
   try {
     const stored = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<Record<keyof Prefs, unknown>>;
     const merged = { ...DEFAULTS, ...stored } as Prefs;
+    // The beginner aids are the defaults for new visitors only: players who saved preferences before they existed
+    // keep the board they knew (kanji, no movement guides) until they choose otherwise.
+    const returning = Object.keys(stored).length > 0;
     return {
       ...merged,
       pieceNames: stored.pieceNames === 'ja' ? 'ja' : 'local',
+      moveGuides: typeof stored.moveGuides === 'boolean' ? stored.moveGuides : !returning && DEFAULTS.moveGuides,
+      pieceStyle:
+        stored.pieceStyle === 'kanji' || stored.pieceStyle === 'illustrated' ? stored.pieceStyle : returning ? 'kanji' : DEFAULTS.pieceStyle,
       // Older versions had a free 0-100 slider; snap those values to the sizes offered today.
       zoom: Number.isFinite(Number(stored.zoom)) ? nearestBoardSize(stored.zoom) : DEFAULTS.zoom,
       lang: merged.lang === 'auto' || LANGS.includes(merged.lang) ? merged.lang : 'auto',

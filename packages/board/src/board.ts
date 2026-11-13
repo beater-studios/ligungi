@@ -1,5 +1,4 @@
 import {
-  ROLE_INFO,
   ROLES,
   actionsOn,
   applyMove,
@@ -17,6 +16,7 @@ import {
   type Square,
 } from '@ligungi/engine';
 import { coordinateLabels, visualSquares } from './geometry.ts';
+import { glyphClass, pieceGlyph } from './glyph.ts';
 import { DEFAULT_LABELS, colorLabel, pieceName, type Labels } from './labels.ts';
 import type { Api, Config, Selection } from './types.ts';
 
@@ -40,6 +40,8 @@ const DEFAULTS: Config = {
   lastMove: null,
   coordinates: true,
   pieceNames: 'pt',
+  moveGuides: false,
+  pieceStyle: 'kanji',
   labels: {},
   onMove: null,
   premoveMoves: [],
@@ -479,7 +481,9 @@ export class Board implements Api {
 
   #pieceHtml(piece: Piece, extra: string, level = 0): string {
     const flipped = piece.color !== this.#config.orientation ? ' gg-flipped' : '';
-    return `<div class="gg-piece gg-${piece.color}${flipped} ${extra}" style="--level:${level}"><span>${ROLE_INFO[piece.role].kanji}</span></div>`;
+    const { pieceStyle, moveGuides } = this.#config;
+    const layout = glyphClass(pieceStyle, moveGuides);
+    return `<div class="gg-piece gg-${piece.color}${flipped}${layout ? ` ${layout}` : ''} ${extra}" style="--level:${level}"><span>${pieceGlyph(piece.role, pieceStyle, moveGuides)}</span></div>`;
   }
 
   #towerHtml(square: Square): string {

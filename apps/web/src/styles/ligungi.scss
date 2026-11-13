@@ -968,6 +968,95 @@ select.ligungi-select {
   margin-top: 1.5rem;
 }
 
+/* ===== "New to Gungi?" box beside the board (components/BeginnerHint.tsx) ===== */
+.ligungi-beginner {
+  padding: 0.9rem 1rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.95em;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    h2 {
+      margin: 0;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+  }
+
+  &__close {
+    border: 0;
+    background: none;
+    color: $c-font-dim;
+    cursor: pointer;
+    padding: 0.3rem;
+
+    &:hover {
+      color: $c-font-clear;
+    }
+  }
+
+  p {
+    margin: 0.5rem 0 0.2rem;
+    color: $c-font-dim;
+  }
+
+  .form3 .ligungi-check {
+    margin: 0.5rem 0 0;
+  }
+
+  a {
+    display: inline-block;
+    margin-top: 0.7rem;
+  }
+}
+
+/* ===== Piece glyphs outside the board (components/PieceGlyph.tsx, PiecePreview.tsx) ===== */
+.ligungi-glyph:has(.gg-icon) {
+  position: absolute;
+  inset: 0;
+}
+
+.ligungi-tower__kanji {
+  margin-inline-start: 0.4em;
+  font-family: $kanji-font;
+  font-weight: bold;
+}
+
+.ligungi-piece-preview {
+  margin: 1rem 0 0;
+
+  figcaption {
+    margin-bottom: 0.4rem;
+    color: $c-font-dim;
+    font-size: 0.85em;
+  }
+
+  &__row {
+    display: inline-flex;
+    border: 1px solid rgba(0, 0, 0, 0.35);
+  }
+
+  &__sq {
+    position: relative;
+    width: 4.4rem;
+    height: 4.4rem;
+    container-type: inline-size;
+    background: #e3c290;
+
+    & + & {
+      border-inline-start: 1px solid rgba(0, 0, 0, 0.25);
+    }
+
+    .gg-piece {
+      font-size: 44cqw;
+    }
+  }
+}
+
 /* ===== Leaderboards: room below the last row ===== */
 .ligungi-ranking.community {
   margin-bottom: 1.5rem;

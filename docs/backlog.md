@@ -14,7 +14,6 @@ The first item closes a gap between what the terms promise and what the site can
 | Password recovery by email | Needs an outgoing email service | M | Medium | lichess, internal, lishogi |
 | Profile details (bio, country flag, links) | Personality on profiles; flags show up on leaderboards | S | Low | lichess, lidraughts, libaduk, lishogi |
 | Captcha instead of the per-username login lockout | Today 20 wrong passwords lock an account for 15 minutes, which an attacker can abuse | M | Low | internal |
-| Two-factor authentication | Protects accounts, especially rated and moderator ones | M | Medium | lichess |
 | Privacy settings: who can challenge, message or follow me | Reduces harassment once social features exist | S | Low | lichess |
 | Kid mode (no chat or messages) | Safer for young players | S | Low | lichess |
 
@@ -28,17 +27,12 @@ The first item closes a gap between what the terms promise and what the site can
 
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
-| Byo-yomi time control (for example 10\|30), with a spoken countdown | The traditional clock of Japanese games | M | Medium | lichess, libaduk, lishogi |
 | Kyu and dan ranks derived from the rating, shown beside names | Japanese-game flavor; easier to read than a number | S | Medium | lishogi |
 | Speed categories on quick pairing (Bullet, Blitz, Rapid, Classical) | lichess convention, easier to read than raw times | S | Low | lichess, lidraughts, libaduk |
 | Computer presets on quick pairing (play the bot at each level in one click) | Shortcut for the most common solo game | S | Low | lichess, lishogi |
 | Rating range filter for seeks | Find opponents of similar strength | S | Low | lichess, lishogi |
-| Challenge a player directly from their profile, with a notification | Today challenges only work by sharing a link | M | High | lichess |
-| Takeback requests and giving the opponent extra time | Friendly casual games | S | Medium | lichess |
 | Keyboard move input | Speed and accessibility | M | Low | lichess |
 | Zen mode (hide everything but the board and clocks) | Focus while playing | S | Low | lichess |
-| Correspondence games (days per move) | Play without being online at the same time | M | Medium | lichess, lidraughts, libaduk, lishogi |
-| Stronger computer opponent | The bot searches only two plies; several other items depend on it | M | Medium | internal |
 | Tournaments: Arena and Swiss, then calendar, shields, ladders, round robin and team battles | Main engagement driver on lichess-style sites | L | Medium | lichess, lidraughts, lishogi |
 | Bot accounts through a bot API (engines play on the site, list of online bots) | Lets engine authors join, gives players more opponents | L | Low | lichess, lishogi |
 | Simultaneous exhibitions | Strong players against many at once | L | Low | lichess, lidraughts, lishogi |
@@ -70,9 +64,6 @@ The first item closes a gap between what the terms promise and what the site can
 
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
-| Piece sets, including a beginner set that draws how each piece moves instead of the kanji | Most players outside Japan do not read kanji; a movement-pictogram set lowers the entry barrier a lot | M | High | lichess, lishogi |
-| Notation choice in the move list (rulebook notation, coordinates, machine notation) | Players and teachers read moves differently | S | Medium | lishogi |
-| Board themes (several woods and colors, custom theme) | Personal taste and accessibility (contrast) | S | Medium | lichess, lishogi |
 | Sound sets, including spoken moves | Personal taste and accessibility | M | Low | lichess, lishogi |
 | Custom background image | Personal taste | S | Low | lichess, lishogi |
 | Language shortcut in the header | Faster than opening the settings menu | S | Low | lishogi |
@@ -86,7 +77,6 @@ The first item closes a gap between what the terms promise and what the site can
 |---|---|---|---|---|
 | Official social media: a Discord server first (community and support), then X, YouTube, Twitch and Instagram, each linked from the footer with its icon (icons from Simple Icons, CC0) | Gives players a place to meet, ask questions and follow news; Discord needs moderators before it opens | S | Medium | lichess, lishogi |
 | Community links in the menu and footer (GitHub issues, community group, social media) | The issue tracker is only linked from the FAQ and contact page | S | Medium | lichess, libaduk, lishogi |
-| Players page: who is online, live games, site statistics and rating distribution | Shows the site is alive; the data already exists | M | Medium | lichess, libaduk, lishogi |
 | Recent activity feed (finished games, new players) | Same | S | Low | libaduk |
 | Leaderboard: drop inactive players, show rating trend | lichess convention | S | Low | lichess, lidraughts, lishogi |
 | Profile tab counts follow the mode filter | Counts are global today while the list is filtered | S | Low | internal |

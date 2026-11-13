@@ -17,6 +17,7 @@ A free platform to play Gungi (軍儀), the board game from HUNTER×HUNTER, onli
 - [docs/rules.md](docs/rules.md): the rules specification, with sources and interpretations.
 - [docs/architecture.md](docs/architecture.md): packages, the flow of an online game, and technical decisions.
 - [docs/api.md](docs/api.md): HTTP and WebSocket API.
+- [docs/roadmap.md](docs/roadmap.md): work confirmed for upcoming versions.
 - [docs/backlog.md](docs/backlog.md): candidate work and ideas, not committed to.
 
 ## Structure

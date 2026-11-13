@@ -422,6 +422,16 @@ export const es: Messages = {
 
   tv: { empty: 'No hay partidas en curso ahora.' },
 
+  beginner: {
+    title: '¿Nuevo en Gungi?',
+    text: 'Dos ayudas para aprender jugando. Puedes cambiarlas después en Preferencias.',
+    illustrated: 'Usar piezas ilustradas en lugar del kanji',
+    moveGuides: 'Mostrar cómo se mueven las piezas',
+    hoverReach: 'Mostrar el alcance al pasar el ratón, también de las piezas rivales',
+    learn: 'Aprender las reglas',
+    close: 'Cerrar',
+  },
+
   settings: {
     title: 'Preferencias',
     language: 'Idioma',
@@ -429,6 +439,12 @@ export const es: Messages = {
     pieceNames: 'Nombres de las piezas',
     pieceNamesLocal: 'Español (Lancero, Ninja...)',
     pieceNamesJapanese: 'Japonés (Yari, Shinobi...)',
+    pieceStyle: 'Estilo de las piezas',
+    pieceStyleIllustrated: 'Ilustrado',
+    pieceStyleKanji: 'Kanji, como en el juego físico',
+    piecePreview: 'Vista previa',
+    moveGuides: 'Indicadores de movimiento',
+    moveGuidesHelp: 'Marcas alrededor de cada pieza muestran cómo se mueve: un punto por cada casilla de alcance, una flecha para una línea ilimitada y un anillo donde aterrizan las piezas que saltan.',
     theme: 'Tema',
     light: 'Claro',
     dark: 'Oscuro',

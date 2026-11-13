@@ -1,4 +1,6 @@
-.gg-wrap {
+/* Palette of the board, also used by pieces drawn outside it (add `gg-palette` to their container). */
+.gg-wrap,
+.gg-palette {
   --gg-board: #e7c88f;
   --gg-board-edge: #c9a564;
   --gg-line: rgba(60, 40, 15, 0.55);
@@ -17,6 +19,9 @@
   --gg-panel-ink: #222;
   --gg-accent: #3b7a2a;
   --gg-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif CJK JP', serif;
+}
+
+.gg-wrap {
   display: grid;
   gap: 0.5rem;
   width: 100%;
@@ -176,6 +181,56 @@
 
 .gg-piece.gg-flipped span {
   transform: rotate(180deg);
+}
+
+/* Beginner set: the movement guides fill the disc and the kanji shrinks to the middle. */
+.gg-piece.gg-guided span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.56em;
+}
+
+.gg-piece.gg-illustrated span {
+  position: absolute;
+  inset: 0;
+}
+
+/* Details cut into an icon take the disc's color, so they show on both sides. */
+.gg-cut {
+  fill: #fff;
+  stroke: none;
+  opacity: 0.45;
+}
+
+.gg-cut [stroke] {
+  stroke: #fff;
+}
+
+.gg-black .gg-cut,
+.black > .ligungi-glyph .gg-cut {
+  fill: #000;
+}
+
+.gg-black .gg-cut [stroke],
+.black > .ligungi-glyph .gg-cut [stroke] {
+  stroke: #000;
+}
+
+/* The opponent's pieces turn around, and so do their movement guides; a picture stays upright to be recognized. */
+.gg-flipped .gg-art,
+.flipped .gg-art {
+  transform: rotate(180deg);
+}
+
+.gg-icon,
+.gg-guides {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 .gg-height {

@@ -367,6 +367,16 @@ export const pt = {
 
   tv: { empty: 'Nenhuma partida em andamento agora.' },
 
+  beginner: {
+    title: 'Novo no Gungi?',
+    text: 'Duas ajudas para aprender jogando. Dá para mudar depois em Preferências.',
+    illustrated: 'Usar peças ilustradas em vez do kanji',
+    moveGuides: 'Mostrar como as peças andam',
+    hoverReach: 'Mostrar o alcance ao passar o mouse, inclusive das peças do adversário',
+    learn: 'Aprender as regras',
+    close: 'Fechar',
+  },
+
   settings: {
     title: 'Preferências',
     language: 'Idioma',
@@ -374,6 +384,12 @@ export const pt = {
     pieceNames: 'Nomes das peças',
     pieceNamesLocal: 'Português (Lanceiro, Ninja...)',
     pieceNamesJapanese: 'Japonês (Yari, Shinobi...)',
+    pieceStyle: 'Estilo das peças',
+    pieceStyleIllustrated: 'Ilustrado',
+    pieceStyleKanji: 'Kanji, como no jogo físico',
+    piecePreview: 'Prévia',
+    moveGuides: 'Indicadores de movimento',
+    moveGuidesHelp: 'Marcas em volta de cada peça mostram como ela anda: um ponto por casa de alcance, uma seta para linha ilimitada e um anel onde as peças que saltam aterrissam.',
     theme: 'Tema',
     light: 'Claro',
     dark: 'Escuro',

@@ -1,4 +1,5 @@
 import type { Color, Move, Position, Role, Square } from '@ligungi/engine';
+import type { PieceStyle } from './glyph.ts';
 import type { Labels, PieceNames } from './labels.ts';
 
 export type Selection =
@@ -17,6 +18,10 @@ export interface Config {
   lastMove: Move | null;
   coordinates: boolean;
   pieceNames: PieceNames;
+  /** Marks around each piece showing how it moves at tier 1 (the beginner aid). */
+  moveGuides: boolean;
+  /** `kanji` as on the physical game, `illustrated` with an icon per piece. */
+  pieceStyle: PieceStyle;
   labels: Partial<Labels>;
   /** Called after the user picks a move. The board already shows the resulting position. */
   onMove: ((move: Move) => void) | null;

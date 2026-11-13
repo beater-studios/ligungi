@@ -1,11 +1,15 @@
 import { pieceName } from '@ligungi/board';
 import { ROLE_INFO, handSize, type Color, type Position, type Square } from '@ligungi/engine';
 import { usePieceNames, useT } from '../i18n/index.ts';
+import { prefs } from '../prefs.ts';
+import { useStore } from '../store.ts';
+import { PieceGlyph } from './PieceGlyph.tsx';
 
 /** Fixed panel with the composition of the tower the user is looking at, top first. */
 export const TowerPanel = ({ position, square }: { position: Position; square: Square | null }) => {
   const t = useT();
   const pieceNames = usePieceNames();
+  const { pieceStyle } = useStore(prefs);
   const tower = square === null ? [] : position.board[square]!;
   return (
     <section class="ligungi-tower">
@@ -20,9 +24,12 @@ export const TowerPanel = ({ position, square }: { position: Position; square: S
             .map(({ piece, level }) => (
               <li key={level}>
                 <span class={`gg-mini-piece ${piece.color}`}>
-                  <span>{ROLE_INFO[piece.role].kanji}</span>
+                  <PieceGlyph role={piece.role} />
                 </span>
-                <span class="ligungi-tower__name">{pieceName(piece.role, pieceNames)}</span>
+                <span class="ligungi-tower__name">
+                  {pieceName(piece.role, pieceNames)}
+                  {pieceStyle === 'illustrated' && <span class="ligungi-tower__kanji">{ROLE_INFO[piece.role].kanji}</span>}
+                </span>
                 <span class="ligungi-tower__meta">
                   {t.colors[piece.color]} · {t.panels.level(level + 1)}
                 </span>

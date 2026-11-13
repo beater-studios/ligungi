@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { initialPosition, legalMoves, moveToString, type Move, type Position } from '@ligungi/engine';
-import { Gungiground, type Api } from '../src/index.ts';
+import { ROLES, initialPosition, legalMoves, moveToString, type Move, type Position } from '@ligungi/engine';
+import { Gungiground, PIECE_ICONS, guidesSvg, type Api } from '../src/index.ts';
 import { build, sq } from '../../engine/test/helpers.ts';
 
 let api: Api | undefined;
@@ -177,5 +177,47 @@ describe('Gungiground', () => {
   it('marks the attacked marshal', () => {
     mount(build({ e1: 'M', e9: 'g', a9: 'm' }));
     expect(squareEl('e1').classList.contains('gg-check')).toBe(true);
+  });
+});
+
+describe('movement guides', () => {
+  const count = (svg: string, pattern: RegExp) => (svg.match(pattern) ?? []).length;
+  const dots = (svg: string) => count(svg, /r="3\.6"/g);
+  const arrows = (svg: string) => count(svg, /<polygon/g);
+  const rings = (svg: string) => count(svg, /fill="none"/g);
+  const ticks = (svg: string) => count(svg, /r="1\.8"/g);
+
+  it('draws each role from the engine rules', () => {
+    expect([dots(guidesSvg('marshal')), arrows(guidesSvg('marshal'))]).toEqual([8, 0]);
+    expect([dots(guidesSvg('general')), arrows(guidesSvg('general'))]).toEqual([4, 4]);
+    expect(dots(guidesSvg('lancer'))).toBe(5);
+    expect(dots(guidesSvg('spy'))).toBe(8);
+    expect([ticks(guidesSvg('cannon')), rings(guidesSvg('cannon')), dots(guidesSvg('cannon'))]).toEqual([2, 1, 3]);
+    expect([ticks(guidesSvg('archer')), rings(guidesSvg('archer')), dots(guidesSvg('archer'))]).toEqual([1, 3, 1]);
+  });
+
+  it('draws the illustrated style with an icon instead of the kanji, with or without guides', () => {
+    mount(initialPosition('beginner'), { pieceStyle: 'illustrated' });
+    const piece = root.querySelector('.gg-sq .gg-piece.gg-top')!;
+    expect(piece.classList.contains('gg-illustrated')).toBe(true);
+    expect(piece.querySelector('svg.gg-icon')).not.toBeNull();
+    expect(piece.textContent).toBe('');
+    const plain = piece.querySelector('svg.gg-icon')!.innerHTML;
+    api!.set({ moveGuides: true });
+    const guided = root.querySelector('.gg-sq .gg-piece.gg-top svg.gg-icon')!.innerHTML;
+    expect(guided.length).toBeGreaterThan(plain.length);
+    expect(guided).not.toContain('scale(');
+  });
+
+  it('has an icon for every role', () => {
+    for (const role of ROLES) expect(PIECE_ICONS[role].length).toBeGreaterThan(20);
+  });
+
+  it('renders the guides only when turned on', () => {
+    mount(initialPosition('beginner'));
+    expect(root.querySelector('.gg-guided')).toBeNull();
+    api!.set({ moveGuides: true });
+    expect(root.querySelectorAll('.gg-piece.gg-guided .gg-guides').length).toBeGreaterThan(0);
+    expect(root.querySelector('.gg-guided span')!.textContent).toMatch(/[一-鿿]/);
   });
 });

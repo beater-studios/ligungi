@@ -1,4 +1,5 @@
 import type { Color, Move, Position, Role, Square } from '@ligungi/engine';
+import type { CoordinateStyle } from './geometry.ts';
 import type { PieceStyle } from './glyph.ts';
 import type { Labels, PieceNames } from './labels.ts';
 
@@ -17,6 +18,8 @@ export interface Config {
   moves: readonly Move[];
   lastMove: Move | null;
   coordinates: boolean;
+  /** Numbers as in the rulebook, or the letters and numbers of the machine notation. */
+  coordinateStyle: CoordinateStyle;
   pieceNames: PieceNames;
   /** Marks around each piece showing how it moves at tier 1 (the beginner aid). */
   moveGuides: boolean;

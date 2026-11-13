@@ -12,7 +12,7 @@ export const TowerPanel = ({ position, square }: { position: Position; square: S
   const { pieceStyle } = useStore(prefs);
   const tower = square === null ? [] : position.board[square]!;
   return (
-    <section class="ligungi-tower">
+    <section class="ligungi-tower gg-palette">
       <h3>{tower.length > 1 ? t.panels.tower(tower.length) : t.panels.piece}</h3>
       {tower.length === 0 ? (
         <p class="ligungi-notice">{t.panels.towerHint}</p>

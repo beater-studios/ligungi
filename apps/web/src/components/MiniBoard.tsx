@@ -15,7 +15,7 @@ export const MiniBoard = ({ position, fen, orientation = 'white', marks }: MiniB
   const pos = position ?? (fen ? parseFen(fen) : undefined);
   if (!pos) return null;
   return (
-    <div class="gg-mini">
+    <div class="gg-mini gg-palette">
       {visualOrder(orientation).map((square) => {
         const tower = pos.board[square]!;
         const top = topOf(tower);

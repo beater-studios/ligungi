@@ -3,7 +3,7 @@ import { MoveListPreview } from '../components/MoveListPreview.tsx';
 import { PiecePreview } from '../components/PiecePreview.tsx';
 import { RadioGroup, SettingRow, Toggle } from '../components/ui.tsx';
 import { MESSAGES, themeLabel, useT } from '../i18n/index.ts';
-import { BOARD_SIZES, LANGS, THEMES, prefs, updatePrefs, type Prefs } from '../prefs.ts';
+import { BOARD_SIZES, BOARD_THEMES, LANGS, THEMES, prefs, updatePrefs, type Prefs } from '../prefs.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
 import { SettingsMenu } from './AccountPage.tsx';
@@ -64,6 +64,15 @@ export const SettingsPage = () => {
           </Group>
 
           <Group title={s.groupPieces} help={s.groupPiecesHelp} preview={<PiecePreview />}>
+            <SettingRow title={s.boardTheme} help={s.boardThemeHelp} stacked>
+              {radio(
+                'boardTheme',
+                BOARD_THEMES.map((name) => [
+                  name,
+                  { wood: s.boardThemeWood, walnut: s.boardThemeWalnut, slate: s.boardThemeSlate, contrast: s.boardThemeContrast }[name],
+                ]),
+              )}
+            </SettingRow>
             <SettingRow title={s.pieceStyle} stacked>
               {radio('pieceStyle', [
                 ['illustrated', s.pieceStyleIllustrated],
@@ -71,6 +80,7 @@ export const SettingsPage = () => {
               ])}
             </SettingRow>
             {toggle('moveGuides', s.moveGuides, s.moveGuidesHelp)}
+            {toggle('coordinates', s.coordinates, s.coordinatesHelp)}
           </Group>
 
           <Group title={s.groupRecord} help={s.groupRecordHelp} preview={<MoveListPreview />}>
@@ -106,7 +116,6 @@ export const SettingsPage = () => {
                 [BOARD_SIZES[3], s.sizeMax],
               ])}
             </SettingRow>
-            {toggle('coordinates', s.coordinates, s.coordinatesHelp)}
             {toggle('hoverReach', s.hoverReach, s.hoverReachHelp)}
             {toggle('animation', s.animation, s.animationHelp)}
           </Group>

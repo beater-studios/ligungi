@@ -1,24 +1,110 @@
 /* Palette of the board, also used by pieces drawn outside it (add `gg-palette` to their container). */
 .gg-wrap,
 .gg-palette {
-  --gg-board: #e7c88f;
+  --gg-board: #e3c389;
+  --gg-board-texture:
+    repeating-linear-gradient(
+      100deg,
+      rgba(120, 72, 22, 0.06) 0 2px,
+      transparent 2px 9px,
+      rgba(120, 72, 22, 0.04) 9px 11px,
+      transparent 11px 23px
+    ),
+    radial-gradient(ellipse at 30% 20%, rgba(255, 240, 210, 0.35), transparent 60%),
+    linear-gradient(180deg, rgba(150, 95, 35, 0.08), rgba(150, 95, 35, 0.16));
   --gg-board-edge: #c9a564;
   --gg-line: rgba(60, 40, 15, 0.55);
   --gg-coord: rgba(60, 40, 15, 0.75);
   --gg-white-face: #f6f1e7;
   --gg-white-ink: #1b1b1b;
   --gg-white-rim: #cfc6b5;
+  --gg-white-border: rgba(0, 0, 0, 0.35);
   --gg-black-face: #232323;
   --gg-black-ink: #f4f1ea;
   --gg-black-rim: #000;
+  --gg-black-border: rgba(0, 0, 0, 0.8);
   --gg-last: rgba(155, 199, 0, 0.38);
   --gg-selected: rgba(20, 85, 30, 0.5);
   --gg-dest: rgba(20, 85, 30, 0.55);
+  --gg-dest-hover: rgba(20, 85, 30, 0.3);
+  --gg-premove: rgba(30, 60, 160, 0.35);
+  --gg-premove-dest: rgba(30, 60, 160, 0.55);
+  --gg-reach: rgba(214, 110, 40, 0.28);
+  --gg-reach-edge: rgba(214, 110, 40, 0.55);
   --gg-check: rgba(214, 40, 40, 0.85);
   --gg-panel: #fffaf0;
   --gg-panel-ink: #222;
   --gg-accent: #3b7a2a;
   --gg-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif CJK JP', serif;
+}
+
+/*
+ * Board themes: put `gg-theme-<name>` on the board or any ancestor (the page root, for a site-wide choice). Light wood
+ * is the default above. Every theme keeps the marks (last move, selection, destinations, reach) readable on its
+ * surface; the high contrast one uses blue and yellow, which most kinds of color blindness tell apart.
+ */
+.gg-theme-walnut .gg-wrap,
+.gg-theme-walnut .gg-palette,
+.gg-wrap.gg-theme-walnut,
+.gg-palette.gg-theme-walnut {
+  --gg-board: #9a6a44;
+  --gg-board-texture:
+    repeating-linear-gradient(
+      100deg,
+      rgba(40, 18, 4, 0.1) 0 2px,
+      transparent 2px 9px,
+      rgba(40, 18, 4, 0.07) 9px 11px,
+      transparent 11px 23px
+    ),
+    radial-gradient(ellipse at 30% 20%, rgba(255, 220, 170, 0.18), transparent 60%),
+    linear-gradient(180deg, rgba(60, 28, 8, 0.05), rgba(60, 28, 8, 0.2));
+  --gg-board-edge: #6b4428;
+  --gg-line: rgba(30, 14, 4, 0.7);
+  --gg-coord: rgba(255, 236, 205, 0.8);
+  --gg-last: rgba(255, 225, 90, 0.6);
+  --gg-selected: rgba(170, 225, 110, 0.5);
+  --gg-dest: rgba(195, 240, 140, 0.8);
+  --gg-dest-hover: rgba(170, 225, 110, 0.35);
+  --gg-reach: rgba(255, 165, 80, 0.35);
+  --gg-reach-edge: rgba(255, 180, 100, 0.9);
+}
+
+.gg-theme-slate .gg-wrap,
+.gg-theme-slate .gg-palette,
+.gg-wrap.gg-theme-slate,
+.gg-palette.gg-theme-slate {
+  --gg-board: #b8bdc3;
+  --gg-board-texture:
+    radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.3), transparent 60%),
+    linear-gradient(180deg, rgba(40, 50, 60, 0.04), rgba(40, 50, 60, 0.14));
+  --gg-board-edge: #8d939a;
+  --gg-line: rgba(25, 32, 40, 0.55);
+  --gg-coord: rgba(25, 32, 40, 0.8);
+}
+
+.gg-theme-contrast .gg-wrap,
+.gg-theme-contrast .gg-palette,
+.gg-wrap.gg-theme-contrast,
+.gg-palette.gg-theme-contrast {
+  --gg-board: #d6d6d6;
+  --gg-board-texture: none;
+  --gg-board-edge: #000;
+  --gg-line: #000;
+  --gg-coord: #000;
+  --gg-white-face: #fff;
+  --gg-white-ink: #000;
+  --gg-white-rim: #fff;
+  --gg-white-border: #000;
+  --gg-black-face: #000;
+  --gg-black-ink: #fff;
+  --gg-black-rim: #000;
+  --gg-black-border: #fff;
+  --gg-last: rgba(255, 200, 0, 0.65);
+  --gg-selected: rgba(0, 80, 230, 0.5);
+  --gg-dest: rgba(0, 60, 210, 0.9);
+  --gg-dest-hover: rgba(0, 80, 230, 0.3);
+  --gg-reach: rgba(0, 80, 230, 0.15);
+  --gg-reach-edge: rgba(0, 60, 210, 0.9);
 }
 
 .gg-wrap {
@@ -48,7 +134,8 @@
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
   aspect-ratio: 1;
-  background: var(--gg-board);
+  background-color: var(--gg-board);
+  background-image: var(--gg-board-texture);
   box-shadow: inset 0 0 0 2px var(--gg-board-edge), 0 2px 10px rgba(0, 0, 0, 0.25);
   touch-action: none;
 }
@@ -102,7 +189,14 @@
 }
 
 .gg-sq.gg-check {
-  background: radial-gradient(circle, var(--gg-check) 0%, rgba(214, 40, 40, 0.4) 45%, transparent 75%);
+  /* The disc covers the middle of the square, so the glow has to reach past its edge to be seen. */
+  background: radial-gradient(
+    circle,
+    var(--gg-check) 0%,
+    var(--gg-check) 55%,
+    color-mix(in srgb, var(--gg-check) 55%, transparent) 75%,
+    transparent 100%
+  );
 }
 
 .gg-sq.gg-dest::after {
@@ -125,7 +219,7 @@
 
 .gg-sq.gg-dest:hover,
 .gg-sq.gg-dest-occupied:hover {
-  background: rgba(20, 85, 30, 0.3);
+  background: var(--gg-dest-hover);
 }
 
 .gg-tower {
@@ -158,13 +252,13 @@
 .gg-piece.gg-white {
   background: radial-gradient(circle at 50% 42%, #fff 0%, var(--gg-white-face) 62%, var(--gg-white-rim) 100%);
   color: var(--gg-white-ink);
-  border: 1px solid rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--gg-white-border);
 }
 
 .gg-piece.gg-black {
   background: radial-gradient(circle at 50% 42%, #3a3a3a 0%, var(--gg-black-face) 62%, var(--gg-black-rim) 100%);
   color: var(--gg-black-ink);
-  border: 1px solid rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--gg-black-border);
 }
 
 .gg-piece.gg-under {
@@ -426,23 +520,23 @@
 }
 
 .gg-sq.gg-premove {
-  background: rgba(30, 60, 160, 0.35);
+  background: var(--gg-premove);
 }
 
 .gg-sq.gg-dest.gg-pre::after {
-  background: rgba(30, 60, 160, 0.55);
+  background: var(--gg-premove-dest);
 }
 
 .gg-sq.gg-dest-occupied.gg-pre::after {
-  background: radial-gradient(transparent 0%, transparent 79%, rgba(30, 60, 160, 0.55) 80%);
+  background: radial-gradient(transparent 0%, transparent 79%, var(--gg-premove-dest) 80%);
 }
 
 .gg-sq.gg-reach::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(214, 110, 40, 0.28);
-  box-shadow: inset 0 0 0 2px rgba(214, 110, 40, 0.55);
+  background: var(--gg-reach);
+  box-shadow: inset 0 0 0 2px var(--gg-reach-edge);
   pointer-events: none;
   z-index: 5;
 }

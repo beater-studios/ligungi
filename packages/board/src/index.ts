@@ -10,4 +10,4 @@ export { DEFAULT_LABELS, pieceName, type Labels, type PieceNames } from './label
 /** Mounts an interactive Gungi board inside `element`. Styles live in `@ligungi/board/gungiground.css`. */
 export const Gungiground = (element: HTMLElement, config: Partial<Config> = {}): Api =>
   new Board(element, config);
-export { coordinateLabels, visualSquares } from './geometry.ts';
+export { coordinateLabels, visualSquares, type CoordinateStyle } from './geometry.ts';

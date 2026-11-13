@@ -3,6 +3,9 @@ import { createStore } from './store.ts';
 export type Lang = 'pt' | 'en' | 'es';
 export type Theme = Prefs['theme'];
 export const THEMES: readonly Theme[] = ['auto', 'light', 'dark'];
+/** Board themes, as `gg-theme-<name>` classes of the board package; `wood` is its default look. */
+export const BOARD_THEMES = ['wood', 'walnut', 'slate', 'contrast'] as const;
+export type BoardTheme = (typeof BOARD_THEMES)[number];
 /** lila zoom values (0 to 100) offered as board sizes. */
 export const BOARD_SIZES = [40, 60, 80, 100] as const;
 
@@ -22,6 +25,7 @@ export interface Prefs {
   readonly notation: 'rulebook' | 'named' | 'machine';
   readonly sound: boolean;
   readonly theme: 'auto' | 'light' | 'dark';
+  readonly boardTheme: BoardTheme;
   readonly coordinates: boolean;
   readonly animation: boolean;
   /** Board size, 0 to 100, as lila's zoom preference. */
@@ -39,6 +43,7 @@ const DEFAULTS: Prefs = {
   notation: 'named',
   sound: true,
   theme: 'auto',
+  boardTheme: 'wood',
   coordinates: true,
   animation: true,
   zoom: 80,
@@ -64,6 +69,7 @@ const load = (): Prefs => {
           : returning
             ? 'rulebook'
             : DEFAULTS.notation,
+      boardTheme: BOARD_THEMES.find((name) => name === stored.boardTheme) ?? DEFAULTS.boardTheme,
       // Older versions had a free 0-100 slider; snap those values to the sizes offered today.
       zoom: Number.isFinite(Number(stored.zoom)) ? nearestBoardSize(stored.zoom) : DEFAULTS.zoom,
       lang: merged.lang === 'auto' || LANGS.includes(merged.lang) ? merged.lang : 'auto',
@@ -110,12 +116,13 @@ const systemLight = window.matchMedia?.('(prefers-color-scheme: light)');
 
 /** lila themes: the default (dark) theme lives on :root, `html.light` switches to the light one. */
 const apply = () => {
-  const { theme, zoom, lang } = prefs.get();
+  const { theme, zoom, lang, boardTheme } = prefs.get();
   const light = theme === 'light' || (theme === 'auto' && Boolean(systemLight?.matches));
   const root = document.documentElement;
   root.classList.toggle('light', light);
   root.classList.toggle('dark', !light);
   root.style.colorScheme = light ? 'light' : 'dark';
+  for (const name of BOARD_THEMES) root.classList.toggle(`gg-theme-${name}`, name === boardTheme);
   root.lang = { pt: 'pt-BR', en: 'en', es: 'es' }[resolveLang(lang)];
   document.body.style.setProperty('---zoom', String(zoom));
 };

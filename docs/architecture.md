@@ -25,6 +25,8 @@ All code is TypeScript. The server runs directly with `node src/main.ts` (Node 2
 
 A framework-free DOM component, like chessground. It takes the position and the list of legal moves and returns the chosen move. It handles click and drag, the action menu (capture, stack, betray, select), tower inspection, the hand with drops, premoves, animation, check highlight and hover reach. It knows nothing about the network or the clock.
 
+Colors live in CSS variables (`--gg-board`, `--gg-line`, the piece faces and every mark) set on `.gg-wrap` and on `.gg-palette`, a class for pieces and small boards drawn outside the board. A theme is a `gg-theme-<name>` class (`walnut`, `slate`, `contrast`; light wood is the default) on the board or any ancestor; the site puts it on the page root from the preferences.
+
 ## Server (`apps/server`)
 
 | File | Responsibility |

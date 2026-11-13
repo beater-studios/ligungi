@@ -46,6 +46,26 @@ describe('Gungiground', () => {
     expect(squareEl('e9').querySelector('.gg-flipped')).not.toBeNull();
   });
 
+  it('labels the board with the machine notation squares when asked', () => {
+    mount(initialPosition('intro'), { coordinateStyle: 'algebraic' });
+    const labels = () => [root.querySelectorAll('.gg-columns span'), root.querySelectorAll('.gg-rows span')].map((list) => [...list].map((n) => n.textContent).join(''));
+    expect(labels()).toEqual(['abcdefghi', '987654321']);
+    api!.set({ orientation: 'black' });
+    expect(labels()).toEqual(['ihgfedcba', '123456789']);
+  });
+
+  it('gives hands placed outside the board the palette that colors their pieces', () => {
+    const top = document.body.appendChild(document.createElement('div'));
+    const bottom = document.body.appendChild(document.createElement('div'));
+    mount(initialPosition('advanced'), { handElements: { top, bottom } });
+    for (const hand of [top, bottom]) {
+      expect(hand.classList.contains('gg-palette')).toBe(true);
+      expect(hand.querySelector('.gg-hand-piece .gg-piece')).not.toBeNull();
+    }
+    top.remove();
+    bottom.remove();
+  });
+
   it('selects a piece, shows destinations and plays a move', () => {
     const played = mount(build({ e5: 'S' }));
     click('e5');

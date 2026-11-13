@@ -39,6 +39,7 @@ const DEFAULTS: Config = {
   moves: [],
   lastMove: null,
   coordinates: true,
+  coordinateStyle: 'rulebook',
   pieceNames: 'pt',
   moveGuides: false,
   pieceStyle: 'kanji',
@@ -98,8 +99,9 @@ export class Board implements Api {
     const main = el('gg-main', this.#wrap);
     const bottom = external?.bottom ?? el('gg-hand gg-hand-bottom', this.#wrap);
     if (external) {
-      top.classList.add('gg-hand', 'gg-hand-top');
-      bottom.classList.add('gg-hand', 'gg-hand-bottom');
+      // Hands placed elsewhere on the page are outside .gg-wrap, so they need the palette to color their pieces.
+      top.classList.add('gg-hand', 'gg-hand-top', 'gg-palette');
+      bottom.classList.add('gg-hand', 'gg-hand-bottom', 'gg-palette');
     }
     this.#hands = { top, bottom };
     this.#columns = el('gg-coords gg-columns', main);
@@ -505,7 +507,7 @@ export class Board implements Api {
   }
 
   #render(): void {
-    const { position, lastMove, coordinates, orientation, premove } = this.#config;
+    const { position, lastMove, coordinates, coordinateStyle, orientation, premove } = this.#config;
     const dests = this.#destinations();
     const lastSquares = new Set<Square>();
     if (lastMove && lastMove.kind !== 'done') {
@@ -540,7 +542,7 @@ export class Board implements Api {
       node.title = this.#squareTitle(square);
     }
 
-    const { columns, rows } = coordinateLabels(orientation);
+    const { columns, rows } = coordinateLabels(orientation, coordinateStyle);
     this.#columns.innerHTML = coordinates ? columns.map((c) => `<span>${c}</span>`).join('') : '';
     this.#rows.innerHTML = coordinates ? rows.map((r) => `<span>${r}</span>`).join('') : '';
     this.#renderHand('bottom', orientation);

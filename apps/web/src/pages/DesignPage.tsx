@@ -315,7 +315,7 @@ export const DesignPage = () => {
 
         <Section id="game" title="Game">
           <Example label="Pieces (.gg-mini-piece)">
-            <div class="ligungi-ds__row">
+            <div class="ligungi-ds__row gg-palette">
               <span class="gg-mini-piece white">
                 <span>帥</span>
               </span>

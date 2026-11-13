@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-11-13
+
 ### Added
 
 - Account page: see the devices where your account is signed in and sign out one or all of the others.
@@ -77,7 +79,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/beater-studios/ligungi/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/beater-studios/ligungi/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/beater-studios/ligungi/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/beater-studios/ligungi/compare/v0.1.0...v0.1.1

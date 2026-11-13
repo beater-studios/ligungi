@@ -62,6 +62,8 @@ import { USERNAME_PATTERN, Users } from './users.ts';
 export const ANONYMOUS_NAME = 'Anonymous';
 const HEARTBEAT_MS = 30_000;
 const SESSION_SWEEP_MS = 6 * 3_600_000;
+/** Expired challenges are canceled within this delay even if nobody opens them (the receiver's list updates). */
+const CHALLENGE_SWEEP_MS = 60_000;
 const MAX_TOPICS_PER_CLIENT = 32;
 const SEARCH_LIMIT = 10;
 const SITE_NAME = 'ligungi';
@@ -733,6 +735,9 @@ export const createApp = (config: ServerConfig): App => {
   const sessionSweep = setInterval(() => sessions.sweep(), SESSION_SWEEP_MS);
   sessionSweep.unref();
 
+  const challengeSweep = setInterval(() => lobby.sweep(), CHALLENGE_SWEEP_MS);
+  challengeSweep.unref();
+
   return {
     server,
     db,
@@ -742,6 +747,7 @@ export const createApp = (config: ServerConfig): App => {
         closing = true;
         clearInterval(heartbeat);
         clearInterval(sessionSweep);
+        clearInterval(challengeSweep);
         for (const client of hub.clients()) client.socket.terminate();
         wss.close();
         server.close(() => {

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { ChallengeView, FriendView, GameSummary, GameView, LeaderEntry, Leaderboard, LobbyView, Me, SessionView, UserProfile, UserSearchResult } from '@ligungi/protocol';
+import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { Client, firstMove, startServer, type TestServer } from './helpers.ts';
 
 const casual = { mode: 'intro', rated: false, timeControl: { initial: 600, increment: 5 }, color: 'white', firstPlayer: 'white' };
@@ -614,6 +615,26 @@ describe('challenges from a profile', () => {
     gon.disconnect();
     await incoming(leorio, (list) => !has(second.id)(list));
     expect((await leorio.request<ChallengeView>('GET', `/api/challenges/${second.id}`)).data.status).toBe('canceled');
+  });
+
+  it('expires links and profile challenges after their TTL, with or without other activity', async () => {
+    let now = 1_000_000;
+    server = await startServer({ now: () => now });
+    const gon = client();
+    const leorio = client();
+    await signup(gon, 'Gon');
+    await signup(leorio, 'Leorio');
+    await Promise.all([gon.connect(), leorio.connect()]);
+    const link = (await gon.request<ChallengeView>('POST', '/api/challenges', casual)).data;
+    const sent = (await gon.request<ChallengeView>('POST', '/api/challenges', directed)).data;
+    await incoming(leorio, (list) => list.some((c) => c.id === sent.id));
+    now += CHALLENGE_TTL;
+    expect((await leorio.request<{ code: string }>('POST', `/api/challenges/${link.id}/accept`)).data.code).toBe('challengeUnavailable');
+    expect((await leorio.request<ChallengeView>('GET', `/api/challenges/${link.id}`)).data.status).toBe('canceled');
+    await incoming(leorio, (list) => !list.some((c) => c.id === sent.id));
+    expect((await leorio.request('POST', `/api/challenges/${sent.id}/decline`)).status).toBe(404);
+    now += CHALLENGE_TTL;
+    expect((await leorio.request('GET', `/api/challenges/${link.id}`)).status).toBe(404);
   });
 
   it('respects who may challenge and limits pending challenges', async () => {

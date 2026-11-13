@@ -22,6 +22,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 ### Fixed
 
 - Pages with a side menu (profile, account, ranking, friends, TV, info pages) kept changing width with their content, for example when switching the profile tabs.
+- Challenge links older than 2 hours could still be accepted, or not, depending on whether someone else had created a challenge in the meantime. They now always expire after 2 hours, and the page says the challenge was canceled.
 - On phones, the ratings at the top of a profile showed only the numbers, without the mode names, above a tall empty band.
 
 ## [0.1.4] - 2026-11-13

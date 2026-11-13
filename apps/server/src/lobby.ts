@@ -44,7 +44,8 @@ const MAX_SEEKS_PER_PLAYER = 3;
 /** Challenges sent from profiles that may wait at once, per sender and per receiver: keeps spam bounded. */
 const MAX_DIRECTED_SENT = 3;
 const MAX_DIRECTED_RECEIVED = 10;
-const CHALLENGE_TTL = 2 * 60 * 60 * 1000;
+/** How long a challenge stays open. Expired ones are canceled, then forgotten after another period. */
+export const CHALLENGE_TTL = 2 * 60 * 60 * 1000;
 
 const samePerson = (a: Player, b: Player) => a.sessionId === b.sessionId || (a.userId !== null && a.userId === b.userId);
 
@@ -154,7 +155,7 @@ export class Lobby {
 
   createChallenge(owner: Player, settings: GameSettings, destination: UserRef | null = null): Challenge | ErrorCode {
     if (settings.rated && !owner.userId) return 'loginForRated';
-    this.#sweep();
+    this.sweep();
     if (destination) {
       const open = [...this.#challenges.values()].filter((c) => c.status === 'open' && c.destination);
       if (open.filter((c) => samePerson(c.owner, owner)).length >= MAX_DIRECTED_SENT) return 'tooManyChallenges';
@@ -174,10 +175,12 @@ export class Lobby {
   }
 
   challenge(id: string): Challenge | undefined {
+    this.sweep();
     return this.#challenges.get(id);
   }
 
   acceptChallenge(id: string, player: Player): { gameId: string } | ErrorCode {
+    this.sweep();
     const challenge = this.#challenges.get(id);
     if (!challenge || challenge.status !== 'open') return 'challengeUnavailable';
     if (samePerson(challenge.owner, player)) return 'ownChallenge';
@@ -200,6 +203,7 @@ export class Lobby {
 
   /** The receiver turns down a challenge sent from a profile. */
   declineChallenge(id: string, player: Player): boolean {
+    this.sweep();
     const challenge = this.#challenges.get(id);
     if (!challenge || challenge.status !== 'open' || !challenge.destination || challenge.destination.id !== player.userId) return false;
     challenge.status = 'declined';
@@ -209,10 +213,8 @@ export class Lobby {
 
   /** Open challenges sent to a user, oldest first. */
   incomingFor(userId: string): Challenge[] {
-    const limit = this.#options.now() - CHALLENGE_TTL;
-    return [...this.#challenges.values()].filter(
-      (challenge) => challenge.status === 'open' && challenge.destination?.id === userId && challenge.createdAt >= limit,
-    );
+    this.sweep();
+    return [...this.#challenges.values()].filter((challenge) => challenge.status === 'open' && challenge.destination?.id === userId);
   }
 
   /**
@@ -272,9 +274,24 @@ export class Lobby {
     return room;
   }
 
-  #sweep(): void {
-    const limit = this.#options.now() - CHALLENGE_TTL;
-    for (const [id, challenge] of this.#challenges) if (challenge.createdAt < limit) this.#challenges.delete(id);
+  /**
+   * Cancels open challenges past their TTL (telling whoever watches them, like a cancel by the owner) and forgets
+   * challenges a TTL after that, so an old link still says it was canceled for a while. Runs before every read and on
+   * a timer, so whether a challenge is still open never depends on unrelated activity.
+   */
+  sweep(): void {
+    const now = this.#options.now();
+    const expired: Challenge[] = [];
+    for (const [id, challenge] of this.#challenges) {
+      const age = now - challenge.createdAt;
+      if (age >= 2 * CHALLENGE_TTL) this.#challenges.delete(id);
+      else if (age >= CHALLENGE_TTL && challenge.status === 'open') {
+        challenge.status = 'canceled';
+        expired.push(challenge);
+      }
+    }
+    // Notified after the loop: listeners read the lobby again (the receiver's list), which sweeps once more.
+    for (const challenge of expired) this.#options.onChallengeChange(challenge);
   }
 }
 

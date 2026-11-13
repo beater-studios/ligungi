@@ -44,7 +44,7 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 | `POST /api/seeks/:id/accept` | Accepts a seek. |
 | `DELETE /api/seeks/:id` | Cancels your own seek. |
 | `POST /api/challenges` (`GameSettings`, optional `to`) | Creates a challenge link. With `to` (a username) it is a challenge from a profile: only that player can accept it, it needs a signed-in sender with a live WebSocket (`connectionRequired`) and is withdrawn when the sender's last socket closes. Refused with `userNotFound`, `cannotChallengeSelf`, `challengeRefused` (403, the player's policy) or `tooManyChallenges` (429: at most 3 pending sent per player, 10 pending received). |
-| `GET /api/challenges/:id` | Challenge state. |
+| `GET /api/challenges/:id` | Challenge state. A challenge stays open for 2 hours; then it becomes `canceled` (watchers get the usual `challenge` message) and is forgotten 2 hours later (`404 challengeNotFound`). |
 | `POST /api/challenges/:id/accept` | Accepts the challenge and returns `{ gameId }`. A challenge from a profile answers `403 notYourChallenge` to anyone but its destination. |
 | `POST /api/challenges/:id/decline` | The destination declines a challenge from a profile; its status becomes `declined`. |
 | `DELETE /api/challenges/:id` | Cancels your own challenge. |

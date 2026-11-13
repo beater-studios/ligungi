@@ -130,6 +130,17 @@ export class Users {
     return rows.map((row) => ({ from: row.band, players: row.players }));
   }
 
+  /** Leaderboard position of every established player of a mode, as `rank` computes it one by one. */
+  ranks(mode: Mode): Map<string, number> {
+    const rows = this.#db
+      .prepare(
+        `select user_id, rank() over (order by rating desc) as position from ratings
+         where mode = ? and games > 0 and deviation <= ?`,
+      )
+      .all(mode, PROVISIONAL_DEVIATION) as Array<{ user_id: string; position: number }>;
+    return new Map(rows.map((row) => [row.user_id, row.position]));
+  }
+
   /** Each user's rating in every mode they have rated games in. */
   playedRatings(userIds: readonly string[]): Map<string, Array<{ mode: Mode; rating: number; provisional: boolean; games: number }>> {
     const result = new Map<string, Array<{ mode: Mode; rating: number; provisional: boolean; games: number }>>();

@@ -1891,84 +1891,298 @@ body:has(main.auth) #clinput {
 }
 
 /* ===== Players page ===== */
-.ligungi-stats {
+.ligungi-community-nav {
+  align-self: flex-start;
+}
+
+.ligungi-tag {
+  padding: 0 0.4em;
+  border-radius: 3px;
+  background: $c-bg-zebra2;
+  color: $c-font-dim;
+  font-size: 0.75em;
+}
+
+.ligungi-players__hero {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem 2rem;
-  margin: 0;
-  list-style: none;
-  color: $c-font-dim;
-
-  strong {
-    color: $c-font;
-    font-size: 1.4em;
-    margin-inline-end: 0.2em;
-  }
-
-  a {
-    color: inherit;
-
-    &:hover strong {
-      color: $c-link;
-    }
-  }
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.75rem;
 }
 
-.ligungi-stats + .ligungi-players {
-  padding-top: 1.5rem;
-}
+.ligungi-players__intro {
+  flex: 1 1 22rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 
-.ligungi-players {
-  // Four modes: two by two reads better than lila's auto-fit, which leaves the last one alone on a row.
-  .leaderboards {
-    @media (min-width: at-least($small)) {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  .community__online {
-    min-width: 14rem;
-
-    ul {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    li {
-      display: flex;
-      align-items: center;
-      gap: 0.6em;
-      padding: 0.35rem 0;
-    }
-
-    .user-link {
-      margin-inline-end: 0;
-    }
-  }
-
-  &__rating {
-    color: $c-font-dim;
-  }
-
-  &__watch {
-    margin-inline-start: auto;
-    font-size: 0.9em;
-  }
-}
-
-.ligungi-distribution {
-  display: grid;
-  gap: 0.8rem;
-  margin-top: 1rem;
-
-  h2 {
-    font-size: 1.7em;
+  h1 {
     margin: 0;
+    color: $c-font-clear;
+    font-size: 1.8rem;
+    font-weight: 500;
   }
 
   p {
     margin: 0;
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-players__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  .button-empty {
+    box-shadow: inset 0 0 0 1px $c-border;
+    color: $c-font-clear;
+  }
+}
+
+.ligungi-players__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.ligungi-players__online {
+  flex: 999 1 36rem;
+  min-width: 0;
+  padding-bottom: 0.5rem;
+}
+
+.ligungi-players__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: $border;
+
+  h2 {
+    margin: 0 0.5rem 0 0;
+    color: $c-font-clear;
+    font-size: 1.4rem;
+    font-weight: 500;
+  }
+
+  select {
+    width: auto;
+  }
+
+  // lila's form-group keeps a bottom margin that would lift the checkboxes above the rest of the row.
+  .ligungi-check {
+    margin: 0;
+  }
+
+  .form-control {
+    flex: 1 1 10rem;
+    width: auto;
+  }
+}
+
+.ligungi-players__empty {
+  padding: 1rem 1.25rem;
+}
+
+.ligungi-online-list {
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+}
+
+.ligungi-online-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 9rem 5rem 6rem 8rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1.25rem;
+  border-bottom: 1px solid $c-border;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &--head {
+    padding-block: 0.5rem;
+    color: $c-font-dim;
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  &__player {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+
+    .user-link {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__rating strong {
+    color: $c-font-clear;
+  }
+
+  &__rank {
+    color: $c-brag;
+    font-size: 0.85em;
+  }
+
+  &__games {
+    color: $c-font-dim;
+  }
+
+  &__status {
+    color: $c-good;
+  }
+
+  &--playing &__status {
+    color: $c-bad;
+  }
+
+  &__meta {
+    display: none;
+  }
+
+  &__action {
+    text-align: right;
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.25rem;
+      padding: 0 0.9rem;
+      font-size: 0.85em;
+    }
+  }
+
+  // Phones: name with rating and status below it, the action on the right.
+  @media (max-width: at-most($small)) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.15rem 0.75rem;
+    padding-inline: 0.75rem;
+
+    &--head,
+    &__rating,
+    &__games,
+    &__status {
+      display: none;
+    }
+
+    &__meta {
+      display: block;
+      grid-column: 1;
+      grid-row: 2;
+      color: $c-font-dim;
+      font-size: 0.85em;
+    }
+
+    &__action {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+
+      .button {
+        min-height: 2.5rem;
+      }
+    }
+  }
+}
+
+.ligungi-players__side {
+  flex: 1 1 18rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+}
+
+.ligungi-players__site {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+
+  dl {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 0.6rem;
+    margin: 0;
+  }
+
+  dd {
+    margin: 0;
+    color: $c-font-clear;
+    font-weight: 600;
+    text-align: right;
+  }
+}
+
+.ligungi-players__position {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+@media (max-width: at-most($small)) {
+  .ligungi-community-nav {
+    align-self: stretch;
+
+    > a {
+      flex: 1;
+      text-align: center;
+    }
+  }
+
+  .ligungi-players__hero {
+    padding: 1.25rem;
+  }
+
+  .ligungi-players__intro h1 {
+    font-size: 1.4rem;
+  }
+
+  .ligungi-players__cta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+
+    .button {
+      justify-content: center;
+    }
+
+    .button:first-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .ligungi-players__filters {
+    padding: 0.75rem;
   }
 }
 
@@ -1976,6 +2190,10 @@ body:has(main.auth) #clinput {
 .ligungi-dist {
   margin: 0;
   max-width: 44rem;
+
+  &--compact {
+    max-width: none;
+  }
 
   svg {
     display: block;
@@ -2016,10 +2234,10 @@ body:has(main.auth) #clinput {
     font-size: 12px;
   }
 
-  // The figure scales down with the screen, text included: on phones the labels get bigger in drawing units.
+  // The large figure scales down with the screen, text included: on phones its labels get bigger in drawing units.
   @media (max-width: at-most($small)) {
-    &__tick,
-    &__marker {
+    &--large &__tick,
+    &--large &__marker {
       font-size: 20px;
     }
   }
@@ -2134,6 +2352,22 @@ body:has(main.auth) #clinput {
 
 .button.ligungi-button-good {
   background: $c-good;
+}
+
+// lila's hover on an empty button is a near-white gradient, which in the light theme looks like the button vanished.
+// The selectors match lila's specificity so these rules, loaded later, win.
+.button.button-empty:not(.disabled, :disabled, [disabled]):not(.disabled):hover,
+.button.button-empty:not(.disabled, :disabled, [disabled]):not(.disabled):focus-visible {
+  background: color-mix(in srgb, #{$c-primary} 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #{$c-primary} 45%, transparent);
+  color: $c-primary;
+}
+
+.button.button-empty.button-red:not(.disabled, :disabled, [disabled]):not(.disabled):hover,
+.button.button-empty.button-red:not(.disabled, :disabled, [disabled]):not(.disabled):focus-visible {
+  background: color-mix(in srgb, #{$c-error} 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #{$c-error} 45%, transparent);
+  color: $c-error;
 }
 
 .ligungi-live-badge {

@@ -191,7 +191,12 @@ export const createApp = (config: ServerConfig): App => {
     return user;
   };
 
-  let playersCache: { at: number; stats: Omit<PlayersView['counts'], 'online' | 'playing'>; distribution: PlayersView['distribution'] } | null = null;
+  let playersCache: {
+    at: number;
+    stats: Pick<PlayersView['counts'], 'gamesLastDay' | 'gamesTotal' | 'players'>;
+    distribution: PlayersView['distribution'];
+    ranks: Record<Mode, Map<string, number>>;
+  } | null = null;
 
   const playersView = (viewerId: string | null): PlayersView => {
     const now = config.now();
@@ -202,33 +207,46 @@ export const createApp = (config: ServerConfig): App => {
         at: now,
         stats: { gamesLastDay: recent, gamesTotal: finished, players: users.count() },
         distribution: { intro: bands('intro'), beginner: bands('beginner'), intermediate: bands('intermediate'), advanced: bands('advanced') },
+        ranks: { intro: users.ranks('intro'), beginner: users.ranks('beginner'), intermediate: users.ranks('intermediate'), advanced: users.ranks('advanced') },
       };
     }
+    const cache = playersCache;
     const ongoing = games.ongoing();
     const playingIn = new Map<string, string>();
     for (const room of ongoing) for (const seat of Object.values(room.seats)) if (seat.userId) playingIn.set(seat.userId, room.id);
-    const ids = [...onlineUsers()].slice(0, 500);
+    const signedIn = [...onlineUsers()];
+    const ids = signedIn.slice(0, 500);
     const ratings = users.playedRatings(viewerId ? [...ids, viewerId] : ids);
+    const followed = new Set(viewerId ? users.following(viewerId).map((user) => user.id) : []);
+    const best = (player: OnlinePlayer) => Math.max(0, ...Object.values(player.ratings).map((standing) => standing.rating));
     const online: OnlinePlayer[] = ids
       .map((id) => users.findById(id))
       .filter((user) => user !== undefined)
-      .map((user) => {
-        const main = (ratings.get(user.id) ?? []).sort((a, b) => b.games - a.games)[0];
-        return {
-          user: { id: user.id, name: user.name },
-          rating: main?.rating ?? null,
-          mode: main?.mode ?? null,
-          provisional: main?.provisional ?? false,
-          playing: playingIn.get(user.id) ?? null,
-        };
-      })
-      .sort((a, b) => Number(b.playing !== null) - Number(a.playing !== null) || (b.rating ?? 0) - (a.rating ?? 0) || a.user.name.localeCompare(b.user.name))
+      .map((user) => ({
+        user: { id: user.id, name: user.name },
+        ratings: Object.fromEntries(
+          (ratings.get(user.id) ?? []).map((entry) => [
+            entry.mode,
+            { rating: entry.rating, provisional: entry.provisional, games: entry.games, rank: cache.ranks[entry.mode].get(user.id) ?? null },
+          ]),
+        ),
+        playing: playingIn.get(user.id) ?? null,
+        followed: followed.has(user.id),
+        canChallenge: viewerId !== null && users.canChallenge(viewerId, user.id),
+      }))
+      .sort((a, b) => Number(a.playing !== null) - Number(b.playing !== null) || best(b) - best(a) || a.user.name.localeCompare(b.user.name))
       .slice(0, ONLINE_LIST_MAX);
     const you = viewerId ? Object.fromEntries((ratings.get(viewerId) ?? []).map((entry) => [entry.mode, entry.rating])) : null;
     return {
       online,
-      counts: { online: hub.onlineCount(), playing: ongoing.length, ...playersCache.stats },
-      distribution: playersCache.distribution,
+      counts: {
+        online: hub.onlineCount(),
+        signedIn: signedIn.length,
+        free: signedIn.filter((id) => !playingIn.has(id)).length,
+        playing: ongoing.length,
+        ...cache.stats,
+      },
+      distribution: cache.distribution,
       you,
     };
   };

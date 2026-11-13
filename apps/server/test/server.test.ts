@@ -345,7 +345,7 @@ describe('community', () => {
       ['Ging', id],
       ['Pariston', id],
     ]);
-    expect(players.counts).toMatchObject({ playing: 1, players: 2, gamesTotal: 0 });
+    expect(players.counts).toMatchObject({ playing: 1, players: 2, gamesTotal: 0, signedIn: 2, free: 0 });
     expect(players.you).toEqual({});
 
     a.send({ t: 'resign', game: id });
@@ -355,7 +355,16 @@ describe('community', () => {
     now += 61_000;
     players = (await a.request<PlayersView>('GET', '/api/players')).data;
     expect(players.counts).toMatchObject({ playing: 0, gamesLastDay: 1, gamesTotal: 1 });
-    expect(players.online.find((p) => p.user.name === 'Pariston')).toMatchObject({ mode: 'intro', playing: null, provisional: true });
+    expect(players.online.find((p) => p.user.name === 'Pariston')).toMatchObject({
+      playing: null,
+      followed: false,
+      canChallenge: true,
+      ratings: { intro: { provisional: true, games: 1, rank: null } },
+    });
+    expect(players.online.find((p) => p.user.name === 'Ging')?.canChallenge).toBe(false);
+    expect(players.counts).toMatchObject({ signedIn: 2, free: 2 });
+    expect((await a.request('POST', '/api/users/pariston/follow')).status).toBe(200);
+    expect((await a.request<PlayersView>('GET', '/api/players')).data.online.find((p) => p.user.name === 'Pariston')?.followed).toBe(true);
     expect(players.distribution.intro.reduce((sum, band) => sum + band.players, 0)).toBe(2);
     expect(players.distribution.advanced).toEqual([]);
     expect(Object.keys(players.you!)).toEqual(['intro']);

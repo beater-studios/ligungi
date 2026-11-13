@@ -1,8 +1,8 @@
 import { RATING_BAND, type RatingBand } from '@ligungi/protocol';
 import { useT } from '../i18n/index.ts';
 
-const WIDTH = 640;
-const HEIGHT = 200;
+/** Drawing sizes: the figure scales to its box, so a narrow column gets a smaller drawing to keep the text legible. */
+const SIZES = { large: { width: 640, height: 200, ticks: 8 }, compact: { width: 320, height: 150, ticks: 4 } } as const;
 const PAD = { top: 22, right: 8, bottom: 26, left: 8 };
 
 /** Bar path with rounded top corners only: the bar stays anchored to the baseline. */
@@ -15,8 +15,19 @@ const bar = (x: number, y: number, w: number, h: number): string => {
  * Histogram of players per rating band, with the viewer's band marked by color and a label (never color alone).
  * Every band has a native tooltip, and the figure carries a text summary for screen readers.
  */
-export const RatingChart = ({ bands, you, label }: { bands: readonly RatingBand[]; you: number | null; label: string }) => {
+export const RatingChart = ({
+  bands,
+  you,
+  label,
+  size = 'large',
+}: {
+  bands: readonly RatingBand[];
+  you: number | null;
+  label: string;
+  size?: keyof typeof SIZES;
+}) => {
   const t = useT();
+  const { width, height, ticks } = SIZES[size];
   if (bands.length === 0) return null;
   const first = bands[0]!.from;
   const last = bands[bands.length - 1]!.from;
@@ -28,16 +39,16 @@ export const RatingChart = ({ bands, you, label }: { bands: readonly RatingBand[
     columns.push({ from, players: counts.get(from) ?? 0 });
   }
   const max = Math.max(...columns.map((column) => column.players));
-  const innerW = WIDTH - PAD.left - PAD.right;
-  const innerH = HEIGHT - PAD.top - PAD.bottom;
+  const innerW = width - PAD.left - PAD.right;
+  const innerH = height - PAD.top - PAD.bottom;
   const step = innerW / columns.length;
   const gap = Math.min(2, step / 4);
-  const labelEvery = Math.max(1, Math.ceil(columns.length / 8));
+  const labelEvery = Math.max(1, Math.ceil(columns.length / ticks));
   return (
-    <figure class="ligungi-dist">
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={label}>
+    <figure class={`ligungi-dist ligungi-dist--${size}`}>
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label}>
         {/* A path, not <line>: lila uses <line> as a custom element, declared in lila-elements.d.ts. */}
-        <path class="ligungi-dist__base" d={`M${PAD.left},${PAD.top + innerH}H${WIDTH - PAD.right}`} />
+        <path class="ligungi-dist__base" d={`M${PAD.left},${PAD.top + innerH}H${width - PAD.right}`} />
         {columns.map((column, index) => {
           const x = PAD.left + index * step + gap / 2;
           const h = max === 0 ? 0 : (column.players / max) * innerH;
@@ -54,7 +65,7 @@ export const RatingChart = ({ bands, you, label }: { bands: readonly RatingBand[
                 </text>
               )}
               {index % labelEvery === 0 && (
-                <text class="ligungi-dist__tick" x={x} y={HEIGHT - 8}>
+                <text class="ligungi-dist__tick" x={x} y={height - 8}>
                   {column.from}
                 </text>
               )}

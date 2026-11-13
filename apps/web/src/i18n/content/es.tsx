@@ -18,6 +18,12 @@ const sources = (
       </li>
     </ol>
     <p>
+      Universal Music es Universal Music Japan, la rama japonesa de la discográfica Universal Music Group, que también
+      lanza productos licenciados de anime y manga. Gungi salió como producto oficial licenciado de HUNTER×HUNTER, es decir,
+      con la autorización de los titulares de la obra: las reglas las escribió un equipo dedicado al juego (HUNTER×HUNTER
+      軍儀 特別チーム), con la supervisión de Shueisha, la editorial del manga de Yoshihiro Togashi.
+    </p>
+    <p>
       Cuando el libro deja dudas, la interpretación adoptada y el motivo están en la{' '}
       <Ext href={LINKS.spec}>especificación completa de las reglas</Ext>, en el código fuente del proyecto.
     </p>
@@ -31,7 +37,7 @@ export const es: Content = {
     <>
       <p>
         ligungi es una plataforma gratuita para jugar Gungi (軍儀), el juego de tablero de HUNTER×HUNTER, online y con las
-        reglas oficiales de 2022. Sin anuncios, sin necesidad de cuenta y con código abierto.
+        reglas oficiales publicadas por Universal Music (2022). Sin anuncios, sin necesidad de cuenta y con código abierto.
       </p>
       <p>
         Lo hace <Ext href={STUDIO}>Beater Studios</Ext> y está inspirado en lichess.org: la interfaz reutiliza el diseño de

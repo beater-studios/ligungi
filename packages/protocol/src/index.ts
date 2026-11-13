@@ -223,14 +223,26 @@ export const LEADERBOARD_TOP = 10;
 /** Width, in rating points, of each band of the rating distribution on the players page. */
 export const RATING_BAND = 50;
 
+/** A player's place in one mode. */
+export interface ModeStanding {
+  readonly rating: number;
+  readonly provisional: boolean;
+  /** Rated games played in the mode. */
+  readonly games: number;
+  /** Leaderboard position, `null` while provisional. */
+  readonly rank: number | null;
+}
+
 export interface OnlinePlayer {
   readonly user: UserRef;
-  /** Rating in the mode the player has the most rated games in; null without rated games. */
-  readonly rating: number | null;
-  readonly mode: Mode | null;
-  readonly provisional: boolean;
+  /** Standing in each mode the player has rated games in. */
+  readonly ratings: Readonly<Partial<Record<Mode, ModeStanding>>>;
   /** The game the player is in right now, if any. */
   readonly playing: string | null;
+  /** Whether the viewer follows this player. */
+  readonly followed: boolean;
+  /** Whether the viewer may challenge this player from their profile (signed in, not themselves, allowed by them). */
+  readonly canChallenge: boolean;
 }
 
 export interface RatingBand {
@@ -240,11 +252,15 @@ export interface RatingBand {
 }
 
 export interface PlayersView {
-  /** Signed-in players online now, the ones playing first, then by rating. At most `ONLINE_LIST_MAX`. */
+  /** Signed-in players online now, the free ones first, then by best rating. At most `ONLINE_LIST_MAX`. */
   readonly online: readonly OnlinePlayer[];
   readonly counts: {
     /** Connected browsers, signed in or not. */
     readonly online: number;
+    /** Signed-in players online. */
+    readonly signedIn: number;
+    /** Signed-in players online and not in a game. */
+    readonly free: number;
     readonly playing: number;
     readonly gamesLastDay: number;
     readonly gamesTotal: number;
@@ -256,7 +272,7 @@ export interface PlayersView {
   readonly you: Readonly<Partial<Record<Mode, number>>> | null;
 }
 
-export const ONLINE_LIST_MAX = 50;
+export const ONLINE_LIST_MAX = 100;
 export const LEADERBOARD_MAX = 100;
 export const MAX_FOLLOWS = 400;
 

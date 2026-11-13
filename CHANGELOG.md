@@ -8,7 +8,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 - Takebacks in casual games: ask to take back your last move, and the opponent accepts or declines. Not available in rated games or for the first two moves.
 - Give your opponent 15 seconds with the + button on their clock, in any game with a clock.
-- Players page (Community > Players): who is online now and in which game, site counts (online, games in progress, games in the last 24 hours, finished games, accounts), the best of each mode and a rating distribution chart per mode that marks where you stand.
+- Players page (Community > Players), made to find someone to play: how many are online and free, quick game and create game buttons, and the list of signed-in players online with their rating and leaderboard position in the chosen mode, whether they are free or playing, and a Challenge or Watch button. Filters for free players, people you follow and a name search. On the side, the site's numbers and a rating distribution chart that marks where you stand.
 - Two stronger computer levels: level 4 thinks up to about 1 second per move and level 5 up to 3 seconds, searching several moves ahead, following captures to the end and avoiding repeating positions when ahead. Levels 1 to 3 are unchanged.
 - When you offer a draw or a takeback, a line says it is waiting for your opponent, and another tells you if they decline (also for rematches).
 
@@ -20,6 +20,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Fixed
 
+- Secondary buttons no longer look see-through on hover in the light theme: they get a tinted background and an outline in both themes.
 - The draw confirmation (Offer a draw?) had its buttons out of place, and the answer buttons to an offer did not look like the rest of the game controls.
 
 ## [0.2.0] - 2026-11-13

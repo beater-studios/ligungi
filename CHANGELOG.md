@@ -23,6 +23,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Fixed
 
+- Rules: capturing the opponent's Marshal is now always allowed, even when your own Marshal is still attacked afterwards. Right after the draft both Marshals can be under attack, and the capture used to be hidden, which could even end the game as a mate for the player who had the winning move.
+- Rules: with only the two Marshals left, the game is no longer a draw when they stand next to each other, because the player to move captures and wins.
 - The site header got no background when the page was scrolled, so the content showed through it.
 - Secondary buttons no longer look see-through on hover in the light theme: they get a tinted background and an outline in both themes.
 - The draw confirmation (Offer a draw?) had its buttons out of place, and the answer buttons to an offer did not look like the rest of the game controls.

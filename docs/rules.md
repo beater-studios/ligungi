@@ -203,9 +203,10 @@ The rulebook and FAQ Q10 define:
 The rulebook does not forbid moves that leave your own Marshal capturable: whoever does that simply loses when the opponent captures. The platform implements it this way, with the same result as the rulebook:
 
 - A move that exposes the Marshal: not offered. Such a move would only lead to the Marshal's capture (a loss), so blocking it prevents losses by misclick without changing the result of any position where the opponent captures.
+- Capturing the opposing Marshal is always offered, even if your own Marshal is still attacked afterwards: the capture ends the game. This matters right after the draft, which does not check Marshal safety, so both Marshals can start the play phase attacked.
 - Mate: the player to move has no move that keeps the Marshal safe. The opponent wins, whether the Marshal is attacked right now or not. This follows the rulebook: if every move exposes the Marshal, the capture is unavoidable. Unlike chess and gungi.io, there is no "stalemate is a draw".
 - Repetition: the same position (board, hands and player to move) for the fourth time. Draw.
-- Insufficient material (a platform convention, not in the rulebook): only the two Marshals are left on the board and both hands are empty. Draw, because neither can capture the other without exposing itself first.
+- Insufficient material (a platform convention, not in the rulebook): only the two Marshals are left on the board, both hands are empty and the Marshals are not on neighbouring squares. Draw, because neither can capture the other without exposing itself first. On neighbouring squares the player to move captures and wins.
 - On top of that, the usual platform rules: timeout, resignation, draw by agreement, leaving the game. The rulebook does not define time (FAQ Q11); time controls belong to the platform.
 
 Drops count as moves that can save the Marshal.
@@ -227,4 +228,4 @@ Where the rulebook is ambiguous, or where Komugi differs from the rulebook and t
 7. **Exposing your own Marshal.** The rulebook does not forbid it. The platform does not offer such a move, and declares mate when there is no safe move, attacked or not (section 9). The result is the same as in the rulebook. The only practical difference: in the rulebook, whoever exposes their Marshal only loses if the opponent notices and captures; here that move does not exist. We do not adopt the gungi.io rule where having no safe move without being attacked is a draw: that changes the rulebook result.
 8. **End of the draft.** gungi.io lets the first player keep going after the second declares done. By default we follow the rulebook (section 7.1, item 7), confirmed by 軍儀Web and kyproduce.com. The gungi.io rule exists as the "free draft" option, in casual games only.
 9. **First player.** We follow the rulebook: color and order are independent. Whoever starts the draft starts the game (FAQ Q20). In the fixed setups, the setup is the same and only who moves first changes.
-10. **Insufficient material.** Not in the rulebook. We adopt it to end games that have no way to finish.
+10. **Insufficient material.** Not in the rulebook. We adopt it to end games that have no way to finish. It does not apply when the two Marshals are neighbours, since the player to move can capture (as in gungi.js). In ligungi that position cannot come from legal play, because the last capture would put a Marshal next to the other, which exposes it; it can only come from a position set up by hand.

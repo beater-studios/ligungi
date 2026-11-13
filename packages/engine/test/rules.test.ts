@@ -184,6 +184,22 @@ describe('end of game', () => {
     game.play('a1b2x');
     expect(game.outcome).toEqual({ winner: null, reason: 'insufficient' });
   });
+
+  it('does not draw when the two remaining marshals are neighbours: the side to move captures', () => {
+    const game = new Game(build({ a1: 'M', b2: 'm' }));
+    expect(game.outcome).toBeUndefined();
+    game.play('a1b2x');
+    expect(game.outcome).toEqual({ winner: 'white', reason: 'capture' });
+  });
+
+  it('always allows capturing the opponent marshal, even with the own marshal still attacked', () => {
+    // As right after the draft, which does not check marshal safety: both marshals start the play phase attacked.
+    const position = build({ a1: 'M', a2: 'p', b4: 'P', b5: 'm' });
+    expect(moveStrings(position)).toContain('b4b5x');
+    const game = new Game(position);
+    game.play('b4b5x');
+    expect(game.outcome).toEqual({ winner: 'white', reason: 'capture' });
+  });
 });
 
 describe('draft', () => {

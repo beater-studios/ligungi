@@ -1,18 +1,31 @@
 import { applyMove } from './apply.ts';
 import { repetitionKey } from './fen.ts';
 import { legalMoves } from './movegen.ts';
-import { handSize, initialPosition } from './position.ts';
+import { fileOf, rankOf } from './board.ts';
+import { findMarshal, handSize, initialPosition } from './position.ts';
 import { moveToString, parseMove } from './notation.ts';
 import { opposite, type Color, type Move, type Outcome, type Position } from './types.ts';
 
 export const REPETITION_LIMIT = 4;
 
-/** Only both marshals remain on the board and nothing is left in hand (docs/rules.md section 9). */
+/** Whether the two marshals stand on neighbouring squares, where the side to move can capture the other one. */
+const marshalsTouch = (position: Position): boolean => {
+  const white = findMarshal(position, 'white');
+  const black = findMarshal(position, 'black');
+  if (white === undefined || black === undefined) return false;
+  return Math.abs(fileOf(white) - fileOf(black)) <= 1 && Math.abs(rankOf(white) - rankOf(black)) <= 1;
+};
+
+/**
+ * Only both marshals remain on the board, nothing is left in hand and they are not neighbours
+ * (docs/rules.md section 9): neighbours are a win for the side to move, not a draw.
+ */
 export const isInsufficientMaterial = (position: Position): boolean =>
   position.phase === 'play' &&
   handSize(position.hands.white) === 0 &&
   handSize(position.hands.black) === 0 &&
-  position.board.every((tower) => tower.every((piece) => piece.role === 'marshal'));
+  position.board.every((tower) => tower.every((piece) => piece.role === 'marshal')) &&
+  !marshalsTouch(position);
 
 const hasMarshal = (position: Position, color: Color): boolean =>
   position.board.some((tower) => tower.some((piece) => piece.role === 'marshal' && piece.color === color));

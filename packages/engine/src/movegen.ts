@@ -219,10 +219,17 @@ export const pseudoLegalMoves = (position: Position): Move[] => {
   return moves;
 };
 
-/** Pseudo-legal moves that do not leave the mover's marshal capturable (docs/rules.md section 9). */
+/**
+ * Pseudo-legal moves that do not leave the mover's marshal capturable (docs/rules.md section 9). Capturing the
+ * opponent's marshal is always allowed: it ends the game, so whatever still attacks the mover's marshal no longer
+ * matters. After the draft, which does not check marshal safety, both marshals can start the play phase attacked.
+ */
 export const legalMoves = (position: Position): Move[] => {
   const moves = pseudoLegalMoves(position);
   if (position.phase === 'draft') return moves;
   const color = position.turn;
-  return moves.filter((move) => !isMarshalAttacked(applyMove(position, move), color));
+  return moves.filter((move) => {
+    const next = applyMove(position, move);
+    return findMarshal(next, opposite(color)) === undefined || !isMarshalAttacked(next, color);
+  });
 };

@@ -1,8 +1,6 @@
 import { TIME_PRESETS, type GameSummary, type LeaderEntry, type LobbyView, type Me, type SeekView, type TimeControl } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
-import { SOURCE_URL } from '../source.ts';
-import { LINKS } from '../i18n/content/shared.tsx';
 import { CreateGame, type CreateTarget } from '../components/CreateGame.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { icons } from '../icons.ts';
@@ -396,19 +394,6 @@ export const HomePage = () => {
       <TvBox game={tv} />
       <LeaderboardBox entries={leaders} />
 
-      <div class="lobby__about">
-        <a href="/about">{t.nav.about}</a>
-        <a href="/faq">{t.nav.faq}</a>
-        <a href="/contact">{t.nav.contact}</a>
-        <a href="/terms">{t.nav.terms}</a>
-        <a href="/privacy">{t.nav.privacy}</a>
-        <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer">
-          {t.home.source}
-        </a>
-        <a href={LINKS.status} target="_blank" rel="noopener noreferrer">
-          {t.nav.status}
-        </a>
-      </div>
 
       {create && <CreateGame target={create} onClose={() => setCreate(null)} />}
       {cancelling && (

@@ -132,6 +132,16 @@ export class Users {
     return rows.map((row) => ({ id: row.id, name: row.username }));
   }
 
+  followers(userId: string): UserRef[] {
+    const rows = this.#db
+      .prepare(
+        `select users.id, users.username from follows join users on users.id = follows.user_id
+         where follows.followed_id = ? order by users.username_key`,
+      )
+      .all(userId) as Array<{ id: string; username: string }>;
+    return rows.map((row) => ({ id: row.id, name: row.username }));
+  }
+
   followCounts(userId: string): { followers: number; following: number } {
     const row = this.#db
       .prepare(

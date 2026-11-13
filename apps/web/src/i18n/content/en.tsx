@@ -26,7 +26,7 @@ const sources = (
 );
 
 export const en: Content = {
-  updated: 'Last updated: November 12, 2026.',
+  updated: 'Last updated: November 13, 2026.',
 
   about: (
     <>
@@ -250,7 +250,8 @@ export const en: Content = {
         <li>
           <b>Session cookie (sid):</b> an essential cookie that identifies your browser to keep you signed in and keep your
           games. It is not used for tracking. Sessions without an account expire after 30 days unused; with an account, after
-          a year.
+          a year. With each signed-in session we also keep a description of the browser (the "user agent", for example "Chrome on Windows")
+          and when it signed in and was last used, so you can see on the Account page where your account is open.
         </li>
         <li>
           <b>IP address:</b> used at request time to limit login attempts and protect the site from abuse. It is not stored in
@@ -288,8 +289,8 @@ export const en: Content = {
       <h2>Your rights</h2>
       <p>
         Under the LGPD you may request access to, correction or deletion of your data, and information about how it is
-        processed. You can change your password or delete your account yourself on the <a href="/account">Account</a> page;
-        for anything else, write to <Mail /> with the subject "Privacy", including your username. Deleting your account removes your
+        processed. On the <a href="/account">Account</a> page you can download a copy of your data, sign out other devices,
+        change your password and delete your account yourself; for anything else, write to <Mail /> with the subject "Privacy", including your username. Deleting your account removes your
         personal data; games already played may remain in the history anonymously.
       </p>
       <h2>Changes</h2>

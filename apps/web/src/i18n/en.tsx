@@ -1,7 +1,7 @@
 import type { Color } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import type { Messages } from './pt.tsx';
-import { LINKS, STUDIO } from './content/shared.tsx';
+import { STUDIO } from './content/shared.tsx';
 
 const colorOf = (color: Color) => (color === 'white' ? 'White' : 'Black');
 
@@ -69,6 +69,7 @@ export const en: Messages = {
     wrongCredentials: 'Wrong username or password.',
     wrongPassword: 'Current password is incorrect.',
     activeGame: 'Finish your ongoing games before deleting your account.',
+    sessionNotFound: 'Session not found.',
     userNotFound: 'User not found.',
     gameNotFound: 'Game not found.',
     challengeNotFound: 'Challenge not found.',
@@ -154,12 +155,12 @@ export const en: Messages = {
   },
   notFound: { title: 'Page not found', back: 'Back to the home page' },
   footer: {
-    source: (url) => (
-      <>
-        ligungi is free software: <a href={url}>source code (AGPL-3.0)</a>. Look based on <a href={LINKS.lila}>lila</a>, the
-        open source code of lichess.org.
-      </>
-    ),
+    tagline: 'Gungi online and for free, with the official 2022 rules.',
+    siteTitle: 'Site',
+    playTitle: 'Play',
+    codeTitle: 'Code and legal',
+    sourceCode: 'Source code (AGPL-3.0)',
+    basedOnLila: 'Based on lila',
     trademark: 'Gungi and HUNTER×HUNTER belong to their owners. Fan project, not officially affiliated.',
     studio: (
       <>
@@ -202,6 +203,16 @@ export const en: Messages = {
     mismatch: 'The new passwords do not match.',
     change: 'Change password',
     changed: 'Password changed. Other devices must sign in again.',
+    sessionsTitle: 'Signed-in devices',
+    sessionsText: 'Where your account is open right now. If you do not recognize one, sign it out and change your password.',
+    thisDevice: 'This device',
+    unknownDevice: 'Unknown browser',
+    sessionDates: (since: string, active: string) => `Signed in on ${since} · active on ${active}`,
+    revoke: 'Sign out',
+    revokeOthers: 'Sign out all others',
+    dataTitle: 'Your data',
+    dataText: 'Download a copy of the data we keep about your account: profile, ratings, who you follow and who follows you, signed-in devices and all your games, as a JSON file.',
+    dataDownload: 'Download my data',
     deleteTitle: 'Delete account',
     deleteText: 'Deletes the account, its ratings and who you follow. Games already played stay in the history, as "Anonymous". This cannot be undone.',
     deleteConfirm: 'I understand that deletion is permanent',
@@ -270,7 +281,6 @@ export const en: Messages = {
     noTv: 'No live games right now.',
     featured: 'Featured game',
     more: 'More »',
-    source: 'Source code',
   },
 
   create: {

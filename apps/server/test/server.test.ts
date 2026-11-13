@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { ChallengeView, FriendView, GameSummary, GameView, LeaderEntry, Leaderboard, LobbyView, Me, UserProfile, UserSearchResult } from '@ligungi/protocol';
+import type { ChallengeView, FriendView, GameSummary, GameView, LeaderEntry, Leaderboard, LobbyView, Me, SessionView, UserProfile, UserSearchResult } from '@ligungi/protocol';
 import { Client, firstMove, startServer, type TestServer } from './helpers.ts';
 
 const casual = { mode: 'intro', rated: false, timeControl: { initial: 600, increment: 5 }, color: 'white', firstPlayer: 'white' };
@@ -476,6 +476,91 @@ describe('account', () => {
     const anon = client();
     expect((await anon.request<{ code: string }>('POST', '/api/account/delete', { password: 'x' })).data.code).toBe('loginRequired');
     expect((await anon.request<{ code: string }>('POST', '/api/account/password', { current: 'x', next: 'yyyyyyyy' })).data.code).toBe('loginRequired');
+  });
+});
+
+describe('sessions and data export', () => {
+  it('lists the account sessions without their secrets and signs out one or all the others', async () => {
+    server = await startServer();
+    const laptop = client();
+    const phone = client();
+    const tablet = client();
+    await signup(laptop, 'Biscuit');
+    for (const device of [phone, tablet]) {
+      expect((await device.request('POST', '/api/login', { username: 'biscuit', password: 'segredo123' })).status).toBe(200);
+    }
+    const list = (await laptop.request<SessionView[]>('GET', '/api/account/sessions')).data;
+    expect(list).toHaveLength(3);
+    expect(list.filter((s) => s.current)).toHaveLength(1);
+    const secrets = [laptop, phone, tablet].map((c) => c.cookie.split('=')[1]);
+    for (const session of list) {
+      expect(session.id).toMatch(/^[0-9a-f]{16}$/);
+      expect(secrets).not.toContain(session.id);
+      expect(session.userAgent).toBeTruthy();
+    }
+    const other = list.find((s) => !s.current)!;
+    const current = list.find((s) => s.current)!;
+    expect((await laptop.request<{ code: string }>('DELETE', `/api/account/sessions/${current.id}`)).data.code).toBe('sessionNotFound');
+    expect((await laptop.request('DELETE', `/api/account/sessions/${other.id}`)).status).toBe(200);
+    expect((await laptop.request<SessionView[]>('GET', '/api/account/sessions')).data).toHaveLength(2);
+    expect((await laptop.request<{ revoked: number }>('DELETE', '/api/account/sessions')).data.revoked).toBe(1);
+    expect((await phone.request<Me>('GET', '/api/me')).data.user).toBeNull();
+    expect((await tablet.request<Me>('GET', '/api/me')).data.user).toBeNull();
+    expect((await laptop.request<Me>('GET', '/api/me')).data.user?.name).toBe('Biscuit');
+    expect((await client().request<{ code: string }>('GET', '/api/account/sessions')).data.code).toBe('loginRequired');
+    await laptop.request('POST', '/api/logout');
+    const anonymous = server.app.db.prepare('select count(*) as n from sessions where user_id is null and user_agent is not null').get() as { n: number };
+    expect(anonymous.n).toBe(0);
+  });
+
+  it('does not list sessions that expired but were not swept yet', async () => {
+    let now = Date.now();
+    server = await startServer({ now: () => now });
+    const kept = client();
+    const stale = client();
+    await signup(kept, 'Morel');
+    expect((await stale.request('POST', '/api/login', { username: 'morel', password: 'segredo123' })).status).toBe(200);
+    const day = 86_400_000;
+    for (let step = 0; step < 2; step++) {
+      now += 200 * day;
+      expect((await kept.request<Me>('GET', '/api/me')).data.user?.name).toBe('Morel');
+    }
+    expect((await kept.request<SessionView[]>('GET', '/api/account/sessions')).data).toHaveLength(1);
+  });
+
+  it('exports the account data as a download, without session secrets', async () => {
+    server = await startServer();
+    const a = client();
+    const b = client();
+    await signup(a, 'Knuckle');
+    await signup(b, 'Shoot');
+    await a.request('POST', '/api/users/shoot/follow');
+    await b.request('POST', '/api/users/knuckle/follow');
+    const { id } = await startGame(a, b);
+    a.send({ t: 'abort', game: id });
+    await a.waitGame(id, (g) => g.status === 'aborted');
+    const res = await fetch(`${server.base}/api/account/export`, { headers: { cookie: a.cookie } });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-disposition')).toBe('attachment; filename="ligungi-Knuckle.json"');
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    const text = await res.text();
+    const data = JSON.parse(text) as {
+      account: { username: string };
+      following: string[];
+      followers: string[];
+      sessions: Array<{ current: boolean }>;
+      games: Array<{ id: string; color: string; opponent: string; result: string }>;
+      ratings: Record<string, unknown>;
+    };
+    expect(data.account.username).toBe('Knuckle');
+    expect(data.following).toEqual(['Shoot']);
+    expect(data.followers).toEqual(['Shoot']);
+    expect(data.sessions).toEqual([expect.objectContaining({ current: true })]);
+    expect(data.games).toEqual([expect.objectContaining({ id, opponent: 'Shoot', result: 'aborted' })]);
+    expect(Object.keys(data.ratings)).toHaveLength(4);
+    expect(text).not.toContain(a.cookie.split('=')[1]!);
+    expect(text).not.toContain(b.cookie.split('=')[1]!);
+    expect((await client().request<{ code: string }>('GET', '/api/account/export')).data.code).toBe('loginRequired');
   });
 });
 

@@ -20,6 +20,7 @@ export const ERROR_MESSAGES = {
   wrongCredentials: 'Usuário ou senha incorretos.',
   wrongPassword: 'Senha atual incorreta.',
   activeGame: 'Termine suas partidas em andamento antes de excluir a conta.',
+  sessionNotFound: 'Sessão não encontrada.',
   userNotFound: 'Usuário não encontrado.',
   gameNotFound: 'Partida não encontrada.',
   challengeNotFound: 'Desafio não encontrado.',

@@ -64,6 +64,23 @@ interface GameRow {
   ended_at: number | null;
 }
 
+/** One game in the account data export (`GET /api/account/export`). */
+export interface GameExport {
+  readonly id: string;
+  readonly createdAt: string;
+  readonly endedAt: string | null;
+  readonly mode: Mode;
+  readonly rated: boolean;
+  readonly timeControl: { readonly initial: number; readonly increment: number } | null;
+  readonly color: Color;
+  readonly opponent: string;
+  readonly result: 'win' | 'loss' | 'draw' | 'aborted' | 'ongoing';
+  readonly reason: string | null;
+  readonly ratingBefore: number | null;
+  readonly ratingChange: number | null;
+  readonly moves: readonly string[];
+}
+
 const rowOutcome = (row: GameRow): Outcome | null => {
   if (row.status !== 'ended' || !row.reason) return null;
   return row.winner
@@ -233,6 +250,37 @@ export class Games {
       .prepare(`select * from games where ${where.join(' and ')} order by created_at desc limit ?`)
       .all(...params, limit) as unknown as GameRow[];
     return rows.map((row) => this.#summaryOf(row));
+  }
+
+  /**
+   * Every game of a user, oldest first, read straight from the table (no rooms rebuilt), for the data export.
+   * Session ids are left out: they are other people's secrets too.
+   */
+  exportFor(userId: string): GameExport[] {
+    const rows = this.#db
+      .prepare('select * from games where white_user = ?1 or black_user = ?1 order by created_at')
+      .all(userId) as unknown as GameRow[];
+    return rows.map((row) => {
+      const color: Color = row.white_user === userId ? 'white' : 'black';
+      const opponent = color === 'white' ? 'black' : 'white';
+      const result =
+        row.status === 'started' ? 'ongoing' : row.status === 'aborted' ? 'aborted' : row.winner === null ? 'draw' : row.winner === color ? 'win' : 'loss';
+      return {
+        id: row.id,
+        createdAt: new Date(row.created_at).toISOString(),
+        endedAt: row.ended_at === null ? null : new Date(row.ended_at).toISOString(),
+        mode: row.mode,
+        rated: Boolean(row.rated),
+        timeControl: row.clock_initial === null ? null : { initial: row.clock_initial, increment: row.clock_increment ?? 0 },
+        color,
+        opponent: row[`${opponent}_name`],
+        result,
+        reason: row.reason,
+        ratingBefore: row[`${color}_rating`],
+        ratingChange: row[`${color}_diff`],
+        moves: row.moves ? row.moves.split(' ') : [],
+      };
+    });
   }
 
   counts(userId: string): GameCounts {

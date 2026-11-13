@@ -1,4 +1,4 @@
-import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import type { Db } from './db.ts';
 import { safeDecode } from './http.ts';
 import { randomId } from './ids.ts';
@@ -81,6 +81,20 @@ export interface Session {
   readonly userId: string | null;
 }
 
+/** A signed-in session as its owner sees it in the account page. */
+export interface StoredSession {
+  readonly id: string;
+  readonly createdAt: number;
+  readonly seenAt: number;
+  readonly userAgent: string | null;
+}
+
+const USER_AGENT_MAX = 256;
+const userAgentOf = (value: string | undefined): string | null => value?.slice(0, USER_AGENT_MAX) || null;
+
+/** Public handle of a session: the id itself is the cookie secret and never leaves the server. */
+export const sessionHandle = (id: string): string => createHash('sha256').update(id).digest('hex').slice(0, 16);
+
 export class Sessions {
   readonly #db: Db;
   readonly #now: () => number;
@@ -121,19 +135,40 @@ export class Sessions {
     return { id, userId: null };
   }
 
-  /** Signs a user out everywhere except the given session (after a password change). */
-  deleteOtherSessions(userId: string, keep: string): void {
+  /** The user's live sessions (expired ones may wait for the next sweep), most recently active first. */
+  listForUser(userId: string): StoredSession[] {
+    const rows = this.#db
+      .prepare(
+        'select id, created_at, seen_at, user_agent from sessions where user_id = ? and seen_at >= ? order by seen_at desc, created_at desc',
+      )
+      .all(userId, this.#now() - USER_TTL_MS) as Array<{ id: string; created_at: number; seen_at: number; user_agent: string | null }>;
+    return rows.map((row) => ({ id: row.id, createdAt: row.created_at, seenAt: row.seen_at, userAgent: row.user_agent }));
+  }
+
+  /** Signs a user out everywhere except the given session. Returns the ids removed. */
+  deleteOtherSessions(userId: string, keep: string): string[] {
+    const removed = this.listForUser(userId).filter((session) => session.id !== keep).map((session) => session.id);
     this.#db.prepare('delete from sessions where user_id = ? and id != ?').run(userId, keep);
+    return removed;
+  }
+
+  /** Removes one of the user's sessions by its public handle, never `keep`. Returns the id removed. */
+  deleteByHandle(userId: string, handle: string, keep: string): string | null {
+    const session = this.listForUser(userId).find((entry) => entry.id !== keep && sessionHandle(entry.id) === handle);
+    if (!session) return null;
+    this.#db.prepare('delete from sessions where id = ?').run(session.id);
+    return session.id;
   }
 
   /** Logging in or out rotates the session id to prevent fixation. */
-  rotate(previous: string, userId: string | null): Session {
+  /** The user agent is kept only for signed-in sessions, which list it on the account page. */
+  rotate(previous: string, userId: string | null, userAgent?: string): Session {
     this.#db.prepare('delete from sessions where id = ?').run(previous);
     const id = randomId(24);
     const now = this.#now();
     this.#db
-      .prepare('insert into sessions (id, user_id, created_at, seen_at) values (?, ?, ?, ?)')
-      .run(id, userId, now, now);
+      .prepare('insert into sessions (id, user_id, created_at, seen_at, user_agent) values (?, ?, ?, ?, ?)')
+      .run(id, userId, now, now, userId ? userAgentOf(userAgent) : null);
     return { id, userId };
   }
 }

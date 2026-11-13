@@ -163,6 +163,15 @@ export interface UserProfile {
   readonly recent: readonly GameSummary[];
 }
 
+/** A signed-in session listed on the account page; `id` is a public handle, not the session secret. */
+export interface SessionView {
+  readonly id: string;
+  readonly current: boolean;
+  readonly createdAt: number;
+  readonly seenAt: number;
+  readonly userAgent: string | null;
+}
+
 export interface UserSearchResult {
   readonly user: UserRef;
   readonly online: boolean;

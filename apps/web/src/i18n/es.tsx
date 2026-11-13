@@ -1,7 +1,7 @@
 import type { Color } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import type { Messages } from './pt.tsx';
-import { LINKS, STUDIO } from './content/shared.tsx';
+import { STUDIO } from './content/shared.tsx';
 
 const sideOf = (color: Color) => (color === 'white' ? 'las blancas' : 'las negras');
 
@@ -69,6 +69,7 @@ export const es: Messages = {
     wrongCredentials: 'Usuario o contraseña incorrectos.',
     wrongPassword: 'La contraseña actual es incorrecta.',
     activeGame: 'Termina tus partidas en curso antes de eliminar la cuenta.',
+    sessionNotFound: 'Sesión no encontrada.',
     userNotFound: 'Usuario no encontrado.',
     gameNotFound: 'Partida no encontrada.',
     challengeNotFound: 'Desafío no encontrado.',
@@ -154,12 +155,12 @@ export const es: Messages = {
   },
   notFound: { title: 'Página no encontrada', back: 'Volver al inicio' },
   footer: {
-    source: (url) => (
-      <>
-        ligungi es software libre: <a href={url}>código fuente (AGPL-3.0)</a>. Diseño basado en <a href={LINKS.lila}>lila</a>,
-        el código abierto de lichess.org.
-      </>
-    ),
+    tagline: 'Gungi online y gratis, con las reglas oficiales de 2022.',
+    siteTitle: 'Sitio',
+    playTitle: 'Jugar',
+    codeTitle: 'Código y legal',
+    sourceCode: 'Código fuente (AGPL-3.0)',
+    basedOnLila: 'Basado en lila',
     trademark: 'Gungi y HUNTER×HUNTER pertenecen a sus propietarios. Proyecto de fans, sin afiliación oficial.',
     studio: (
       <>
@@ -202,6 +203,16 @@ export const es: Messages = {
     mismatch: 'Las contraseñas nuevas no coinciden.',
     change: 'Cambiar contraseña',
     changed: 'Contraseña cambiada. Los demás dispositivos deben iniciar sesión de nuevo.',
+    sessionsTitle: 'Dispositivos conectados',
+    sessionsText: 'Dónde está abierta tu cuenta ahora. Si no reconoces alguno, cierra esa sesión y cambia la contraseña.',
+    thisDevice: 'Este dispositivo',
+    unknownDevice: 'Navegador desconocido',
+    sessionDates: (since: string, active: string) => `Entró el ${since} · activo el ${active}`,
+    revoke: 'Cerrar',
+    revokeOthers: 'Cerrar todas las demás',
+    dataTitle: 'Tus datos',
+    dataText: 'Descarga una copia de los datos que guardamos sobre tu cuenta: perfil, puntuaciones, a quién sigues y quién te sigue, dispositivos conectados y todas tus partidas, en un archivo JSON.',
+    dataDownload: 'Descargar mis datos',
     deleteTitle: 'Eliminar cuenta',
     deleteText: 'Borra la cuenta, las puntuaciones y a quién sigues. Las partidas ya jugadas quedan en el historial, como "Anónimo". No se puede deshacer.',
     deleteConfirm: 'Entiendo que la eliminación es permanente',
@@ -270,7 +281,6 @@ export const es: Messages = {
     noTv: 'No hay partidas en vivo ahora.',
     featured: 'Partida destacada',
     more: 'Más »',
-    source: 'Código fuente',
   },
 
   create: {

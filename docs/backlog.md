@@ -15,8 +15,6 @@ The first item closes a gap between what the terms promise and what the site can
 | Profile details (bio, country flag, links) | Personality on profiles; flags show up on leaderboards | S | Low | lichess, lidraughts, libaduk, lishogi |
 | Captcha instead of the per-username login lockout | Today 20 wrong passwords lock an account for 15 minutes, which an attacker can abuse | M | Low | internal |
 | Two-factor authentication | Protects accounts, especially rated and moderator ones | M | Medium | lichess |
-| Manage sessions (see devices, sign out of the others) | Account safety after using a shared computer | S | Medium | lichess |
-| Download my data | Easy way to honor the LGPD access right | S | Medium | lichess |
 | Privacy settings: who can challenge, message or follow me | Reduces harassment once social features exist | S | Low | lichess |
 | Kid mode (no chat or messages) | Safer for young players | S | Low | lichess |
 
@@ -24,7 +22,6 @@ The first item closes a gap between what the terms promise and what the site can
 
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
-| Uptime monitoring with alerts | Nobody is warned when the site goes down | S | High | internal |
 | Several server processes (message broker) | Only needed with many concurrent players | L | Low | internal |
 
 ## Play
@@ -87,6 +84,7 @@ The first item closes a gap between what the terms promise and what the site can
 
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
+| Official social media: a Discord server first (community and support), then X, YouTube, Twitch and Instagram, each linked from the footer with its icon (icons from Simple Icons, CC0) | Gives players a place to meet, ask questions and follow news; Discord needs moderators before it opens | S | Medium | lichess, lishogi |
 | Community links in the menu and footer (GitHub issues, community group, social media) | The issue tracker is only linked from the FAQ and contact page | S | Medium | lichess, libaduk, lishogi |
 | Players page: who is online, live games, site statistics and rating distribution | Shows the site is alive; the data already exists | M | Medium | lichess, libaduk, lishogi |
 | Recent activity feed (finished games, new players) | Same | S | Low | libaduk |
@@ -120,9 +118,6 @@ The first item closes a gap between what the terms promise and what the site can
 
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
-| Installable app (PWA first) | Mobile players | M | Medium | lichess, lidraughts |
 | Public API with personal tokens (and OAuth for third-party apps) | Lets the community build tools, bots and integrations | L | Medium | lichess |
 | Donations or patrons | Funding, if wanted | S | Low | lichess, lidraughts, lishogi |
-| Vite 8 | Dependabot update; the build passes but the bundler changed | S | Medium | internal |
-| Preact 11 | Dependabot update; CI fails, breaking changes to handle | M | Medium | internal |
-| TypeScript 7 | Dependabot update; CI passes, but it is the rewritten compiler | S | Low | internal |
+| Preact 11 | Dependabot update; CI fails on stricter ARIA types, and the prerender needs a compatible preact-render-to-string; a major runtime release, so it needs a full UI pass | M | Medium | internal |

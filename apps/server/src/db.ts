@@ -76,6 +76,10 @@ const MIGRATIONS = [
   create index follows_followed on follows(followed_id);
   create index ratings_board on ratings(mode, rating);
   `,
+  `
+  alter table sessions add column user_agent text;
+  create index sessions_user on sessions(user_id);
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

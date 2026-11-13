@@ -18,6 +18,7 @@ import {
   type Me,
   type Topic,
   type UserProfile,
+  type SessionView,
   type UserSearchResult,
 } from '@ligungi/protocol';
 import { WebSocketServer, type WebSocket } from 'ws';
@@ -28,6 +29,7 @@ import {
   needsRehash,
   parseCookies,
   sessionCookie,
+  sessionHandle,
   verifyPassword,
   type Session,
 } from './auth.ts';
@@ -97,6 +99,8 @@ export const createApp = (config: ServerConfig): App => {
   const loginFailures = new RateLimiter(20, 15 * 60_000, config.now);
   /** New sessions per IP: each one is a database row. */
   const sessionLimiter = new RateLimiter(30, 60_000, config.now);
+  /** The export reads every game of the account: a few per minute is plenty. */
+  const exportLimiter = new RateLimiter(5, 60_000, config.now);
   const csp = contentSecurityPolicy(config.cloudflareWebAnalytics);
   let closing = false;
 
@@ -185,12 +189,19 @@ export const createApp = (config: ServerConfig): App => {
    */
   const rotateSession = (ctx: Context, userId: string | null): void => {
     const previous = ctx.session.id;
-    const next = sessions.rotate(previous, userId);
+    const next = sessions.rotate(previous, userId, ctx.req.headers['user-agent']);
     games.rebindSession(previous, next.id);
     lobby.rebindSession(previous, next.id);
     ctx.setSession(next);
     for (const client of hub.clients()) {
       if (client.player.sessionId === previous) client.socket.close(4001, 'session changed');
+    }
+  };
+
+  const closeSessionSockets = (ids: readonly string[]): void => {
+    const revoked = new Set(ids);
+    for (const client of hub.clients()) {
+      if (revoked.has(client.player.sessionId)) client.socket.close(4001, 'session changed');
     }
   };
 
@@ -274,6 +285,55 @@ export const createApp = (config: ServerConfig): App => {
       closeUserSockets(userId);
       rotateSession(ctx, null);
       sendJson(ctx.res, 200, { user: null });
+    })
+    .add('GET', '/api/account/sessions', (ctx) => {
+      const userId = requireUser(ctx);
+      const list: SessionView[] = sessions.listForUser(userId).map((session) => ({
+        id: sessionHandle(session.id),
+        current: session.id === ctx.session.id,
+        createdAt: session.createdAt,
+        seenAt: session.seenAt,
+        userAgent: session.userAgent,
+      }));
+      sendJson(ctx.res, 200, list);
+    })
+    .add('DELETE', '/api/account/sessions', (ctx) => {
+      const userId = requireUser(ctx);
+      const removed = sessions.deleteOtherSessions(userId, ctx.session.id);
+      closeSessionSockets(removed);
+      sendJson(ctx.res, 200, { revoked: removed.length });
+    })
+    .add('DELETE', '/api/account/sessions/:id', (ctx) => {
+      const userId = requireUser(ctx);
+      const removed = sessions.deleteByHandle(userId, ctx.params.id!, ctx.session.id);
+      if (!removed) throw new HttpError(404, 'sessionNotFound');
+      closeSessionSockets([removed]);
+      sendJson(ctx.res, 200, { revoked: 1 });
+    })
+    .add('GET', '/api/account/export', (ctx) => {
+      const userId = requireUser(ctx);
+      if (!exportLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
+      const user = users.findById(userId);
+      if (!user) throw new HttpError(401, 'loginRequired');
+      const iso = (ms: number) => new Date(ms).toISOString();
+      const data = {
+        about: 'Personal data held by ligungi for this account (LGPD access right). Preferences live only in your browser.',
+        exportedAt: iso(config.now()),
+        account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
+        ratings: users.ratings(userId),
+        following: users.following(userId).map((entry) => entry.name),
+        followers: users.followers(userId).map((entry) => entry.name),
+        sessions: sessions.listForUser(userId).map((session) => ({
+          current: session.id === ctx.session.id,
+          createdAt: iso(session.createdAt),
+          lastActive: iso(session.seenAt),
+          browser: session.userAgent,
+        })),
+        games: games.exportFor(userId),
+      };
+      ctx.res.setHeader('content-disposition', `attachment; filename="ligungi-${user.name}.json"`);
+      ctx.res.setHeader('cache-control', 'no-store');
+      sendJson(ctx.res, 200, data);
     })
     .add('GET', '/api/users', (ctx) => {
       const query = ctx.url.searchParams.get('q')?.trim() ?? '';

@@ -4,6 +4,17 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Account page: see the devices where your account is signed in and sign out one or all of the others.
+- Account page: download a copy of your data (profile, ratings, follows, sessions and all your games) as JSON.
+
+### Changed
+
+- New site footer, the same on every page including the home: the brand, links grouped into Site, Play and Code and legal, and the legal notice with the version.
+- Build tooling upgraded to Vite 8 and TypeScript 7, and the server image to Node 24.22.2.
+- The privacy policy now says that each signed-in session keeps the browser's description and its sign-in and last-use dates, and lists what you can do yourself on the Account page.
+
 ## [0.1.3] - 2026-11-13
 
 ### Added

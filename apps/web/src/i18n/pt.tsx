@@ -2,7 +2,7 @@ import type { Labels } from '@ligungi/board';
 import type { Color, Mode, Outcome, Role } from '@ligungi/engine';
 import { ERROR_MESSAGES, type ErrorCode } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
-import { LINKS, STUDIO } from './content/shared.tsx';
+import { STUDIO } from './content/shared.tsx';
 
 const colorOf = (color: Color) => (color === 'white' ? 'Branco' : 'Preto');
 
@@ -100,12 +100,12 @@ export const pt = {
   },
   notFound: { title: 'Página não encontrada', back: 'Voltar ao início' },
   footer: {
-    source: (url: string) => (
-      <>
-        ligungi é software livre: <a href={url}>código-fonte (AGPL-3.0)</a>. Visual baseado no <a href={LINKS.lila}>lila</a>, o
-        código aberto do lichess.org.
-      </>
-    ),
+    tagline: 'Gungi online e de graça, com as regras oficiais de 2022.',
+    siteTitle: 'Site',
+    playTitle: 'Jogar',
+    codeTitle: 'Código e legal',
+    sourceCode: 'Código-fonte (AGPL-3.0)',
+    basedOnLila: 'Baseado no lila',
     trademark: 'Gungi e HUNTER×HUNTER pertencem aos seus detentores. Projeto de fãs, sem afiliação oficial.',
     studio: (
       <>
@@ -148,6 +148,16 @@ export const pt = {
     mismatch: 'As senhas novas não são iguais.',
     change: 'Trocar senha',
     changed: 'Senha trocada. Os outros aparelhos precisam entrar de novo.',
+    sessionsTitle: 'Aparelhos conectados',
+    sessionsText: 'Onde a sua conta está aberta agora. Se não reconhecer algum, encerre a sessão e troque a senha.',
+    thisDevice: 'Este aparelho',
+    unknownDevice: 'Navegador desconhecido',
+    sessionDates: (since: string, active: string) => `Entrou em ${since} · ativo em ${active}`,
+    revoke: 'Encerrar',
+    revokeOthers: 'Encerrar todas as outras',
+    dataTitle: 'Seus dados',
+    dataText: 'Baixe uma cópia dos dados que guardamos sobre a sua conta: perfil, ratings, quem você segue e quem segue você, aparelhos conectados e todas as suas partidas, em um arquivo JSON.',
+    dataDownload: 'Baixar meus dados',
     deleteTitle: 'Excluir conta',
     deleteText: 'Apaga a conta, os ratings e quem você segue. As partidas já jogadas continuam no histórico, como "Anônimo". Não dá para desfazer.',
     deleteConfirm: 'Entendo que a exclusão é permanente',
@@ -216,7 +226,6 @@ export const pt = {
     noTv: 'Nenhuma partida ao vivo agora.',
     featured: 'Partida em destaque',
     more: 'Mais »',
-    source: 'Código-fonte',
   },
 
   create: {

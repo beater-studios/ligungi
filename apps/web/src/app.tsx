@@ -292,26 +292,73 @@ const Header = () => {
   );
 };
 
+const footerLink = (href: string, label: string) => {
+  const external = href.startsWith('http');
+  return (
+    <li key={href}>
+      <a href={href} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+        {label}
+      </a>
+    </li>
+  );
+};
+
 export const SiteFooter = () => {
   const t = useT();
+  const columns: Array<{ title: string; links: Array<[string, string]> }> = [
+    {
+      title: t.footer.siteTitle,
+      links: [
+        ['/about', t.nav.about],
+        ['/faq', t.nav.faq],
+        ['/contact', t.nav.contact],
+        [LINKS.status, t.nav.status],
+      ],
+    },
+    {
+      title: t.footer.playTitle,
+      links: [
+        ['/learn', t.nav.learn],
+        ['/computer', t.nav.playComputer],
+        ['/analysis', t.nav.analysis],
+        ['/ranking', t.nav.players],
+        ['/tv', t.nav.liveGames],
+      ],
+    },
+    {
+      title: t.footer.codeTitle,
+      links: [
+        [SOURCE_URL, t.footer.sourceCode],
+        [LINKS.lila, t.footer.basedOnLila],
+        ['/terms', t.nav.terms],
+        ['/privacy', t.nav.privacy],
+      ],
+    },
+  ];
   return (
     <footer class="ligungi-footer">
-      <nav class="ligungi-footer__links">
-        {INFO_KINDS.map((kind) => (
-          <a key={kind} href={`/${kind}`}>
-            {t.nav[kind]}
+      <div class="ligungi-footer__main">
+        <div class="ligungi-footer__brand">
+          <a class="ligungi-footer__logo" href="/">
+            <img src={logoUrl} alt="" width="32" height="32" />
+            <span>
+              ligungi<span class="ligungi-footer__tld">.org</span>
+            </span>
           </a>
+          <p>{t.footer.tagline}</p>
+          <p class="ligungi-footer__studio">{t.footer.studio}</p>
+        </div>
+        {columns.map((column) => (
+          <nav key={column.title} class="ligungi-footer__column" aria-label={column.title}>
+            <span class="ligungi-footer__title">{column.title}</span>
+            <ul>{column.links.map(([href, label]) => footerLink(href, label))}</ul>
+          </nav>
         ))}
-        <a href={LINKS.status} target="_blank" rel="noopener noreferrer">
-          {t.nav.status}
-        </a>
-      </nav>
-      <span>{t.footer.source(SOURCE_URL)}</span>
-      <span>{t.footer.trademark}</span>
-      <span class="ligungi-footer__studio">
-        {t.footer.studio}
+      </div>
+      <div class="ligungi-footer__bottom">
+        <span>{t.footer.trademark}</span>
         <span class="ligungi-footer__version">
-          {' · '}v{VERSION}
+          v{VERSION}
           {COMMIT !== 'dev' &&
             (COMMIT.endsWith('-dirty') ? (
               ` (${COMMIT})`
@@ -325,7 +372,7 @@ export const SiteFooter = () => {
               </>
             ))}
         </span>
-      </span>
+      </div>
     </footer>
   );
 };

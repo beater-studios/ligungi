@@ -25,7 +25,7 @@ const sources = (
 );
 
 export const es: Content = {
-  updated: 'Última actualización: 12 de noviembre de 2026.',
+  updated: 'Última actualización: 13 de noviembre de 2026.',
 
   about: (
     <>
@@ -253,6 +253,8 @@ export const es: Content = {
         <li>
           <b>Cookie de sesión (sid):</b> una cookie esencial que identifica tu navegador para mantener la sesión y tus
           partidas. No se usa para rastrear. Las sesiones sin cuenta caducan tras 30 días sin uso; con cuenta, tras un año.
+          En las sesiones con cuenta guardamos también la descripción del navegador (el "user agent", por ejemplo "Chrome en Windows") y las
+          fechas de entrada y de último uso, para que veas en la página Cuenta dónde está abierta tu cuenta.
         </li>
         <li>
           <b>Dirección IP:</b> se usa en el momento de la solicitud para limitar los intentos de inicio de sesión y proteger
@@ -290,7 +292,8 @@ export const es: Content = {
       <h2>Tus derechos</h2>
       <p>
         Según la LGPD, puedes pedir acceso, corrección o eliminación de tus datos, e información sobre su tratamiento.
-        Puedes cambiar la contraseña o eliminar la cuenta tú mismo en la página <a href="/account">Cuenta</a>; para lo demás,
+        En la página <a href="/account">Cuenta</a> puedes descargar una copia de tus datos, cerrar sesiones en otros
+        dispositivos, cambiar la contraseña y eliminar la cuenta tú mismo; para lo demás,
         escribe a <Mail /> con el asunto "Privacidad", indicando tu nombre de usuario. Eliminar la cuenta borra tus datos
         personales; las partidas ya jugadas pueden quedar en el historial de forma anónima.
       </p>

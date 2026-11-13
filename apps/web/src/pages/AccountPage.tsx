@@ -1,7 +1,9 @@
-import { useState } from 'preact/hooks';
+import type { SessionView } from '@ligungi/protocol';
+import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { Checkbox, Field, SubmitButton } from '../components/ui.tsx';
-import { useT } from '../i18n/index.ts';
+import { formatDate, useT } from '../i18n/index.ts';
+import { describeUserAgent } from '../userAgent.ts';
 import { navigate } from '../router.ts';
 import { loadSession, session } from '../session.ts';
 import { socket } from '../socket.ts';
@@ -82,6 +84,61 @@ const PasswordForm = () => {
   );
 };
 
+const Sessions = () => {
+  const t = useT();
+  const [list, setList] = useState<SessionView[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const load = () =>
+    api
+      .get<SessionView[]>('/api/account/sessions')
+      .then(setList)
+      .catch((err: Error) => setError(err.message));
+  useEffect(() => void load(), []);
+
+  const revoke = async (path: string) => {
+    setError(null);
+    try {
+      await api.delete(path);
+      await load();
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  const others = list?.filter((session) => !session.current).length ?? 0;
+  return (
+    <>
+      <p>{t.account.sessionsText}</p>
+      {list && (
+        <ul class="ligungi-sessions">
+          {list.map((session) => (
+            <li key={session.id}>
+              <div class="ligungi-sessions__device">
+                <strong>{describeUserAgent(session.userAgent) ?? t.account.unknownDevice}</strong>
+                {session.current && <span class="ligungi-sessions__current">{t.account.thisDevice}</span>}
+                <small>{t.account.sessionDates(formatDate(t, session.createdAt), formatDate(t, session.seenAt))}</small>
+              </div>
+              {!session.current && (
+                <button type="button" class="button button-empty" onClick={() => void revoke(`/api/account/sessions/${session.id}`)}>
+                  {t.account.revoke}
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {error && <p class="error">{error}</p>}
+      {others > 1 && (
+        <div class="ligungi-actions">
+          <button type="button" class="button button-empty button-red" onClick={() => void revoke('/api/account/sessions')}>
+            {t.account.revokeOthers}
+          </button>
+        </div>
+      )}
+    </>
+  );
+};
+
 const DeleteForm = () => {
   const t = useT();
   const [password, setPassword] = useState('');
@@ -146,6 +203,17 @@ export const AccountPage = () => {
             <section>
               <h2>{t.account.passwordTitle}</h2>
               <PasswordForm />
+            </section>
+            <section>
+              <h2>{t.account.sessionsTitle}</h2>
+              <Sessions />
+            </section>
+            <section>
+              <h2>{t.account.dataTitle}</h2>
+              <p>{t.account.dataText}</p>
+              <a class="button button-empty" href="/api/account/export" download>
+                {t.account.dataDownload}
+              </a>
             </section>
             <section class="ligungi-danger-zone">
               <h2>{t.account.deleteTitle}</h2>

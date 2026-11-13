@@ -14,27 +14,20 @@ import {
   type Role,
 } from '@ligungi/engine';
 
-export type BotLevel = 1 | 2 | 3;
-export type Random = () => number;
+import { Searcher, VALUE, type Random, type SearchLimits } from './search.ts';
 
-export const BOT_LEVELS: readonly BotLevel[] = [1, 2, 3];
+export { Searcher, evaluate as evaluateForSideToMove, type Random, type SearchLimits, type SearchResult } from './search.ts';
 
-const VALUE: Readonly<Record<Role, number>> = {
-  marshal: 0,
-  general: 900,
-  lieutenant: 600,
-  major: 400,
-  samurai: 280,
-  lancer: 250,
-  rider: 230,
-  spy: 220,
-  fortress: 210,
-  soldier: 120,
-  cannon: 300,
-  archer: 270,
-  musketeer: 260,
-  tactician: 350,
+export type BotLevel = 1 | 2 | 3 | 4 | 5;
+
+export const BOT_LEVELS: readonly BotLevel[] = [1, 2, 3, 4, 5];
+
+/** Levels 4 and 5 search with alpha-beta and iterative deepening within a time budget per move. */
+export const SEARCH_LIMITS: Readonly<Record<4 | 5, SearchLimits>> = {
+  4: { timeMs: 800, maxDepth: 6 },
+  5: { timeMs: 2500, maxDepth: 12 },
 };
+
 
 const MATE = 1_000_000;
 const ROOT_DROP_LIMIT = 24;
@@ -145,8 +138,17 @@ const search = (position: Position, moves: readonly Move[], random: Random): Mov
   return best;
 };
 
+export interface ChooseOptions {
+  readonly random?: Random;
+  /** Overrides the search budget of levels 4 and 5 (tests). */
+  readonly limits?: SearchLimits;
+  /** Repetition keys (`repetitionKey`) of the earlier positions of the game, so levels 4 and 5 avoid repeating. */
+  readonly history?: readonly string[];
+}
+
 /** Picks a move for the side to move. Throws when there is none. */
-export const chooseMove = (position: Position, level: BotLevel, random: Random = Math.random): Move => {
+export const chooseMove = (position: Position, level: BotLevel, options: ChooseOptions = {}): Move => {
+  const random = options.random ?? Math.random;
   const moves = legalMoves(position);
   if (moves.length === 0) throw new Error('No legal moves');
   if (position.phase === 'draft') return draftMove(position, moves, random);
@@ -154,5 +156,6 @@ export const chooseMove = (position: Position, level: BotLevel, random: Random =
   if (top) return top;
   if (level === 1) return pick(moves, random);
   if (level === 2) return greedy(position, moves, random);
-  return search(position, moves, random);
+  if (level === 3) return search(position, moves, random);
+  return new Searcher(options.limits ?? SEARCH_LIMITS[level], random).choose(position, options.history).move;
 };

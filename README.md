@@ -26,7 +26,7 @@ A free platform to play Gungi (軍儀), the board game from HUNTER×HUNTER, onli
 |---|---|
 | [packages/engine](packages/engine) | Rules engine in TypeScript, no dependencies. Used by both the browser and the server. |
 | [packages/board](packages/board) | Framework-free board component (the equivalent of chessground). |
-| [packages/bot](packages/bot) | Computer opponent, 3 levels. |
+| [packages/bot](packages/bot) | Computer opponent, 5 levels (the strongest search with alpha-beta in a time budget). |
 | [packages/protocol](packages/protocol) | Types and validation shared by the server and the site. |
 | [apps/server](apps/server) | Node server: HTTP, WebSocket and SQLite (built into Node). |
 | [apps/web](apps/web) | The site, in Preact. |

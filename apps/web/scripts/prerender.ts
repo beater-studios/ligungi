@@ -150,7 +150,7 @@ The site works like lichess: rated and casual games with Glicko-2 ratings, games
 
 - [Home](${en('/')}): quick pairing, open games and live counters
 - [How to play](${en('/learn')}): pieces, movement, towers, the draft and checkmate, with an interactive piece trainer
-- [Play the computer](${en('/computer')}): three levels, no account needed
+- [Play the computer](${en('/computer')}): five levels, no account needed
 - [Analysis board](${en('/analysis')}): try moves and study positions
 - [Leaderboard](${en('/ranking')}): best players of each mode
 - [Gungi TV](${en('/tv')}): games being played now

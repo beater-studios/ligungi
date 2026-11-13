@@ -1,5 +1,5 @@
 import { BOT_LEVELS, type BotLevel } from '@ligungi/bot';
-import { MODES, MODE_RULES, initialPosition, legalMoves, moveToString, opposite, parseMove, toFen, type Color, type Mode } from '@ligungi/engine';
+import { MODES, MODE_RULES, initialPosition, legalMoves, moveToString, opposite, parseMove, repetitionKey, toFen, type Color, type Mode } from '@ligungi/engine';
 import type { ColorChoice } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
@@ -57,7 +57,9 @@ export const ComputerPage = () => {
       }, wait);
     };
     worker.current.addEventListener('message', onMessage);
-    worker.current.postMessage({ id, fen: toFen(position), level });
+    // Earlier positions of the game, so the bot can tell when a move would repeat one.
+    const history = replay.positions.slice(0, -1).filter((p) => p.phase === 'play').map(repetitionKey);
+    worker.current.postMessage({ id, fen: toFen(position), level, history });
     return () => {
       worker.current?.removeEventListener('message', onMessage);
       request.current++;

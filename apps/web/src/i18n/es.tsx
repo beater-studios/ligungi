@@ -383,7 +383,13 @@ export const es: Messages = {
   computer: {
     title: 'Jugar contra la computadora',
     strength: 'Fuerza',
-    levels: { 1: 'Nivel 1 (aleatorio)', 2: 'Nivel 2 (codicioso)', 3: 'Nivel 3 (calcula 2 jugadas)' },
+    levels: {
+      1: 'Nivel 1 (aleatorio)',
+      2: 'Nivel 2 (codicioso)',
+      3: 'Nivel 3 (calcula 2 jugadas)',
+      4: 'Nivel 4 (calcula más a fondo, hasta 1 s)',
+      5: 'Nivel 5 (el más fuerte, hasta 3 s)',
+    },
     start: 'Empezar',
     bot: (level) => `Computadora · nivel ${level}`,
   },
@@ -622,7 +628,7 @@ export const es: Messages = {
       },
       computer: {
         title: 'Jugar Gungi contra la computadora · ligungi',
-        description: 'Juega Gungi contra la computadora en el navegador, en tres niveles, sin necesidad de cuenta.',
+        description: 'Juega Gungi contra la computadora en el navegador, en cinco niveles, sin necesidad de cuenta.',
       },
       analysis: {
         title: 'Tablero de análisis de Gungi · ligungi',

@@ -383,7 +383,13 @@ export const en: Messages = {
   computer: {
     title: 'Play against the computer',
     strength: 'Strength',
-    levels: { 1: 'Level 1 (random)', 2: 'Level 2 (greedy)', 3: 'Level 3 (looks 2 moves ahead)' },
+    levels: {
+      1: 'Level 1 (random)',
+      2: 'Level 2 (greedy)',
+      3: 'Level 3 (looks 2 moves ahead)',
+      4: 'Level 4 (looks deeper, up to 1 s)',
+      5: 'Level 5 (strongest, up to 3 s)',
+    },
     start: 'Start',
     bot: (level) => `Computer · level ${level}`,
   },
@@ -622,7 +628,7 @@ export const en: Messages = {
       },
       computer: {
         title: 'Play Gungi against the computer · ligungi',
-        description: 'Play Gungi against the computer in your browser, at three levels, without an account.',
+        description: 'Play Gungi against the computer in your browser, at five levels, without an account.',
       },
       analysis: {
         title: 'Gungi analysis board · ligungi',

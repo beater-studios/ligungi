@@ -8,6 +8,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 - Takebacks in casual games: ask to take back your last move, and the opponent accepts or declines. Not available in rated games or for the first two moves.
 - Give your opponent 15 seconds with the + button on their clock, in any game with a clock.
+- Two stronger computer levels: level 4 thinks up to about 1 second per move and level 5 up to 3 seconds, searching several moves ahead, following captures to the end and avoiding repeating positions when ahead. Levels 1 to 3 are unchanged.
 - When you offer a draw or a takeback, a line says it is waiting for your opponent, and another tells you if they decline (also for rematches).
 
 ### Changed

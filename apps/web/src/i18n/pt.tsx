@@ -320,7 +320,13 @@ export const pt = {
   computer: {
     title: 'Jogar contra o computador',
     strength: 'Força',
-    levels: { 1: 'Nível 1 (aleatório)', 2: 'Nível 2 (guloso)', 3: 'Nível 3 (calcula 2 lances)' } as Record<1 | 2 | 3, string>,
+    levels: {
+      1: 'Nível 1 (aleatório)',
+      2: 'Nível 2 (guloso)',
+      3: 'Nível 3 (calcula 2 lances)',
+      4: 'Nível 4 (calcula mais fundo, até 1 s)',
+      5: 'Nível 5 (o mais forte, até 3 s)',
+    } as Record<1 | 2 | 3 | 4 | 5, string>,
     start: 'Começar',
     bot: (level: number) => `Computador · nível ${level}`,
   },
@@ -558,7 +564,7 @@ export const pt = {
       },
       computer: {
         title: 'Jogar Gungi contra o computador · ligungi',
-        description: 'Jogue Gungi contra o computador no navegador, em três níveis, sem precisar de conta.',
+        description: 'Jogue Gungi contra o computador no navegador, em cinco níveis, sem precisar de conta.',
       },
       analysis: {
         title: 'Tabuleiro de análise de Gungi · ligungi',

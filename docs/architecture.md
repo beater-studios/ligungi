@@ -66,7 +66,7 @@ Sending the full view on every change is simpler than sending diffs and solves r
 
 ## Site (`apps/web`)
 
-Preact with its own router and a minimal store (`store.ts`). A single WebSocket with reconnection and per-topic subscription counting (`socket.ts`). The computer opponent runs in a Web Worker so it does not freeze the interface. Preferences (language, piece names, theme, sound, coordinates, animation) are kept in `localStorage`.
+Preact with its own router and a minimal store (`store.ts`). A single WebSocket with reconnection and per-topic subscription counting (`socket.ts`). The computer opponent runs in a Web Worker so it does not freeze the interface; levels 4 and 5 search with a time budget per move (`SEARCH_LIMITS` in `packages/bot`), using pseudo-legal moves inside the tree, where a move that exposes the own Marshal loses to the capture that follows. Preferences (language, piece names, theme, sound, coordinates, animation) are kept in `localStorage`.
 
 ### Search engines and link previews
 
@@ -80,7 +80,7 @@ Languages: Portuguese, English and Spanish. Texts live in `src/i18n/`: `pt.tsx` 
 
 - A single server process: rooms and the lobby live in memory (games are persisted in SQLite). Scaling to several instances would need a broker (Redis, for example), like lichess's lila-ws.
 - No password recovery (no email sending).
-- The bot is simple (2-ply search).
+- The strongest bot levels search only a few moves ahead (alpha-beta with iterative deepening, quiescence on captures and betrayals, within 0.8 s or 2.5 s per move), with no transposition table and no opening knowledge. The page sends the game's earlier positions, and returning to one scores as a draw in the search, so the bot avoids repeating when ahead and seeks it when behind. Below the root only the ten most promising drops are tried, except when the side to move has its Marshal under attack: then every move that saves it is searched, drops included.
 - A deploy restarts that single process: a few seconds of downtime, and ongoing games reconnect.
 - Prerendered pages show the signed-out header and home until the app loads the session, so signed-in players see it for a moment.
 - The server cannot read a language chosen in the settings (it lives in the browser), so a player whose choice differs from the browser language sees the browser language for a moment. The light theme has the same flash: the page starts dark.

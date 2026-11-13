@@ -454,7 +454,7 @@ export const createApp = (config: ServerConfig): App => {
     res.setHeader('referrer-policy', 'strict-origin-when-cross-origin');
     if (!url.pathname.startsWith('/api/')) {
       res.setHeader('content-security-policy', csp);
-      if ((req.method === 'GET' || req.method === 'HEAD') && config.staticDir && serveStatic(config.staticDir, url.pathname, res, req.method === 'HEAD')) return;
+      if ((req.method === 'GET' || req.method === 'HEAD') && config.staticDir && serveStatic(config.staticDir, url, req.headers['accept-language'], res, req.method === 'HEAD')) return;
       sendText(res, 404, 'Not found');
       return;
     }

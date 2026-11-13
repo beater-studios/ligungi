@@ -54,7 +54,27 @@ const load = (): Prefs => {
 
 export const prefs = createStore<Prefs>(load());
 
+const URL_LANG_KEY = 'ligungi.urlLang';
+
+/**
+ * `?lang=` in the address fixes the language for the tab (search results link to each language this way), so a
+ * reload or a link without it keeps the language the visitor arrived in.
+ */
+const urlLang = (): Lang | undefined => {
+  const value = new URLSearchParams(window.location.search).get('lang');
+  const fromUrl = LANGS.find((lang) => lang === value);
+  try {
+    if (fromUrl) sessionStorage.setItem(URL_LANG_KEY, fromUrl);
+    const stored = sessionStorage.getItem(URL_LANG_KEY);
+    return fromUrl ?? LANGS.find((lang) => lang === stored);
+  } catch {
+    return fromUrl;
+  }
+};
+const URL_LANG = urlLang();
+
 const detectLang = (): Lang => {
+  if (URL_LANG) return URL_LANG;
   const tags = navigator.languages?.length ? navigator.languages : [navigator.language];
   for (const tag of tags) {
     const base = tag?.toLowerCase().slice(0, 2) as Lang;

@@ -108,7 +108,8 @@ describe('client IP', () => {
     expect((await login({ 'x-forwarded-for': '10.1.1.1' }, 'TARGET', 'wrong-guess')).status).toBe(429);
     expect((await login({ 'x-forwarded-for': '10.1.1.2' }, 'target', 'correct-horse')).status).toBe(429);
     expect((await login({ 'x-forwarded-for': '10.1.1.3' }, 'other', 'x')).status).toBe(401);
-  });
+    // 22 scrypt derivations, slow by design: the default 5 s is too tight on a busy machine.
+  }, 20_000);
 
   it('drops expired rate limit windows', () => {
     let now = 0;
@@ -205,6 +206,47 @@ describe('static files', () => {
     expect((await head('/'))[0]).toBe('no-cache, no-transform');
     expect((await head('/ranking'))[0]).toBe('no-cache, no-transform');
     expect((await head('/favicon.svg'))[0]).toBe('public, max-age=604800, stale-while-revalidate=2592000');
+  });
+});
+
+describe('prerendered pages', () => {
+  const site = () => {
+    const staticDir = mkdtempSync(join(tmpdir(), 'ligungi-static-'));
+    dirs.push(staticDir);
+    writeFileSync(join(staticDir, 'index.html'), 'bare');
+    writeFileSync(join(staticDir, 'sitemap.xml'), '<urlset/>');
+    for (const lang of ['pt', 'en', 'es']) {
+      mkdirSync(join(staticDir, 'pages', lang), { recursive: true });
+      for (const slug of ['home', 'faq']) {
+        writeFileSync(join(staticDir, 'pages', lang, `${slug}.html`), `${slug} ${lang} fixed`);
+        writeFileSync(join(staticDir, 'pages', lang, `${slug}.auto.html`), `${slug} ${lang} auto`);
+      }
+      writeFileSync(join(staticDir, 'pages', lang, 'shell.html'), `shell ${lang}`);
+    }
+    return staticDir;
+  };
+  const get = async (path: string, acceptLanguage?: string) => {
+    const res = await raw(path, acceptLanguage ? { 'accept-language': acceptLanguage } : {});
+    return { status: res.status, text: await res.text(), vary: res.headers.get('vary'), lang: res.headers.get('content-language') };
+  };
+
+  it('serves each public page in the language of ?lang= or of the browser', async () => {
+    server = await startServer({ staticDir: site() });
+    expect(await get('/faq?lang=es', 'pt-BR')).toEqual({ status: 200, text: 'faq es fixed', vary: null, lang: 'es' });
+    expect(await get('/faq', 'pt-BR,pt;q=0.9,en;q=0.8')).toMatchObject({ text: 'faq pt auto', vary: 'Accept-Language', lang: 'pt' });
+    expect((await get('/', 'fr-FR, es;q=0.5, en;q=0.7')).text).toBe('home en auto');
+    expect((await get('/', 'de')).text).toBe('home en auto');
+    expect((await get('/faq?lang=xx')).text).toBe('faq en auto');
+  });
+
+  it('gives other routes the shell of their language and hides the page files', async () => {
+    server = await startServer({ staticDir: site() });
+    expect((await get('/@/someone', 'es')).text).toBe('shell es');
+    expect((await get('/abcd1234?lang=pt')).text).toBe('shell pt');
+    expect((await get('/pages/en/faq.html')).status).toBe(404);
+    expect((await get('//pages/en/faq.html')).status).toBe(404);
+    expect((await get('/sitemap.xml')).text).toBe('<urlset/>');
+    expect((await raw('/sitemap.xml')).headers.get('cache-control')).toBe('public, max-age=86400');
   });
 });
 

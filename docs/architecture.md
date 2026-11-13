@@ -66,10 +66,25 @@ Sending the full view on every change is simpler than sending diffs and solves r
 
 Preact with its own router and a minimal store (`store.ts`). A single WebSocket with reconnection and per-topic subscription counting (`socket.ts`). The computer opponent runs in a Web Worker so it does not freeze the interface. Preferences (language, piece names, theme, sound, coordinates, animation) are kept in `localStorage`.
 
-Languages: Portuguese, English and Spanish. Texts live in `src/i18n/`: `pt.tsx` is the source, and `en.tsx` and `es.tsx` share its type (`Messages`), so TypeScript reports any missing key. In automatic mode the language comes from the browser (`navigator.languages`), with English for unsupported languages. Piece names follow the interface language or use the Japanese readings. The server sends stable error codes (`packages/protocol/src/errors.ts`) and the site translates them; the Portuguese message sent along with the code is only a fallback.
+### Search engines and link previews
+
+The site is a single-page app, so `scripts/prerender.ts` runs after `vite build`: it renders the public pages (`PAGES` in `src/seo.ts`) with `preact-render-to-string` in each language and writes them to `dist/pages/<lang>/`, together with `sitemap.xml`, `robots.txt`, `llms.txt` and `llms-full.txt` (the rules specification). Every page has its own title, description, canonical, hreflang, Open Graph tags and, on the home and FAQ, JSON-LD. Other routes (profiles, games) get a shell with the head of their language and an empty body. The app renders over the prerendered markup when it starts.
+
+The server picks the file for each request (`serveStatic` in `apps/server/src/http.ts`): `?lang=pt|en|es` fixes the language (the version search engines index, declared by hreflang), and the plain URL follows `Accept-Language`, as the app follows the browser languages. Page titles and descriptions are in the `seo` section of the dictionaries; a new public page goes in `PAGES` and gets its texts there.
+
+Languages: Portuguese, English and Spanish. Texts live in `src/i18n/`: `pt.tsx` is the source, and `en.tsx` and `es.tsx` share its type (`Messages`), so TypeScript reports any missing key. In automatic mode the language comes from the browser (`navigator.languages`), with English for unsupported languages; `?lang=` in the address fixes it for the tab. Piece names follow the interface language or use the Japanese readings. The server sends stable error codes (`packages/protocol/src/errors.ts`) and the site translates them; the Portuguese message sent along with the code is only a fallback.
 
 ## Known limitations
 
 - A single server process: rooms and the lobby live in memory (games are persisted in SQLite). Scaling to several instances would need a broker (Redis, for example), like lichess's lila-ws.
 - No password recovery (no email sending).
 - The bot is simple (2-ply search).
+- A deploy restarts that single process: a few seconds of downtime, and ongoing games reconnect.
+- Prerendered pages show the signed-out header and home until the app loads the session, so signed-in players see it for a moment.
+- The server cannot read a language chosen in the settings (it lives in the browser), so a player whose choice differs from the browser language sees the browser language for a moment. The light theme has the same flash: the page starts dark.
+- Unknown addresses answer 200 with `noindex` (the client decides what is a 404), not a real 404 status.
+- Profiles and games share the site's default title and link preview; only the public pages have their own.
+- The link preview image (`og.png`) has English text in every language.
+- Performance has not been measured (Lighthouse, Core Web Vitals).
+- Player search matches the start of the username only, without typo tolerance.
+- An account cannot be deleted while it has an ongoing game (on purpose, but the player has to finish or wait for the game first).

@@ -10,6 +10,8 @@ COPY package.json package-lock.json .npmrc tsconfig.base.json ./
 COPY packages ./packages
 COPY apps ./apps
 COPY scripts ./scripts
+# The rules specification is published as llms-full.txt.
+COPY docs/rules.md ./docs/rules.md
 RUN npm ci --ignore-scripts --no-audit --no-fund && npm run build
 
 FROM node:24.22.1-alpine

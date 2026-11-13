@@ -2,18 +2,40 @@ import { TIME_PRESETS, type GameSummary, type LeaderEntry, type LobbyView, type 
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { SOURCE_URL } from '../source.ts';
+import { LINKS } from '../i18n/content/shared.tsx';
 import { CreateGame, type CreateTarget } from '../components/CreateGame.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { icons } from '../icons.ts';
 import { PlayerTag } from '../components/PlayerTag.tsx';
 import { useFriends } from './FriendsPage.tsx';
-import { playerName, timeControlText, useT } from '../i18n/index.ts';
+import { playerName, settingsText, timeControlText, useT } from '../i18n/index.ts';
+import { Modal } from '../components/Modal.tsx';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
 import { socket } from '../socket.ts';
 import { useStore } from '../store.ts';
 
 type Tab = 'pools' | 'seeks' | 'playing';
+
+/** Shown in place of the quick pairing grid while the player's own games wait in the lobby. */
+const Waiting = ({ seeks, onCancel }: { seeks: readonly SeekView[]; onCancel: (seek: SeekView) => void }) => {
+  const t = useT();
+  return (
+    <div class="lobby__app__content ligungi-waiting" role="status">
+      <div class="ligungi-waiting__spinner" aria-hidden="true" />
+      <h2>{t.home.waitingTitle}</h2>
+      {seeks.map((seek) => (
+        <div key={seek.id} class="ligungi-waiting__seek">
+          <span>{settingsText(t, seek.settings)}</span>
+          <button type="button" class="button button-empty button-red" onClick={() => onCancel(seek)}>
+            {t.home.cancelSeek}
+          </button>
+        </div>
+      ))}
+      <p class="ligungi-waiting__hint">{t.home.waitingHint}</p>
+    </div>
+  );
+};
 
 const Pools = ({ rated, onPool, onCustom }: { rated: boolean; onPool: (tc: TimeControl) => void; onCustom: () => void }) => {
   const t = useT();
@@ -232,6 +254,13 @@ export const HomePage = () => {
   const [tab, setTab] = useState<Tab>('pools');
   const [create, setCreate] = useState<CreateTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState<SeekView | null>(null);
+  const mine = lobby?.seeks.filter((seek) => seek.mine) ?? [];
+
+  // A new game of ours in the lobby (from quick pairing or the create dialog) brings the waiting panel into view.
+  useEffect(() => {
+    if (mine.length > 0) setTab('pools');
+  }, [mine.length > 0]);
 
   useEffect(() => {
     const target = new URLSearchParams(search).get('create');
@@ -267,7 +296,7 @@ export const HomePage = () => {
     try {
       const result = await task();
       if (result.gameId) navigate(`/${result.gameId}`);
-      else if (result.seekId) setTab('seeks');
+      else if (result.seekId) setTab('pools');
     } catch (err) {
       setError((err as Error).message);
     }
@@ -300,7 +329,7 @@ export const HomePage = () => {
       <div class="lobby__side">
         <div class="lobby__box">
           <div class="lobby__box__top">
-            <h2 class="title">{t.home.title}</h2>
+            <h1 class="title">{t.home.title}</h1>
           </div>
           <div class="lobby__box__content ligungi-intro">
             <p>{t.home.intro}</p>
@@ -331,8 +360,13 @@ export const HomePage = () => {
           {tabButton('seeks', t.home.lobby, lobby?.seeks.length)}
           {tabButton('playing', t.home.playing, playing.length)}
         </div>
-        {tab === 'pools' && <Pools rated={Boolean(user)} onPool={quick} onCustom={() => setCreate('lobby')} />}
-        {tab === 'seeks' && <Seeks seeks={lobby?.seeks ?? []} onAccept={accept} onCancel={cancel} />}
+        {tab === 'pools' &&
+          (mine.length > 0 ? (
+            <Waiting seeks={mine} onCancel={setCancelling} />
+          ) : (
+            <Pools rated={Boolean(user)} onPool={quick} onCustom={() => setCreate('lobby')} />
+          ))}
+        {tab === 'seeks' && <Seeks seeks={lobby?.seeks ?? []} onAccept={accept} onCancel={setCancelling} />}
         {tab === 'playing' && <Playing games={playing} />}
       </div>
 
@@ -371,9 +405,33 @@ export const HomePage = () => {
         <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer">
           {t.home.source}
         </a>
+        <a href={LINKS.status} target="_blank" rel="noopener noreferrer">
+          {t.nav.status}
+        </a>
       </div>
 
       {create && <CreateGame target={create} onClose={() => setCreate(null)} />}
+      {cancelling && (
+        <Modal title={t.home.cancelTitle} onClose={() => setCancelling(null)}>
+          <p>{t.home.cancelText}</p>
+          <p class="ligungi-modal__summary">{settingsText(t, cancelling.settings)}</p>
+          <div class="ligungi-modal__actions">
+            <button type="button" class="button button-empty" onClick={() => setCancelling(null)}>
+              {t.home.keepWaiting}
+            </button>
+            <button
+              type="button"
+              class="button button-red"
+              onClick={() => {
+                void cancel(cancelling);
+                setCancelling(null);
+              }}
+            >
+              {t.home.confirmCancel}
+            </button>
+          </div>
+        </Modal>
+      )}
     </main>
   );
 };

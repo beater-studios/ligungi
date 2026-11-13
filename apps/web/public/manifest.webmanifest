@@ -1,0 +1,24 @@
+{
+  "name": "ligungi · Gungi online",
+  "short_name": "ligungi",
+  "description": "Jogue Gungi, o jogo de tabuleiro de HUNTER×HUNTER, online e de graça, com as regras oficiais.",
+  "lang": "pt-BR",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#161512",
+  "theme_color": "#161512",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Jogar contra o computador", "short_name": "Computador", "url": "/computer", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Aprender a jogar", "short_name": "Aprender", "url": "/learn", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

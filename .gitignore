@@ -1,6 +1,7 @@
 # Dependencies and build output
 node_modules/
 dist/
+dist-ssr/
 coverage/
 *.tsbuildinfo
 
@@ -50,3 +51,5 @@ Thumbs.db
 *.swp
 *~
 .claude/settings.local.json
+
+todo

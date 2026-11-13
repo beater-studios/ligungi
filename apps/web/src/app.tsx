@@ -26,6 +26,8 @@ import { MODES, type Mode } from '@ligungi/engine';
 import { LANGS, THEMES, prefs, resolveLang, updatePrefs } from './prefs.ts';
 import { matchRoute, navigate, useLocation, type Route } from './router.ts';
 import { logout, session } from './session.ts';
+import { LINKS } from './i18n/content/shared.tsx';
+import { applyHead } from './seo.ts';
 import { socket } from './socket.ts';
 import { useStore } from './store.ts';
 
@@ -300,6 +302,9 @@ export const SiteFooter = () => {
             {t.nav[kind]}
           </a>
         ))}
+        <a href={LINKS.status} target="_blank" rel="noopener noreferrer">
+          {t.nav.status}
+        </a>
       </nav>
       <span>{t.footer.source(SOURCE_URL)}</span>
       <span>{t.footer.trademark}</span>
@@ -330,9 +335,9 @@ const FULL_SCREEN = /^\/([A-Za-z0-9]{8}|computer|analysis)$/;
 export const App = () => {
   const { path } = useLocation();
   const t = useT();
-  useEffect(() => {
-    document.querySelector('meta[name="description"]')?.setAttribute('content', t.metaDescription);
-  }, [t]);
+  const content = matchRoute(ROUTES, path);
+  const found = content !== undefined;
+  useEffect(() => applyHead(t, path, found), [t, path, found]);
   useEffect(
     () =>
       socket.on((message) => {
@@ -344,7 +349,7 @@ export const App = () => {
     <>
       <Header />
       <div id="main-wrap" class={`is2d${FULL_SCREEN.test(path) ? ' full-screen-force' : ''}`}>
-        {matchRoute(ROUTES, path) ?? <NotFound />}
+        {content ?? <NotFound />}
       </div>
       <SiteFooter />
       <CookieBanner />

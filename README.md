@@ -1,5 +1,9 @@
 # ligungi
 
+[![CI](https://github.com/beater-studios/ligungi/actions/workflows/ci.yml/badge.svg)](https://github.com/beater-studios/ligungi/actions/workflows/ci.yml)
+[![License: AGPL-3.0-or-later](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue)](LICENSE)
+[![Uptime](https://incidents.betterstack.com/status-badges/v2/monitor/3448b.svg)](https://beaterstudios.betteruptime.com/)
+
 A free platform to play Gungi (軍儀), the board game from HUNTER×HUNTER, online, with a lichess-inspired interface and the official 2022 rules.
 
 - Real-time online games: lobby with automatic pairing, challenge links, clocks with increment, draw offers, rematch, abort, and claiming victory when the opponent leaves.

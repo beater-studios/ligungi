@@ -9,7 +9,6 @@ const colorOf = (color: Color) => (color === 'white' ? 'Branco' : 'Preto');
 export const pt = {
   locale: 'pt-BR',
   languageName: 'Português',
-  metaDescription: 'Jogue Gungi, o jogo de tabuleiro de HUNTER×HUNTER, online e de graça, com as regras oficiais.',
 
   modes: {
     intro: 'Introdução',
@@ -97,6 +96,7 @@ export const pt = {
     terms: 'Condições de uso',
     account: 'Conta',
     privacy: 'Privacidade',
+    status: 'Status',
   },
   notFound: { title: 'Página não encontrada', back: 'Voltar ao início' },
   footer: {
@@ -200,6 +200,13 @@ export const pt = {
     noSeeks: 'Nenhuma partida aberta. Crie uma ou entre numa partida rápida.',
     cancel: 'Cancelar',
     join: 'Jogar',
+    waitingTitle: 'Aguardando adversário',
+    waitingHint: 'Sua partida está no lobby e começa assim que alguém aceitar. Se você sair do site, ela é cancelada.',
+    cancelSeek: 'Cancelar partida',
+    cancelTitle: 'Cancelar o pedido de partida?',
+    cancelText: 'Ela sai do lobby e ninguém mais poderá aceitar.',
+    keepWaiting: 'Continuar esperando',
+    confirmCancel: 'Sim, cancelar',
     noPlaying: 'Você não tem partidas em andamento.',
     quickGame: 'Partida rápida',
     lobby: 'Lobby',
@@ -435,6 +442,60 @@ export const pt = {
       musketeer: 'Salta para frente sobre torres de altura igual ou menor.',
       tactician: 'Pode trair: ao empilhar sobre peças adversárias, troca todas por peças iguais da sua mão.',
     } as Partial<Record<Role, string>>,
+  },
+
+  seo: {
+    imageAlt: 'ligungi: Gungi online, o jogo de tabuleiro de HUNTER×HUNTER',
+    pages: {
+      default: {
+        title: 'ligungi · Gungi online',
+        description: 'Jogue Gungi, o jogo de tabuleiro de HUNTER×HUNTER, online e de graça, com as regras oficiais.',
+      },
+      home: {
+        title: 'ligungi · Jogue Gungi online grátis',
+        description: 'Jogue Gungi, o jogo de estratégia de HUNTER×HUNTER, online e de graça: ranqueadas, contra o computador ou com amigos, com as regras oficiais de 2022.',
+      },
+      learn: {
+        title: 'Como jogar Gungi: regras e peças · ligungi',
+        description: 'Aprenda a jogar Gungi: como cada peça se move, torres de até três, draft e xeque-mate, com treino interativo no tabuleiro.',
+      },
+      about: {
+        title: 'Sobre o ligungi',
+        description: 'O ligungi é um site livre e de código aberto para jogar Gungi com as regras oficiais de 2022. Veja as fontes das regras e quem mantém o projeto.',
+      },
+      faq: {
+        title: 'Perguntas frequentes sobre Gungi · ligungi',
+        description: 'Respostas sobre as regras oficiais do Gungi, contas, ranking e partidas no ligungi.',
+      },
+      contact: {
+        title: 'Contato · ligungi',
+        description: 'Fale com a equipe do ligungi: dúvidas, sugestões e erros nas regras ou no site.',
+      },
+      terms: {
+        title: 'Condições de uso · ligungi',
+        description: 'As condições de uso do ligungi, site gratuito para jogar Gungi online.',
+      },
+      privacy: {
+        title: 'Política de privacidade · ligungi',
+        description: 'Quais dados o ligungi guarda, por quanto tempo e como exercer seus direitos pela LGPD.',
+      },
+      ranking: {
+        title: 'Ranking de Gungi · ligungi',
+        description: 'Os melhores jogadores de Gungi em cada modo (introdução, iniciante, intermediário e avançado), pelo rating Glicko-2.',
+      },
+      tv: {
+        title: 'Gungi ao vivo · ligungi TV',
+        description: 'Assista às partidas de Gungi em andamento no ligungi, das mais fortes para as mais fracas.',
+      },
+      computer: {
+        title: 'Jogar Gungi contra o computador · ligungi',
+        description: 'Jogue Gungi contra o computador no navegador, em três níveis, sem precisar de conta.',
+      },
+      analysis: {
+        title: 'Tabuleiro de análise de Gungi · ligungi',
+        description: 'Tabuleiro livre de Gungi para testar lances e estudar posições, com as regras oficiais.',
+      },
+    },
   },
 };
 

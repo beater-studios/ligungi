@@ -17,6 +17,7 @@ export const LINKS = {
   ofl: 'https://openfontlicense.org/',
   agpl: `${REPO}/blob/main/LICENSE`,
   cloudflarePrivacy: 'https://www.cloudflare.com/privacypolicy/',
+  status: 'https://beaterstudios.betteruptime.com/',
 } as const;
 
 /** External link, opened in a new tab. */

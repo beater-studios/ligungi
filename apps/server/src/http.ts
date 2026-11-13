@@ -130,27 +130,78 @@ const MIME: Record<string, string> = {
   '.webmanifest': 'application/manifest+json',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
 };
 
-/** Serves the built web app, falling back to index.html for client-side routes. */
-export const serveStatic = (root: string, pathname: string, res: ServerResponse, headOnly = false): boolean => {
+const LANGS = ['pt', 'en', 'es'] as const;
+type Lang = (typeof LANGS)[number];
+const asLang = (value: string | null | undefined): Lang | undefined => LANGS.find((lang) => lang === value);
+
+/**
+ * Language of a page request: `?lang=` fixes it; otherwise the first supported language of Accept-Language, as the
+ * app does with the browser languages (English when none matches).
+ */
+export const pageLang = (search: URLSearchParams, acceptLanguage: string | undefined): { lang: Lang; fixed: boolean } => {
+  const fixed = asLang(search.get('lang'));
+  if (fixed) return { lang: fixed, fixed: true };
+  const ranked = (acceptLanguage ?? '')
+    .split(',')
+    .map((part, index) => {
+      const [tag = '', ...params] = part.trim().split(';');
+      const q = Number(params.find((param) => param.trim().startsWith('q='))?.trim().slice(2) ?? 1);
+      return { base: tag.trim().slice(0, 2).toLowerCase(), q: Number.isFinite(q) ? q : 0, index };
+    })
+    .filter((entry) => entry.q > 0)
+    .sort((a, b) => b.q - a.q || a.index - b.index);
+  return { lang: ranked.map((entry) => asLang(entry.base)).find(Boolean) ?? 'en', fixed: false };
+};
+
+/**
+ * HTML for an app route, prerendered by the web build (apps/web/scripts/prerender.ts): the public page in the
+ * request language when there is one, else that language's shell, else the bare index.html (development builds).
+ */
+const pageFile = (base: string, pathname: string, lang: Lang, fixed: boolean): string => {
+  const slug = pathname === '/' ? 'home' : /^\/([a-z]+)$/.exec(pathname)?.[1];
+  const candidates = [
+    ...(slug ? [join(base, 'pages', lang, `${slug}${fixed ? '' : '.auto'}.html`)] : []),
+    join(base, 'pages', lang, 'shell.html'),
+  ];
+  return candidates.find((file) => safeStat(file)?.isFile()) ?? join(base, 'index.html');
+};
+
+/** Serves the built web app; client-side routes get the prerendered HTML of their page and language. */
+export const serveStatic = (
+  root: string,
+  url: URL,
+  acceptLanguage: string | undefined,
+  res: ServerResponse,
+  headOnly = false,
+): boolean => {
+  const { pathname } = url;
   const base = resolve(root);
   const decoded = safeDecode(pathname);
   if (decoded === null || decoded.includes('\0')) return false;
   const candidate = resolve(join(base, normalize(decoded)));
   if (candidate !== base && !candidate.startsWith(base + sep)) return false;
+  // Prerendered pages are reached through their routes only, never as files (no duplicate URLs).
+  if (candidate.startsWith(join(base, 'pages') + sep)) return false;
   let file = candidate;
   let stats = safeStat(file);
+  const headers: Record<string, string> = {};
   if (!stats?.isFile()) {
     if (extname(pathname)) return false;
-    file = join(base, 'index.html');
+    const { lang, fixed } = pageLang(url.searchParams, acceptLanguage);
+    file = pageFile(base, pathname, lang, fixed);
     stats = safeStat(file);
     if (!stats?.isFile()) return false;
+    headers['content-language'] = lang;
+    if (!fixed) headers['vary'] = 'Accept-Language';
   }
   res.writeHead(200, {
     'content-type': MIME[extname(file)] ?? 'application/octet-stream',
     'content-length': stats.size,
     'cache-control': cacheControl(pathname, file),
+    ...headers,
   });
   if (headOnly) res.end();
   else createReadStream(file).on('error', () => res.destroy()).pipe(res);
@@ -165,6 +216,8 @@ const cacheControl = (pathname: string, file: string): string => {
   if (pathname.startsWith('/assets/')) return 'public, max-age=31536000, immutable';
   // no-transform: CDNs must not rewrite the page (Cloudflare would inject its analytics beacon before consent).
   if (extname(file) === '.html') return 'no-cache, no-transform';
+  // Generated on every build under fixed names, so a deploy must show up within a day.
+  if (['.txt', '.xml', '.webmanifest'].includes(extname(file))) return 'public, max-age=86400';
   return 'public, max-age=604800, stale-while-revalidate=2592000';
 };
 

@@ -4,6 +4,21 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-11-13
+
+### Added
+
+- Search engines, AI assistants and link previews now see the real content: public pages are prerendered in Portuguese, English and Spanish, each with its own title, description, canonical address, language alternates (`?lang=`), Open Graph image and structured data.
+- `sitemap.xml`, `robots.txt`, `llms.txt` and `llms-full.txt` (the full rules specification).
+- The site can be installed as an app (web manifest and icons).
+- While your game waits in the lobby, the home shows it with a cancel button instead of the quick pairing grid.
+- Link to the public status page in the footer and on the home.
+
+### Changed
+
+- Cancelling your game in the lobby asks for confirmation.
+- `?lang=pt`, `?lang=en` or `?lang=es` in the address sets the language for the tab.
+
 ## [0.1.2] - 2026-11-12
 
 ### Added
@@ -51,7 +66,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/beater-studios/ligungi/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/beater-studios/ligungi/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/beater-studios/ligungi/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/beater-studios/ligungi/releases/tag/v0.1.0

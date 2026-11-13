@@ -1,6 +1,7 @@
 # Only what the image needs goes into the build context; secrets and local infra never do.
 **/node_modules
 **/dist
+**/dist-ssr
 **/coverage
 .git
 .github

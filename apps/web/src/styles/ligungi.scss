@@ -923,6 +923,83 @@ select.ligungi-select {
   }
 }
 
+/* ===== Waiting for an opponent (home) ===== */
+// The faded logo behind the lobby grid would sit right under the spinner.
+.lobby__app__content.ligungi-waiting::before {
+  display: none;
+}
+
+.ligungi-waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+
+  h2 {
+    margin: 0;
+    font-size: 1.4em;
+    font-weight: normal;
+  }
+
+  &__seek {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem 1rem;
+    font-weight: bold;
+  }
+
+  &__hint {
+    max-width: 32em;
+    margin: 0;
+    color: $c-font-dim;
+    font-size: 0.9em;
+  }
+
+  &__spinner {
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 4px solid $c-border;
+    border-top-color: $c-primary;
+    border-radius: 50%;
+    animation: ligungi-spin 0.9s linear infinite;
+
+    // lila turns every animation off for reduced motion, and a still ring reads as frozen: fade instead of spinning.
+    @media (prefers-reduced-motion: reduce) {
+      border-color: $c-primary;
+      animation: ligungi-pulse 1.6s ease-in-out infinite alternate !important;
+    }
+  }
+}
+
+@keyframes ligungi-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ligungi-pulse {
+  to {
+    opacity: 0.25;
+  }
+}
+
+.ligungi-modal__summary {
+  font-weight: bold;
+}
+
+.ligungi-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
 /* ===== Leaderboards: room below the last row ===== */
 .ligungi-ranking.community {
   margin-bottom: 1.5rem;

@@ -8,7 +8,6 @@ const sideOf = (color: Color) => (color === 'white' ? 'las blancas' : 'las negra
 export const es: Messages = {
   locale: 'es',
   languageName: 'Español',
-  metaDescription: 'Juega Gungi, el juego de tablero de HUNTER×HUNTER, online y gratis, con las reglas oficiales.',
 
   modes: {
     intro: 'Introducción',
@@ -151,6 +150,7 @@ export const es: Messages = {
     terms: 'Condiciones de uso',
     account: 'Cuenta',
     privacy: 'Privacidad',
+    status: 'Estado',
   },
   notFound: { title: 'Página no encontrada', back: 'Volver al inicio' },
   footer: {
@@ -254,6 +254,13 @@ export const es: Messages = {
     noSeeks: 'No hay partidas abiertas. Crea una o entra en una partida rápida.',
     cancel: 'Cancelar',
     join: 'Jugar',
+    waitingTitle: 'Esperando rival',
+    waitingHint: 'Tu partida está en la sala y empieza en cuanto alguien la acepte. Si sales del sitio, se cancela.',
+    cancelSeek: 'Cancelar partida',
+    cancelTitle: '¿Cancelar la solicitud de partida?',
+    cancelText: 'Sale de la sala y nadie más podrá aceptarla.',
+    keepWaiting: 'Seguir esperando',
+    confirmCancel: 'Sí, cancelar',
     noPlaying: 'No tienes partidas en curso.',
     quickGame: 'Partida rápida',
     lobby: 'Sala',
@@ -489,6 +496,60 @@ export const es: Messages = {
       archer: 'Dispara en línea recta hacia adelante y por las diagonales delanteras, por encima de torres de altura igual o menor.',
       musketeer: 'Salta hacia adelante sobre torres de altura igual o menor.',
       tactician: 'Puede traicionar: al apilar sobre piezas rivales, las cambia todas por piezas iguales de tu mano.',
+    },
+  },
+
+  seo: {
+    imageAlt: 'ligungi: Gungi online, el juego de tablero de HUNTER×HUNTER',
+    pages: {
+      default: {
+        title: 'ligungi · Gungi online',
+        description: 'Juega Gungi, el juego de tablero de HUNTER×HUNTER, online y gratis, con las reglas oficiales.',
+      },
+      home: {
+        title: 'ligungi · Juega Gungi online gratis',
+        description: 'Juega Gungi, el juego de estrategia de HUNTER×HUNTER, online y gratis: partidas puntuadas, contra la computadora o con amigos, con las reglas oficiales de 2022.',
+      },
+      learn: {
+        title: 'Cómo jugar Gungi: reglas y piezas · ligungi',
+        description: 'Aprende a jugar Gungi: cómo se mueve cada pieza, torres de hasta tres, el draft y el jaque mate, con práctica interactiva en el tablero.',
+      },
+      about: {
+        title: 'Acerca de ligungi',
+        description: 'ligungi es un sitio libre y de código abierto para jugar Gungi con las reglas oficiales de 2022. Consulta las fuentes de las reglas y quién mantiene el proyecto.',
+      },
+      faq: {
+        title: 'Preguntas frecuentes sobre Gungi · ligungi',
+        description: 'Respuestas sobre las reglas oficiales del Gungi, cuentas, puntuaciones y partidas en ligungi.',
+      },
+      contact: {
+        title: 'Contacto · ligungi',
+        description: 'Escribe al equipo de ligungi: dudas, sugerencias y errores en las reglas o en el sitio.',
+      },
+      terms: {
+        title: 'Condiciones de uso · ligungi',
+        description: 'Las condiciones de uso de ligungi, sitio gratuito para jugar Gungi online.',
+      },
+      privacy: {
+        title: 'Política de privacidad · ligungi',
+        description: 'Qué datos guarda ligungi, durante cuánto tiempo y cómo ejercer tus derechos según la LGPD.',
+      },
+      ranking: {
+        title: 'Clasificación de Gungi · ligungi',
+        description: 'Los mejores jugadores de Gungi en cada modo (introducción, principiante, intermedio y avanzado), según la puntuación Glicko-2.',
+      },
+      tv: {
+        title: 'Gungi en vivo · ligungi TV',
+        description: 'Mira las partidas de Gungi que se están jugando en ligungi, de las más fuertes a las más débiles.',
+      },
+      computer: {
+        title: 'Jugar Gungi contra la computadora · ligungi',
+        description: 'Juega Gungi contra la computadora en el navegador, en tres niveles, sin necesidad de cuenta.',
+      },
+      analysis: {
+        title: 'Tablero de análisis de Gungi · ligungi',
+        description: 'Un tablero libre de Gungi para probar jugadas y estudiar posiciones, con las reglas oficiales.',
+      },
     },
   },
 };

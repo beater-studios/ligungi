@@ -3,7 +3,7 @@ import { buildCommit, buildVersion } from '../../scripts/build-info.ts';
 
 const server = process.env.LIGUNGI_SERVER ?? 'http://localhost:4000';
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   esbuild: { jsx: 'automatic', jsxImportSource: 'preact' },
   define: {
     __LIGUNGI_VERSION__: JSON.stringify(buildVersion()),
@@ -24,4 +24,7 @@ export default defineConfig({
     },
   },
   worker: { format: 'es' },
-});
+  // The SSR build only feeds scripts/prerender.ts: bundle everything (workspace packages are TypeScript sources).
+  ssr: { noExternal: true },
+  build: { copyPublicDir: !isSsrBuild },
+}));

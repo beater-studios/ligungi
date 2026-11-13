@@ -17,6 +17,7 @@ import { GamePage } from './pages/GamePage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LearnPage } from './pages/LearnPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
+import { PlayersPage } from './pages/PlayersPage.tsx';
 import { RankingPage } from './pages/RankingPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
 import { AccountPage } from './pages/AccountPage.tsx';
@@ -45,6 +46,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/friends$/, render: () => <FriendsPage /> },
   { pattern: /^\/design$/, render: () => <DesignPage /> },
   { pattern: new RegExp(`^/(${INFO_KINDS.join('|')})$`), render: ([kind]) => (isInfoKind(kind!) ? <InfoPage kind={kind} /> : <NotFound />) },
+  { pattern: /^\/players$/, render: () => <PlayersPage /> },
   { pattern: /^\/ranking$/, render: () => <RankingPage /> },
   { pattern: new RegExp(`^/ranking/(${MODES.join('|')})$`), render: ([mode]) => <RankingPage mode={mode as Mode} /> },
   { pattern: /^\/login$/, render: () => <AuthPage signup={false} /> },
@@ -236,8 +238,9 @@ const Header = () => {
             </div>
           </section>
           <section>
-            <a href="/ranking">{t.nav.community}</a>
+            <a href="/players">{t.nav.community}</a>
             <div role="group">
+              <a href="/players">{t.nav.playerList}</a>
               <a href="/ranking">{t.nav.players}</a>
               <a href="/friends">{t.nav.friends}</a>
             </div>
@@ -307,6 +310,7 @@ export const SiteFooter = () => {
         ['/learn', t.nav.learn],
         ['/computer', t.nav.playComputer],
         ['/analysis', t.nav.analysis],
+        ['/players', t.nav.playerList],
         ['/ranking', t.nav.players],
         ['/tv', t.nav.liveGames],
       ],

@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type SessionView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type SessionView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { Client, firstMove, startServer, type TestServer } from './helpers.ts';
 
@@ -326,6 +326,39 @@ describe('playing online', () => {
 });
 
 describe('community', () => {
+  it('lists online players, site counts and the rating distribution', async () => {
+    let now = 1_000_000_000;
+    server = await startServer({ now: () => now });
+    const a = client();
+    const b = client();
+    const anon = client();
+    await signup(a, 'Ging');
+    await signup(b, 'Pariston');
+    let { id, view } = await startGame(a, b, { ...casual, rated: true });
+    view = await play(a, b, view);
+    view = await play(b, a, view);
+    let players = (await a.request<PlayersView>('GET', '/api/players')).data;
+    expect(players.online.map((p) => [p.user.name, p.playing])).toEqual([
+      ['Ging', id],
+      ['Pariston', id],
+    ]);
+    expect(players.counts).toMatchObject({ playing: 1, players: 2, gamesTotal: 0 });
+    expect(players.you).toEqual({});
+
+    a.send({ t: 'resign', game: id });
+    await b.waitGame(id, (g) => g.status === 'ended');
+    // Counts are cached for a minute.
+    expect((await a.request<PlayersView>('GET', '/api/players')).data.counts.gamesTotal).toBe(0);
+    now += 61_000;
+    players = (await a.request<PlayersView>('GET', '/api/players')).data;
+    expect(players.counts).toMatchObject({ playing: 0, gamesLastDay: 1, gamesTotal: 1 });
+    expect(players.online.find((p) => p.user.name === 'Pariston')).toMatchObject({ mode: 'intro', playing: null, provisional: true });
+    expect(players.distribution.intro.reduce((sum, band) => sum + band.players, 0)).toBe(2);
+    expect(players.distribution.advanced).toEqual([]);
+    expect(Object.keys(players.you!)).toEqual(['intro']);
+    expect((await anon.request<PlayersView>('GET', '/api/players')).data.you).toBeNull();
+  });
+
   it('follows and unfollows players and lists them with presence and current game', async () => {
     server = await startServer();
     const a = client();

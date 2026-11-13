@@ -12,33 +12,38 @@ const UserLink = ({ entry }: { entry: LeaderEntry }) => (
   </a>
 );
 
-const Overview = ({ board }: { board: Leaderboard }) => {
+/** The top players of every mode, as lila's leaderboard boxes. Also used on the players page. */
+export const Leaderboards = ({ board }: { board: Leaderboard }) => {
   const t = useT();
   return (
-    <div class="community ligungi-ranking">
-      <div class="community__leaders">
-        <div class="leaderboards">
-          {MODES.map((mode) => (
-            <div key={mode} class="user-top">
-              <h2 class="text" data-icon={icons.Trophy}>
-                <a href={`/ranking/${mode}`}>{t.modes[mode]}</a>
-              </h2>
-              <ol>
-                {board[mode].length === 0 && <li class="ligungi-notice">{t.ranking.empty}</li>}
-                {board[mode].map((entry) => (
-                  <li key={entry.user.id}>
-                    <UserLink entry={entry} />
-                    <span>{entry.rating}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          ))}
+    <div class="leaderboards">
+      {MODES.map((mode) => (
+        <div key={mode} class="user-top">
+          <h2 class="text" data-icon={icons.Trophy}>
+            <a href={`/ranking/${mode}`}>{t.modes[mode]}</a>
+          </h2>
+          <ol>
+            {board[mode].length === 0 && <li class="ligungi-notice">{t.ranking.empty}</li>}
+            {board[mode].map((entry) => (
+              <li key={entry.user.id}>
+                <UserLink entry={entry} />
+                <span>{entry.rating}</span>
+              </li>
+            ))}
+          </ol>
         </div>
-      </div>
+      ))}
     </div>
   );
 };
+
+const Overview = ({ board }: { board: Leaderboard }) => (
+  <div class="community ligungi-ranking">
+    <div class="community__leaders">
+      <Leaderboards board={board} />
+    </div>
+  </div>
+);
 
 const ModeTable = ({ list }: { list: readonly LeaderEntry[] }) => {
   const t = useT();

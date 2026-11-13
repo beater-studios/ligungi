@@ -152,6 +152,7 @@ The site works like lichess: rated and casual games with Glicko-2 ratings, games
 - [How to play](${en('/learn')}): pieces, movement, towers, the draft and checkmate, with an interactive piece trainer
 - [Play the computer](${en('/computer')}): five levels, no account needed
 - [Analysis board](${en('/analysis')}): try moves and study positions
+- [Players](${en('/players')}): who is online, site counts, the best of each mode and the rating distribution
 - [Leaderboard](${en('/ranking')}): best players of each mode
 - [Gungi TV](${en('/tv')}): games being played now
 

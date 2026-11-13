@@ -202,6 +202,13 @@ export class Games {
     }
   }
 
+  /** Games started since `since` (aborted ones excluded) and games finished overall, for the players page. */
+  activity(since: number): { recent: number; finished: number } {
+    const recent = this.#db.prepare(`select count(*) as n from games where created_at >= ? and status != 'aborted'`).get(since) as { n: number };
+    const finished = this.#db.prepare(`select count(*) as n from games where status = 'ended'`).get() as { n: number };
+    return { recent: recent.n, finished: finished.n };
+  }
+
   ongoing(): GameRoom[] {
     return [...this.#rooms.values()].filter((room) => room.status === 'started');
   }

@@ -19,6 +19,10 @@ import {
   type Topic,
   type UserProfile,
   CHALLENGE_POLICIES,
+  ONLINE_LIST_MAX,
+  RATING_BAND,
+  type OnlinePlayer,
+  type PlayersView,
   type SessionView,
   type UserRef,
   type UserSearchResult,
@@ -62,6 +66,8 @@ import { USERNAME_PATTERN, Users } from './users.ts';
 export const ANONYMOUS_NAME = 'Anonymous';
 const HEARTBEAT_MS = 30_000;
 const SESSION_SWEEP_MS = 6 * 3_600_000;
+/** The site-wide counts and rating distribution on the players page are recomputed at most this often. */
+const PLAYERS_CACHE_MS = 60_000;
 /** Expired challenges are canceled within this delay even if nobody opens them (the receiver's list updates). */
 const CHALLENGE_SWEEP_MS = 60_000;
 const MAX_TOPICS_PER_CLIENT = 32;
@@ -183,6 +189,48 @@ export const createApp = (config: ServerConfig): App => {
     const user = users.findByName(name);
     if (!user) throw new HttpError(404, 'userNotFound');
     return user;
+  };
+
+  let playersCache: { at: number; stats: Omit<PlayersView['counts'], 'online' | 'playing'>; distribution: PlayersView['distribution'] } | null = null;
+
+  const playersView = (viewerId: string | null): PlayersView => {
+    const now = config.now();
+    if (!playersCache || now - playersCache.at >= PLAYERS_CACHE_MS) {
+      const { recent, finished } = games.activity(now - 24 * 3_600_000);
+      const bands = (mode: Mode) => users.ratingDistribution(mode, RATING_BAND);
+      playersCache = {
+        at: now,
+        stats: { gamesLastDay: recent, gamesTotal: finished, players: users.count() },
+        distribution: { intro: bands('intro'), beginner: bands('beginner'), intermediate: bands('intermediate'), advanced: bands('advanced') },
+      };
+    }
+    const ongoing = games.ongoing();
+    const playingIn = new Map<string, string>();
+    for (const room of ongoing) for (const seat of Object.values(room.seats)) if (seat.userId) playingIn.set(seat.userId, room.id);
+    const ids = [...onlineUsers()].slice(0, 500);
+    const ratings = users.playedRatings(viewerId ? [...ids, viewerId] : ids);
+    const online: OnlinePlayer[] = ids
+      .map((id) => users.findById(id))
+      .filter((user) => user !== undefined)
+      .map((user) => {
+        const main = (ratings.get(user.id) ?? []).sort((a, b) => b.games - a.games)[0];
+        return {
+          user: { id: user.id, name: user.name },
+          rating: main?.rating ?? null,
+          mode: main?.mode ?? null,
+          provisional: main?.provisional ?? false,
+          playing: playingIn.get(user.id) ?? null,
+        };
+      })
+      .sort((a, b) => Number(b.playing !== null) - Number(a.playing !== null) || (b.rating ?? 0) - (a.rating ?? 0) || a.user.name.localeCompare(b.user.name))
+      .slice(0, ONLINE_LIST_MAX);
+    const you = viewerId ? Object.fromEntries((ratings.get(viewerId) ?? []).map((entry) => [entry.mode, entry.rating])) : null;
+    return {
+      online,
+      counts: { online: hub.onlineCount(), playing: ongoing.length, ...playersCache.stats },
+      distribution: playersCache.distribution,
+      you,
+    };
   };
 
   const leaders = (mode: Mode, limit: number, online: Set<string>): LeaderEntry[] =>
@@ -427,6 +475,7 @@ export const createApp = (config: ServerConfig): App => {
       }));
       sendJson(ctx.res, 200, list);
     })
+    .add('GET', '/api/players', (ctx) => sendJson(ctx.res, 200, playersView(ctx.session.userId)))
     .add('GET', '/api/leaderboard', (ctx) => {
       const online = onlineUsers();
       const board = Object.fromEntries(MODES.map((mode) => [mode, leaders(mode, LEADERBOARD_TOP, online)])) as unknown as Leaderboard;

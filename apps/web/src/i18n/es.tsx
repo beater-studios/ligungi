@@ -154,6 +154,7 @@ export const es: Messages = {
     language: 'Idioma',
     community: 'Comunidad',
     players: 'Clasificación',
+    playerList: 'Jugadores',
     friends: 'Amigos',
     about: 'Acerca de',
     faq: 'FAQ',
@@ -436,6 +437,26 @@ export const es: Messages = {
     challengeRefused: 'Este jugador no acepta tus desafíos.',
   },
 
+  players: {
+    title: 'Jugadores',
+    online: 'conectados ahora',
+    playing: 'partidas en curso',
+    gamesLastDay: 'partidas en las últimas 24 h',
+    gamesTotal: 'partidas terminadas',
+    accounts: 'cuentas',
+    onlineTitle: 'Conectados',
+    onlineEmpty: 'Ningún jugador con cuenta está conectado ahora.',
+    watch: 'ver',
+    leadersTitle: 'Los mejores de cada modo',
+    distributionTitle: 'Distribución de puntuación',
+    distributionHelp: 'Jugadores con partidas puntuables en cada modo, en franjas de 50 puntos.',
+    distributionEmpty: 'Nadie ha jugado partidas puntuables en este modo todavía.',
+    you: 'tú',
+    yourPosition: (rating, percent) => `Tu puntuación es ${rating}: por encima del ${percent}% de los jugadores de este modo.`,
+    band: (from, to, n) => `${from} a ${to}: ${n} ${n === 1 ? 'jugador' : 'jugadores'}`,
+    chartLabel: (mode, total) => `Distribución de puntuación en el modo ${mode}, ${total} ${total === 1 ? 'jugador' : 'jugadores'}`,
+  },
+
   ranking: {
     title: 'Clasificación',
     overview: 'Resumen',
@@ -617,6 +638,10 @@ export const es: Messages = {
       privacy: {
         title: 'Política de privacidad · ligungi',
         description: 'Qué datos guarda ligungi, durante cuánto tiempo y cómo ejercer tus derechos según la LGPD.',
+      },
+      players: {
+        title: 'Jugadores de Gungi en línea · ligungi',
+        description: 'Quién juega Gungi ahora en ligungi, los mejores de cada modo y la distribución de puntuación.',
       },
       ranking: {
         title: 'Clasificación de Gungi · ligungi',

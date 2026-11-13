@@ -154,6 +154,7 @@ export const en: Messages = {
     language: 'Language',
     community: 'Community',
     players: 'Leaderboard',
+    playerList: 'Players',
     friends: 'Friends',
     about: 'About',
     faq: 'FAQ',
@@ -436,6 +437,26 @@ export const en: Messages = {
     challengeRefused: 'This player does not accept challenges from you.',
   },
 
+  players: {
+    title: 'Players',
+    online: 'online now',
+    playing: 'games in progress',
+    gamesLastDay: 'games in the last 24 h',
+    gamesTotal: 'finished games',
+    accounts: 'accounts',
+    onlineTitle: 'Online',
+    onlineEmpty: 'No signed-in player is online right now.',
+    watch: 'watch',
+    leadersTitle: 'Best of each mode',
+    distributionTitle: 'Rating distribution',
+    distributionHelp: 'Players with rated games in each mode, in bands of 50 points.',
+    distributionEmpty: 'Nobody has played rated games in this mode yet.',
+    you: 'you',
+    yourPosition: (rating, percent) => `Your rating is ${rating}: above ${percent}% of the players in this mode.`,
+    band: (from, to, n) => `${from} to ${to}: ${n} ${n === 1 ? 'player' : 'players'}`,
+    chartLabel: (mode, total) => `Rating distribution in ${mode} mode, ${total} ${total === 1 ? 'player' : 'players'}`,
+  },
+
   ranking: {
     title: 'Leaderboard',
     overview: 'Overview',
@@ -617,6 +638,10 @@ export const en: Messages = {
       privacy: {
         title: 'Privacy policy · ligungi',
         description: 'What data ligungi keeps, for how long, and how to exercise your rights under the LGPD.',
+      },
+      players: {
+        title: 'Gungi players online · ligungi',
+        description: 'Who is playing Gungi on ligungi right now, the best of each mode and the rating distribution.',
       },
       ranking: {
         title: 'Gungi leaderboard · ligungi',

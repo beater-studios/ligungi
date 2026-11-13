@@ -115,6 +115,40 @@ export class Users {
     this.#db.prepare('update users set challenge_policy = ? where id = ?').run(policy, userId);
   }
 
+  count(): number {
+    return (this.#db.prepare('select count(*) as n from users').get() as { n: number }).n;
+  }
+
+  /** Players with rated games in `mode`, per band of `width` rating points, lowest band first. */
+  ratingDistribution(mode: Mode, width: number): Array<{ from: number; players: number }> {
+    const rows = this.#db
+      .prepare(
+        `select cast(rating / ? as integer) * ? as band, count(*) as players from ratings
+         where mode = ? and games > 0 group by band order by band`,
+      )
+      .all(width, width, mode) as Array<{ band: number; players: number }>;
+    return rows.map((row) => ({ from: row.band, players: row.players }));
+  }
+
+  /** Each user's rating in every mode they have rated games in. */
+  playedRatings(userIds: readonly string[]): Map<string, Array<{ mode: Mode; rating: number; provisional: boolean; games: number }>> {
+    const result = new Map<string, Array<{ mode: Mode; rating: number; provisional: boolean; games: number }>>();
+    if (userIds.length === 0) return result;
+    // Only the number of placeholders is built here; the ids themselves are bound.
+    const rows = this.#db
+      .prepare(
+        `select user_id, mode, rating, deviation, games from ratings
+         where games > 0 and user_id in (${userIds.map(() => '?').join(', ')})`,
+      )
+      .all(...userIds) as Array<{ user_id: string; mode: Mode; rating: number; deviation: number; games: number }>;
+    for (const row of rows) {
+      const list = result.get(row.user_id) ?? [];
+      list.push({ mode: row.mode, rating: Math.round(row.rating), provisional: row.deviation > PROVISIONAL_DEVIATION, games: row.games });
+      result.set(row.user_id, list);
+    }
+    return result;
+  }
+
   /** Whether `fromId` may challenge `toId` from the profile, by `toId`'s policy. */
   canChallenge(fromId: string, toId: string): boolean {
     if (fromId === toId) return false;

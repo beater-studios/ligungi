@@ -83,6 +83,9 @@ const MIGRATIONS = [
   `
   alter table users add column challenge_policy text not null default 'everyone';
   `,
+  `
+  create index games_created on games(created_at);
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

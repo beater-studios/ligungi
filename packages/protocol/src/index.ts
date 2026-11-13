@@ -210,6 +210,44 @@ export interface LeaderEntry {
 export type Leaderboard = Readonly<Record<Mode, readonly LeaderEntry[]>>;
 
 export const LEADERBOARD_TOP = 10;
+
+/** Width, in rating points, of each band of the rating distribution on the players page. */
+export const RATING_BAND = 50;
+
+export interface OnlinePlayer {
+  readonly user: UserRef;
+  /** Rating in the mode the player has the most rated games in; null without rated games. */
+  readonly rating: number | null;
+  readonly mode: Mode | null;
+  readonly provisional: boolean;
+  /** The game the player is in right now, if any. */
+  readonly playing: string | null;
+}
+
+export interface RatingBand {
+  /** Lowest rating of the band; the band covers `RATING_BAND` points. */
+  readonly from: number;
+  readonly players: number;
+}
+
+export interface PlayersView {
+  /** Signed-in players online now, the ones playing first, then by rating. At most `ONLINE_LIST_MAX`. */
+  readonly online: readonly OnlinePlayer[];
+  readonly counts: {
+    /** Connected browsers, signed in or not. */
+    readonly online: number;
+    readonly playing: number;
+    readonly gamesLastDay: number;
+    readonly gamesTotal: number;
+    readonly players: number;
+  };
+  /** Players with rated games, per mode, in bands of `RATING_BAND` points. */
+  readonly distribution: Readonly<Record<Mode, readonly RatingBand[]>>;
+  /** The viewer's rating in each mode they have rated games in, for "you are here". */
+  readonly you: Readonly<Partial<Record<Mode, number>>> | null;
+}
+
+export const ONLINE_LIST_MAX = 50;
 export const LEADERBOARD_MAX = 100;
 export const MAX_FOLLOWS = 400;
 

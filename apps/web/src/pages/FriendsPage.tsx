@@ -53,6 +53,7 @@ export const FriendsPage = () => {
         <a class="active" href="/friends">
           {t.friends.title}
         </a>
+        <a href="/players">{t.nav.playerList}</a>
         <a href="/ranking">{t.nav.players}</a>
       </nav>
       <div class="page-menu__content box">

@@ -20,6 +20,7 @@ export const PAGES: readonly Page[] = (
     ['/computer', 'computer'],
     ['/analysis', 'analysis'],
     ['/tv', 'tv'],
+    ['/players', 'players'],
     ['/ranking', 'ranking'],
     ['/about', 'about'],
     ['/faq', 'faq'],

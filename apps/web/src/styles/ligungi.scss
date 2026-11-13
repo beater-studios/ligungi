@@ -1999,3 +1999,138 @@ body:has(main.auth) #clinput {
 #main-wrap:has(> main.page-menu) {
   ---main-max-width: #{$main-max-width};
 }
+
+/* ===== Players page ===== */
+.ligungi-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 2rem;
+  margin: 0;
+  list-style: none;
+  color: $c-font-dim;
+
+  strong {
+    color: $c-font;
+    font-size: 1.4em;
+    margin-inline-end: 0.2em;
+  }
+
+  a {
+    color: inherit;
+
+    &:hover strong {
+      color: $c-link;
+    }
+  }
+}
+
+.ligungi-stats + .ligungi-players {
+  padding-top: 1.5rem;
+}
+
+.ligungi-players {
+  // Four modes: two by two reads better than lila's auto-fit, which leaves the last one alone on a row.
+  .leaderboards {
+    @media (min-width: at-least($small)) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .community__online {
+    min-width: 14rem;
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.6em;
+      padding: 0.35rem 0;
+    }
+
+    .user-link {
+      margin-inline-end: 0;
+    }
+  }
+
+  &__rating {
+    color: $c-font-dim;
+  }
+
+  &__watch {
+    margin-inline-start: auto;
+    font-size: 0.9em;
+  }
+}
+
+.ligungi-distribution {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+
+  h2 {
+    font-size: 1.7em;
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+// Histogram on the players page: one series in a muted primary, the viewer's band in the accent color with a label.
+.ligungi-dist {
+  margin: 0;
+  max-width: 44rem;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  &__base {
+    stroke: $c-border;
+    stroke-width: 1;
+  }
+
+  &__bar {
+    fill: color-mix(in srgb, $c-primary 55%, transparent);
+  }
+
+  &__hit {
+    fill: transparent;
+  }
+
+  g:hover &__bar {
+    fill: $c-primary;
+  }
+
+  &__you &__bar {
+    fill: $c-brag;
+  }
+
+  &__marker {
+    fill: $c-font;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  &__tick {
+    fill: $c-font-dim;
+    font-size: 12px;
+  }
+
+  // The figure scales down with the screen, text included: on phones the labels get bigger in drawing units.
+  @media (max-width: at-most($small)) {
+    &__tick,
+    &__marker {
+      font-size: 20px;
+    }
+  }
+}

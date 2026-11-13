@@ -150,17 +150,19 @@ export const ComputerPage = () => {
           <div class="ricons">
             {doneAvailable && (
               <button type="button" class="fbt text strong glowing ligungi-done" onClick={() => local.play({ kind: 'done' })}>
-                済み {t.done}
+                {t.done}
               </button>
             )}
             <button
               type="button"
-              class="fbt"
+              class="fbt ligungi-ctl"
               title={t.common.takeback}
               data-icon={icons.Back}
               disabled={thinking || replay.moves.length === 0}
               onClick={() => local.undo(position.turn === me ? 2 : 1)}
-            />
+            >
+              <span>{t.game.ctlTakeback}</span>
+            </button>
           </div>
           {outcome && (
             <div class="follow-up">
@@ -172,25 +174,15 @@ export const ComputerPage = () => {
         </>
       }
       side={
-        <div class="game__meta">
-          <section>
-            <div class="game__meta__infos" data-icon={icons.Cogs}>
-              <div>
-                <div class="header">
-                  <div class="setup">
-                    {t.modes[local.start.mode]} • {t.computer.levels[level]}
-                    {local.start.freeDraft && <span title={t.freeDraftHint}> • {t.freeDraft}</span>}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-          <section class="ligungi-links">
-            <button type="button" class="button button-empty" onClick={() => setMe(null)}>
-              {t.common.newGame}
-            </button>
-          </section>
-        </div>
+        <section class="ligungi-card ligungi-game-info">
+          <p class="ligungi-game-info__setup">
+            {t.modes[local.start.mode]} · {t.computer.levels[level]}
+          </p>
+          {local.start.freeDraft && <p class="ligungi-notice">{t.freeDraftHint}</p>}
+          <button type="button" class="button button-empty" onClick={() => setMe(null)}>
+            {t.common.newGame}
+          </button>
+        </section>
       }
     />
   );

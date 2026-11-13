@@ -45,7 +45,6 @@ export const en: Messages = {
   rated: 'Rated',
   casual: 'Casual',
   freeDraftTag: 'free draft',
-  freeDraft: 'Free draft',
   freeDraftHint: 'Each player places pieces until they declare done; the draft only ends when both are done.',
   freeDraftLabel: 'Each player finishes their own draft',
   freeDraftRatedHint: 'Casual games only. Rated games follow the rulebook.',
@@ -349,6 +348,10 @@ export const en: Messages = {
   },
 
   game: {
+    ctlTakeback: 'Takeback',
+    ctlDraw: 'Draw',
+    ctlResign: 'Resign',
+    ctlAbort: 'Abort',
     notFound: 'Game not found',
     titleFlash: 'Your turn! · ligungi',
     confirmResign: 'Resign?',

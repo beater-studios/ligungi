@@ -218,9 +218,6 @@ export const DesignPage = () => {
         </Section>
 
         <Section id="feedback" title="Feedback">
-          <Example label="Turn badge">
-            <span class="ligungi-turn-badge">Your turn</span>
-          </Example>
           <Example label="First player mark">
             <span class="ligungi-first">1st</span>
           </Example>

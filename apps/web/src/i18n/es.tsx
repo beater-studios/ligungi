@@ -45,7 +45,6 @@ export const es: Messages = {
   rated: 'Puntuable',
   casual: 'Casual',
   freeDraftTag: 'draft libre',
-  freeDraft: 'Draft libre',
   freeDraftHint: 'Cada jugador coloca piezas hasta declarar listo; el draft solo termina cuando los dos terminan.',
   freeDraftLabel: 'Cada jugador termina su draft',
   freeDraftRatedHint: 'Solo en partidas casuales. Las puntuables siguen la regla del libro.',
@@ -349,6 +348,10 @@ export const es: Messages = {
   },
 
   game: {
+    ctlTakeback: 'Deshacer',
+    ctlDraw: 'Tablas',
+    ctlResign: 'Abandonar',
+    ctlAbort: 'Anular',
     notFound: 'Partida no encontrada',
     titleFlash: '¡Tu turno! · ligungi',
     confirmResign: '¿Abandonar?',

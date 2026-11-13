@@ -225,28 +225,36 @@ export const GamePage = ({ id }: { id: string }) => {
               <button type="button" class="fbt no" title={t.game.cancel} data-icon={icons.X} onClick={() => setConfirming(null)} />
             </div>
           ) : view.canAbort ? (
-            <button type="button" class="fbt abort" title={t.game.abort} data-icon={icons.X} onClick={() => action('abort')} />
+            <button type="button" class="fbt abort ligungi-ctl" title={t.game.abort} data-icon={icons.X} onClick={() => action('abort')}>
+              <span>{t.game.ctlAbort}</span>
+            </button>
           ) : (
             <>
               {view.canTakeback && view.takebackOffer !== opponent && (
                 <button
                   type="button"
-                  class="fbt takeback-yes"
+                  class="fbt takeback-yes ligungi-ctl"
                   title={view.takebackOffer === you ? t.game.takebackProposed : t.game.proposeTakeback}
                   disabled={view.takebackOffer === you}
                   data-icon={icons.Back}
                   onClick={() => offer('takeback', 'offer')}
-                />
+                >
+                  <span>{t.game.ctlTakeback}</span>
+                </button>
               )}
               <button
                 type="button"
-                class="fbt draw-yes"
+                class="fbt draw-yes ligungi-ctl"
                 title={view.drawOffer === you ? t.game.drawOffered : t.game.offerDraw}
                 disabled={view.drawOffer === you}
                 data-icon={icons.OneHalf}
                 onClick={() => setConfirming('draw')}
-              />
-              <button type="button" class="fbt resign" title={t.game.resign} data-icon={icons.FlagOutline} onClick={() => setConfirming('resign')} />
+              >
+                <span>{t.game.ctlDraw}</span>
+              </button>
+              <button type="button" class="fbt resign ligungi-ctl" title={t.game.resign} data-icon={icons.FlagOutline} onClick={() => setConfirming('resign')}>
+                <span>{t.game.ctlResign}</span>
+              </button>
             </>
           )}
         </div>
@@ -319,50 +327,18 @@ export const GamePage = ({ id }: { id: string }) => {
   );
 
   const side = (
-    <div class="game__meta">
-      <section>
-        <div class="game__meta__infos" data-icon={icons.Swords}>
-          <div>
-            <div class="header">
-              <div class="setup">
-                {timeControlText(t, view.timeControl)} • {view.rated ? t.rated : t.casual} • {t.modes[view.mode]}
-                {view.freeDraft && <span title={t.freeDraftHint}> • {t.freeDraft}</span>}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="game__meta__players">
-          {(['white', 'black'] as const).map((color) => (
-            <div key={color} class={`player color-icon is ${color} text`}>
-              {view.players[color].user ? (
-                <a class="user-link" href={`/@/${view.players[color].name}`}>
-                  {view.players[color].name}
-                </a>
-              ) : (
-                playerName(t, view.players[color])
-              )}
-              {view.firstPlayer === color && (
-                <span class="ligungi-first" title={t.common.startsGame}>
-                  {t.common.firstShort}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-      {!started && (
-        <section class="status">
-          {outcomeText(t, view.outcome, view.status === 'aborted')}
-        </section>
-      )}
-      {notice && <section class="ligungi-notice">{notice}</section>}
-      {premove && <section class="ligungi-notice">{t.game.premove(moveToString(premove))}</section>}
-      <section class="ligungi-links">
-        <a href={`/api/games/${view.id}/export`} target="_blank" rel="noopener" data-icon={icons.Download}>
-          {t.game.export}
-        </a>
-      </section>
-    </div>
+    <section class="ligungi-card ligungi-game-info">
+      <p class="ligungi-game-info__setup">
+        {t.modes[view.mode]} · {timeControlText(t, view.timeControl)} · {view.rated ? t.rated : t.casual}
+      </p>
+      {view.freeDraft && <p class="ligungi-notice">{t.freeDraftHint}</p>}
+      {!started && <p class="ligungi-game-info__status">{outcomeText(t, view.outcome, view.status === 'aborted')}</p>}
+      {notice && <p class="ligungi-notice">{notice}</p>}
+      {premove && <p class="ligungi-notice">{t.game.premove(moveToString(premove))}</p>}
+      <a class="text" href={`/api/games/${view.id}/export`} target="_blank" rel="noopener" data-icon={icons.Download}>
+        {t.game.export}
+      </a>
+    </section>
   );
 
   return (

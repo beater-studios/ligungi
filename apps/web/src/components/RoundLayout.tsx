@@ -86,36 +86,53 @@ const ClockBox = ({ color, position, clock }: { color: Color; position: 'top' | 
   );
 };
 
-const UserBox = ({ player, position, myTurn = false }: { player: RoundPlayer; position: 'top' | 'bottom'; myTurn?: boolean }) => {
+/** A player row: initial, name, rating and first-player mark, with the turn or presence below; the clock shares the row. */
+const UserBox = ({ player, color, position, myTurn = false }: { player: RoundPlayer; color: Color; position: 'top' | 'bottom'; myTurn?: boolean }) => {
   const t = useT();
+  const presence = player.online === undefined ? null : player.online ? t.common.online : t.common.offline;
   return (
-  <div class={`ruser-${position} ruser user-link ${player.online === false ? 'offline' : 'online'}${myTurn ? ' ligungi-my-turn' : ''}`}>
-    <i class="line" title={player.online === false ? t.common.offline : t.common.online} />
-    {player.href ? (
-      <a class="text ulpt" href={player.href}>
-        {player.name}
-      </a>
-    ) : (
-      <name>{player.name}</name>
-    )}
-    {player.rating !== null && player.rating !== undefined && (
-      <rating>
-        {player.rating}
-        {player.provisional ? '?' : ''}
-      </rating>
-    )}
-    {player.ratingDiff !== null && player.ratingDiff !== undefined && (
-      <rating class={player.ratingDiff >= 0 ? 'good' : 'bad'}>
-        {player.ratingDiff >= 0 ? `+${player.ratingDiff}` : player.ratingDiff}
-      </rating>
-    )}
-    {player.first && (
-      <span class="ligungi-first" title={t.common.startsGame}>
-        {t.common.firstShort}
+    <div class={`ruser-${position} ruser ligungi-ruser${myTurn ? ' ligungi-my-turn' : ''}`}>
+      <span
+        class={`ligungi-avatar ligungi-avatar--small ligungi-ruser__color--${color}${player.online ? ' ligungi-avatar--online' : ''}`}
+        role="img"
+        aria-label={t.colors[color]}
+        title={t.colors[color]}
+      >
+        {player.name.slice(0, 1).toUpperCase()}
       </span>
-    )}
-    {myTurn && <span class="ligungi-turn-badge">{t.common.yourTurn}</span>}
-  </div>
+      <span class="ligungi-ruser__body">
+        <span class="ligungi-ruser__name">
+          {player.href ? (
+            <a class="ulpt" href={player.href}>
+              {player.name}
+            </a>
+          ) : (
+            <name>{player.name}</name>
+          )}
+          {player.rating !== null && player.rating !== undefined && (
+            <rating>
+              {player.rating}
+              {player.provisional ? '?' : ''}
+            </rating>
+          )}
+          {player.ratingDiff !== null && player.ratingDiff !== undefined && (
+            <rating class={player.ratingDiff >= 0 ? 'good' : 'bad'}>
+              {player.ratingDiff >= 0 ? `+${player.ratingDiff}` : player.ratingDiff}
+            </rating>
+          )}
+          {player.first && (
+            <span class="ligungi-first" title={t.common.startsGame}>
+              {t.common.firstShort}
+            </span>
+          )}
+        </span>
+        {myTurn ? (
+          <span class="ligungi-ruser__status ligungi-ruser__status--turn">{t.common.yourTurn}</span>
+        ) : (
+          presence && <span class="ligungi-ruser__status">{presence}</span>
+        )}
+      </span>
+    </div>
   );
 };
 
@@ -205,7 +222,7 @@ export const RoundLayout = (props: RoundLayoutProps) => {
       <aside class="round__side">
         {props.side}
         <BeginnerHint />
-        <div class="ligungi-panels box">
+        <div class="ligungi-panels ligungi-card">
           {props.board.position && (
             <DraftPanel
               position={props.board.position}
@@ -230,8 +247,8 @@ export const RoundLayout = (props: RoundLayoutProps) => {
         <div class="pocket is2d pocket-top" ref={topHand} />
         <div class="pocket is2d pocket-bottom" ref={bottomHand} />
         <div class="round__app__table" />
-        <UserBox player={props.players[top]} position="top" />
-        <UserBox player={props.players[bottom]} position="bottom" myTurn={props.myTurn ?? false} />
+        <UserBox player={props.players[top]} color={top} position="top" />
+        <UserBox player={props.players[bottom]} color={bottom} position="bottom" myTurn={props.myTurn ?? false} />
         {props.clocks && <ClockBox color={top} position="top" clock={props.clocks[top]} />}
         {props.clocks && <ClockBox color={bottom} position="bottom" clock={props.clocks[bottom]} />}
         <MoveTable

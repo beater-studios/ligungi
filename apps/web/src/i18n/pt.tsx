@@ -46,7 +46,6 @@ export const pt = {
   rated: 'Ranqueada',
   casual: 'Casual',
   freeDraftTag: 'draft livre',
-  freeDraft: 'Draft livre',
   freeDraftHint: 'Cada jogador coloca peças até declarar pronto; o draft só termina quando os dois terminam.',
   freeDraftLabel: 'Cada jogador termina seu draft',
   freeDraftRatedHint: 'Só em partidas casuais. Ranqueadas seguem a regra do livro.',
@@ -286,6 +285,10 @@ export const pt = {
   },
 
   game: {
+    ctlTakeback: 'Voltar',
+    ctlDraw: 'Empate',
+    ctlResign: 'Abandonar',
+    ctlAbort: 'Abortar',
     notFound: 'Partida não encontrada',
     titleFlash: 'Sua vez! · ligungi',
     confirmResign: 'Abandonar?',

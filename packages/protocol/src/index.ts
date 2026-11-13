@@ -159,6 +159,13 @@ export interface GameCounts {
   readonly draws: number;
 }
 
+/** Results of a player's rated games in one mode. */
+export interface ModeRecord {
+  readonly wins: number;
+  readonly draws: number;
+  readonly losses: number;
+}
+
 export interface UserProfile {
   readonly user: UserRef;
   readonly createdAt: number;
@@ -167,6 +174,8 @@ export interface UserProfile {
   /** Leaderboard position per mode, `null` while provisional or without games. */
   readonly ranks: Readonly<Record<Mode, number | null>>;
   readonly counts: GameCounts;
+  /** Wins, draws and losses of the rated games in each mode. */
+  readonly records: Readonly<Record<Mode, ModeRecord>>;
   readonly followers: number;
   readonly following: number;
   /** Whether the viewer follows this user. */

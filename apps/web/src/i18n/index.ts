@@ -42,9 +42,6 @@ export const outcomeText = (t: Messages, outcome: Outcome | null, aborted = fals
   return outcome.winner ? t.win(outcome.winner, reason) : t.draw(reason);
 };
 
-export const resultSymbol = (outcome: Outcome | null): string =>
-  !outcome ? '*' : outcome.winner === 'white' ? '1-0' : outcome.winner === 'black' ? '0-1' : '½-½';
-
 export const timeControlText = (t: Messages, tc: TimeControl | null): string => (tc ? formatTimeControl(tc) : t.noClock);
 
 export const settingsText = (

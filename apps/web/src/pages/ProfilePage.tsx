@@ -1,4 +1,4 @@
-import { MODES, type Mode } from '@ligungi/engine';
+import { MODES, opposite, type Color, type Mode } from '@ligungi/engine';
 import {
   gameFiltersQuery,
   isErrorCode,
@@ -12,7 +12,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { CreateGame } from '../components/CreateGame.tsx';
 import { Select } from '../components/ui.tsx';
-import { formatDate, outcomeText, playerName, resultSymbol, timeControlText, useT, type Messages } from '../i18n/index.ts';
+import { formatDate, playerName, timeControlText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
@@ -20,29 +20,80 @@ import { useStore } from '../store.ts';
 
 const PAGE = 20;
 
-const playerCell = (t: Messages, player: GameSummary['players']['white']) =>
-  player.user ? <a href={`/@/${player.user.name}`}>{player.name}</a> : playerName(t, player);
+type GameResult = 'win' | 'loss' | 'draw' | 'aborted';
 
+const resultOf = (game: GameSummary, color: Color): GameResult => {
+  if (game.status === 'aborted') return 'aborted';
+  const winner = game.outcome?.winner;
+  if (!winner) return 'draw';
+  return winner === color ? 'win' : 'loss';
+};
+
+const signed = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `\u2212${-n}` : '0');
+
+/** One finished game from the profile owner's side: result, opponent, how it went, rating change and date. */
 const GameRow = ({ game, userId }: { game: GameSummary; userId: string }) => {
   const t = useT();
-  const color = game.players.white.user?.id === userId ? 'white' : 'black';
-  const won = game.outcome?.winner === color;
-  const lost = Boolean(game.outcome?.winner && game.outcome.winner !== color);
+  const color: Color = game.players.white.user?.id === userId ? 'white' : 'black';
+  const own = game.players[color];
+  const opponent = game.players[opposite(color)];
+  const result = resultOf(game, color);
+  const label = { win: t.profile.resultWin, loss: t.profile.resultLoss, draw: t.profile.resultDraw, aborted: t.profile.resultAborted }[result];
+  const reason = game.outcome ? t.reasons[game.outcome.reason] : null;
+  const meta = [
+    t.modes[game.mode],
+    timeControlText(t, game.timeControl),
+    game.rated ? t.rated : t.casual,
+    ...(reason ? [`${reason} · ${t.profile.moves(game.plies)}`] : []),
+  ].join(' · ');
   return (
-    <tr>
-      <td>
-        <a href={`/${game.id}`}>{formatDate(t, game.createdAt)}</a>
-      </td>
-      <td>{playerCell(t, game.players.white)}</td>
-      <td>{playerCell(t, game.players.black)}</td>
-      <td class={won ? 'win' : lost ? 'loss' : ''} title={outcomeText(t, game.outcome, game.status === 'aborted')}>
-        {game.status === 'aborted' ? t.profile.abortedShort : resultSymbol(game.outcome)}
-      </td>
-      <td>
-        {t.modes[game.mode]} · {timeControlText(t, game.timeControl)}
-        {game.rated ? '' : ` · ${t.profile.casualShort}`}
-      </td>
-    </tr>
+    <li>
+      <a class={`ligungi-game-row ligungi-game-row--${result}`} href={`/${game.id}`}>
+        <span class="ligungi-game-row__result">{label}</span>
+        <span class="ligungi-game-row__main">
+          <span class="ligungi-game-row__opponent">
+            {t.profile.against(playerName(t, opponent))}
+            {opponent.rating !== null && <span class="ligungi-game-row__rating"> {opponent.rating}</span>}
+          </span>
+          <span class="ligungi-game-row__meta">{meta}</span>
+        </span>
+        <span class="ligungi-game-row__diff">{own.ratingDiff !== null ? signed(own.ratingDiff) : ''}</span>
+        <span class="ligungi-game-row__date">{formatDate(t, game.createdAt)}</span>
+      </a>
+    </li>
+  );
+};
+
+/** Rating, leaderboard position and the wins, draws and losses of one mode, linking to that mode's ranking. */
+const RatingCard = ({ profile, mode }: { profile: UserProfile; mode: Mode }) => {
+  const t = useT();
+  const rating = profile.ratings[mode];
+  const rank = profile.ranks[mode];
+  const { wins, draws, losses } = profile.records[mode];
+  const total = wins + draws + losses;
+  const share = (n: number) => `${(n / total) * 100}%`;
+  return (
+    <a class={`ligungi-card ligungi-rating-card${rating.games ? '' : ' ligungi-rating-card--empty'}`} href={`/ranking/${mode}`}>
+      <span class="ligungi-rating-card__head">
+        <span class="ligungi-rating-card__mode">{t.modes[mode]}</span>
+        <span class="ligungi-rating-card__rank">{rank !== null ? `#${rank}` : rating.games ? t.profile.provisional : ''}</span>
+      </span>
+      <strong class="ligungi-rating-card__rating">
+        {rating.rating}
+        {rating.provisional ? '?' : ''}
+      </strong>
+      <span class="ligungi-rating-card__games">{t.profile.ratedGames(rating.games)}</span>
+      {total > 0 && (
+        <>
+          <span class="ligungi-rating-card__bar" aria-hidden="true">
+            <span class="win" style={{ width: share(wins) }} />
+            <span class="draw" style={{ width: share(draws) }} />
+            <span class="loss" style={{ width: share(losses) }} />
+          </span>
+          <span class="ligungi-rating-card__record">{t.profile.record(wins, draws, losses)}</span>
+        </>
+      )}
+    </a>
   );
 };
 
@@ -56,7 +107,7 @@ const hrefFor = (name: string, filters: GameFilters) => {
   return `/@/${name}${query ? `?${query}` : ''}`;
 };
 
-/** Mode, color and opponent filters; the result and rated filters live in the tabs. */
+/** Mode chips, then color and opponent; the result and rated filters live in the tabs above. */
 const FilterForm = ({ name, filters }: { name: string; filters: GameFilters }) => {
   const t = useT();
   const [vs, setVs] = useState(filters.vs ?? '');
@@ -66,48 +117,56 @@ const FilterForm = ({ name, filters }: { name: string; filters: GameFilters }) =
     for (const key of Object.keys(next)) if (next[key] === undefined || next[key] === '') delete next[key];
     navigate(hrefFor(name, next as GameFilters), false, false);
   };
+  const { mode, ...withoutMode } = filters;
   const active = Object.keys(filters).length > 0;
   return (
-    <form
-      class="form3 ligungi-history-filters"
-      onSubmit={(e) => {
-        e.preventDefault();
-        go({ vs: vs.trim() || undefined });
-      }}
-    >
-      <Select
-        ariaLabel={t.common.mode}
-        value={filters.mode ?? ''}
-        options={[{ value: '', label: t.profile.allModes }, ...MODES.map((mode) => ({ value: mode, label: t.modes[mode] }))]}
-        onChange={(value) => go({ mode: (value || undefined) as Mode | undefined })}
-      />
-      <Select
-        ariaLabel={t.common.yourColor}
-        value={filters.color ?? ''}
-        options={[
-          { value: '', label: t.profile.anyColor },
-          { value: 'white', label: t.colors.white },
-          { value: 'black', label: t.colors.black },
-        ]}
-        onChange={(value) => go({ color: (value || undefined) as GameFilters['color'] })}
-      />
-      <input
-        class="form-control"
-        placeholder={t.profile.opponent}
-        aria-label={t.profile.opponent}
-        maxLength={20}
-        value={vs}
-        onInput={(e) => setVs((e.target as HTMLInputElement).value)}
-      />
-      <button type="submit" class="button">
-        {t.profile.filter}
-      </button>
-      {active && (
-        <a class="button button-empty" href={`/@/${name}`}>
-          {t.profile.clearFilters}
+    <div class="ligungi-history-filters">
+      <nav class="ligungi-chips" aria-label={t.common.mode}>
+        <a class={`ligungi-chip${mode ? '' : ' active'}`} href={hrefFor(name, withoutMode)}>
+          {t.profile.allModes}
         </a>
-      )}
-    </form>
+        {MODES.map((m) => (
+          <a key={m} class={`ligungi-chip${mode === m ? ' active' : ''}`} href={hrefFor(name, { ...withoutMode, mode: m })}>
+            {t.modes[m]}
+          </a>
+        ))}
+      </nav>
+      <form
+        class="form3 ligungi-history-filters__form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          go({ vs: vs.trim() || undefined });
+        }}
+      >
+        <Select
+          ariaLabel={t.common.yourColor}
+          value={filters.color ?? ''}
+          options={[
+            { value: '', label: t.profile.anyColor },
+            { value: 'white', label: t.colors.white },
+            { value: 'black', label: t.colors.black },
+          ]}
+          onChange={(value) => go({ color: (value || undefined) as GameFilters['color'] })}
+        />
+        <input
+          class="form-control"
+          type="search"
+          placeholder={t.profile.opponent}
+          aria-label={t.profile.opponent}
+          maxLength={20}
+          value={vs}
+          onInput={(e) => setVs((e.target as HTMLInputElement).value)}
+        />
+        <button type="submit" class="button button-empty">
+          {t.profile.filter}
+        </button>
+        {active && (
+          <a class="ligungi-history-filters__clear" href={`/@/${name}`}>
+            {t.profile.clearFilters}
+          </a>
+        )}
+      </form>
+    </div>
   );
 };
 
@@ -165,7 +224,7 @@ export const ProfilePage = ({ name }: { name: string }) => {
       </main>
     );
   }
-  if (!profile) return <main class="page-menu" />;
+  if (!profile) return <main class="ligungi-page ligungi-profile" />;
 
   const loadMore = async () => {
     const last = games?.[games.length - 1];
@@ -196,138 +255,117 @@ export const ProfilePage = ({ name }: { name: string }) => {
   const tab = (label: string, count: number, patch: { result?: ResultFilter; rated?: boolean }) => {
     const activeTab = result === patch.result && rated === patch.rated;
     return (
-      <a class={`nm-item${activeTab ? ' active' : ''}`} href={hrefFor(profile.user.name, { ...rest, ...patch })}>
-        <strong>{count}</strong> {label}
+      <a class={activeTab ? 'active' : ''} href={hrefFor(profile.user.name, { ...rest, ...patch })}>
+        {label} <strong>{count}</strong>
       </a>
     );
   };
 
   return (
-    <main class="page-menu">
-      <aside class="page-menu__menu side sub-ratings">
-        {MODES.map((mode) => {
-          const rating = profile.ratings[mode];
-          const rank = profile.ranks[mode];
-          return (
-            <a key={mode} class={rating.games ? '' : 'empty'} href={`/ranking/${mode}`}>
-              <span>
-                <h3>{t.modes[mode]}</h3>
-                <rating>
-                  <strong>
-                    {rating.rating}
-                    {rating.provisional ? '?' : ''}
-                  </strong>
-                  <span>
-                    {rating.games} {t.profile.games(rating.games)}
-                  </span>
-                  {rank !== null && <span class="ligungi-rank">{t.profile.rank(rank)}</span>}
-                </rating>
-              </span>
-            </a>
-          );
-        })}
-      </aside>
-      <div class="page-menu__content box user-show">
-        <div class="box__top user-show__header">
-          <h1 class={`user-link ${profile.online ? 'online' : 'offline'}`}>
-            <i class="line" title={profile.online ? t.common.online : t.common.offline} />
-            {profile.user.name}
-          </h1>
-          <div class="ligungi-profile-actions">
+    <main class="ligungi-page ligungi-profile">
+      <section class="ligungi-card ligungi-profile__hero">
+        <span class={`ligungi-avatar ligungi-avatar--large${profile.online ? ' ligungi-avatar--online' : ''}`} aria-hidden="true">
+          {profile.user.name.charAt(0).toUpperCase()}
+        </span>
+        <div class="ligungi-profile__identity">
+          <h1>{profile.user.name}</h1>
+          <p class="ligungi-profile__since">
+            <span class={profile.online ? 'ligungi-profile__online' : ''}>{profile.online ? t.common.online : t.common.offline}</span> ·{' '}
+            {t.profile.memberSince(formatDate(t, profile.createdAt))}
+          </p>
+          <p>
+            <strong>{profile.followers}</strong> {t.profile.followers(profile.followers)} · <strong>{profile.following}</strong>{' '}
+            {t.profile.following}
             {!isMe && me && (
-              <button
-                type="button"
-                class={`button text ${profile.followed ? 'button-empty' : ''}`}
-                data-icon={profile.followed ? icons.X : icons.User}
-                disabled={busy}
-                onClick={toggleFollow}
-              >
-                {profile.followed ? t.profile.unfollow : t.profile.follow}
-              </button>
+              <>
+                {' · '}
+                <a href={hrefFor(me.name, { vs: profile.user.name })}>{t.profile.vsLink}</a>
+              </>
             )}
-            {!isMe && me && (
-              <button
-                type="button"
-                class="button text"
-                data-icon={icons.Swords}
-                disabled={!profile.canChallenge}
-                title={profile.canChallenge ? '' : t.profile.challengeRefused}
-                onClick={() => setChallenging(true)}
-              >
-                {t.profile.challenge}
-              </button>
-            )}
-            {!isMe && !me && (
-              <a class="button button-empty text" href="/login" title={t.profile.loginToFollow} data-icon={icons.User}>
-                {t.profile.follow}
-              </a>
-            )}
-          </div>
+          </p>
         </div>
-        <div class="ligungi-profile-facts">
-          <ul>
-            <li>{t.profile.memberSince(formatDate(t, profile.createdAt))}</li>
-            <li>
-              <strong>{profile.followers}</strong> {t.profile.followers(profile.followers)}
-            </li>
-            <li>
-              <strong>{profile.following}</strong> {t.profile.following}
-            </li>
-          </ul>
+        <div class="ligungi-profile__actions">
           {!isMe && me && (
-            <a href={hrefFor(me.name, { vs: profile.user.name })} data-icon={icons.Swords} class="text">
-              {t.profile.vsLink}
+            <button
+              type="button"
+              class="button text ligungi-button-good"
+              data-icon={icons.Swords}
+              disabled={!profile.canChallenge}
+              title={profile.canChallenge ? '' : t.profile.challengeRefused}
+              onClick={() => setChallenging(true)}
+            >
+              {t.profile.challenge}
+            </button>
+          )}
+          {!isMe && me && (
+            <button
+              type="button"
+              class="button button-empty text"
+              data-icon={profile.followed ? icons.X : icons.User}
+              disabled={busy}
+              onClick={toggleFollow}
+            >
+              {profile.followed ? t.profile.unfollow : t.profile.follow}
+            </button>
+          )}
+          {!isMe && !me && (
+            <a class="button button-empty text" href="/login" title={t.profile.loginToFollow} data-icon={icons.User}>
+              {t.profile.follow}
             </a>
           )}
         </div>
-        {profile.playing.length > 0 && (
-          <p class="ligungi-profile-playing">
-            {t.profile.playingNow}:{' '}
-            {profile.playing.map((g) => (
-              <a key={g.id} href={`/${g.id}`}>
-                {playerName(t, g.players.white)} × {playerName(t, g.players.black)}{' '}
-              </a>
-            ))}
-          </p>
-        )}
-        <div class="number-menu number-menu--tabs">
-          {tab(t.profile.games(counts.games), counts.games, {})}
-          {tab(t.profile.rated(counts.rated), counts.rated, { rated: true })}
-          {tab(t.profile.wins(counts.wins), counts.wins, { result: 'win' })}
-          {tab(t.profile.losses(counts.losses), counts.losses, { result: 'loss' })}
-          {tab(t.profile.draws(counts.draws), counts.draws, { result: 'draw' })}
+      </section>
+
+      <section class="ligungi-profile__ratings" aria-label={t.profile.ratingsLabel}>
+        {MODES.map((mode) => (
+          <RatingCard key={mode} profile={profile} mode={mode} />
+        ))}
+      </section>
+
+      {profile.playing.map((game) => (
+        <section key={game.id} class="ligungi-card ligungi-profile__live">
+          <span class="ligungi-live-badge">{t.profile.live}</span>
+          <span class="ligungi-profile__live-text">
+            {playerName(t, game.players.white)} × {playerName(t, game.players.black)} · {t.modes[game.mode]} ·{' '}
+            {timeControlText(t, game.timeControl)}
+          </span>
+          <a class="button" href={`/${game.id}`}>
+            {t.profile.watch}
+          </a>
+        </section>
+      ))}
+
+      <section class="ligungi-card ligungi-profile__games">
+        <div class="ligungi-profile__games-head">
+          <h2>{t.profile.gamesTitle}</h2>
+          <nav class="ligungi-segmented" aria-label={t.profile.result}>
+            {tab(t.profile.tabAll, counts.games, {})}
+            {tab(t.profile.tabRated, counts.rated, { rated: true })}
+            {tab(t.profile.tabWins, counts.wins, { result: 'win' })}
+            {tab(t.profile.tabLosses, counts.losses, { result: 'loss' })}
+            {tab(t.profile.tabDraws, counts.draws, { result: 'draw' })}
+          </nav>
         </div>
         <FilterForm name={profile.user.name} filters={filters} />
-        {games === null && <p class="box__pad ligungi-notice">{t.common.loading}</p>}
+        {games === null && <p class="ligungi-notice ligungi-profile__empty">{t.common.loading}</p>}
         {games?.length === 0 && (
-          <p class="box__pad ligungi-notice">{filterKey ? t.profile.noMatch : t.profile.noGames}</p>
+          <p class="ligungi-notice ligungi-profile__empty">{filterKey ? t.profile.noMatch : t.profile.noGames}</p>
         )}
         {games && games.length > 0 && (
-          <table class="slist slist-pad">
-            <thead>
-              <tr>
-                <th>{t.profile.date}</th>
-                <th>{t.colors.white}</th>
-                <th>{t.colors.black}</th>
-                <th>{t.profile.result}</th>
-                <th>{t.profile.game}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {games.map((game) => (
-                <GameRow key={game.id} game={game} userId={profile.user.id} />
-              ))}
-            </tbody>
-          </table>
+          <ul class="ligungi-game-list">
+            {games.map((game) => (
+              <GameRow key={game.id} game={game} userId={profile.user.id} />
+            ))}
+          </ul>
         )}
         {more && games && games.length > 0 && (
-          <div class="box__pad">
+          <div class="ligungi-profile__more">
             <button type="button" class="button button-empty" onClick={loadMore}>
               {t.profile.loadMore}
             </button>
           </div>
         )}
-      </div>
+      </section>
       {challenging && <CreateGame target="friend" to={profile.user.name} onClose={() => setChallenging(false)} />}
     </main>
   );

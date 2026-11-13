@@ -1,5 +1,5 @@
 import { moveToString, opposite, type Color, type Mode, type Outcome } from '@ligungi/engine';
-import type { GameCounts, GameFilters, GameStatus, GameSummary, TimeControl } from '@ligungi/protocol';
+import type { GameCounts, GameFilters, GameStatus, GameSummary, ModeRecord, TimeControl } from '@ligungi/protocol';
 import type { Db } from './db.ts';
 import { updateRating, PROVISIONAL_DEVIATION } from './glicko.ts';
 import { randomId } from './ids.ts';
@@ -302,6 +302,24 @@ export class Games {
       )
       .get(userId) as { games: number; rated: number | null; wins: number | null; losses: number | null; draws: number | null };
     return { games: row.games, rated: row.rated ?? 0, wins: row.wins ?? 0, losses: row.losses ?? 0, draws: row.draws ?? 0 };
+  }
+
+  /** Wins, draws and losses of a user's finished rated games, per mode. */
+  records(userId: string): Record<Mode, ModeRecord> {
+    const rows = this.#db
+      .prepare(
+        `select mode,
+          sum(case when (winner = 'white' and white_user = ?1) or (winner = 'black' and black_user = ?1) then 1 else 0 end) as wins,
+          sum(case when winner is null then 1 else 0 end) as draws,
+          sum(case when winner is not null and not ((winner = 'white' and white_user = ?1) or (winner = 'black' and black_user = ?1)) then 1 else 0 end) as losses
+         from games where (white_user = ?1 or black_user = ?1) and status = 'ended' and rated = 1
+         group by mode`,
+      )
+      .all(userId) as Array<{ mode: Mode; wins: number; draws: number; losses: number }>;
+    const empty = (): ModeRecord => ({ wins: 0, draws: 0, losses: 0 });
+    const records: Record<Mode, ModeRecord> = { intro: empty(), beginner: empty(), intermediate: empty(), advanced: empty() };
+    for (const row of rows) records[row.mode] = { wins: row.wins, draws: row.draws, losses: row.losses };
+    return records;
   }
 
   /** Summary of a stored game without keeping its room in memory. */

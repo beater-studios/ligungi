@@ -145,6 +145,9 @@ describe('playing online', () => {
     const profile = (await a.request<UserProfile>('GET', '/api/users/komugi')).data;
     expect(profile.ratings.intro.rating).toBeGreaterThan(1500);
     expect(profile.counts).toEqual({ games: 1, rated: 1, wins: 1, losses: 0, draws: 0 });
+    expect(profile.records.intro).toEqual({ wins: 1, draws: 0, losses: 0 });
+    expect(profile.records.advanced).toEqual({ wins: 0, draws: 0, losses: 0 });
+    expect((await a.request<UserProfile>('GET', '/api/users/meruem')).data.records.intro).toEqual({ wins: 0, draws: 0, losses: 1 });
     expect(profile.recent[0]!.id).toBe(id);
   });
 

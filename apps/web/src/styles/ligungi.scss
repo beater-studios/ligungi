@@ -435,39 +435,6 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   }
 }
 
-.sub-ratings rating {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5em;
-}
-
-// lila hides the mode names on narrow screens because each mode has an icon there; ours have none, so keep the name.
-.sub-ratings {
-  @include mq-topnav-hidden {
-    h3 {
-      display: block;
-    }
-  }
-
-  @include mq-subnav-top {
-    a {
-      padding: 0.6em 0.3em;
-    }
-
-    a > span {
-      min-width: 0;
-      align-items: center;
-    }
-
-    h3 {
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-size: 0.8em;
-      letter-spacing: 0;
-    }
-  }
-}
 
 // Without this, a short menu page stretches its rows to the page height (a tall empty band above the content on mobile).
 main.page-menu {
@@ -803,83 +770,6 @@ html.light {
   width: 3em;
 }
 
-.ligungi-rank {
-  color: $c-brag;
-  font-size: 0.85em;
-}
-
-.user-show__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-
-  h1.user-link {
-    display: flex;
-    align-items: center;
-  }
-}
-
-.ligungi-profile-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-
-  .button {
-    display: inline-flex;
-    align-items: center;
-  }
-}
-
-// Member since and follow counts on one quiet line under the name, the head-to-head link on the right.
-.ligungi-profile-facts {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.6rem 1.5rem;
-  padding: 1rem $box-padding 1.2rem;
-  color: $c-font-dim;
-
-  ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 1.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  strong {
-    color: $c-font;
-  }
-
-  a.text {
-    display: inline-flex;
-    align-items: center;
-  }
-}
-
-.ligungi-profile-playing {
-  padding: 0 $box-padding 1.2rem;
-}
-
-.ligungi-history-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 1rem var(---box-padding, 1.5rem);
-
-  .form-control {
-    flex: 1 1 10rem;
-    width: auto;
-  }
-
-  .button {
-    flex: 0 0 auto;
-  }
-}
 
 .ligungi-friend-box {
   margin-top: 1rem;
@@ -2131,6 +2021,529 @@ body:has(main.auth) #clinput {
     &__tick,
     &__marker {
       font-size: 20px;
+    }
+  }
+}
+
+/* ===== Shared pieces of the redesigned pages (profile, players, ranking and the rest) ===== */
+#main-wrap:has(> main.ligungi-page) {
+  ---main-max-width: 1180px;
+}
+
+.ligungi-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  // Without it the grid sizes the page to its widest row, scrolling ones included, and phones scroll sideways.
+  min-width: 0;
+  padding-bottom: 3rem;
+}
+
+.ligungi-card {
+  @extend %box-radius;
+
+  background: $c-bg-box;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+// The player's initial in a circle, standing in for an avatar; a green dot when online.
+.ligungi-avatar {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: $c-bg-zebra2;
+  color: $c-font-clear;
+  font-weight: 600;
+
+  &--large {
+    width: 6rem;
+    height: 6rem;
+    font-size: 2.75rem;
+  }
+
+  &--online::after {
+    content: '';
+    position: absolute;
+    right: 6%;
+    bottom: 6%;
+    width: 22%;
+    height: 22%;
+    border-radius: 50%;
+    background: $c-good;
+    box-shadow: 0 0 0 3px $c-bg-box;
+  }
+}
+
+// Tabs as one segmented control (links or buttons).
+.ligungi-segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 6px;
+  background: $c-bg-page;
+
+  > a,
+  > button {
+    flex: none;
+    white-space: nowrap;
+    padding: 0.5rem 0.9rem;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: $c-font;
+    font: inherit;
+    font-size: 0.95em;
+    cursor: pointer;
+
+    &.active {
+      background: $c-bg-zebra2;
+      color: $c-font-clear;
+    }
+  }
+}
+
+.ligungi-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ligungi-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+  border: 1px solid $c-border;
+  border-radius: 1.2rem;
+  color: $c-font;
+  font-size: 0.9em;
+
+  &.active {
+    border-color: $c-bg-zebra2;
+    background: $c-bg-zebra2;
+    color: $c-font-clear;
+  }
+}
+
+.button.ligungi-button-good {
+  background: $c-good;
+}
+
+.ligungi-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  color: $c-bad;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &::before {
+    content: '';
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+/* ===== Profile ===== */
+.ligungi-profile__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.75rem;
+}
+
+.ligungi-profile__identity {
+  flex: 1 1 18rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  h1 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 2.1rem;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  strong {
+    color: $c-font-clear;
+  }
+}
+
+.ligungi-profile__since {
+  color: $c-font-dim;
+  font-size: 0.9em;
+}
+
+.ligungi-profile__online {
+  color: $c-good;
+}
+
+.ligungi-profile__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  // lila's empty button reads as a link next to a filled one; an outline keeps it a button.
+  .button-empty {
+    box-shadow: inset 0 0 0 1px $c-border;
+    color: $c-font-clear;
+  }
+}
+
+.ligungi-profile__ratings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.ligungi-rating-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.25rem;
+  color: $c-font;
+
+  &:hover {
+    color: $c-font;
+    box-shadow: 0 0 0 1px $c-border, 0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+
+  &--empty {
+    opacity: 0.7;
+  }
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  &__mode {
+    color: $c-font-dim;
+    font-size: 0.8em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__rank {
+    color: $c-brag;
+    font-size: 0.8em;
+  }
+
+  &__rating {
+    color: $c-font-clear;
+    font-size: 2.5rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  &__games,
+  &__record {
+    color: $c-font-dim;
+    font-size: 0.85em;
+  }
+
+  &__bar {
+    display: flex;
+    gap: 2px;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: $c-border;
+
+    .win {
+      background: $c-good;
+    }
+
+    .draw {
+      background: $c-font-dim;
+    }
+
+    .loss {
+      background: $c-bad;
+    }
+  }
+}
+
+.ligungi-profile__live {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+
+  .ligungi-profile__live-text {
+    flex: 1 1 16rem;
+    color: $c-font-clear;
+  }
+}
+
+.ligungi-profile__games {
+  padding-bottom: 0.5rem;
+}
+
+.ligungi-profile__games-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 0;
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.6rem;
+    font-weight: 500;
+  }
+
+  strong {
+    margin-inline-start: 0.2em;
+  }
+}
+
+.ligungi-history-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+
+  &__form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+
+    select,
+    .form-control {
+      width: auto;
+    }
+  }
+
+  &__clear {
+    font-size: 0.9em;
+  }
+}
+
+.ligungi-profile__empty {
+  padding: 0.5rem 1.25rem 1rem;
+}
+
+.ligungi-game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0 0.75rem;
+  list-style: none;
+}
+
+.ligungi-game-row {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  background: $c-bg-zebra;
+  color: $c-font;
+
+  &:hover {
+    color: $c-font;
+    background: $c-bg-zebra2;
+  }
+
+  &__result {
+    justify-self: start;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  &--win &__result {
+    background: color-mix(in srgb, #{$c-good} 20%, transparent);
+    color: $c-good;
+  }
+
+  &--loss &__result {
+    background: color-mix(in srgb, #{$c-bad} 20%, transparent);
+    color: $c-bad;
+  }
+
+  &--draw &__result,
+  &--aborted &__result {
+    background: color-mix(in srgb, #{$c-font-dim} 20%, transparent);
+    color: $c-font;
+  }
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  &__opponent {
+    color: $c-font-clear;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__rating,
+  &__meta,
+  &__date {
+    color: $c-font-dim;
+  }
+
+  &__meta {
+    font-size: 0.85em;
+  }
+
+  &__diff {
+    font-weight: 600;
+  }
+
+  &--win &__diff {
+    color: $c-good;
+  }
+
+  &--loss &__diff {
+    color: $c-bad;
+  }
+
+  &__date {
+    font-size: 0.85em;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  // Phones: result and date on top, opponent and rating change below.
+  @media (max-width: at-most($small)) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 0.6rem;
+
+    &__result {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    &__date {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    &__main {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    &__diff {
+      grid-column: 2;
+      grid-row: 2;
+      text-align: right;
+    }
+  }
+}
+
+.ligungi-profile__more {
+  padding: 0.75rem;
+  text-align: center;
+}
+
+@media (max-width: at-most($small)) {
+  .ligungi-page {
+    padding-inline: 0.5rem;
+  }
+
+  .ligungi-profile__hero {
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  .ligungi-avatar--large {
+    width: 4rem;
+    height: 4rem;
+    font-size: 1.9rem;
+  }
+
+  .ligungi-profile__identity {
+    flex-basis: calc(100% - 5.5rem);
+
+    h1 {
+      font-size: 1.6rem;
+    }
+  }
+
+  .ligungi-profile__actions {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    width: 100%;
+
+    .button {
+      justify-content: center;
+    }
+  }
+
+  .ligungi-profile__ratings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .ligungi-rating-card {
+    padding: 0.9rem;
+
+    &__rating {
+      font-size: 1.75rem;
+    }
+  }
+
+  // These rows scroll sideways inside the card instead of widening the page.
+  .ligungi-profile__games-head .ligungi-segmented,
+  .ligungi-history-filters .ligungi-chips {
+    flex-wrap: nowrap;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .ligungi-history-filters__form {
+    width: 100%;
+
+    .form-control {
+      flex: 1 1 8rem;
     }
   }
 }

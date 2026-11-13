@@ -60,6 +60,7 @@ export const DesignPage = () => {
     ['buttons', 'Buttons'],
     ['forms', 'Forms'],
     ['feedback', 'Feedback'],
+    ['pages', 'Page blocks'],
     ['data', 'Data'],
     ['game', 'Game'],
   ];
@@ -223,9 +224,6 @@ export const DesignPage = () => {
           <Example label="First player mark">
             <span class="ligungi-first">1st</span>
           </Example>
-          <Example label="Rank">
-            <span class="ligungi-rank">#3 on the leaderboard</span>
-          </Example>
           <Example label="Waiting (.ligungi-waiting, home)">
             <div class="ligungi-waiting">
               <div class="ligungi-waiting__spinner" aria-hidden="true" />
@@ -252,6 +250,63 @@ export const DesignPage = () => {
                 </button>
               </div>
             </div>
+          </Example>
+        </Section>
+
+        <Section id="pages" title="Page blocks" note="The redesigned pages (profile first) are built from these: a ligungi-page main, ligungi-card boxes, segmented tabs and chips.">
+          <Example label="Card with avatar (.ligungi-card, .ligungi-avatar)">
+            <div class="ligungi-card ligungi-ds__row" style={{ padding: '1rem' }}>
+              <span class="ligungi-avatar" aria-hidden="true">
+                K
+              </span>
+              <span class="ligungi-avatar ligungi-avatar--online" aria-hidden="true">
+                M
+              </span>
+              <span>A box on the page background, with the shadow and corners of every card.</span>
+            </div>
+          </Example>
+          <Example label="Tabs (.ligungi-segmented) and chips (.ligungi-chip)">
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
+              <nav class="ligungi-segmented" aria-label="Example tabs">
+                <a class="active" href="#pages">
+                  All <strong>52</strong>
+                </a>
+                <a href="#pages">
+                  Rated <strong>38</strong>
+                </a>
+                <a href="#pages">
+                  Wins <strong>29</strong>
+                </a>
+              </nav>
+              <nav class="ligungi-chips" aria-label="Example chips">
+                <a class="ligungi-chip active" href="#pages">
+                  All modes
+                </a>
+                <a class="ligungi-chip" href="#pages">
+                  Advanced
+                </a>
+              </nav>
+            </div>
+          </Example>
+          <Example label="Live badge (.ligungi-live-badge)">
+            <span class="ligungi-live-badge">Live</span>
+          </Example>
+          <Example label="Game row (.ligungi-game-row)">
+            <ul class="ligungi-game-list" style={{ padding: 0 }}>
+              <li>
+                <a class="ligungi-game-row ligungi-game-row--win" href="#pages">
+                  <span class="ligungi-game-row__result">Win</span>
+                  <span class="ligungi-game-row__main">
+                    <span class="ligungi-game-row__opponent">
+                      vs Netero <span class="ligungi-game-row__rating">2100</span>
+                    </span>
+                    <span class="ligungi-game-row__meta">Advanced · 10+5 · Rated · checkmate · 64 moves</span>
+                  </span>
+                  <span class="ligungi-game-row__diff">+11</span>
+                  <span class="ligungi-game-row__date">Nov 13, 2026</span>
+                </a>
+              </li>
+            </ul>
           </Example>
         </Section>
 

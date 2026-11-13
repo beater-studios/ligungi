@@ -425,6 +425,7 @@ export const createApp = (config: ServerConfig): App => {
         ratings: users.ratings(user.id),
         ranks: Object.fromEntries(MODES.map((mode) => [mode, users.rank(user.id, mode)])) as Record<Mode, number | null>,
         counts: games.counts(user.id),
+        records: games.records(user.id),
         ...users.followCounts(user.id),
         followed: ctx.session.userId ? users.isFollowing(ctx.session.userId, user.id) : false,
         canChallenge: ctx.session.userId ? users.canChallenge(ctx.session.userId, user.id) : false,

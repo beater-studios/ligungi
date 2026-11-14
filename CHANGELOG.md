@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-14
+
 ### Added
 
 - Correspondence games: challenge a player from their profile or by link, or open a game in the lobby's Correspondence tab, with 1, 3 or 7 days per move, rated or casual, and play without being online at the same time. Whoever runs out of days loses (a game nobody started is aborted), being away never does. The bell in the header counts the games waiting for your move and lists them, with a sound when a move arrives, and your games on the home page say whose turn it is and how long is left. They stay off the TV and the live counts, so their players remain free to challenge. Their challenges and open games wait up to 7 days, even with you away, and survive server restarts. Needs an account.
@@ -141,7 +143,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/beater-studios/ligungi/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/beater-studios/ligungi/compare/v0.1.4...v0.2.0
 [0.1.4]: https://github.com/beater-studios/ligungi/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/beater-studios/ligungi/compare/v0.1.2...v0.1.3

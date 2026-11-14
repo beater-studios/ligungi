@@ -545,6 +545,8 @@ export const es: Messages = {
     hint: 'Sigue a jugadores desde su perfil para verlos aquí. En Cuenta, en los desafíos, puedes permitir que solo te desafíen quienes sigues.',
   },
 
+  info: { pages: 'Páginas' },
+
   tv: {
     title: 'Gungi TV',
     all: 'Todos',

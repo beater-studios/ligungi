@@ -1,3 +1,4 @@
+import { useEffect } from 'preact/hooks';
 import { CookiePreferences } from '../components/Consent.tsx';
 import { useContent } from '../i18n/content/index.ts';
 import { useT } from '../i18n/index.ts';
@@ -7,39 +8,45 @@ export type InfoKind = (typeof INFO_KINDS)[number];
 
 export const isInfoKind = (value: string): value is InfoKind => (INFO_KINDS as readonly string[]).includes(value);
 
-/** About, FAQ, contact and legal pages, with lila's side menu to move between them. */
+/** About, FAQ, contact and legal pages: a menu between them beside (on phones above) the article. */
 export const InfoPage = ({ kind }: { kind: InfoKind }) => {
   const t = useT();
   const content = useContent();
   const dated = kind === 'terms' || kind === 'privacy';
+  // On phones the menu is a row that scrolls sideways: centre the current page's chip by scrolling the row only, never the page.
+  useEffect(() => {
+    const menu = document.querySelector<HTMLElement>('.ligungi-info__menu');
+    const active = menu?.querySelector<HTMLElement>('a.active');
+    if (menu && active) menu.scrollLeft = active.offsetLeft - menu.offsetLeft - (menu.clientWidth - active.offsetWidth) / 2;
+  }, [kind]);
   return (
-    <main class="page-menu ligungi-info">
-      <nav class="page-menu__menu subnav">
+    <main class="ligungi-page ligungi-info">
+      <nav class="ligungi-card ligungi-info__menu" aria-label={t.info.pages}>
         {INFO_KINDS.map((k) => (
-          <a key={k} class={k === kind ? 'active' : ''} href={`/${k}`}>
+          <a key={k} class={k === kind ? 'active' : ''} href={`/${k}`} aria-current={k === kind ? 'page' : undefined}>
             {t.nav[k]}
           </a>
         ))}
       </nav>
-      <div class="page-menu__content box box-pad">
-        <h1 class="box__top">{t.nav[kind]}</h1>
+      <article class="ligungi-card ligungi-info__article">
+        <h1>{t.nav[kind]}</h1>
         {dated && <p class="ligungi-notice">{content.updated}</p>}
         <div class="ligungi-info__body">
           {kind === 'faq' ? (
-            <dl class="ligungi-faq">
-              {content.faq.map((item) => (
-                <div key={item.q}>
-                  <dt>{item.q}</dt>
-                  <dd>{item.a}</dd>
-                </div>
+            <div class="ligungi-faq">
+              {content.faq.map((item, index) => (
+                <details key={item.q} open={index === 0}>
+                  <summary>{item.q}</summary>
+                  <div class="ligungi-faq__answer">{item.a}</div>
+                </details>
               ))}
-            </dl>
+            </div>
           ) : (
             content[kind]
           )}
           {kind === 'privacy' && <CookiePreferences />}
         </div>
-      </div>
+      </article>
     </main>
   );
 };

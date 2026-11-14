@@ -545,6 +545,8 @@ export const en: Messages = {
     hint: 'Follow players from their profile to see them here. In Account, under challenges, you can let only the people you follow challenge you.',
   },
 
+  info: { pages: 'Pages' },
+
   tv: {
     title: 'Gungi TV',
     all: 'All',

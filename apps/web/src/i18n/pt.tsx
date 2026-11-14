@@ -484,6 +484,8 @@ export const pt = {
     hint: 'Siga jogadores pelo perfil deles para vê-los aqui. Em Conta, nos desafios, você pode deixar que só quem você segue desafie você.',
   },
 
+  info: { pages: 'Páginas' },
+
   tv: {
     title: 'Gungi TV',
     all: 'Todos',

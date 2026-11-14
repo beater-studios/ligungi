@@ -117,6 +117,64 @@ export const RadioGroup = <T,>({ name, value, options, onChange }: RadioGroupPro
   </group>
 );
 
+export interface CardOption<T> extends Option<T> {
+  /** Big text over the label, such as a level number. */
+  readonly badge?: ComponentChildren;
+  readonly icon?: ComponentChildren;
+  /** One line under the label. */
+  readonly hint?: ComponentChildren;
+}
+
+interface OptionCardsProps<T> {
+  /** Shared `name` of the inputs, also the prefix of their ids (`${name}-${value}`). */
+  readonly name: string;
+  readonly legend: ComponentChildren;
+  readonly value: T;
+  readonly options: readonly CardOption<T>[];
+  readonly onChange: (value: T) => void;
+  readonly help?: ComponentChildren;
+  /** `cards` stack into rows on phones, `row` stays side by side, `segmented` is a compact switch. */
+  readonly layout?: 'cards' | 'row' | 'segmented';
+}
+
+/** One choice among a few, as cards: native radio inputs, so the keyboard and screen readers treat it as a group. */
+export const OptionCards = <T,>({ name, legend, value, options, onChange, help, layout = 'cards' }: OptionCardsProps<T>) => (
+  <fieldset class={`ligungi-choice ligungi-choice--${layout}`}>
+    <legend class="ligungi-choice__legend">{legend}</legend>
+    <div class="ligungi-choice__options">
+      {options.map((option) => {
+        const id = `${name}-${String(option.value)}`;
+        const checked = option.value === value;
+        return (
+          <label
+            key={id}
+            for={id}
+            class={`ligungi-choice__option${checked ? ' is-checked' : ''}${option.disabled ? ' is-disabled' : ''}`}
+            title={option.title}
+          >
+            <input
+              class="ligungi-choice__input"
+              type="radio"
+              id={id}
+              name={name}
+              checked={checked}
+              disabled={option.disabled}
+              onChange={() => onChange(option.value)}
+            />
+            {option.badge !== undefined && <span class="ligungi-choice__badge">{option.badge}</span>}
+            {option.icon}
+            <span class="ligungi-choice__text">
+              <span class="ligungi-choice__label">{option.label}</span>
+              {option.hint !== undefined && <span class="ligungi-choice__hint">{option.hint}</span>}
+            </span>
+          </label>
+        );
+      })}
+    </div>
+    {help !== undefined && <small class="form-help">{help}</small>}
+  </fieldset>
+);
+
 export const SubmitButton = ({ children, disabled = false }: { children: ComponentChildren; disabled?: boolean }) => (
   <div class="ligungi-actions">
     <button type="submit" class="button ligungi-submit" disabled={disabled}>

@@ -387,12 +387,14 @@ export const en: Messages = {
   computer: {
     title: 'Play against the computer',
     strength: 'Strength',
-    levels: {
-      1: 'Level 1 (random)',
-      2: 'Level 2 (greedy)',
-      3: 'Level 3 (looks 2 moves ahead)',
-      4: 'Level 4 (looks deeper, up to 1 s)',
-      5: 'Level 5 (strongest, up to 3 s)',
+    intro: 'No account and no queue: the computer plays in your browser.',
+    levelNames: { 1: 'Random', 2: 'Greedy', 3: 'Careful', 4: 'Strong', 5: 'Strongest' },
+    levelHints: {
+      1: 'Plays any legal move.',
+      2: 'Takes whatever it can right now.',
+      3: 'Looks at your reply.',
+      4: 'Searches deeper, up to 1 s.',
+      5: 'Thinks up to 3 s per move.',
     },
     start: 'Start',
     bot: (level) => `Computer · level ${level}`,

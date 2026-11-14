@@ -387,12 +387,14 @@ export const es: Messages = {
   computer: {
     title: 'Jugar contra la computadora',
     strength: 'Fuerza',
-    levels: {
-      1: 'Nivel 1 (aleatorio)',
-      2: 'Nivel 2 (codicioso)',
-      3: 'Nivel 3 (calcula 2 jugadas)',
-      4: 'Nivel 4 (calcula más a fondo, hasta 1 s)',
-      5: 'Nivel 5 (el más fuerte, hasta 3 s)',
+    intro: 'Sin cuenta y sin cola: la computadora juega en tu navegador.',
+    levelNames: { 1: 'Aleatorio', 2: 'Codicioso', 3: 'Cauteloso', 4: 'Fuerte', 5: 'El más fuerte' },
+    levelHints: {
+      1: 'Juega cualquier jugada válida.',
+      2: 'Captura lo que pueda en la jugada.',
+      3: 'Mira la respuesta del rival.',
+      4: 'Calcula más a fondo, hasta 1 s.',
+      5: 'Piensa hasta 3 s por jugada.',
     },
     start: 'Empezar',
     bot: (level) => `Computadora · nivel ${level}`,

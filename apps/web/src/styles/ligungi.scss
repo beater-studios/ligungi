@@ -197,12 +197,6 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   font-size: 0.9em;
 }
 
-.ligungi-setup .radio {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em;
-}
-
 .ligungi-tools {
   display: grid;
   gap: 0.8em;
@@ -2019,6 +2013,239 @@ body:has(main.auth) #clinput {
     &--large &__marker {
       font-size: 20px;
     }
+  }
+}
+
+/* ===== Option cards (components/ui.tsx OptionCards) ===== */
+.ligungi-choice {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  &__legend {
+    margin-bottom: 0.6rem;
+    padding: 0;
+    color: $c-font-clear;
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
+
+  &__options {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 0.6rem;
+  }
+
+  &__option {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 3rem;
+    padding: 0.75rem 0.6rem;
+    border: 1px solid $c-border;
+    border-radius: 6px;
+    background: $c-bg-zebra;
+    color: $c-font;
+    text-align: center;
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      background 0.15s;
+
+    &:hover {
+      border-color: color-mix(in srgb, #{$c-primary} 50%, #{$c-border});
+    }
+
+    &.is-checked {
+      border-color: $c-primary;
+      background: color-mix(in srgb, #{$c-primary} 14%, #{$c-bg-box});
+    }
+
+    &:has(:focus-visible) {
+      outline: 2px solid $c-primary;
+      outline-offset: 2px;
+    }
+
+    &.is-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  // Hidden but still focusable: the card is the visible control, the input keeps the radio group semantics.
+  &__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__badge {
+    color: $c-font-clear;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  &__label {
+    color: $c-font-clear;
+  }
+
+  &__hint {
+    color: $c-font-dim;
+    font-size: 0.8em;
+    line-height: 1.35;
+  }
+
+  .form-help {
+    display: block;
+    margin-top: 0.5rem;
+  }
+
+  &--segmented {
+    .ligungi-choice__options {
+      gap: 4px;
+      padding: 4px;
+      border-radius: 6px;
+      background: $c-bg-page;
+    }
+
+    .ligungi-choice__option {
+      min-height: 2.5rem;
+      padding: 0.4rem 0.5rem;
+      border: 0;
+      background: none;
+
+      &.is-checked {
+        background: $c-bg-zebra2;
+
+        @include if-light {
+          background: $c-bg-box;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+      }
+    }
+  }
+
+  @media (max-width: at-most($small)) {
+    &--cards {
+      .ligungi-choice__options {
+        grid-auto-flow: row;
+        gap: 0.4rem;
+      }
+
+      .ligungi-choice__option {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 0.9rem;
+        text-align: left;
+      }
+
+      .ligungi-choice__badge {
+        flex: 0 0 2rem;
+        text-align: center;
+      }
+    }
+
+    &--segmented .ligungi-choice__options {
+      grid-auto-columns: max-content;
+      overflow-x: auto;
+    }
+  }
+}
+
+// A piece-coloured disc for colour choices; random is half and half.
+.ligungi-choice__disc {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.5);
+
+  &--white {
+    background: #f3eee6;
+  }
+
+  &--black {
+    background: #232323;
+  }
+
+  &--random {
+    background: linear-gradient(90deg, #f3eee6 50%, #232323 50%);
+  }
+}
+
+/* ===== Computer setup ===== */
+.ligungi-computer {
+  width: 100%;
+  max-width: 56rem;
+  margin-inline: auto;
+}
+
+.ligungi-computer__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  padding: 1.75rem;
+
+  .ligungi-check {
+    margin: -0.8rem 0 0;
+  }
+
+  .ligungi-actions {
+    margin: 0;
+  }
+
+  .ligungi-submit {
+    width: 100%;
+    min-height: 3.5rem;
+    background: $c-good;
+  }
+}
+
+.ligungi-computer__head {
+  h1 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.75rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-computer__pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+@media (max-width: at-most($small)) {
+  .ligungi-computer__form {
+    gap: 1.25rem;
+    padding: 1rem;
+  }
+
+  .ligungi-computer__head h1 {
+    font-size: 1.4rem;
+  }
+
+  .ligungi-computer__pair {
+    grid-template-columns: 1fr;
   }
 }
 

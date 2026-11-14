@@ -324,12 +324,14 @@ export const pt = {
   computer: {
     title: 'Jogar contra o computador',
     strength: 'Força',
-    levels: {
-      1: 'Nível 1 (aleatório)',
-      2: 'Nível 2 (guloso)',
-      3: 'Nível 3 (calcula 2 lances)',
-      4: 'Nível 4 (calcula mais fundo, até 1 s)',
-      5: 'Nível 5 (o mais forte, até 3 s)',
+    intro: 'Sem conta e sem fila: o computador joga no seu navegador.',
+    levelNames: { 1: 'Aleatório', 2: 'Guloso', 3: 'Cauteloso', 4: 'Forte', 5: 'O mais forte' } as Record<1 | 2 | 3 | 4 | 5, string>,
+    levelHints: {
+      1: 'Joga qualquer lance válido.',
+      2: 'Pega o que puder no lance.',
+      3: 'Olha a resposta do adversário.',
+      4: 'Calcula mais fundo, até 1 s.',
+      5: 'Pensa até 3 s por lance.',
     } as Record<1 | 2 | 3 | 4 | 5, string>,
     start: 'Começar',
     bot: (level: number) => `Computador · nível ${level}`,

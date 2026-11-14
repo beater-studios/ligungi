@@ -3,7 +3,7 @@ import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PlayerTag } from '../components/PlayerTag.tsx';
-import { Checkbox, Field, FieldRow, RadioGroup, Select, SettingRow, SubmitButton, Toggle } from '../components/ui.tsx';
+import { Checkbox, Field, FieldRow, OptionCards, RadioGroup, Select, SettingRow, SubmitButton, Toggle } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
@@ -53,6 +53,7 @@ export const DesignPage = () => {
   const [switched, setSwitched] = useState(true);
   const [checked, setChecked] = useState(true);
   const [choice, setChoice] = useState<'white' | 'random' | 'black'>('random');
+  const [strength, setStrength] = useState(2);
   const sections = [
     ['principles', 'Principles'],
     ['colors', 'Colors'],
@@ -88,7 +89,7 @@ export const DesignPage = () => {
         <Section id="principles" title="Principles">
           <ul class="ligungi-ds__list">
             <li>Keep the lichess look: lila's markup and SCSS (vendored, never edited) are the base; ligungi only adds what lila lacks, in <code>styles/ligungi.scss</code>.</li>
-            <li>Forms use the components in <code>components/ui.tsx</code> (Field, FieldRow, Select, Checkbox, RadioGroup, SubmitButton). Never write raw inputs or selects.</li>
+            <li>Forms use the components in <code>components/ui.tsx</code> (Field, FieldRow, Select, Checkbox, RadioGroup, OptionCards, SubmitButton). Never write raw inputs or selects.</li>
             <li>Colors come from the theme variables below, never hard-coded, so light and dark both work.</li>
             <li>Spacing scale: 0.25, 0.5, 1 and 1.6 rem. Fields are 1.6rem apart on pages and 1.1rem in dialogs.</li>
             <li>One main action per form (SubmitButton, full width). Secondary actions use <code>button-empty</code>.</li>
@@ -213,6 +214,37 @@ export const DesignPage = () => {
                   onChange={setChoice}
                 />
               </SettingRow>
+            </div>
+          </Example>
+          <Example label="OptionCards: one choice among a few, as cards (layout cards, row or segmented); cards stack on phones">
+            <div style={{ display: 'grid', gap: '1.25rem', width: '100%' }}>
+              <OptionCards
+                name="ds-cards"
+                legend="Strength"
+                value={strength}
+                options={[1, 2, 3].map((n) => ({ value: n, badge: n, label: ['Random', 'Greedy', 'Careful'][n - 1]!, hint: 'One line of help.' }))}
+                onChange={setStrength}
+              />
+              <OptionCards
+                name="ds-row"
+                legend="Your colour"
+                layout="row"
+                value={choice}
+                options={(['white', 'random', 'black'] as const).map((value) => ({
+                  value,
+                  label: value,
+                  icon: <span class={`ligungi-choice__disc ligungi-choice__disc--${value}`} aria-hidden="true" />,
+                }))}
+                onChange={setChoice}
+              />
+              <OptionCards
+                name="ds-segmented"
+                legend="Mode"
+                layout="segmented"
+                value={mode}
+                options={['intro', 'beginner', 'intermediate', 'advanced'].map((value) => ({ value, label: value }))}
+                onChange={setMode}
+              />
             </div>
           </Example>
         </Section>

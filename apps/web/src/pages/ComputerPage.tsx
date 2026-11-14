@@ -3,7 +3,7 @@ import { MODES, MODE_RULES, initialPosition, legalMoves, moveToString, opposite,
 import type { ColorChoice } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
-import { Checkbox, Field, RadioGroup, Select, SubmitButton } from '../components/ui.tsx';
+import { Checkbox, OptionCards, SubmitButton } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
 import { colorChoiceOptions, outcomeText, useT } from '../i18n/index.ts';
 import { useLocalGame } from '../localGame.ts';
@@ -83,27 +83,46 @@ export const ComputerPage = () => {
   };
 
   const colorOptions = colorChoiceOptions(t);
+  const disc = (color: ColorChoice) => <span class={`ligungi-choice__disc ligungi-choice__disc--${color}`} aria-hidden="true" />;
 
   if (!me) {
     return (
-      <main class="page-small box box-pad page ligungi-setup">
-        <h1 class="box__top">{t.computer.title}</h1>
-        <form class="form3" onSubmit={(e) => (e.preventDefault(), start())}>
-          <Field label={t.common.mode} htmlFor="ai-mode" help={t.modeDescriptions[mode]}>
-            <Select id="ai-mode" value={mode} options={MODES.map((m) => ({ value: m, label: t.modes[m] }))} onChange={setMode} />
-          </Field>
+      <main class="ligungi-page ligungi-computer">
+        <form class="ligungi-card ligungi-computer__form" onSubmit={(e) => (e.preventDefault(), start())}>
+          <header class="ligungi-computer__head">
+            <h1>{t.computer.title}</h1>
+            <p>{t.computer.intro}</p>
+          </header>
+          <OptionCards
+            name="ai-level"
+            legend={t.computer.strength}
+            value={level}
+            options={BOT_LEVELS.map((l) => ({ value: l, badge: l, label: t.computer.levelNames[l], hint: t.computer.levelHints[l] }))}
+            onChange={setLevel}
+          />
+          <OptionCards
+            name="ai-mode"
+            legend={t.common.mode}
+            layout="segmented"
+            value={mode}
+            options={MODES.map((m) => ({ value: m, label: t.modes[m] }))}
+            onChange={setMode}
+            help={t.modeDescriptions[mode]}
+          />
           {MODE_RULES[mode].draft && (
             <Checkbox id="ai-free" checked={freeDraft} onChange={setFreeDraft} label={t.freeDraftLabel} help={t.freeDraftHint} />
           )}
-          <Field label={t.computer.strength} htmlFor="ai-level">
-            <Select id="ai-level" value={level} options={BOT_LEVELS.map((l) => ({ value: l, label: t.computer.levels[l] }))} onChange={setLevel} />
-          </Field>
-          <Field label={t.common.yourColor}>
-            <RadioGroup name="ai-color" value={colorChoice} options={colorOptions} onChange={setColorChoice} />
-          </Field>
-          <Field label={t.common.whoStarts}>
-            <RadioGroup name="ai-first" value={firstChoice} options={colorOptions} onChange={setFirstChoice} />
-          </Field>
+          <div class="ligungi-computer__pair">
+            <OptionCards
+              name="ai-color"
+              legend={t.common.yourColor}
+              layout="row"
+              value={colorChoice}
+              options={colorOptions.map((option) => ({ ...option, icon: disc(option.value) }))}
+              onChange={setColorChoice}
+            />
+            <OptionCards name="ai-first" legend={t.common.whoStarts} layout="row" value={firstChoice} options={colorOptions} onChange={setFirstChoice} />
+          </div>
           <SubmitButton>{t.computer.start}</SubmitButton>
         </form>
       </main>
@@ -176,7 +195,7 @@ export const ComputerPage = () => {
       side={
         <section class="ligungi-card ligungi-game-info">
           <p class="ligungi-game-info__setup">
-            {t.modes[local.start.mode]} · {t.computer.levels[level]}
+            {t.modes[local.start.mode]} · {t.computer.bot(level)} · {t.computer.levelNames[level]}
           </p>
           {local.start.freeDraft && <p class="ligungi-notice">{t.freeDraftHint}</p>}
           <button type="button" class="button button-empty" onClick={() => setMe(null)}>

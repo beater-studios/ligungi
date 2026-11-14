@@ -23,7 +23,7 @@ export interface Config {
   pieceNames: PieceNames;
   /** Marks around each piece showing how it moves at tier 1 (the beginner aid). */
   moveGuides: boolean;
-  /** `kanji` as on the physical game, `illustrated` with an icon per piece. */
+  /** What each piece shows: kanji, an icon, the icon as outlines or letters (see `PieceStyle`). */
   pieceStyle: PieceStyle;
   labels: Partial<Labels>;
   /** Called after the user picks a move. The board already shows the resulting position. */

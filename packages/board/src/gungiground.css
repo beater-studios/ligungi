@@ -16,10 +16,12 @@
   --gg-line: rgba(60, 40, 15, 0.55);
   --gg-coord: rgba(60, 40, 15, 0.75);
   --gg-white-face: #f6f1e7;
+  --gg-white-shine: #fff;
   --gg-white-ink: #1b1b1b;
   --gg-white-rim: #cfc6b5;
   --gg-white-border: rgba(0, 0, 0, 0.35);
   --gg-black-face: #232323;
+  --gg-black-shine: #3a3a3a;
   --gg-black-ink: #f4f1ea;
   --gg-black-rim: #000;
   --gg-black-border: rgba(0, 0, 0, 0.8);
@@ -36,6 +38,13 @@
   --gg-panel-ink: #222;
   --gg-accent: #3b7a2a;
   --gg-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif CJK JP', serif;
+  --gg-koma-grain: repeating-linear-gradient(
+    97deg,
+    rgba(60, 30, 10, 0.07) 0 1px,
+    transparent 1px 4px,
+    rgba(60, 30, 10, 0.04) 4px 5px,
+    transparent 5px 9px
+  );
 }
 
 /*
@@ -105,6 +114,146 @@
   --gg-dest-hover: rgba(0, 80, 230, 0.3);
   --gg-reach: rgba(0, 80, 230, 0.15);
   --gg-reach-edge: rgba(0, 60, 210, 0.9);
+}
+
+/*
+ * Custom theme: the page supplies the colors as `--gg-custom-*` properties on an ancestor (board, edge, line and the
+ * marks). The board gets only a soft shading, which works on any color; the fallbacks are the light wood theme.
+ */
+.gg-theme-custom .gg-wrap,
+.gg-theme-custom .gg-palette,
+.gg-wrap.gg-theme-custom,
+.gg-palette.gg-theme-custom {
+  --gg-board: var(--gg-custom-board, #e3c389);
+  --gg-board-texture:
+    radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.14), transparent 60%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.1));
+  --gg-board-edge: var(--gg-custom-edge, #c9a564);
+  --gg-line: var(--gg-custom-line, rgba(60, 40, 15, 0.55));
+  --gg-coord: var(--gg-custom-line, rgba(60, 40, 15, 0.75));
+  --gg-last: var(--gg-custom-last, rgba(155, 199, 0, 0.38));
+  --gg-selected: var(--gg-custom-selected, rgba(20, 85, 30, 0.5));
+  --gg-dest: var(--gg-custom-dest, rgba(20, 85, 30, 0.55));
+  --gg-dest-hover: var(--gg-custom-dest-hover, rgba(20, 85, 30, 0.3));
+  --gg-reach: var(--gg-custom-reach, rgba(214, 110, 40, 0.28));
+  --gg-reach-edge: var(--gg-custom-reach-edge, rgba(214, 110, 40, 0.55));
+}
+
+/*
+ * Piece palettes: put `gg-pieces-<name>` on the board or any ancestor to recolor the faces and the ink of both sides,
+ * in either shape. The disc palettes are ivory (the default above), lacquer, indigo and jade; the koma ones are woods.
+ * `custom` reads `--gg-custom-white-*` and `--gg-custom-black-*` properties set by the page.
+ */
+.gg-pieces-lacquer .gg-wrap,
+.gg-pieces-lacquer .gg-palette,
+.gg-wrap.gg-pieces-lacquer,
+.gg-palette.gg-pieces-lacquer {
+  --gg-white-face: #b3261e;
+  --gg-white-shine: #e0574c;
+  --gg-white-rim: #7c1913;
+  --gg-white-ink: #fff5e8;
+  --gg-white-border: rgba(0, 0, 0, 0.45);
+  --gg-black-face: #191919;
+  --gg-black-shine: #3a3a3a;
+  --gg-black-rim: #000;
+  --gg-black-ink: #e2bd5a;
+  --gg-black-border: rgba(0, 0, 0, 0.8);
+}
+
+.gg-pieces-indigo .gg-wrap,
+.gg-pieces-indigo .gg-palette,
+.gg-wrap.gg-pieces-indigo,
+.gg-palette.gg-pieces-indigo {
+  --gg-white-face: #eef1f6;
+  --gg-white-shine: #fff;
+  --gg-white-rim: #c4ccd8;
+  --gg-white-ink: #1f3a68;
+  --gg-white-border: rgba(0, 0, 0, 0.3);
+  --gg-black-face: #1f3a68;
+  --gg-black-shine: #3a5d95;
+  --gg-black-rim: #12243f;
+  --gg-black-ink: #f2f5fa;
+  --gg-black-border: rgba(0, 0, 0, 0.7);
+}
+
+.gg-pieces-jade .gg-wrap,
+.gg-pieces-jade .gg-palette,
+.gg-wrap.gg-pieces-jade,
+.gg-palette.gg-pieces-jade {
+  --gg-white-face: #cfe6d6;
+  --gg-white-shine: #f1faf4;
+  --gg-white-rim: #9fc4ab;
+  --gg-white-ink: #1d4d36;
+  --gg-white-border: rgba(0, 0, 0, 0.3);
+  --gg-black-face: #6b4528;
+  --gg-black-shine: #9a6c44;
+  --gg-black-rim: #43291a;
+  --gg-black-ink: #f6e7cc;
+  --gg-black-border: rgba(0, 0, 0, 0.7);
+}
+
+.gg-pieces-wood .gg-wrap,
+.gg-pieces-wood .gg-palette,
+.gg-wrap.gg-pieces-wood,
+.gg-palette.gg-pieces-wood {
+  --gg-white-face: #e0c088;
+  --gg-white-shine: #f5e3b9;
+  --gg-white-rim: #c49a5a;
+  --gg-white-ink: #1b1208;
+  --gg-white-border: rgba(0, 0, 0, 0.35);
+  --gg-black-face: #563720;
+  --gg-black-shine: #7a5332;
+  --gg-black-rim: #33200f;
+  --gg-black-ink: #f6e9cf;
+  --gg-black-border: rgba(0, 0, 0, 0.7);
+}
+
+.gg-pieces-cherry .gg-wrap,
+.gg-pieces-cherry .gg-palette,
+.gg-wrap.gg-pieces-cherry,
+.gg-palette.gg-pieces-cherry {
+  --gg-white-face: #d9a27c;
+  --gg-white-shine: #efc7a6;
+  --gg-white-rim: #b37a52;
+  --gg-white-ink: #2a140a;
+  --gg-white-border: rgba(0, 0, 0, 0.35);
+  --gg-black-face: #2b211c;
+  --gg-black-shine: #4a3a31;
+  --gg-black-rim: #140e0b;
+  --gg-black-ink: #efe3cf;
+  --gg-black-border: rgba(0, 0, 0, 0.8);
+}
+
+.gg-pieces-bamboo .gg-wrap,
+.gg-pieces-bamboo .gg-palette,
+.gg-wrap.gg-pieces-bamboo,
+.gg-palette.gg-pieces-bamboo {
+  --gg-white-face: #e6d49a;
+  --gg-white-shine: #f6ebc4;
+  --gg-white-rim: #c7b06b;
+  --gg-white-ink: #2b2a12;
+  --gg-white-border: rgba(0, 0, 0, 0.35);
+  --gg-black-face: #6b4a33;
+  --gg-black-shine: #8d6648;
+  --gg-black-rim: #422b1c;
+  --gg-black-ink: #f3e6cf;
+  --gg-black-border: rgba(0, 0, 0, 0.7);
+}
+
+.gg-pieces-custom .gg-wrap,
+.gg-pieces-custom .gg-palette,
+.gg-wrap.gg-pieces-custom,
+.gg-palette.gg-pieces-custom {
+  --gg-white-face: var(--gg-custom-white-face, #f6f1e7);
+  --gg-white-shine: var(--gg-custom-white-shine, #fff);
+  --gg-white-rim: var(--gg-custom-white-rim, #cfc6b5);
+  --gg-white-ink: var(--gg-custom-white-ink, #1b1b1b);
+  --gg-white-border: rgba(0, 0, 0, 0.35);
+  --gg-black-face: var(--gg-custom-black-face, #232323);
+  --gg-black-shine: var(--gg-custom-black-shine, #3a3a3a);
+  --gg-black-rim: var(--gg-custom-black-rim, #000);
+  --gg-black-ink: var(--gg-custom-black-ink, #f4f1ea);
+  --gg-black-border: rgba(0, 0, 0, 0.8);
 }
 
 .gg-wrap {
@@ -250,13 +399,13 @@
 }
 
 .gg-piece.gg-white {
-  background: radial-gradient(circle at 50% 42%, #fff 0%, var(--gg-white-face) 62%, var(--gg-white-rim) 100%);
+  background: radial-gradient(circle at 50% 42%, var(--gg-white-shine) 0%, var(--gg-white-face) 62%, var(--gg-white-rim) 100%);
   color: var(--gg-white-ink);
   border: 1px solid var(--gg-white-border);
 }
 
 .gg-piece.gg-black {
-  background: radial-gradient(circle at 50% 42%, #3a3a3a 0%, var(--gg-black-face) 62%, var(--gg-black-rim) 100%);
+  background: radial-gradient(circle at 50% 42%, var(--gg-black-shine) 0%, var(--gg-black-face) 62%, var(--gg-black-rim) 100%);
   color: var(--gg-black-ink);
   border: 1px solid var(--gg-black-border);
 }
@@ -316,6 +465,97 @@
 .gg-flipped .gg-art,
 .flipped .gg-art {
   transform: rotate(180deg);
+}
+
+/* Trace style: the icons drawn as outlines, details included (they are not cut out of a solid shape any more). */
+.gg-icon.gg-trace .gg-art,
+.gg-icon.gg-trace .gg-art *,
+.gg-icon.gg-trace .gg-cut [stroke] {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 1;
+}
+
+/* Letters style: a two-letter abbreviation in a plain sans-serif. */
+.gg-letters {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.74em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.gg-guided .gg-letters {
+  font-size: 0.9em;
+}
+
+/*
+ * Koma shape: a pentagon of wood pointing at the opponent, as in shogi. Put `gg-shape-koma` on an ancestor. A clipped
+ * pseudo-element draws the face, so the drop shadow on the piece follows the shape; the glyph moves down into the wide
+ * part and shrinks a little. Meant without the movement guides, which are laid out for a disc.
+ */
+.gg-shape-koma .gg-piece.gg-white,
+.gg-shape-koma .gg-piece.gg-black {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  filter: drop-shadow(0 1px 1.2px rgba(0, 0, 0, 0.5));
+}
+
+.gg-shape-koma .gg-piece::before {
+  content: '';
+  position: absolute;
+  inset: 0 8%;
+  clip-path: polygon(50% 0, 86% 14%, 100% 100%, 0 100%, 14% 14%);
+}
+
+.gg-shape-koma .gg-piece.gg-white::before {
+  background: var(--gg-koma-grain), linear-gradient(165deg, var(--gg-white-shine), var(--gg-white-face) 45%, var(--gg-white-rim));
+}
+
+.gg-shape-koma .gg-piece.gg-black::before {
+  background: var(--gg-koma-grain), linear-gradient(165deg, var(--gg-black-shine), var(--gg-black-face) 45%, var(--gg-black-rim));
+}
+
+.gg-shape-koma .gg-piece.gg-flipped::before {
+  transform: rotate(180deg);
+}
+
+.gg-shape-koma .gg-piece > span {
+  z-index: 1;
+  transform: translateY(7%) scale(0.84);
+}
+
+/* Icons and guided kanji are laid over the whole piece already; plain text only needs to stack above the face. */
+.gg-shape-koma .gg-piece:not(.gg-illustrated, .gg-guided) > span {
+  position: relative;
+}
+
+.gg-shape-koma .gg-piece.gg-flipped > span {
+  transform: translateY(-7%) rotate(180deg) scale(0.84);
+}
+
+.gg-shape-koma .gg-inspector .gg-piece.gg-flipped::before {
+  transform: none;
+}
+
+.gg-shape-koma .gg-inspector .gg-piece.gg-flipped > span {
+  transform: translateY(7%) scale(0.84);
+}
+
+/*
+ * Training: `gg-hidden-pieces` on an ancestor hides what the pieces on the board are (the hands stay readable, to pick
+ * a piece to drop). With `gg-peek` as well, hovering a square shows its top piece.
+ */
+.gg-hidden-pieces .gg-board .gg-piece > span {
+  visibility: hidden;
+}
+
+.gg-hidden-pieces.gg-peek .gg-board .gg-sq:hover .gg-piece.gg-top > span {
+  visibility: visible;
 }
 
 .gg-icon,

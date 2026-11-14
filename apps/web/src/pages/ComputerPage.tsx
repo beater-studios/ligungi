@@ -143,6 +143,7 @@ export const ComputerPage = () => {
 
   return (
     <RoundLayout
+      training
       board={{
         position: local.position,
         movableColor: me,

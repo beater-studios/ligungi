@@ -154,12 +154,13 @@ export const AnalysisPage = () => {
         </div>
         <div class="ligungi-panels box">
           <DraftPanel position={position} names={t.colors} />
-          <TowerPanel position={position} square={inspected} />
+          <TowerPanel position={position} square={inspected} training />
         </div>
       </div>
       <div class="analyse__board main-board">
         {hands && (
           <BoardView
+            training
             position={position}
             orientation={orientation}
             movableColor={outcome ? null : 'both'}

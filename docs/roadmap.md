@@ -6,5 +6,4 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more).
 
 | Item | Why | Size | Notes |
 |---|---|---|---|
-| Custom board theme | The four built-in themes (light wood, dark wood, gray, high contrast) shipped; some players want their own colors | S | Pick the board and line colors in Preferences, kept in the browser. Warn or adjust when the marks (last move, selection, destinations, reach) would not stand out against the chosen colors. |
 | Byo-yomi time control (for example 10 min + 30 s), with an optional spoken countdown | The traditional clock of Japanese games: once the main time runs out, every move has a fixed period | M | New time control type in game creation, the server clock and the clock display; optionally several periods (3 x 30 s). The draft keeps its own clock rule. |

@@ -68,6 +68,19 @@ const NAMES: Readonly<Record<PieceNames, Readonly<Record<Role, string>>>> = {
 
 export const pieceName = (role: Role, names: PieceNames): string => NAMES[names][role];
 
+/**
+ * Two-letter abbreviations for the letters piece style: the first letter and the one that tells the piece apart, both
+ * initials for compound names. No two pieces share one within a language; with Japanese names, the readings' romaji.
+ */
+const LETTERS: Readonly<Record<PieceNames, Readonly<Record<Role, string>>>> = {
+  pt: { marshal: 'Ma', general: 'Ge', lieutenant: 'TG', major: 'MG', samurai: 'Sa', lancer: 'La', rider: 'Cv', spy: 'Ni', fortress: 'Fo', soldier: 'So', cannon: 'Cn', archer: 'Aq', musketeer: 'Mo', tactician: 'Es' },
+  en: { marshal: 'Ma', general: 'Ge', lieutenant: 'LG', major: 'MG', samurai: 'Sa', lancer: 'La', rider: 'Kn', spy: 'Ni', fortress: 'Fo', soldier: 'So', cannon: 'Ca', archer: 'Ar', musketeer: 'Mu', tactician: 'Ta' },
+  es: { marshal: 'Ma', general: 'Ge', lieutenant: 'TG', major: 'MG', samurai: 'Sa', lancer: 'La', rider: 'Cb', spy: 'Ni', fortress: 'Fo', soldier: 'So', cannon: 'Cn', archer: 'Aq', musketeer: 'Mo', tactician: 'Es' },
+  ja: { marshal: 'Su', general: 'Ta', lieutenant: 'Ch', major: 'Sh', samurai: 'Sa', lancer: 'Ya', rider: 'Ki', spy: 'Sn', fortress: 'To', soldier: 'Hy', cannon: 'Oz', archer: 'Yu', musketeer: 'Ts', tactician: 'Bo' },
+};
+
+export const pieceLetters = (role: Role, names: PieceNames): string => LETTERS[names][role];
+
 export interface Labels {
   readonly white: string;
   readonly black: string;

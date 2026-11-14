@@ -1,6 +1,7 @@
 import { pieceGlyph } from '@ligungi/board';
 import type { Role } from '@ligungi/engine';
-import { prefs } from '../prefs.ts';
+import { usePieceNames } from '../i18n/index.ts';
+import { guidesShown, prefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
 
 /**
@@ -8,6 +9,8 @@ import { useStore } from '../store.ts';
  * comes from the board package's constant icons and kanji, never from user input.
  */
 export const PieceGlyph = ({ role, guides = false }: { role: Role; guides?: boolean }) => {
-  const { pieceStyle } = useStore(prefs);
-  return <span class="ligungi-glyph" dangerouslySetInnerHTML={{ __html: pieceGlyph(role, pieceStyle, guides) }} />;
+  const current = useStore(prefs);
+  const names = usePieceNames();
+  const withGuides = guides && guidesShown({ moveGuides: true, pieceShape: current.pieceShape });
+  return <span class="ligungi-glyph" dangerouslySetInnerHTML={{ __html: pieceGlyph(role, current.pieceStyle, withGuides, names) }} />;
 };

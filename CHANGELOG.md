@@ -6,6 +6,9 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- New piece looks in Preferences, to combine freely: the shape (the disc, or a wooden koma pointing at the opponent, as in shogi), what each piece shows (icon, the icon as an outline, kanji or two letters of its name in the chosen language), the kanji typeface (the device's own, or brush, serif, gothic and pop typefaces that come with the site and look the same everywhere) and the colors (lacquer, indigo, jade and bronze for the disc; light and dark wood, cherry and ebony, bamboo and walnut, and lacquer for the koma; or your own colors, with a warning when the symbol loses contrast or the sides look alike).
+- Hidden pieces, a memory training in Preferences: the board shows only the color of each piece, while the hands still show them. Applies to casual games, the computer and analysis, with an option to peek by hovering a square.
+- Custom board theme in Preferences: pick the board and line colors, with the preview following along. The move marks (last move, selection, destinations and reach) switch on their own to the built-in colors that stand out most on that board, and a note warns when lines, pieces or marks would be hard to see. Saved in the browser.
 - Two-step verification, opt-in, in the Account page: scan a QR code with any authenticator app (Google Authenticator, Microsoft Authenticator, Aegis, 2FAS and others), confirm with a first code (and, if you wish, sign out every other device), and signing in then asks for the 6-digit code after the password. Ten single-use recovery codes, to copy or download, let you in if you lose your phone; you can make new ones or turn the verification off with your password and a code.
 
 ## [0.3.0] - 2026-11-14

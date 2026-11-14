@@ -483,9 +483,9 @@ export class Board implements Api {
 
   #pieceHtml(piece: Piece, extra: string, level = 0): string {
     const flipped = piece.color !== this.#config.orientation ? ' gg-flipped' : '';
-    const { pieceStyle, moveGuides } = this.#config;
+    const { pieceStyle, moveGuides, pieceNames } = this.#config;
     const layout = glyphClass(pieceStyle, moveGuides);
-    return `<div class="gg-piece gg-${piece.color}${flipped}${layout ? ` ${layout}` : ''} ${extra}" style="--level:${level}"><span>${pieceGlyph(piece.role, pieceStyle, moveGuides)}</span></div>`;
+    return `<div class="gg-piece gg-${piece.color}${flipped}${layout ? ` ${layout}` : ''} ${extra}" style="--level:${level}"><span>${pieceGlyph(piece.role, pieceStyle, moveGuides, pieceNames)}</span></div>`;
   }
 
   #towerHtml(square: Square): string {

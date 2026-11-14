@@ -6,16 +6,18 @@ import { useStore } from '../store.ts';
 import { PieceGlyph } from './PieceGlyph.tsx';
 
 /** Fixed panel with the composition of the tower the user is looking at, top first. */
-export const TowerPanel = ({ position, square }: { position: Position; square: Square | null }) => {
+export const TowerPanel = ({ position, square, training = false }: { position: Position; square: Square | null; training?: boolean }) => {
   const t = useT();
   const pieceNames = usePieceNames();
-  const { pieceStyle } = useStore(prefs);
+  const { pieceStyle, hidePieces, peekPieces } = useStore(prefs);
   const tower = square === null ? [] : position.board[square]!;
+  // With the pieces hidden, the panel would give them away: only peeking (hovering) shows what a tower holds.
+  const hidden = training && hidePieces && !peekPieces;
   return (
     <section class="ligungi-tower gg-palette">
       <h3>{tower.length > 1 ? t.panels.tower(tower.length) : t.panels.piece}</h3>
-      {tower.length === 0 ? (
-        <p class="ligungi-notice">{t.panels.towerHint}</p>
+      {tower.length === 0 || hidden ? (
+        <p class="ligungi-notice">{hidden ? t.panels.hiddenHint : t.panels.towerHint}</p>
       ) : (
         <ol>
           {[...tower]
@@ -28,7 +30,7 @@ export const TowerPanel = ({ position, square }: { position: Position; square: S
                 </span>
                 <span class="ligungi-tower__name">
                   {pieceName(piece.role, pieceNames)}
-                  {pieceStyle === 'illustrated' && <span class="ligungi-tower__kanji">{ROLE_INFO[piece.role].kanji}</span>}
+                  {pieceStyle !== 'kanji' && <span class="ligungi-tower__kanji">{ROLE_INFO[piece.role].kanji}</span>}
                 </span>
                 <span class="ligungi-tower__meta">
                   {t.colors[piece.color]} · {t.panels.level(level + 1)}

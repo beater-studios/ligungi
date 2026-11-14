@@ -351,6 +351,7 @@ export const GamePage = ({ id }: { id: string }) => {
 
   return (
     <RoundLayout
+      training={!view.rated}
       board={{
         position,
         movableColor: live && started && you ? you : null,

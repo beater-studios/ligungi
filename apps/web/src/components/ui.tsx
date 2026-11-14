@@ -185,6 +185,24 @@ export const SubmitButton = ({ children, disabled = false }: { children: Compone
   </div>
 );
 
+interface ColorFieldProps {
+  readonly id: string;
+  readonly label: ComponentChildren;
+  /** `#rrggbb`. */
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+}
+
+/** A color picker (the browser's own) with the chosen value written beside it. */
+export const ColorField = ({ id, label, value, onChange }: ColorFieldProps) => (
+  <Field label={label} htmlFor={id}>
+    <span class="ligungi-color">
+      <input type="color" id={id} class="ligungi-color__input" value={value} onInput={(event) => onChange((event.target as HTMLInputElement).value)} />
+      <code class="ligungi-color__value">{value}</code>
+    </span>
+  </Field>
+);
+
 interface ToggleProps {
   readonly id: string;
   readonly checked: boolean;

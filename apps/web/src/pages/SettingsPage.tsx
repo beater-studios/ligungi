@@ -1,9 +1,12 @@
 import type { ComponentChildren } from 'preact';
 import { MoveListPreview } from '../components/MoveListPreview.tsx';
 import { PiecePreview } from '../components/PiecePreview.tsx';
-import { OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
+import { PIECE_STYLES } from '@ligungi/board';
+import { customBoardStyle, DEFAULT_CUSTOM_BOARD, type BoardWarning } from '../boardColors.ts';
+import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../pieceColors.ts';
+import { ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
 import { MESSAGES, themeLabel, useT } from '../i18n/index.ts';
-import { BOARD_SIZES, BOARD_THEMES, LANGS, THEMES, prefs, updatePrefs, type Prefs } from '../prefs.ts';
+import { BOARD_SIZES, BOARD_THEMES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, prefs, updatePrefs, type Prefs } from '../prefs.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
 import { SettingsShell } from './AccountPage.tsx';
@@ -21,6 +24,99 @@ const Group = ({ title, help, preview, children }: { title: string; help?: strin
 );
 
 type BooleanPref = { [K in keyof Prefs]: Prefs[K] extends boolean ? K : never }[keyof Prefs];
+
+/** Face colors of the two sides in each palette, for its swatch. */
+const PALETTE_FACES: Record<string, readonly [string, string]> = {
+  ivory: ['#f6f1e7', '#232323'],
+  lacquer: ['#b3261e', '#191919'],
+  indigo: ['#eef1f6', '#1f3a68'],
+  jade: ['#cfe6d6', '#6b4528'],
+  wood: ['#e0c088', '#563720'],
+  cherry: ['#d9a27c', '#2b211c'],
+  bamboo: ['#e6d49a', '#6b4a33'],
+};
+
+const Swatch = ({ faces }: { faces: readonly [string, string] }) => (
+  <span class="ligungi-swatch" aria-hidden="true">
+    <i style={{ background: faces[0] }} />
+    <i style={{ background: faces[1] }} />
+  </span>
+);
+
+/** The custom piece palette: face and symbol colors of each side, with what would make the pieces hard to read. */
+const CustomPieceColors = () => {
+  const s = useT().settings;
+  const { customPieces } = useStore(prefs);
+  const { warnings } = customPieceStyle(customPieces);
+  const set = (patch: Partial<Prefs['customPieces']>) => updatePrefs({ customPieces: { ...customPieces, ...patch } });
+  const text: Record<PieceWarning, string> = {
+    whiteInk: s.customWarnWhiteInk,
+    blackInk: s.customWarnBlackInk,
+    sidesAlike: s.customWarnSidesAlike,
+  };
+  const changed = (Object.keys(DEFAULT_CUSTOM_PIECES) as Array<keyof Prefs['customPieces']>).some((key) => customPieces[key] !== DEFAULT_CUSTOM_PIECES[key]);
+  return (
+    <div class="ligungi-custom-board">
+      <FieldRow>
+        <ColorField id="pref-white-face" label={s.customWhiteFace} value={customPieces.whiteFace} onChange={(whiteFace) => set({ whiteFace })} />
+        <ColorField id="pref-white-ink" label={s.customWhiteInk} value={customPieces.whiteInk} onChange={(whiteInk) => set({ whiteInk })} />
+      </FieldRow>
+      <FieldRow>
+        <ColorField id="pref-black-face" label={s.customBlackFace} value={customPieces.blackFace} onChange={(blackFace) => set({ blackFace })} />
+        <ColorField id="pref-black-ink" label={s.customBlackInk} value={customPieces.blackInk} onChange={(blackInk) => set({ blackInk })} />
+      </FieldRow>
+      <p class="ligungi-custom-board__help">{s.customPiecesHelp}</p>
+      {warnings.length > 0 && (
+        <ul class="ligungi-warnings" role="status">
+          {warnings.map((warning) => (
+            <li key={warning}>{text[warning]}</li>
+          ))}
+        </ul>
+      )}
+      {changed && (
+        <button type="button" class="button button-empty" onClick={() => updatePrefs({ customPieces: DEFAULT_CUSTOM_PIECES })}>
+          {s.customReset}
+        </button>
+      )}
+    </div>
+  );
+};
+
+/** The colors of the custom board theme, with what would make that board hard to read. */
+const CustomBoardColors = () => {
+  const s = useT().settings;
+  const { customBoard } = useStore(prefs);
+  const { warnings } = customBoardStyle(customBoard);
+  const set = (patch: Partial<Prefs['customBoard']>) => updatePrefs({ customBoard: { ...customBoard, ...patch } });
+  const text: Record<BoardWarning, string> = {
+    lines: s.customWarnLines,
+    whitePieces: s.customWarnWhitePieces,
+    blackPieces: s.customWarnBlackPieces,
+    marks: s.customWarnMarks,
+  };
+  const changed = customBoard.board !== DEFAULT_CUSTOM_BOARD.board || customBoard.line !== DEFAULT_CUSTOM_BOARD.line;
+  return (
+    <div class="ligungi-custom-board">
+      <FieldRow>
+        <ColorField id="pref-board-color" label={s.customBoardColor} value={customBoard.board} onChange={(board) => set({ board })} />
+        <ColorField id="pref-line-color" label={s.customLineColor} value={customBoard.line} onChange={(line) => set({ line })} />
+      </FieldRow>
+      <p class="ligungi-custom-board__help">{s.customBoardHelp}</p>
+      {warnings.length > 0 && (
+        <ul class="ligungi-warnings" role="status">
+          {warnings.map((warning) => (
+            <li key={warning}>{text[warning]}</li>
+          ))}
+        </ul>
+      )}
+      {changed && (
+        <button type="button" class="button button-empty" onClick={() => updatePrefs({ customBoard: DEFAULT_CUSTOM_BOARD })}>
+          {s.customReset}
+        </button>
+      )}
+    </div>
+  );
+};
 
 export const SettingsPage = () => {
   const t = useT();
@@ -72,15 +168,86 @@ export const SettingsPage = () => {
               s.boardTheme,
               BOARD_THEMES.map((name) => [
                 name,
-                { wood: s.boardThemeWood, walnut: s.boardThemeWalnut, slate: s.boardThemeSlate, contrast: s.boardThemeContrast }[name],
+                { wood: s.boardThemeWood, walnut: s.boardThemeWalnut, slate: s.boardThemeSlate, contrast: s.boardThemeContrast, custom: s.boardThemeCustom }[name],
               ]),
               { help: s.boardThemeHelp, layout: 'row' },
             )}
-            {choice('pieceStyle', s.pieceStyle, [
-              ['illustrated', s.pieceStyleIllustrated],
-              ['kanji', s.pieceStyleKanji],
-            ])}
-            {toggle('moveGuides', s.moveGuides, s.moveGuidesHelp)}
+            {current.boardTheme === 'custom' && <CustomBoardColors />}
+            {choice(
+              'pieceShape',
+              s.pieceShape,
+              PIECE_SHAPES.map((shape) => [shape, { disc: s.shapeDisc, koma: s.shapeKoma }[shape]]),
+              { help: s.pieceShapeHelp },
+            )}
+            {choice(
+              'pieceStyle',
+              s.pieceStyle,
+              PIECE_STYLES.map((style) => [
+                style,
+                { illustrated: s.pieceStyleIllustrated, trace: s.pieceStyleTrace, kanji: s.pieceStyleKanji, letters: s.pieceStyleLetters }[style],
+              ]),
+              { help: s.pieceStyleHelp },
+            )}
+            {current.pieceStyle === 'kanji' && (
+              <div class="ligungi-setting">
+                <OptionCards
+                  name="pref-kanjiFont"
+                  legend={s.kanjiFont}
+                  layout="row"
+                  value={current.kanjiFont}
+                  options={KANJI_FONTS.map((font) => ({
+                    value: font,
+                    label: { system: s.kanjiFontSystem, brush: s.kanjiFontBrush, serif: s.kanjiFontSerif, gothic: s.kanjiFontGothic, pop: s.kanjiFontPop }[font],
+                    icon: (
+                      <span class={`ligungi-font-sample ligungi-font-sample--${font}`} aria-hidden="true">
+                        帥
+                      </span>
+                    ),
+                  }))}
+                  onChange={(kanjiFont) => updatePrefs({ kanjiFont })}
+                  help={s.kanjiFontHelp}
+                />
+              </div>
+            )}
+            <div class="ligungi-setting">
+              {current.pieceShape === 'koma' ? (
+                <OptionCards
+                  name="pref-komaPalette"
+                  legend={s.pieceColors}
+                  layout="row"
+                  value={current.komaPalette}
+                  options={PIECE_PALETTES.koma.map((palette) => ({
+                    value: palette,
+                    label: { wood: s.paletteWood, cherry: s.paletteCherry, bamboo: s.paletteBamboo, lacquer: s.paletteLacquer, custom: s.paletteCustom }[palette],
+                    icon: <Swatch faces={PALETTE_FACES[palette] ?? [current.customPieces.whiteFace, current.customPieces.blackFace]} />,
+                  }))}
+                  onChange={(komaPalette) => updatePrefs({ komaPalette })}
+                />
+              ) : (
+                <OptionCards
+                  name="pref-discPalette"
+                  legend={s.pieceColors}
+                  layout="row"
+                  value={current.discPalette}
+                  options={PIECE_PALETTES.disc.map((palette) => ({
+                    value: palette,
+                    label: { ivory: s.paletteIvory, lacquer: s.paletteLacquer, indigo: s.paletteIndigo, jade: s.paletteJade, custom: s.paletteCustom }[palette],
+                    icon: <Swatch faces={PALETTE_FACES[palette] ?? [current.customPieces.whiteFace, current.customPieces.blackFace]} />,
+                  }))}
+                  onChange={(discPalette) => updatePrefs({ discPalette })}
+                />
+              )}
+            </div>
+            {(current.pieceShape === 'koma' ? current.komaPalette : current.discPalette) === 'custom' && <CustomPieceColors />}
+            <SettingRow title={s.moveGuides} htmlFor="pref-moveGuides" help={current.pieceShape === 'koma' ? s.moveGuidesKoma : s.moveGuidesHelp}>
+              <Toggle
+                id="pref-moveGuides"
+                checked={current.moveGuides && current.pieceShape === 'disc'}
+                disabled={current.pieceShape === 'koma'}
+                label={s.moveGuides}
+                onChange={(moveGuides) => updatePrefs({ moveGuides })}
+              />
+            </SettingRow>
             {toggle('coordinates', s.coordinates, s.coordinatesHelp)}
           </Group>
 
@@ -126,6 +293,8 @@ export const SettingsPage = () => {
             )}
             {toggle('hoverReach', s.hoverReach, s.hoverReachHelp)}
             {toggle('animation', s.animation, s.animationHelp)}
+            {toggle('hidePieces', s.hidePieces, s.hidePiecesHelp)}
+            {current.hidePieces && toggle('peekPieces', s.peekPieces, s.peekPiecesHelp)}
           </Group>
 
         </form>

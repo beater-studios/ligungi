@@ -4,7 +4,7 @@ import { useState } from 'preact/hooks';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PlayerTag } from '../components/PlayerTag.tsx';
 import { QrCode } from '../components/QrCode.tsx';
-import { Checkbox, Field, FieldRow, OptionCards, RadioGroup, Select, SettingRow, SubmitButton, Toggle } from '../components/ui.tsx';
+import { Checkbox, ColorField, Field, FieldRow, OptionCards, RadioGroup, Select, SettingRow, SubmitButton, Toggle } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
@@ -50,6 +50,7 @@ const Example = ({ label, children }: { label: string; children: ComponentChildr
 export const DesignPage = () => {
   const { theme } = useStore(prefs);
   const [mode, setMode] = useState('advanced');
+  const [color, setColor] = useState('#e3c389');
   const [minutes, setMinutes] = useState(10);
   const [switched, setSwitched] = useState(true);
   const [checked, setChecked] = useState(true);
@@ -249,6 +250,16 @@ export const DesignPage = () => {
                 options={['intro', 'beginner', 'intermediate', 'advanced'].map((value) => ({ value, label: value }))}
                 onChange={setMode}
               />
+            </div>
+          </Example>
+          <Example label="ColorField, and .ligungi-warnings for things worth fixing that are not errors">
+            <div class="ligungi-custom-board">
+              <FieldRow>
+                <ColorField id="ds-color" label="Board color" value={color} onChange={setColor} />
+              </FieldRow>
+              <ul class="ligungi-warnings">
+                <li>Lines and coordinates are hard to see.</li>
+              </ul>
             </div>
           </Example>
           <Example label="Two-step verification (account page): QrCode, a code field, recovery codes">
@@ -519,6 +530,31 @@ export const DesignPage = () => {
               </span>
               <span class="gg-mini-piece black">
                 <span>帥</span>
+              </span>
+            </div>
+          </Example>
+          <Example label="Piece looks: the page root's gg-shape-koma, gg-pieces-<palette> and ligungi-kanji-<font> classes restyle every piece; here set locally">
+            <div class="ligungi-ds__row">
+              <span class="gg-palette gg-pieces-lacquer ligungi-kanji-gothic ligungi-ds__row">
+                <span class="gg-mini-piece white">
+                  <span>帥</span>
+                </span>
+                <span class="gg-mini-piece black">
+                  <span>帥</span>
+                </span>
+              </span>
+              <span class="gg-shape-koma gg-palette gg-pieces-wood ligungi-kanji-brush ligungi-ds__row">
+                <span class="gg-mini-piece white">
+                  <span>帥</span>
+                </span>
+                <span class="gg-mini-piece black flipped">
+                  <span>帥</span>
+                </span>
+              </span>
+              <span class="ligungi-font-sample ligungi-font-sample--pop">帥</span>
+              <span class="ligungi-swatch">
+                <i style={{ background: '#d9a27c' }} />
+                <i style={{ background: '#2b211c' }} />
               </span>
             </div>
           </Example>

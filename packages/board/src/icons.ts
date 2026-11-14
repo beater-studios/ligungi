@@ -36,3 +36,18 @@ export const PIECE_ICONS: Readonly<Record<Role, string>> = {
   // compass
   tactician: `<path fill-rule="evenodd" d="M0 -17 A17 17 0 1 0 0.01 -17 Z M0 -13 A13 13 0 1 1 -0.01 -13 Z"/><polygon points="0,-11.5 5,0 0,3 -5,0"/><polygon points="0,11.5 5,0 0,-3 -5,0" opacity="0.4"/><circle cx="0" cy="0" r="2"/>`,
 };
+
+/**
+ * The trace piece style draws the icons above as outlines. These pieces have thick bars (shafts, barrels, strings)
+ * that would turn into double lines, so they get a version drawn with single strokes; the others are outlined as is.
+ */
+export const TRACE_ICONS: Readonly<Partial<Record<Role, string>>> = {
+  // spear: one line for the shaft, the head and the guard as outlines
+  lancer: `<path d="M0 -3.5 V18"/><path d="M0 -19 L6.5 -7 L0 -3.5 L-6.5 -7 Z"/><path d="M-6 -0.5 H6"/>`,
+  // bow, string and arrow as single lines
+  archer: `<path d="M-6 -17 Q17 0 -6 17"/><path d="M-6 -17 V17"/><path d="M-16 0 H17"/><path d="M11 -5 L18 0 L11 5"/><path d="M-16 0 L-19.5 -3.5 M-16 0 L-19.5 3.5"/>`,
+  // barrel on a spoked wheel and its carriage
+  cannon: `<g transform="rotate(-24)"><polygon points="-13,-5 13,-3.5 13,3.5 -13,5"/><circle cx="-15.5" cy="0" r="2.6"/></g><circle cx="-4" cy="11" r="6.5"/><path d="M-4 4.5 V17.5 M-10.5 11 H2.5 M-8.6 6.4 L0.6 15.6 M0.6 6.4 L-8.6 15.6"/><path d="M-14 18 H8"/>`,
+  // musket: one line for the barrel, the stock as an outline
+  musketeer: `<g transform="rotate(-28)"><path d="M-4 0 H20"/><path d="M-4 -3 L-12.5 -3 Q-17.5 -3 -20.5 2 L-20.5 8.5 L-13.5 7.5 Q-9 2.8 -4 2.8 Z"/><path d="M-8.4 2.6 Q-7.4 7.8 -3.4 6.4"/><path d="M-8 -3 V-5.5 H-4 V-3"/></g>`,
+};

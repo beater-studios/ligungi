@@ -1,7 +1,7 @@
 import { Gungiground, type Api, type Config } from '@ligungi/board';
 import { useEffect, useRef } from 'preact/hooks';
 import { usePieceNames, useT } from '../i18n/index.ts';
-import { prefs } from '../prefs.ts';
+import { guidesShown, prefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
 
 export type BoardProps = Partial<Omit<Config, 'pieceNames' | 'moveGuides' | 'pieceStyle' | 'labels' | 'coordinates' | 'coordinateStyle' | 'animation' | 'hoverReach'>>;
@@ -10,11 +10,20 @@ export type BoardProps = Partial<Omit<Config, 'pieceNames' | 'moveGuides' | 'pie
  * Preact wrapper around the framework-free board. Only props that changed identity are pushed,
  * so a re-render of the page does not clear the user's selection.
  */
-export const BoardView = (props: BoardProps) => {
+/**
+ * `training` marks the boards where the hidden pieces preference applies (casual games, the computer and analysis): a
+ * rated game always shows the pieces.
+ */
+export const BoardView = ({ training = false, ...props }: BoardProps & { readonly training?: boolean }) => {
   const element = useRef<HTMLDivElement>(null);
   const board = useRef<Api | null>(null);
   const last = useRef<Partial<Config>>({});
-  const { coordinates, animation, hoverReach, moveGuides, pieceStyle, notation } = useStore(prefs);
+  const current = useStore(prefs);
+  const { coordinates, animation, pieceStyle, notation, hidePieces, peekPieces } = current;
+  const moveGuides = guidesShown(current);
+  const hidden = training && hidePieces;
+  // The reach of a hovered piece tells what it is, so hidden pieces show it only when peeking is allowed.
+  const hoverReach = current.hoverReach && (!hidden || peekPieces);
   // The board speaks the same notation as the move list: letters only with the machine notation.
   const coordinateStyle = notation === 'machine' ? 'algebraic' : 'rulebook';
   const pieceNames = usePieceNames();
@@ -36,5 +45,5 @@ export const BoardView = (props: BoardProps) => {
     if (Object.keys(changed).length && board.current) board.current.set(changed);
   });
 
-  return <div class="board-view" ref={element} />;
+  return <div class={`board-view${hidden ? ' gg-hidden-pieces' : ''}${hidden && peekPieces ? ' gg-peek' : ''}`} ref={element} />;
 };

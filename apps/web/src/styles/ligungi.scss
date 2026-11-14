@@ -3,6 +3,15 @@
 
 $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif CJK JP', serif;
 
+// The kanji typeface picked in Preferences, as a class on the page root. The board package reads it as --gg-font,
+// which every board and small piece uses; the fonts themselves are declared in fonts.css.
+@each $name in brush, serif, gothic, pop {
+  .ligungi-kanji-#{$name} .gg-wrap,
+  .ligungi-kanji-#{$name} .gg-palette {
+    --gg-font: 'ligungi kanji #{$name}', #{$kanji-font};
+  }
+}
+
 #top .ligungi-mark {
   font-family: $kanji-font;
   font-weight: 700;
@@ -64,7 +73,7 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-family: $kanji-font;
+  font-family: var(--gg-font, #{$kanji-font});
   font-weight: 700;
   font-size: calc(100cqw / 9 * 0.48);
   line-height: 1;
@@ -86,6 +95,7 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   }
 
   i {
+    z-index: 2;
     position: absolute;
     right: -8%;
     bottom: -8%;
@@ -96,6 +106,50 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
     color: #fff;
     border-radius: 999px;
     padding: 0 0.25em;
+  }
+}
+
+// Small pieces as koma, like the board package's .gg-shape-koma pieces: a clipped face and a shadow that follows it.
+.gg-shape-koma .gg-mini-piece {
+  &.white,
+  &.black {
+    background: none;
+    border: 0;
+    border-radius: 0;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 8%;
+    clip-path: polygon(50% 0, 86% 14%, 100% 100%, 0 100%, 14% 14%);
+  }
+
+  &.white::before {
+    background: var(--gg-koma-grain), linear-gradient(165deg, var(--gg-white-shine), var(--gg-white-face) 45%, var(--gg-white-rim));
+  }
+
+  &.black::before {
+    background: var(--gg-koma-grain), linear-gradient(165deg, var(--gg-black-shine), var(--gg-black-face) 45%, var(--gg-black-rim));
+  }
+
+  &.flipped::before {
+    transform: rotate(180deg);
+  }
+
+  > span {
+    z-index: 1;
+    transform: translateY(7%) scale(0.84);
+  }
+
+  // Icons are laid over the whole piece (.ligungi-glyph:has(.gg-icon)); text only needs to stack above the face.
+  > span:not(:has(.gg-icon)) {
+    position: relative;
+  }
+
+  &.flipped > span {
+    transform: translateY(-7%) rotate(180deg) scale(0.84);
   }
 }
 
@@ -862,7 +916,7 @@ select.ligungi-select {
 
 .ligungi-tower__kanji {
   margin-inline-start: 0.4em;
-  font-family: $kanji-font;
+  font-family: var(--gg-font, #{$kanji-font});
   font-weight: bold;
 }
 
@@ -1278,6 +1332,107 @@ body:has(main.ligungi-auth) #clinput {
 /* ===== Account page ===== */
 .ligungi-success {
   color: $c-good;
+}
+
+/* ===== Color picker (components/ui.tsx ColorField) and the custom board theme ===== */
+.ligungi-color {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ligungi-color__input {
+  width: 3rem;
+  height: 2.25rem;
+  padding: 2px;
+  border: $border;
+  border-radius: 4px;
+  background: $c-bg-box;
+  cursor: pointer;
+}
+
+.ligungi-color__value {
+  color: $c-font-dim;
+  font-family: monospace;
+}
+
+.ligungi-custom-board {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+
+  .ligungi-field-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+    margin: 0;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0;
+  }
+}
+
+// Five board themes do not fit in one row on phones: three per row.
+@media (max-width: at-most($small)) {
+  .ligungi-prefs .ligungi-choice--row .ligungi-choice__options {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.ligungi-custom-board__help {
+  margin: 0;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+// A kanji in each typeface on the font choices, and the two faces of each piece palette.
+.ligungi-font-sample {
+  font-size: 1.6em;
+  font-weight: 700;
+  line-height: 1;
+  color: $c-font-clear;
+
+  @each $name in brush, serif, gothic, pop {
+    &--#{$name} {
+      font-family: 'ligungi kanji #{$name}', #{$kanji-font};
+    }
+  }
+
+  &--system {
+    font-family: $kanji-font;
+  }
+}
+
+.ligungi-swatch {
+  display: inline-flex;
+
+  i {
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 1px solid rgba(0, 0, 0, 0.35);
+    border-radius: 50%;
+  }
+
+  i + i {
+    margin-left: -0.35rem;
+  }
+}
+
+// Something worth fixing, not an error: a neutral box with lila's warning color only on its edge.
+.ligungi-warnings {
+  margin: 0;
+  padding: 0.6rem 0.9rem 0.6rem 1.8rem;
+  border-left: 3px solid var(--c-warn);
+  border-radius: 4px;
+  background: $c-bg-zebra;
+  font-size: 0.9em;
 }
 
 /* ===== Two-step verification (account page) ===== */

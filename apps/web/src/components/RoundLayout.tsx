@@ -47,6 +47,8 @@ interface RoundLayoutProps {
   readonly under?: ComponentChildren;
   /** The user is to move: highlights their name and clock. */
   readonly myTurn?: boolean;
+  /** The hidden pieces training may apply (not in rated games). */
+  readonly training?: boolean;
 }
 
 const LOW_TIME = 20_000;
@@ -229,7 +231,7 @@ export const RoundLayout = (props: RoundLayoutProps) => {
               names={{ white: props.players.white.name, black: props.players.black.name }}
             />
           )}
-          {props.board.position && <TowerPanel position={props.board.position} square={inspected} />}
+          {props.board.position && <TowerPanel position={props.board.position} square={inspected} training={props.training ?? false} />}
         </div>
       </aside>
       <div class="round__app variant-standard">
@@ -237,6 +239,7 @@ export const RoundLayout = (props: RoundLayoutProps) => {
           {hands && (
             <BoardView
               {...props.board}
+              training={props.training ?? false}
               orientation={props.orientation}
               handElements={hands}
               inspector={false}

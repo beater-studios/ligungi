@@ -250,7 +250,9 @@ export const es: Content = {
       <ul>
         <li>
           <b>Cuenta (si creas una):</b> nombre de usuario y contraseña. La contraseña solo se guarda cifrada (hash), y ni
-          nosotros podemos leerla.
+          nosotros podemos leerla. Si activas la verificación en dos pasos, también guardamos la clave que genera los códigos
+          de tu app de autenticación y los códigos de recuperación, estos solo como hash. Todo se borra cuando desactivas la
+          verificación o eliminas la cuenta (una activación sin terminar se borra al cancelar o después de 30 minutos), y la copia de tus datos solo indica si está activada.
         </li>
         <li>
           <b>Partidas y actividad:</b> jugadas, resultados, puntuaciones, jugadores que sigues y la fecha de creación de la

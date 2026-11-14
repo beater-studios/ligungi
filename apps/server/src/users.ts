@@ -98,6 +98,8 @@ export class Users {
       this.#db.prepare('delete from follows where user_id = ? or followed_id = ?').run(userId, userId);
       this.#db.prepare('delete from ratings where user_id = ?').run(userId);
       this.#db.prepare('delete from sessions where user_id = ?').run(userId);
+      this.#db.prepare('delete from recovery_codes where user_id = ?').run(userId);
+      this.#db.prepare('delete from two_factor where user_id = ?').run(userId);
       this.#db.prepare('delete from users where id = ?').run(userId);
       this.#db.exec('commit');
     } catch (error) {

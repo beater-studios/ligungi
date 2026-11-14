@@ -216,6 +216,18 @@ export interface SessionView {
   readonly userAgent: string | null;
 }
 
+/** Two-factor authentication as the account page shows it. */
+export interface TwoFactorView {
+  readonly enabled: boolean;
+  readonly recoveryCodesLeft: number;
+}
+
+/** What the authenticator app needs: the secret in base32, also as the otpauth link the QR code carries. */
+export interface TwoFactorSetup {
+  readonly secret: string;
+  readonly uri: string;
+}
+
 export interface UserSearchResult {
   readonly user: UserRef;
   readonly online: boolean;

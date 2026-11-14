@@ -39,6 +39,7 @@ Colors live in CSS variables (`--gg-board`, `--gg-line`, the piece faces and eve
 | `clock.ts` | Fischer clock. During the draft the same player may move several times in a row, so the clock goes to "whoever is to move" instead of simply alternating. |
 | `glicko.ts` | Glicko-2, one rating per game mode. |
 | `auth.ts`, `users.ts` | Passwords with scrypt, session cookie `HttpOnly; SameSite=Lax`, session rotation on login. Follows and leaderboard queries. |
+| `totp.ts`, `two-factor.ts` | Opt-in two-step verification: TOTP codes (RFC 6238 with Node's crypto), the stored secret and the hashed recovery codes. |
 
 ### Flow of an online game
 
@@ -63,6 +64,7 @@ Sending the full view on every change is simpler than sending diffs and solves r
 - Rate limits: 10 login or signup attempts per minute per IP, 20 failed logins per 15 minutes per username (from any IP) and 30 new sessions per minute per IP. The client IP comes from `TRUST_PROXY` (see the README); forwarding headers are ignored unless a proxy is trusted. Limiter windows are dropped once expired.
 - Sessions are stored only for writes and `/api/me` (the site's bootstrap call); other reads use a throwaway session. Stored sessions expire after 30 days of inactivity (anonymous) or a year (signed in), and are swept every 6 hours.
 - Passwords use scrypt with N=2^14, r=8, p=5 (OWASP's lowest-memory option, 16 MiB per hash). Hashes store their parameters, and older hashes are upgraded on the next successful login.
+- Two-step verification (opt-in): TOTP with SHA-1, 6 digits and 30 second steps, one step of drift either way. The time step of the last accepted code is stored, so a code works once. Ten single-use recovery codes (50 random bits each) are stored as SHA-256 hashes, which is enough for random codes of that length. Sign-in stays stateless: the client sends the password again with the code. A setup not confirmed is deleted on Cancel and expires after 30 minutes (removed by the six-hourly sweep). Setting it up and turning it off need the password, and codes typed on the account page count with the failed logins of the account. The QR code is drawn in the browser by `apps/web/src/qr.ts`, so the secret never goes to a third party.
 - Strict CSP on the site: `default-src 'self'`, `connect-src 'self'` (no WebSocket to other hosts), no plugins, no framing.
 
 ## Site (`apps/web`)

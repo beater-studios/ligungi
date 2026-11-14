@@ -11,8 +11,9 @@ export const loadSession = async (): Promise<Me> => {
   return me;
 };
 
-export const login = async (username: string, password: string, signup: boolean): Promise<void> => {
-  const { user } = await api.post<{ user: UserRef }>(signup ? '/api/signup' : '/api/login', { username, password });
+/** `code` is the two-factor code, sent with the password again once the server asked for it. */
+export const login = async (username: string, password: string, signup: boolean, code?: string): Promise<void> => {
+  const { user } = await api.post<{ user: UserRef }>(signup ? '/api/signup' : '/api/login', { username, password, ...(code ? { code } : {}) });
   session.set({ loaded: true, user });
   socket.reset();
 };

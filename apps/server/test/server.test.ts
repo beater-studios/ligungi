@@ -2,8 +2,9 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type SessionView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
+import { base32Decode, hotp, TOTP_STEP_MS } from '../src/totp.ts';
 import { Client, firstMove, startServer, type TestServer } from './helpers.ts';
 
 const casual = { mode: 'intro', rated: false, timeControl: { initial: 600, increment: 5 }, color: 'white', firstPlayer: 'white' };
@@ -1034,6 +1035,109 @@ describe('correspondence', () => {
     const ended = await a.waitGame(id, (g) => g.status === 'ended');
     expect(ended.outcome).toEqual({ winner: 'black', reason: 'timeout' });
     expect(ended.players.white.ratingDiff).not.toBeNull();
+  });
+});
+
+describe('two-factor authentication', () => {
+  it('turns on with a first code, then asks for a code at sign-in that works only once', async () => {
+    let now = 1_700_000_000_000;
+    server = await startServer({ now: () => now });
+    const a = client();
+    await signup(a, 'Kurapika');
+    const status = async () => (await a.request<TwoFactorView>('GET', '/api/account/two-factor')).data;
+    expect(await status()).toEqual({ enabled: false, recoveryCodesLeft: 0 });
+    expect((await a.request('POST', '/api/account/two-factor/setup', { password: 'errada123' })).data).toMatchObject({ code: 'wrongPassword' });
+    const setup = (await a.request<TwoFactorSetup>('POST', '/api/account/two-factor/setup', { password: 'segredo123' })).data;
+    expect(setup.uri).toBe(`otpauth://totp/ligungi:Kurapika?secret=${setup.secret}&issuer=ligungi`);
+    const code = (offset = 0) => hotp(base32Decode(setup.secret), Math.floor(now / TOTP_STEP_MS) + offset);
+
+    // Not on until the app proves it has the secret.
+    expect(await status()).toEqual({ enabled: false, recoveryCodesLeft: 0 });
+    expect((await a.request('POST', '/api/account/two-factor/enable', { code: code(5) })).data).toMatchObject({ code: 'wrongTwoFactorCode' });
+    const enabled = await a.request<{ recoveryCodes: string[] }>('POST', '/api/account/two-factor/enable', { code: code() });
+    expect(enabled.data.recoveryCodes).toHaveLength(10);
+    expect(await status()).toEqual({ enabled: true, recoveryCodesLeft: 10 });
+    expect((await a.request('POST', '/api/account/two-factor/setup', { password: 'segredo123' })).data).toMatchObject({ code: 'twoFactorEnabled' });
+
+    const login = (c: Client, extra: object = {}) => c.request<{ user: { name: string } }>('POST', '/api/login', { username: 'kurapika', password: 'segredo123', ...extra });
+    const b = client();
+    expect((await login(b)).data).toMatchObject({ code: 'twoFactorRequired' });
+    // The code that turned it on was used already.
+    expect((await login(b, { code: code() })).data).toMatchObject({ code: 'wrongTwoFactorCode' });
+    now += TOTP_STEP_MS;
+    const fresh = code();
+    expect((await login(b, { code: fresh })).data.user.name).toBe('Kurapika');
+    expect((await login(client(), { code: fresh })).data).toMatchObject({ code: 'wrongTwoFactorCode' });
+
+    // A minute later, past the limit of sign-in attempts per minute. A recovery code works once, typed in any case.
+    now += 60_000;
+    const [first, second] = enabled.data.recoveryCodes;
+    expect((await login(client(), { code: first!.toUpperCase() })).status).toBe(200);
+    expect((await login(client(), { code: first })).data).toMatchObject({ code: 'wrongTwoFactorCode' });
+    expect(await status()).toEqual({ enabled: true, recoveryCodesLeft: 9 });
+
+    const exported = (await a.request<{ twoFactor: object }>('GET', '/api/account/export')).data;
+    expect(exported.twoFactor).toMatchObject({ enabled: true, recoveryCodesLeft: 9 });
+    expect(JSON.stringify(exported)).not.toContain(setup.secret);
+
+    // New recovery codes replace the old ones.
+    now += 60_000;
+    const renewed = await a.request<{ recoveryCodes: string[] }>('POST', '/api/account/two-factor/recovery', { code: code() });
+    expect(renewed.data.recoveryCodes).toHaveLength(10);
+    expect((await login(client(), { code: second })).data).toMatchObject({ code: 'wrongTwoFactorCode' });
+
+    // Turning it off needs the password and a code.
+    now += 60_000;
+    expect((await a.request('POST', '/api/account/two-factor/disable', { password: 'errada123', code: code() })).data).toMatchObject({ code: 'wrongPassword' });
+    expect((await a.request('POST', '/api/account/two-factor/disable', { password: 'segredo123', code: '000000' })).status).toBe(401);
+    expect((await a.request('POST', '/api/account/two-factor/disable', { password: 'segredo123', code: code() })).status).toBe(200);
+    expect(await status()).toEqual({ enabled: false, recoveryCodesLeft: 0 });
+    expect((await login(client())).status).toBe(200);
+  });
+
+  it('signs out the other devices when asked to, while turning it on', async () => {
+    const now = 1_700_000_000_000;
+    server = await startServer({ now: () => now });
+    const a = client();
+    await signup(a, 'Neferpitou');
+    const other = client();
+    expect((await other.request('POST', '/api/login', { username: 'neferpitou', password: 'segredo123' })).status).toBe(200);
+    const setup = (await a.request<TwoFactorSetup>('POST', '/api/account/two-factor/setup', { password: 'segredo123' })).data;
+    const code = hotp(base32Decode(setup.secret), Math.floor(now / TOTP_STEP_MS));
+    const enabled = await a.request<{ revoked: number }>('POST', '/api/account/two-factor/enable', { code, signOutOthers: true });
+    expect(enabled.data.revoked).toBe(1);
+    expect((await other.request<Me>('GET', '/api/me')).data.user).toBeNull();
+    expect((await a.request<Me>('GET', '/api/me')).data.user).toMatchObject({ name: 'Neferpitou' });
+  });
+
+  it('deletes a setup that was cancelled or not confirmed within 30 minutes', async () => {
+    let now = 1_700_000_000_000;
+    server = await startServer({ now: () => now });
+    const a = client();
+    await signup(a, 'Shoot');
+    const rows = () => (server!.app.db.prepare('select count(*) as n from two_factor').get() as { n: number }).n;
+    await a.request('POST', '/api/account/two-factor/setup', { password: 'segredo123' });
+    expect(rows()).toBe(1);
+    expect((await a.request('DELETE', '/api/account/two-factor/setup')).status).toBe(200);
+    expect(rows()).toBe(0);
+
+    const setup = (await a.request<TwoFactorSetup>('POST', '/api/account/two-factor/setup', { password: 'segredo123' })).data;
+    now += 31 * 60_000;
+    const late = hotp(base32Decode(setup.secret), Math.floor(now / TOTP_STEP_MS));
+    expect((await a.request('POST', '/api/account/two-factor/enable', { code: late })).data).toMatchObject({ code: 'twoFactorNotSetUp' });
+    expect(rows()).toBe(0);
+  });
+
+  it('leaves nothing behind when the account is deleted', async () => {
+    let now = 1_700_000_000_000;
+    server = await startServer({ now: () => now });
+    const a = client();
+    await signup(a, 'Pakunoda');
+    const setup = (await a.request<TwoFactorSetup>('POST', '/api/account/two-factor/setup', { password: 'segredo123' })).data;
+    await a.request('POST', '/api/account/two-factor/enable', { code: hotp(base32Decode(setup.secret), Math.floor(now / TOTP_STEP_MS)) });
+    expect((await a.request('POST', '/api/account/delete', { password: 'segredo123' })).status).toBe(200);
+    const count = (table: string) => (server!.app.db.prepare(`select count(*) as n from ${table}`).get() as { n: number }).n;
+    expect([count('two_factor'), count('recovery_codes')]).toEqual([0, 0]);
   });
 });
 

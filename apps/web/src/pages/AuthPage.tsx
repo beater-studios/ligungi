@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { ApiError } from '../api.ts';
 import { Field, SubmitButton } from '../components/ui.tsx';
 import { useT } from '../i18n/index.ts';
 import { navigate } from '../router.ts';
@@ -8,6 +9,9 @@ export const AuthPage = ({ signup }: { signup: boolean }) => {
   const t = useT();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  // Asked only after the password, for accounts with two-step verification on.
+  const [needCode, setNeedCode] = useState(false);
+  const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -19,10 +23,11 @@ export const AuthPage = ({ signup }: { signup: boolean }) => {
     setBusy(true);
     setError(null);
     try {
-      await login(username.trim(), password, signup);
+      await login(username.trim(), password, signup, needCode && !signup ? code.trim() : undefined);
       navigate('/');
     } catch (err) {
-      setError((err as Error).message);
+      if (err instanceof ApiError && err.code === 'twoFactorRequired') setNeedCode(true);
+      else setError((err as Error).message);
     } finally {
       setBusy(false);
     }
@@ -64,7 +69,11 @@ export const AuthPage = ({ signup }: { signup: boolean }) => {
               minLength={3}
               maxLength={20}
               value={username}
-              onInput={(e) => setUsername((e.target as HTMLInputElement).value)}
+              onInput={(e) => {
+                setUsername((e.target as HTMLInputElement).value);
+                setNeedCode(false);
+                setCode('');
+              }}
             />
           </Field>
           <Field label={t.auth.password} htmlFor="auth-password" {...(signup ? { help: t.auth.passwordHelp } : {})}>
@@ -79,6 +88,21 @@ export const AuthPage = ({ signup }: { signup: boolean }) => {
               onInput={(e) => setPassword((e.target as HTMLInputElement).value)}
             />
           </Field>
+          {needCode && !signup && (
+            <Field label={t.auth.code} htmlFor="auth-code" help={t.auth.codeHelp}>
+              <input
+                id="auth-code"
+                class="form-control ligungi-code-input"
+                autoComplete="one-time-code"
+                autoFocus
+                required
+                maxLength={16}
+                spellcheck={false}
+                value={code}
+                onInput={(e) => setCode((e.target as HTMLInputElement).value)}
+              />
+            </Field>
+          )}
           {error && <p class="error">{error}</p>}
           <SubmitButton disabled={busy}>{signup ? t.nav.signUp : t.nav.signIn}</SubmitButton>
         </form>

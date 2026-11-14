@@ -3,6 +3,7 @@ import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PlayerTag } from '../components/PlayerTag.tsx';
+import { QrCode } from '../components/QrCode.tsx';
 import { Checkbox, Field, FieldRow, OptionCards, RadioGroup, Select, SettingRow, SubmitButton, Toggle } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
@@ -248,6 +249,26 @@ export const DesignPage = () => {
                 options={['intro', 'beginner', 'intermediate', 'advanced'].map((value) => ({ value, label: value }))}
                 onChange={setMode}
               />
+            </div>
+          </Example>
+          <Example label="Two-step verification (account page): QrCode, a code field, recovery codes">
+            <div class="ligungi-two-factor__setup">
+              <QrCode text="otpauth://totp/ligungi:Example?secret=JBSWY3DPEHPK3PXP&issuer=ligungi" label="QR code example" />
+              <div class="form3">
+                <p class="ligungi-two-factor__key">
+                  Key: <code>JBSW Y3DP EHPK 3PXP</code>
+                </p>
+                <Field label="Code from the app" htmlFor="ds-code" help="Monospaced, with one-time-code autocomplete.">
+                  <input id="ds-code" class="form-control ligungi-code-input" autoComplete="one-time-code" value="123 456" readOnly />
+                </Field>
+                <ol class="ligungi-recovery__codes">
+                  {['kmpei-7uyqm', 'sfeg3-pead2', 'wwzr3-pw374', '6gdzu-6dydt'].map((code) => (
+                    <li key={code}>
+                      <code>{code}</code>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </div>
           </Example>
         </Section>

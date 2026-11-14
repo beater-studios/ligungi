@@ -4,6 +4,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Two-step verification, opt-in, in the Account page: scan a QR code with any authenticator app (Google Authenticator, Microsoft Authenticator, Aegis, 2FAS and others), confirm with a first code (and, if you wish, sign out every other device), and signing in then asks for the 6-digit code after the password. Ten single-use recovery codes, to copy or download, let you in if you lose your phone; you can make new ones or turn the verification off with your password and a code.
+
 ## [0.3.0] - 2026-11-14
 
 ### Added

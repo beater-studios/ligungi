@@ -248,7 +248,9 @@ export const pt: Content = {
       <ul>
         <li>
           <b>Conta (se você criar uma):</b> nome de usuário e senha. A senha é guardada só em forma criptografada (hash), e
-          nem nós conseguimos lê-la.
+          nem nós conseguimos lê-la. Se você ativar a verificação em duas etapas, guardamos também a chave que gera os códigos
+          do app autenticador e os códigos de recuperação, estes só em forma de hash. Tudo isso é apagado quando você
+          desativa a verificação ou exclui a conta (uma ativação não concluída é apagada ao cancelar ou depois de 30 minutos), e a cópia dos seus dados informa só se ela está ativada.
         </li>
         <li>
           <b>Partidas e atividade:</b> lances, resultados, ratings, jogadores que você segue e a data de criação da conta.

@@ -28,6 +28,8 @@ import {
   type PlayersView,
   type RankingView,
   type SessionView,
+  type TwoFactorSetup,
+  type TwoFactorView,
   type UserRef,
   type UserSearchResult,
 } from '@ligungi/protocol';
@@ -66,6 +68,8 @@ import { Hub, type Client } from './hub.ts';
 import { Lobby } from './lobby.ts';
 import type { GameRoom } from './room.ts';
 import { SeekStore } from './seeks.ts';
+import { otpauthUri } from './totp.ts';
+import { TwoFactor } from './two-factor.ts';
 import { USERNAME_PATTERN, Users } from './users.ts';
 
 /** Stored name of players without an account; the site shows a translated label instead. */
@@ -108,6 +112,7 @@ export interface App {
 export const createApp = (config: ServerConfig): App => {
   const db = openDatabase(config.databasePath);
   const sessions = new Sessions(db, config.now);
+  const twoFactor = new TwoFactor(db, config.now);
   const users = new Users(db, config.now);
   const hub = new Hub();
   const authLimiter = new RateLimiter(10, 60_000, config.now);
@@ -206,6 +211,19 @@ export const createApp = (config: ServerConfig): App => {
   const requireUser = (ctx: Context): string => {
     if (!ctx.session.userId) throw new HttpError(401, 'loginRequired');
     return ctx.session.userId;
+  };
+
+  /**
+   * A code typed on the account page by a user with two-factor on. Wrong codes count with the failed logins of the
+   * account, so an open session does not give more guesses than the sign-in form.
+   */
+  const checkAccountCode = (userId: string, code: unknown): void => {
+    const key = users.findById(userId)?.name.toLowerCase() ?? userId;
+    if (loginFailures.blocked(key)) throw new HttpError(429, 'tooManyAttempts');
+    if (typeof code !== 'string' || !twoFactor.verify(userId, code)) {
+      loginFailures.allow(key);
+      throw new HttpError(401, 'wrongTwoFactorCode');
+    }
   };
 
   const findUser = (name: string) => {
@@ -386,13 +404,21 @@ export const createApp = (config: ServerConfig): App => {
     })
     .add('POST', '/api/login', async (ctx) => {
       if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
-      const { username, password } = (await ctx.body()) as { username?: unknown; password?: unknown };
+      const { username, password, code } = (await ctx.body()) as { username?: unknown; password?: unknown; code?: unknown };
       const key = typeof username === 'string' ? username.toLowerCase() : '';
       if (loginFailures.blocked(key)) throw new HttpError(429, 'tooManyAttempts');
       const user = typeof username === 'string' ? users.findByName(username) : undefined;
       if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
         loginFailures.allow(key);
         throw new HttpError(401, 'wrongCredentials');
+      }
+      // The client sends the password again with the code, so no half signed-in state lives on the server.
+      if (twoFactor.isEnabled(user.id)) {
+        if (code === undefined || code === '') throw new HttpError(401, 'twoFactorRequired');
+        if (typeof code !== 'string' || !twoFactor.verify(user.id, code)) {
+          loginFailures.allow(key);
+          throw new HttpError(401, 'wrongTwoFactorCode');
+        }
       }
       if (needsRehash(user.passwordHash)) users.updatePasswordHash(user.id, await hashPassword(password));
       rotateSession(ctx, user.id);
@@ -434,6 +460,64 @@ export const createApp = (config: ServerConfig): App => {
       rotateSession(ctx, null);
       sendJson(ctx.res, 200, { user: null });
     })
+    .add('GET', '/api/account/two-factor', (ctx) => {
+      const userId = requireUser(ctx);
+      const { enabled, recoveryCodesLeft } = twoFactor.state(userId);
+      const view: TwoFactorView = { enabled, recoveryCodesLeft };
+      sendJson(ctx.res, 200, view);
+    })
+    .add('POST', '/api/account/two-factor/setup', async (ctx) => {
+      const userId = requireUser(ctx);
+      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
+      // The password, so that someone using a forgotten open session cannot lock the owner out.
+      const { password } = (await ctx.body()) as { password?: unknown };
+      const user = users.findById(userId);
+      if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
+        throw new HttpError(401, 'wrongPassword');
+      }
+      const secret = twoFactor.begin(userId);
+      if (!secret) throw new HttpError(409, 'twoFactorEnabled');
+      const setup: TwoFactorSetup = { secret, uri: otpauthUri(user.name, secret) };
+      ctx.res.setHeader('cache-control', 'no-store');
+      sendJson(ctx.res, 200, setup);
+    })
+    .add('DELETE', '/api/account/two-factor/setup', (ctx) => {
+      twoFactor.cancel(requireUser(ctx));
+      sendJson(ctx.res, 200, { ok: true });
+    })
+    .add('POST', '/api/account/two-factor/enable', async (ctx) => {
+      const userId = requireUser(ctx);
+      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
+      const { code, signOutOthers } = (await ctx.body()) as { code?: unknown; signOutOthers?: unknown };
+      const result = twoFactor.confirm(userId, typeof code === 'string' ? code : '');
+      if (result === 'notSetUp') throw new HttpError(409, 'twoFactorNotSetUp');
+      if (result === 'wrongCode') throw new HttpError(401, 'wrongTwoFactorCode');
+      // Sessions opened before only had to pass the password: whoever turns this on may want them gone.
+      const revoked = signOutOthers === true ? sessions.deleteOtherSessions(userId, ctx.session.id) : [];
+      closeSessionSockets(revoked);
+      ctx.res.setHeader('cache-control', 'no-store');
+      sendJson(ctx.res, 200, { recoveryCodes: result, revoked: revoked.length });
+    })
+    .add('POST', '/api/account/two-factor/recovery', async (ctx) => {
+      const userId = requireUser(ctx);
+      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
+      const { code } = (await ctx.body()) as { code?: unknown };
+      checkAccountCode(userId, code);
+      ctx.res.setHeader('cache-control', 'no-store');
+      sendJson(ctx.res, 200, { recoveryCodes: twoFactor.regenerate(userId) });
+    })
+    .add('POST', '/api/account/two-factor/disable', async (ctx) => {
+      const userId = requireUser(ctx);
+      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
+      const { password, code } = (await ctx.body()) as { password?: unknown; code?: unknown };
+      const user = users.findById(userId);
+      if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
+        throw new HttpError(401, 'wrongPassword');
+      }
+      checkAccountCode(userId, code);
+      twoFactor.disable(userId);
+      sendJson(ctx.res, 200, { ok: true });
+    })
     .add('GET', '/api/account/sessions', (ctx) => {
       const userId = requireUser(ctx);
       const list: SessionView[] = sessions.listForUser(userId).map((session) => ({
@@ -469,6 +553,12 @@ export const createApp = (config: ServerConfig): App => {
         exportedAt: iso(config.now()),
         account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
         settings: { challengePolicy: users.challengePolicy(userId) },
+        // Whether it is on, never the secret or the recovery codes (stored only as hashes).
+        twoFactor: (({ enabled, enabledAt, recoveryCodesLeft }) => ({
+          enabled,
+          enabledAt: enabledAt === null ? null : iso(enabledAt),
+          recoveryCodesLeft,
+        }))(twoFactor.state(userId)),
         ratings: users.ratings(userId),
         following: users.following(userId).map((entry) => entry.name),
         followers: users.followers(userId).map((entry) => entry.name),
@@ -890,8 +980,12 @@ export const createApp = (config: ServerConfig): App => {
   }, HEARTBEAT_MS);
   heartbeat.unref();
 
-  sessions.sweep();
-  const sessionSweep = setInterval(() => sessions.sweep(), SESSION_SWEEP_MS);
+  const sweepAccounts = () => {
+    sessions.sweep();
+    twoFactor.sweep();
+  };
+  sweepAccounts();
+  const sessionSweep = setInterval(sweepAccounts, SESSION_SWEEP_MS);
   sessionSweep.unref();
 
   const challengeSweep = setInterval(() => lobby.sweep(), CHALLENGE_SWEEP_MS);

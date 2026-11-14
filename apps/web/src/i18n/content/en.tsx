@@ -247,7 +247,9 @@ export const en: Content = {
       <ul>
         <li>
           <b>Account (if you create one):</b> username and password. The password is only stored as a cryptographic hash,
-          which not even we can read.
+          which not even we can read. If you turn on two-step verification, we also store the key that generates the codes
+          of your authenticator app and the recovery codes, these only as hashes. All of it is deleted when you turn the
+          verification off or delete your account (an unfinished setup is deleted when cancelled or after 30 minutes), and your data download only says whether it is on.
         </li>
         <li>
           <b>Games and activity:</b> moves, results, ratings, players you follow and your account creation date. This data

@@ -1280,6 +1280,88 @@ body:has(main.ligungi-auth) #clinput {
   color: $c-good;
 }
 
+/* ===== Two-step verification (account page) ===== */
+.ligungi-qr {
+  display: block;
+  width: 12rem;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  shape-rendering: crispEdges;
+}
+
+// Codes are read and typed in groups: a fixed-width font keeps them apart.
+.ligungi-code-input {
+  font-family: monospace;
+  letter-spacing: 0.15em;
+}
+
+.ligungi-two-factor__setup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem 1.5rem;
+
+  > .form3 {
+    flex: 1 1 18rem;
+    min-width: 0;
+  }
+
+  > p:first-child {
+    margin-top: 0;
+  }
+}
+
+.ligungi-two-factor__key code {
+  font-family: monospace;
+  word-break: break-all;
+  color: $c-font-clear;
+}
+
+.ligungi-two-factor__status {
+  font-weight: 600;
+}
+
+.ligungi-two-factor__actions,
+.ligungi-recovery__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.ligungi-two-factor__cancel {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.ligungi-recovery {
+  h3 {
+    margin: 0 0 0.5rem;
+    color: $c-font-clear;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+}
+
+// Two columns of five, the way they are usually written down or printed.
+.ligungi-recovery__codes {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 0.4rem 2.5rem;
+  margin: 1rem 0 0;
+  padding: 0.9rem 1.1rem;
+  border-radius: 4px;
+  background: $c-bg-zebra;
+  list-style: none;
+
+  code {
+    font-family: monospace;
+    font-size: 1.05em;
+    color: $c-font-clear;
+  }
+}
+
 .ligungi-sessions {
   margin: 1rem 0 0;
   padding: 0;

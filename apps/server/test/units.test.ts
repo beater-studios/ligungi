@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { Clock } from '../src/clock.ts';
+import { openDatabase } from '../src/db.ts';
 import { DEFAULT_RATING, updateRating } from '../src/glicko.ts';
+import { base32Decode, base32Encode, hotp, matchStep, newRecoveryCodes, normalizeCode, otpauthUri, TOTP_STEP_MS } from '../src/totp.ts';
+import { TwoFactor } from '../src/two-factor.ts';
+import { Users } from '../src/users.ts';
 
 describe('clock', () => {
   it('charges the mover, adds the increment and keeps running for consecutive draft moves', () => {
@@ -40,5 +44,64 @@ describe('glicko-2', () => {
     expect(updated.rating).toBeGreaterThan(1500);
     expect(updated.deviation).toBeLessThan(200);
     expect(updated.volatility).toBeCloseTo(0.06, 3);
+  });
+});
+
+describe('totp', () => {
+  const rfcSecret = Buffer.from('12345678901234567890');
+
+  it('matches the HOTP test values of RFC 4226', () => {
+    const expected = ['755224', '287082', '359152', '969429', '338314', '254676', '287922', '162583', '399871', '520489'];
+    expect(expected.map((_, counter) => hotp(rfcSecret, counter))).toEqual(expected);
+  });
+
+  it('matches the SHA-1 TOTP test values of RFC 6238', () => {
+    const cases: Array<[number, string]> = [
+      [59, '94287082'],
+      [1111111109, '07081804'],
+      [1111111111, '14050471'],
+      [1234567890, '89005924'],
+      [2000000000, '69279037'],
+    ];
+    for (const [seconds, code] of cases) expect(hotp(rfcSecret, Math.floor((seconds * 1000) / TOTP_STEP_MS), 8)).toBe(code);
+  });
+
+  it('round-trips base32 and accepts a code one step around now', () => {
+    expect(base32Encode(rfcSecret)).toBe('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ');
+    expect(base32Decode('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ')).toEqual(rfcSecret);
+    const secret = base32Encode(rfcSecret);
+    const now = 1_700_000_000_000;
+    const step = Math.floor(now / TOTP_STEP_MS);
+    for (const offset of [-1, 0, 1]) expect(matchStep(secret, hotp(rfcSecret, step + offset), now)).toBe(step + offset);
+    expect(matchStep(secret, hotp(rfcSecret, step + 2), now)).toBeNull();
+    expect(matchStep(secret, '12345', now)).toBeNull();
+    expect(otpauthUri('Gon', secret)).toBe(`otpauth://totp/ligungi:Gon?secret=${secret}&issuer=ligungi`);
+  });
+
+  it('makes ten distinct recovery codes, typed back in any case and spacing', () => {
+    const codes = newRecoveryCodes();
+    expect(new Set(codes).size).toBe(10);
+    for (const code of codes) expect(code).toMatch(/^[a-z2-7]{5}-[a-z2-7]{5}$/);
+    expect(normalizeCode(' ABCDE - fghij ')).toBe('abcdefghij');
+  });
+});
+
+describe('two-factor sweep', () => {
+  it('drops setups left unconfirmed for over 30 minutes, never one that is on', () => {
+    let now = 1_700_000_000_000;
+    const db = openDatabase(':memory:');
+    const users = new Users(db, () => now);
+    const twoFactor = new TwoFactor(db, () => now);
+    const idle = users.create('Idle', 'x')!.id;
+    const active = users.create('Active', 'x')!.id;
+    twoFactor.begin(idle);
+    const secret = twoFactor.begin(active)!;
+    expect(Array.isArray(twoFactor.confirm(active, hotp(base32Decode(secret), Math.floor(now / TOTP_STEP_MS))))).toBe(true);
+    now += 20 * 60_000;
+    expect(twoFactor.sweep()).toBe(0);
+    now += 11 * 60_000;
+    expect(twoFactor.sweep()).toBe(1);
+    expect(twoFactor.state(active).enabled).toBe(true);
+    db.close();
   });
 });

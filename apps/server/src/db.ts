@@ -117,6 +117,19 @@ const MIGRATIONS = [
   );
   create index seeks_owner on seeks(owner_user);
   `,
+  `
+  create table two_factor (
+    user_id text primary key references users(id),
+    secret text not null,
+    enabled_at integer,
+    last_step integer not null default 0
+  );
+  create table recovery_codes (
+    user_id text not null references users(id),
+    code_hash text not null,
+    primary key (user_id, code_hash)
+  );
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

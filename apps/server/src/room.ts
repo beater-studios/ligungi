@@ -345,6 +345,12 @@ export class GameRoom {
    * Moves anonymous seats from one session to another when the session id rotates (login, signup, logout), so a
    * player keeps their game. Seats of signed-in players are matched by user id and need no change.
    */
+  /** Moves played on the board once the draft is over (draft placements and "done" left out), for the length statistics. */
+  get boardMoves(): number {
+    const positions = this.game.positions;
+    return this.game.moves.filter((_, i) => positions[i]!.phase === 'play').length;
+  }
+
   /** Shows a renamed account's new name in its seat. */
   renameSeat(userId: string, name: string): void {
     for (const color of ['white', 'black'] as const) {

@@ -4299,6 +4299,12 @@ body:has(main.ligungi-auth) #clinput {
     box-shadow: inset 3px 0 0 $c-brag;
   }
 
+  // The count always sits under the name: side by side, a long mode name (or language) wrapped only some of the tabs.
+  &__name,
+  &__count {
+    flex: 1 1 100%;
+  }
+
   &__name {
     color: $c-font-clear;
     font-weight: 500;
@@ -4307,7 +4313,6 @@ body:has(main.ligungi-auth) #clinput {
   &__count {
     color: $c-font-dim;
     font-size: 0.8em;
-    text-align: right;
   }
 
   &__you {
@@ -4593,8 +4598,9 @@ body:has(main.ligungi-auth) #clinput {
       }
     }
 
+    .ligungi-ranking-mode__name,
     .ligungi-ranking-mode__count {
-      text-align: left;
+      flex: none;
     }
 
     .ligungi-ranking-mode__you {
@@ -5420,4 +5426,214 @@ body:has(main.ligungi-auth) #clinput {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+/* ===== Rating history on the profile (components/RatingHistory.tsx, RatingHistoryChart.tsx) ===== */
+.ligungi-card.ligungi-history {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+
+  h3 {
+    margin: 0 0 0.5rem;
+    color: $c-font-dim;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  > .ligungi-notice {
+    margin: 0;
+  }
+}
+
+.ligungi-history__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+}
+
+.ligungi-history-chart {
+  position: relative;
+  margin: 0;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    touch-action: pan-y;
+  }
+
+  &__grid {
+    stroke: $c-border;
+    stroke-width: 1;
+  }
+
+  &__tick {
+    fill: $c-font-dim;
+    font-size: 11px;
+  }
+
+  &__line {
+    fill: none;
+    stroke: $c-primary;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  // A ring in the surface color keeps overlapping dots apart.
+  &__dot {
+    fill: $c-primary;
+    stroke: $c-bg-box;
+    stroke-width: 2;
+  }
+
+  &__cross {
+    stroke: $c-font-dim;
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+
+  &__active {
+    fill: $c-primary;
+    stroke: $c-bg-box;
+    stroke-width: 2;
+  }
+
+  &__hit {
+    fill: transparent;
+    cursor: crosshair;
+  }
+
+  &__tip {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.4rem;
+    padding: 0.35rem 0.6rem;
+    border: $border;
+    border-radius: 4px;
+    background: $c-bg-box;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    color: $c-font;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translate(12px, -50%);
+
+    &.is-left {
+      transform: translate(calc(-100% - 12px), -50%);
+    }
+
+    strong {
+      color: $c-font-clear;
+    }
+
+    small {
+      flex-basis: 100%;
+      color: $c-font-dim;
+    }
+  }
+}
+
+.ligungi-history__figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2.5rem;
+  margin: 0;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  dt {
+    color: $c-font-dim;
+    font-size: 0.8rem;
+  }
+
+  dd {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.35rem;
+    font-weight: 600;
+
+    small {
+      color: $c-font-dim;
+      font-size: 0.75rem;
+      font-weight: 400;
+    }
+  }
+}
+
+.ligungi-history__records {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem 2.5rem;
+}
+
+.ligungi-history__record {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 0.75rem;
+  padding: 0.35rem 0;
+
+  .ligungi-rating-card__bar {
+    margin: 0;
+  }
+}
+
+.ligungi-history__record-label {
+  grid-row: span 2;
+  color: $c-font;
+  font-size: 0.9rem;
+}
+
+.ligungi-history__record-text {
+  color: $c-font-dim;
+  font-size: 0.8rem;
+}
+
+.ligungi-history__table {
+  summary {
+    color: $c-link;
+    cursor: pointer;
+  }
+
+  table {
+    width: 100%;
+    margin-top: 0.75rem;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.35rem 0.5rem;
+    border-bottom: $border;
+    text-align: left;
+  }
+
+  th {
+    color: $c-font-dim;
+    font-weight: 600;
+  }
 }

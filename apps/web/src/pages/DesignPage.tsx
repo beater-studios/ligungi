@@ -4,6 +4,7 @@ import { useState } from 'preact/hooks';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PlayerTag } from '../components/PlayerTag.tsx';
 import { QrCode } from '../components/QrCode.tsx';
+import { RatingHistoryChart } from '../components/RatingHistoryChart.tsx';
 import { Checkbox, ColorField, Field, FieldRow, OptionCards, RadioGroup, Select, SettingRow, SubmitButton, Toggle } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
@@ -465,6 +466,17 @@ export const DesignPage = () => {
         </Section>
 
         <Section id="data" title="Data">
+          <Example label="Rating history (RatingHistoryChart): one 2px line, a recessive grid, crosshair and tip on hover or touch">
+            <RatingHistoryChart
+              label="Example rating history"
+              points={[1500, 1562, 1541, 1580, 1574, 1603, 1590, 1622].map((rating, i, all) => ({
+                at: Date.UTC(2026, 9, 1 + i * 4),
+                rating,
+                change: i ? rating - all[i - 1]! : rating - 1500,
+                gameId: `example${i}`,
+              }))}
+            />
+          </Example>
           <Example label="Players (PlayerTag)">
             <div class="ligungi-ds__row">
               <PlayerTag player={{ name: 'Netero', user: { id: 'x', name: 'Netero' }, rating: 2100, ratingDiff: 8 }} />

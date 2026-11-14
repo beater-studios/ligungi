@@ -22,6 +22,7 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 | `POST /api/logout` | Signs out. |
 | `POST /api/account/password` `{ current, next }` | Changes the password (`wrongPassword` when `current` does not match). Signs out every other session and rotates the current one. |
 | `POST /api/account/delete` `{ password }` | Deletes the account: ratings, follows and sessions are removed, seeks and challenges cancelled, and finished games keep the moves with the player shown as `Anonymous`. Refused with `409 activeGame` while the player has an ongoing game. Returns `{ user: null }`. |
+| `GET /api/users/:name/stats/:mode` | A player's rated games in one mode (`ModeStats`): the rating after each game (oldest first, at most 2000, rating before plus the change as stored), the peak and the lowest with their dates, and the results by color and by length (up to 60 moves, 61 to 120, over 120, counting only the moves after the draft). Voided games are left out. |
 | `POST /api/reports` `{ username, reason, details, gameId? }` | Reports a player to the moderators (signed in): `reason` is `cheating`, `name`, `behavior` or `other`, `details` up to 500 characters. One open report per reporter and player (`409 alreadyReported`), at most 10 per hour. |
 | `GET /api/mod/reports?status=open\|closed` | Moderators: the reports (`ReportView[]`), open ones oldest first, closed ones latest first. Anyone else gets `403 notModerator`. |
 | `POST /api/mod/reports/:id/close` `{ resolution }` | Moderators: closes a report with a note. |

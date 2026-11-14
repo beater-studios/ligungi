@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModUserView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ModUserView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { base32Decode, hotp, TOTP_STEP_MS } from '../src/totp.ts';
 import { Moderation, moderatorCommand } from '../src/moderation.ts';
@@ -1040,8 +1040,49 @@ describe('correspondence', () => {
   });
 });
 
+const makeModerator = (name: string) => moderatorCommand(new Moderation(server!.app.db, Date.now), new Users(server!.app.db, Date.now), ['moderator', 'add', name]);
+
+describe('rating history', () => {
+  it('lists the rating after each rated game, with the peak, the lowest and the results by color and length', async () => {
+    server = await startServer();
+    const a = client();
+    const b = client();
+    await signup(a, 'Ponzu');
+    await signup(b, 'Pokkle');
+    const rated = { ...casual, rated: true };
+    const finish = async (loser: Client, winner: Client, settings: object) => {
+      let { id, view } = await startGame(a, b, settings);
+      view = await play(a, b, view);
+      view = await play(b, a, view);
+      loser.send({ t: 'resign', game: id });
+      await winner.waitGame(id, (g) => g.status === 'ended');
+      return id;
+    };
+    const first = await finish(b, a, rated);
+    await finish(a, b, rated);
+    await finish(b, a, casual);
+    const stats = (await a.request<ModeStats>('GET', '/api/users/ponzu/stats/intro')).data;
+    expect(stats.history).toHaveLength(2);
+    const [win, loss] = stats.history;
+    expect(win!.change).toBeGreaterThan(0);
+    expect(loss!.change).toBeLessThan(0);
+    expect(loss!.rating).toBe(win!.rating + loss!.change);
+    expect(stats.peak).toEqual({ rating: win!.rating, at: win!.at });
+    expect(stats.lowest?.rating).toBe(Math.min(win!.rating, loss!.rating));
+    // Ponzu created both challenges with White.
+    expect(stats.byColor).toEqual({ white: { wins: 1, draws: 0, losses: 1 }, black: { wins: 0, draws: 0, losses: 0 } });
+    expect(stats.byLength).toEqual([{ wins: 1, draws: 0, losses: 1 }, { wins: 0, draws: 0, losses: 0 }, { wins: 0, draws: 0, losses: 0 }]);
+    expect((await a.request<ModeStats>('GET', '/api/users/ponzu/stats/advanced')).data.history).toEqual([]);
+    expect((await a.request('GET', '/api/users/ponzu/stats/nope')).status).toBe(404);
+
+    // A voided game leaves the history and the results.
+    expect(makeModerator('pokkle').code).toBe(0);
+    await b.request('POST', `/api/mod/games/${first}/void`, { reason: 'Teste' });
+    expect((await a.request<ModeStats>('GET', '/api/users/ponzu/stats/intro')).data.history.map((point) => point.gameId)).not.toContain(first);
+  });
+});
+
 describe('moderation', () => {
-  const makeModerator = (name: string) => moderatorCommand(new Moderation(server!.app.db, Date.now), new Users(server!.app.db, Date.now), ['moderator', 'add', name]);
   const login = (c: Client, username: string) => c.request('POST', '/api/login', { username, password: 'segredo123' });
 
   it('takes reports from players, and only moderators read and close them', async () => {

@@ -766,6 +766,12 @@ export const createApp = (config: ServerConfig): App => {
       };
       sendJson(ctx.res, 200, profile);
     })
+    .add('GET', '/api/users/:name/stats/:mode', (ctx) => {
+      const user = findUser(ctx.params.name!);
+      const mode = ctx.params.mode as Mode;
+      if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
+      sendJson(ctx.res, 200, games.modeStats(user.id, mode));
+    })
     .add('GET', '/api/users/:name/games', (ctx) => {
       const user = findUser(ctx.params.name!);
       const filters = parseGameFilters(ctx.url.searchParams);

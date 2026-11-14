@@ -12,6 +12,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { CreateGame } from '../components/CreateGame.tsx';
 import { ModPanel } from '../components/ModPanel.tsx';
+import { RatingHistory } from '../components/RatingHistory.tsx';
 import { ReportButton } from '../components/ReportButton.tsx';
 import { Select } from '../components/ui.tsx';
 import { formatDate, playerName, speedText, useT } from '../i18n/index.ts';
@@ -327,6 +328,8 @@ export const ProfilePage = ({ name }: { name: string }) => {
           <RatingCard key={mode} profile={profile} mode={mode} />
         ))}
       </section>
+
+      <RatingHistory profile={profile} />
 
       {profile.playing.map((game) => (
         <section key={game.id} class="ligungi-card ligungi-live-strip">

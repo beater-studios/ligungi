@@ -1,5 +1,16 @@
 import { moveToString, opposite, type Color, type Mode, type Outcome } from '@ligungi/engine';
-import type { GameCounts, GameFilters, GameStatus, GameSummary, ModeRecord, TimeControl } from '@ligungi/protocol';
+import {
+  GAME_LENGTHS,
+  RATING_HISTORY_MAX,
+  type GameCounts,
+  type GameFilters,
+  type GameStatus,
+  type GameSummary,
+  type ModeRecord,
+  type ModeStats,
+  type RatingPoint,
+  type TimeControl,
+} from '@ligungi/protocol';
 import type { Db } from './db.ts';
 import { updateRating, PROVISIONAL_DEVIATION } from './glicko.ts';
 import { randomId } from './ids.ts';
@@ -116,6 +127,26 @@ export class Games {
     this.#options = options;
     const rows = db.prepare("select * from games where status = 'started'").all() as unknown as GameRow[];
     for (const row of rows) this.#rooms.set(row.id, this.#roomFrom(row));
+    this.#countBoardMoves();
+  }
+
+  /**
+   * Games finished before `board_moves` existed get it once, by replaying them; afterwards every save stores it. Only
+   * rated games feed the statistics that read it.
+   */
+  #countBoardMoves(): void {
+    const rows = this.#db.prepare("select * from games where status = 'ended' and rated = 1 and board_moves is null").all() as unknown as GameRow[];
+    const update = this.#db.prepare('update games set board_moves = ? where id = ?');
+    for (const row of rows) {
+      // A game that cannot be replayed is skipped (its length stays unknown): a statistic must never stop the server.
+      try {
+        const room = this.#roomFrom(row);
+        update.run(room.boardMoves, row.id);
+        room.dispose();
+      } catch (error) {
+        console.error(`could not count the board moves of game ${row.id}`, error);
+      }
+    }
   }
 
   create(game: NewGame): GameRoom {
@@ -373,6 +404,56 @@ export class Games {
     return records;
   }
 
+  /**
+   * A player's rated games in one mode: the rating after each (stored as the rating before plus the change), the peak and
+   * the lowest, and the results by color and by length (moves after the draft). Voided games are left out.
+   */
+  modeStats(userId: string, mode: Mode): ModeStats {
+    const rows = this.#db
+      .prepare(
+        `select id, coalesce(ended_at, created_at) as at, white_user, winner, board_moves,
+           white_rating, white_diff, black_rating, black_diff
+         from games
+         where (white_user = ?1 or black_user = ?1) and mode = ?2 and rated = 1 and status = 'ended' and voided = 0
+         order by at, id`,
+      )
+      .all(userId, mode) as Array<{
+      id: string;
+      at: number;
+      white_user: string | null;
+      winner: Color | null;
+      board_moves: number | null;
+      white_rating: number | null;
+      white_diff: number | null;
+      black_rating: number | null;
+      black_diff: number | null;
+    }>;
+    const empty = (): { wins: number; draws: number; losses: number } => ({ wins: 0, draws: 0, losses: 0 });
+    const byColor = { white: empty(), black: empty() };
+    const byLength = GAME_LENGTHS.map(empty);
+    const history: RatingPoint[] = [];
+    for (const row of rows) {
+      const color: Color = row.white_user === userId ? 'white' : 'black';
+      const result = row.winner === null ? 'draws' : row.winner === color ? 'wins' : 'losses';
+      byColor[color][result]++;
+      const group = GAME_LENGTHS.findIndex((upTo) => upTo === null || (row.board_moves ?? 0) <= upTo);
+      byLength[group]![result]++;
+      const before = color === 'white' ? row.white_rating : row.black_rating;
+      const change = color === 'white' ? row.white_diff : row.black_diff;
+      if (before !== null && change !== null) history.push({ at: row.at, rating: before + change, change, gameId: row.id });
+    }
+    const extreme = (better: (a: number, b: number) => boolean) =>
+      history.reduce<{ rating: number; at: number } | null>((best, point) => (best && !better(point.rating, best.rating) ? best : { rating: point.rating, at: point.at }), null);
+    return {
+      mode,
+      history: history.slice(-RATING_HISTORY_MAX),
+      peak: extreme((a, b) => a > b),
+      lowest: extreme((a, b) => a < b),
+      byColor,
+      byLength,
+    };
+  }
+
   /** Results of several players' rated games in one mode, as `records` counts them. */
   recordsIn(mode: Mode, userIds: readonly string[]): Map<string, ModeRecord> {
     const result = new Map<string, ModeRecord>();
@@ -501,13 +582,14 @@ export class Games {
           white_session, white_user, white_name, white_rating, white_provisional, white_diff,
           black_session, black_user, black_name, black_rating, black_provisional, black_diff,
           moves, status, winner, reason, clock_white, clock_black, clock_running, days_per_move, deadline, rematch_id,
-          created_at, ended_at, updated_at)
-         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          created_at, ended_at, updated_at, board_moves)
+         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          on conflict (id) do update set white_session = excluded.white_session, black_session = excluded.black_session,
           white_diff = excluded.white_diff, black_diff = excluded.black_diff,
           moves = excluded.moves, status = excluded.status, winner = excluded.winner, reason = excluded.reason,
           clock_white = excluded.clock_white, clock_black = excluded.clock_black, clock_running = excluded.clock_running,
-          deadline = excluded.deadline, rematch_id = excluded.rematch_id, ended_at = excluded.ended_at, updated_at = excluded.updated_at`,
+          deadline = excluded.deadline, rematch_id = excluded.rematch_id, ended_at = excluded.ended_at, updated_at = excluded.updated_at,
+          board_moves = excluded.board_moves`,
       )
       .run(
         room.id,
@@ -542,6 +624,7 @@ export class Games {
         room.createdAt,
         room.endedAt,
         now,
+        room.status === 'ended' ? room.boardMoves : null,
       );
   }
 }

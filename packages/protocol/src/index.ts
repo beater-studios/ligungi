@@ -190,6 +190,32 @@ export interface ModeRecord {
   readonly losses: number;
 }
 
+/** A player's rating right after one rated game. */
+export interface RatingPoint {
+  readonly at: number;
+  readonly rating: number;
+  readonly change: number;
+  readonly gameId: string;
+}
+
+/** Upper bounds, in moves played on the board after the draft, of the game length groups; the last one has none. */
+export const GAME_LENGTHS: readonly (number | null)[] = [60, 120, null];
+
+/** Most rating points a history returns: the latest ones. */
+export const RATING_HISTORY_MAX = 2000;
+
+/** A player's rated games in one mode (`GET /api/users/:name/stats/:mode`); voided games are left out. */
+export interface ModeStats {
+  readonly mode: Mode;
+  /** Oldest first, at most `RATING_HISTORY_MAX`. */
+  readonly history: readonly RatingPoint[];
+  readonly peak: { readonly rating: number; readonly at: number } | null;
+  readonly lowest: { readonly rating: number; readonly at: number } | null;
+  readonly byColor: Readonly<Record<Color, ModeRecord>>;
+  /** One record per `GAME_LENGTHS` group, in the same order. */
+  readonly byLength: readonly ModeRecord[];
+}
+
 export interface UserProfile {
   readonly user: UserRef;
   readonly createdAt: number;

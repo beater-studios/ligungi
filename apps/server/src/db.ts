@@ -162,6 +162,9 @@ const MIGRATIONS = [
   );
   create index mod_log_target on mod_log(target_id);
   `,
+  `
+  alter table games add column board_moves integer;
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

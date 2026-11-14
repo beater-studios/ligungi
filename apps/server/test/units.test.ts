@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { Clock } from '../src/clock.ts';
 import { openDatabase } from '../src/db.ts';
+import { Games } from '../src/games.ts';
+import { legalMoves, moveToString } from '@ligungi/engine';
 import { DEFAULT_RATING, updateRating } from '../src/glicko.ts';
 import { base32Decode, base32Encode, hotp, matchStep, newRecoveryCodes, normalizeCode, otpauthUri, TOTP_STEP_MS } from '../src/totp.ts';
 import { TwoFactor } from '../src/two-factor.ts';
@@ -102,6 +104,47 @@ describe('two-factor sweep', () => {
     now += 11 * 60_000;
     expect(twoFactor.sweep()).toBe(1);
     expect(twoFactor.state(active).enabled).toBe(true);
+    db.close();
+  });
+});
+
+describe('board moves', () => {
+  it('counts only the moves after the draft, when saved and when filled in for older games', () => {
+    const db = openDatabase(':memory:');
+    const users = new Users(db, Date.now);
+    const options = { now: Date.now, abortAfterMs: 60_000, claimAfterMs: 30_000, broadcast: () => {} };
+    const games = new Games(db, users, options);
+    const [white, black] = [users.create('Pariston', 'x')!, users.create('Cheadle', 'x')!];
+    const room = games.create({
+      mode: 'advanced',
+      rated: true,
+      timeControl: null,
+      daysPerMove: null,
+      firstPlayer: 'white',
+      freeDraft: false,
+      players: { white: { sessionId: 'w', userId: white.id, name: white.name }, black: { sessionId: 'b', userId: black.id, name: black.name } },
+    });
+    // Each side places a few pieces, then says done; afterwards five moves on the board.
+    let boardMoves = 0;
+    for (let ply = 0; ply < 200 && boardMoves < 5; ply++) {
+      const position = room.game.position;
+      const moves = legalMoves(position);
+      const placed = room.game.moves.filter((move) => move.kind === 'drop').length;
+      const move =
+        position.phase === 'draft'
+          ? (placed >= 6 ? moves.find((m) => m.kind === 'done') : undefined) ?? moves.find((m) => m.kind === 'drop')!
+          : moves.find((m) => m.kind === 'move') ?? moves[0]!;
+      if (position.phase === 'play') boardMoves++;
+      expect(room.move(position.turn, moveToString(move), room.plies)).toBeNull();
+    }
+    expect(room.game.moves.length).toBeGreaterThan(boardMoves);
+    room.resign('white');
+    const stored = () => (db.prepare('select board_moves from games where id = ?').get(room.id) as { board_moves: number | null }).board_moves;
+    expect(stored()).toBe(boardMoves);
+
+    db.prepare('update games set board_moves = null where id = ?').run(room.id);
+    new Games(db, users, options);
+    expect(stored()).toBe(boardMoves);
     db.close();
   });
 });

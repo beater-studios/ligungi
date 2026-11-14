@@ -539,6 +539,7 @@ export const createApp = (config: ServerConfig): App => {
         online: online.has(user.id),
         playing: playing.get(user.id) ?? null,
         ratings: users.ratings(user.id),
+        canChallenge: users.canChallenge(userId, user.id),
       }));
       sendJson(ctx.res, 200, list);
     })

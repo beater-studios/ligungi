@@ -323,7 +323,7 @@ export const pt = {
 
   computer: {
     title: 'Jogar contra o computador',
-    strength: 'Força',
+    level: 'Nível',
     intro: 'Sem conta e sem fila: o computador joga no seu navegador.',
     levelNames: { 1: 'Aleatório', 2: 'Guloso', 3: 'Cauteloso', 4: 'Forte', 5: 'O mais forte' } as Record<1 | 2 | 3 | 4 | 5, string>,
     levelHints: {
@@ -452,7 +452,6 @@ export const pt = {
 
   friends: {
     title: 'Amigos',
-    following: (n: number) => `Seguindo ${n}`,
     empty: 'Você ainda não segue ninguém. Abra o perfil de um jogador e clique em Seguir.',
     login: (
       <>
@@ -463,6 +462,14 @@ export const pt = {
     playing: 'Jogando',
     watch: 'Assistir',
     onlineBox: 'Amigos online',
+    summary: (n: number, online: number) => (
+      <>
+        Você segue <strong>{n}</strong> {n === 1 ? 'jogador' : 'jogadores'} · <strong class="ligungi-friends-page__online">{online} {online === 1 ? 'conectado' : 'conectados'}</strong>
+      </>
+    ),
+    onlineFirst: 'Conectados primeiro',
+    noMatch: 'Ninguém que você segue tem esse nome.',
+    hint: 'Siga jogadores pelo perfil deles para vê-los aqui. Em Conta, nos desafios, você pode deixar que só quem você segue desafie você.',
   },
 
   tv: {

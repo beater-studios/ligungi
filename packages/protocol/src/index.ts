@@ -209,6 +209,8 @@ export interface FriendView {
   /** Id of the game being played right now. */
   readonly playing: string | null;
   readonly ratings: Readonly<Record<Mode, RatingView>>;
+  /** Whether the viewer may challenge them from their profile (allowed by their challenge setting). */
+  readonly canChallenge: boolean;
 }
 
 export interface LeaderEntry {

@@ -95,7 +95,7 @@ export const ComputerPage = () => {
           </header>
           <OptionCards
             name="ai-level"
-            legend={t.computer.strength}
+            legend={t.computer.level}
             value={level}
             options={BOT_LEVELS.map((l) => ({ value: l, badge: l, label: t.computer.levelNames[l], hint: t.computer.levelHints[l] }))}
             onChange={setLevel}

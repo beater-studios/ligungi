@@ -661,10 +661,6 @@ html.light {
 }
 
 
-.ligungi-friends td:nth-child(n + 3) {
-  text-align: center;
-}
-
 /* ===== Forms: styles of the shared components in components/ui.tsx ===== */
 
 // lila's form-group margin (3rem) suits long account pages; ligungi forms are short and denser.
@@ -2012,6 +2008,184 @@ body:has(main.auth) #clinput {
     &--large &__tick,
     &--large &__marker {
       font-size: 20px;
+    }
+  }
+}
+
+/* ===== Friends ===== */
+.ligungi-friends-page__note {
+  padding: 1.25rem;
+
+  h1 {
+    margin: 0 0 0.5rem;
+    color: $c-font-clear;
+    font-size: 1.4rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.ligungi-friends-page__list {
+  padding-bottom: 0.5rem;
+}
+
+.ligungi-friends-page__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: $border;
+
+  h1 {
+    margin: 0 0.5rem 0 0;
+    color: $c-font-clear;
+    font-size: 1.4rem;
+    font-weight: 500;
+  }
+
+  .ligungi-check {
+    margin: 0 0 0 auto;
+  }
+
+  select {
+    display: none;
+    width: auto;
+  }
+
+  .form-control {
+    flex: 0 1 12rem;
+    width: auto;
+  }
+}
+
+.ligungi-friends-page__summary strong {
+  color: $c-font-clear;
+}
+
+.ligungi-friends-page__summary .ligungi-friends-page__online {
+  color: $c-good;
+}
+
+.ligungi-friends-page__empty {
+  padding: 1rem 1.25rem;
+}
+
+.ligungi-friends-page__hint {
+  margin: 0;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-friend-list {
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+}
+
+.ligungi-friend-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8.5rem repeat(4, 6.5rem) 7.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 1.25rem;
+  border-bottom: 1px solid $c-border;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &--head {
+    padding-block: 0.5rem;
+    color: $c-font-dim;
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  &__player {
+    overflow: hidden;
+    color: $c-font-clear;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .is-online {
+    color: $c-good;
+  }
+
+  .is-playing {
+    color: $c-bad;
+  }
+
+  .is-offline,
+  &__rating.is-empty {
+    color: $c-font-dim;
+  }
+
+  &__meta {
+    display: none;
+  }
+
+  &__action {
+    text-align: right;
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.25rem;
+      padding: 0 0.9rem;
+      font-size: 0.85em;
+    }
+  }
+}
+
+@media (max-width: at-most($small)) {
+  .ligungi-friends-page__filters {
+    padding: 0.75rem;
+
+    .ligungi-check {
+      margin: 0;
+    }
+
+    select {
+      display: block;
+    }
+
+    .form-control {
+      flex: 1 1 100%;
+    }
+  }
+
+  .ligungi-friend-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.15rem 0.75rem;
+    padding-inline: 0.75rem;
+
+    &--head,
+    &__status,
+    &__rating {
+      display: none;
+    }
+
+    &__meta {
+      display: block;
+      grid-column: 1;
+      grid-row: 2;
+      font-size: 0.85em;
+    }
+
+    &__action {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+
+      .button {
+        min-height: 2.5rem;
+      }
     }
   }
 }

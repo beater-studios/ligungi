@@ -391,7 +391,10 @@ describe('community', () => {
 
     let list = (await a.request<FriendView[]>('GET', '/api/following')).data;
     expect(list).toHaveLength(1);
-    expect(list[0]).toMatchObject({ user: { name: 'Killua' }, online: false, playing: null });
+    expect(list[0]).toMatchObject({ user: { name: 'Killua' }, online: false, playing: null, canChallenge: true });
+    server.app.db.prepare("update users set challenge_policy = 'nobody' where username = 'Killua'").run();
+    expect((await a.request<FriendView[]>('GET', '/api/following')).data[0]?.canChallenge).toBe(false);
+    server.app.db.prepare("update users set challenge_policy = 'everyone' where username = 'Killua'").run();
 
     const { id } = await startGame(b, a);
     list = (await a.request<FriendView[]>('GET', '/api/following')).data;

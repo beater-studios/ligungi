@@ -386,7 +386,7 @@ export const en: Messages = {
 
   computer: {
     title: 'Play against the computer',
-    strength: 'Strength',
+    level: 'Level',
     intro: 'No account and no queue: the computer plays in your browser.',
     levelNames: { 1: 'Random', 2: 'Greedy', 3: 'Careful', 4: 'Strong', 5: 'Strongest' },
     levelHints: {
@@ -513,7 +513,6 @@ export const en: Messages = {
 
   friends: {
     title: 'Friends',
-    following: (n) => `Following ${n}`,
     empty: 'You do not follow anyone yet. Open a player profile and click Follow.',
     login: (
       <>
@@ -524,6 +523,14 @@ export const en: Messages = {
     playing: 'Playing',
     watch: 'Watch',
     onlineBox: 'Friends online',
+    summary: (n, online) => (
+      <>
+        You follow <strong>{n}</strong> {n === 1 ? 'player' : 'players'} · <strong class="ligungi-friends-page__online">{online} online</strong>
+      </>
+    ),
+    onlineFirst: 'Online first',
+    noMatch: 'Nobody you follow has that name.',
+    hint: 'Follow players from their profile to see them here. In Account, under challenges, you can let only the people you follow challenge you.',
   },
 
   tv: {

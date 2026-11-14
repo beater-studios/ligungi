@@ -386,7 +386,7 @@ export const es: Messages = {
 
   computer: {
     title: 'Jugar contra la computadora',
-    strength: 'Fuerza',
+    level: 'Nivel',
     intro: 'Sin cuenta y sin cola: la computadora juega en tu navegador.',
     levelNames: { 1: 'Aleatorio', 2: 'Codicioso', 3: 'Cauteloso', 4: 'Fuerte', 5: 'El más fuerte' },
     levelHints: {
@@ -513,7 +513,6 @@ export const es: Messages = {
 
   friends: {
     title: 'Amigos',
-    following: (n) => `Siguiendo a ${n}`,
     empty: 'Todavía no sigues a nadie. Abre el perfil de un jugador y haz clic en Seguir.',
     login: (
       <>
@@ -524,6 +523,14 @@ export const es: Messages = {
     playing: 'Jugando',
     watch: 'Ver',
     onlineBox: 'Amigos conectados',
+    summary: (n, online) => (
+      <>
+        Sigues a <strong>{n}</strong> {n === 1 ? 'jugador' : 'jugadores'} · <strong class="ligungi-friends-page__online">{online} {online === 1 ? 'conectado' : 'conectados'}</strong>
+      </>
+    ),
+    onlineFirst: 'Conectados primero',
+    noMatch: 'Nadie a quien sigues tiene ese nombre.',
+    hint: 'Sigue a jugadores desde su perfil para verlos aquí. En Cuenta, en los desafíos, puedes permitir que solo te desafíen quienes sigues.',
   },
 
   tv: {

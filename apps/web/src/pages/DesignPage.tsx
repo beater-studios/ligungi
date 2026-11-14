@@ -53,7 +53,7 @@ export const DesignPage = () => {
   const [switched, setSwitched] = useState(true);
   const [checked, setChecked] = useState(true);
   const [choice, setChoice] = useState<'white' | 'random' | 'black'>('random');
-  const [strength, setStrength] = useState(2);
+  const [level, setLevel] = useState(2);
   const sections = [
     ['principles', 'Principles'],
     ['colors', 'Colors'],
@@ -220,10 +220,10 @@ export const DesignPage = () => {
             <div style={{ display: 'grid', gap: '1.25rem', width: '100%' }}>
               <OptionCards
                 name="ds-cards"
-                legend="Strength"
-                value={strength}
+                legend="Level"
+                value={level}
                 options={[1, 2, 3].map((n) => ({ value: n, badge: n, label: ['Random', 'Greedy', 'Careful'][n - 1]!, hint: 'One line of help.' }))}
-                onChange={setStrength}
+                onChange={setLevel}
               />
               <OptionCards
                 name="ds-row"

@@ -18,7 +18,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more).
 | Studies (shared annotated analysis with chapters) | Teaching and community content | L | Builds on the analysis board, the import and the board editor. |
 | Coaches directory | Connects learners with teachers | S | Profiles that opt in, with languages and contact links. |
 | Videos library | Curated learning content | S | A curated list of links (YouTube and similar), filtered by language and level. |
-| Clocks on the home featured game | Livelier home page | S | The home shows live games as mini boards loaded once. They would follow the moves and show both clocks, like the TV page. |
 | Streamers and broadcasts | Shows Gungi streams and events on the site | M | Only once there are Gungi streams or events to show. |
 | Profile details (bio, country flag, links) | Personality on profiles; flags show up on leaderboards | S | Fields on the account page, shown on the profile; links checked and rendered as plain text links. |
 | Privacy settings: who can message or follow me | Reduces harassment | S | Who can challenge me already exists on the account page. Following can be limited now; messages once private messages exist. |

@@ -4,10 +4,12 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { turns } from '../challenges.ts';
 import { CreateGame, type CreateTarget } from '../components/CreateGame.tsx';
+import { LivePlayer } from '../components/LivePlayer.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { Modal } from '../components/Modal.tsx';
 import { formatClock, playerName, settingsText, speedText, timeControlText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
+import { useLiveGames } from '../liveGames.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
 import { socket } from '../socket.ts';
@@ -144,11 +146,11 @@ const SeekRow = ({ seek, onAccept, onCancel }: { seek: SeekView; onAccept: (s: S
   );
 };
 
-/** `undefined` while loading, `'error'` when the request failed. */
-type Loaded<T> = T | undefined | 'error';
-
-const Live = ({ games }: { games: Loaded<readonly GameSummary[]> }) => {
+/** The strongest live games, following every move with their clocks, as on the TV. */
+const Live = () => {
   const t = useT();
+  const { games, since, failed } = useLiveGames();
+  const shown = games?.slice(0, LIVE_GAMES) ?? [];
   return (
     <section class="ligungi-card ligungi-home__live">
       <div class="ligungi-home__card-head">
@@ -157,20 +159,21 @@ const Live = ({ games }: { games: Loaded<readonly GameSummary[]> }) => {
           {t.home.tvLink}
         </a>
       </div>
-      {games !== undefined && games !== 'error' && games.length > 0 ? (
+      {shown.length > 0 ? (
         <div class="ligungi-home__live-games">
-          {games.map((game) => (
+          {shown.map((game) => (
             <a key={game.id} class="ligungi-home__live-game" href={`/${game.id}`}>
+              <LivePlayer game={game} color="black" since={since} />
               <MiniBoard fen={game.fen} />
-              <span class="ligungi-home__live-players">
-                {playerName(t, game.players.white)} × {playerName(t, game.players.black)}
+              <LivePlayer game={game} color="white" since={since} />
+              <span class="ligungi-home__live-mode">
+                {t.modes[game.mode]} · {speedText(t, game)}
               </span>
-              <span class="ligungi-home__live-mode">{t.modes[game.mode]}</span>
             </a>
           ))}
         </div>
       ) : (
-        <p class="ligungi-notice">{games === undefined ? t.common.loading : games === 'error' ? t.genericError : t.home.noTv}</p>
+        <p class="ligungi-notice">{games === null ? (failed ? t.genericError : t.common.loading) : t.home.noTv}</p>
       )}
     </section>
   );
@@ -208,7 +211,6 @@ export const HomePage = () => {
   const { search } = useLocation();
   const [lobby, setLobby] = useState<LobbyView | null>(null);
   const [me, setMe] = useState<Me | null>(null);
-  const [live, setLive] = useState<Loaded<readonly GameSummary[]>>(undefined);
   const [mode, setMode] = useState<Mode>(storedQuickMode);
   const [create, setCreate] = useState<CreateTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -234,10 +236,6 @@ export const HomePage = () => {
       if (message.t === 'lobby') setLobby(message.lobby);
     });
     api.get<LobbyView>('/api/lobby').then(setLobby).catch(() => {});
-    api
-      .get<GameSummary[]>('/api/tv')
-      .then((games) => setLive(games.slice(0, LIVE_GAMES)))
-      .catch(() => setLive('error'));
     return () => {
       unsubscribe();
       off();
@@ -383,7 +381,7 @@ export const HomePage = () => {
           </section>
 
           <OnlineFriends />
-          <Live games={live} />
+          <Live />
         </div>
       </div>
 

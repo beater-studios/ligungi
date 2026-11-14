@@ -88,6 +88,9 @@ const PLAYERS_CACHE_MS = 60_000;
 /** Expired challenges are canceled within this delay even if nobody opens them (the receiver's list updates). */
 const CHALLENGE_SWEEP_MS = 60_000;
 const MAX_TOPICS_PER_CLIENT = 32;
+/** Live games listed for the TV and the home page. */
+const TV_GAMES = 24;
+const TV_PUBLISH_MS = 500;
 const SEARCH_LIMIT = 10;
 const SITE_NAME = 'ligungi';
 /** Cloudflare Web Analytics: no cookies, aggregate only; its edge injects this script into the HTML. */
@@ -155,7 +158,9 @@ export const createApp = (config: ServerConfig): App => {
       game: room.view(client.player.sessionId, client.player.userId),
     }));
     // The other player may be anywhere on the site, waiting for this move.
-    if (room.daysPerMove !== null) for (const seat of Object.values(room.seats)) if (seat.userId) sendTurns(seat.userId);
+    if (room.daysPerMove !== null) {
+      for (const seat of Object.values(room.seats)) if (seat.userId) sendTurns(seat.userId);
+    } else publishTv();
   };
 
   const games = new Games(db, users, {
@@ -166,6 +171,18 @@ export const createApp = (config: ServerConfig): App => {
   });
 
   const tv = new Tv(games, config.now);
+  const tvGames = () => tv.live().slice(0, TV_GAMES).map((room) => room.summary());
+  // Every move of every live game changes the list, so changes are gathered and sent at most every TV_PUBLISH_MS.
+  let tvTimer: ReturnType<typeof setTimeout> | null = null;
+  const publishTv = () => {
+    if (tvTimer || hub.subscribers('tv').length === 0) return;
+    tvTimer = setTimeout(() => {
+      tvTimer = null;
+      const list = tvGames();
+      hub.publish('tv', () => ({ t: 'tv', games: list }));
+    }, TV_PUBLISH_MS);
+    tvTimer.unref();
+  };
 
   const lobbyView = (player: Player): LobbyView => ({
     seeks: lobby.seekViews(player),
@@ -847,7 +864,7 @@ export const createApp = (config: ServerConfig): App => {
       const origin = `${ctx.req.headers['x-forwarded-proto'] ?? 'http'}://${ctx.req.headers.host ?? SITE_NAME}`;
       sendText(ctx.res, 200, exportGame(room, origin));
     })
-    .add('GET', '/api/tv', (ctx) => sendJson(ctx.res, 200, tv.live().slice(0, 24).map((room) => room.summary())))
+    .add('GET', '/api/tv', (ctx) => sendJson(ctx.res, 200, tvGames()))
     .add('GET', '/api/tv/channels', (ctx) => sendJson(ctx.res, 200, tv.channels()))
     .add('GET', '/api/version', (ctx) => sendJson(ctx.res, 200, BUILD))
     .add('GET', '/api/lobby', (ctx) => sendJson(ctx.res, 200, lobbyView(ctx.player)))
@@ -1011,7 +1028,7 @@ export const createApp = (config: ServerConfig): App => {
   });
 
   const validTopic = (topic: unknown): topic is Topic =>
-    typeof topic === 'string' && (topic === 'lobby' || /^(game|challenge):[A-Za-z0-9]{1,16}$/.test(topic));
+    typeof topic === 'string' && (topic === 'lobby' || topic === 'tv' || /^(game|challenge):[A-Za-z0-9]{1,16}$/.test(topic));
 
   const onConnection = (socket: WebSocket, player: Player) => {
     const client: Client = { socket, player, topics: new Set(), alive: true };
@@ -1057,6 +1074,9 @@ export const createApp = (config: ServerConfig): App => {
         if (kind === 'lobby') {
           hub.subscribe(client, topic);
           hub.send(client, { t: 'lobby', lobby: lobbyView(client.player) });
+        } else if (kind === 'tv') {
+          hub.subscribe(client, topic);
+          hub.send(client, { t: 'tv', games: tvGames() });
         } else if (kind === 'game' && id) {
           const room = games.get(id);
           if (!room) return error('gameNotFound');

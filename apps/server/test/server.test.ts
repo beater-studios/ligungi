@@ -133,6 +133,31 @@ describe('playing online', () => {
     expect(game.firstPlayer).toBe('white');
   });
 
+  it('sends the live games to the tv topic on subscribing and after each move, and lists the channels', async () => {
+    server = await startServer();
+    const a = client();
+    const b = client();
+    const watcher = client();
+    await watcher.connect();
+    watcher.send({ t: 'sub', topic: 'tv' });
+    expect(await watcher.waitFor((m) => m.t === 'tv')).toEqual({ t: 'tv', games: [] });
+    let { id, view } = await startGame(a, b);
+    view = await play(a, b, view);
+    let update = (await watcher.waitFor((m) => m.t === 'tv' && m.games.length === 1)) as { games: readonly GameSummary[] };
+    expect(update.games[0]).toMatchObject({ id, plies: 1, turn: 'black' });
+    await play(b, a, view);
+    update = (await watcher.waitFor((m) => m.t === 'tv' && m.games[0]?.plies === 2)) as { games: readonly GameSummary[] };
+    expect(update.games[0]).toMatchObject({ id, turn: 'white' });
+    const channels = (await watcher.request<{ channel: string; game: GameSummary | null }[]>('GET', '/api/tv/channels')).data;
+    expect(channels.map((c) => [c.channel, c.game?.id ?? null])).toEqual([
+      ['best', id],
+      ['intro', id],
+      ['beginner', null],
+      ['intermediate', null],
+      ['advanced', null],
+    ]);
+  });
+
   it('updates ratings after a rated game and shows it on the profiles', async () => {
     server = await startServer();
     const a = client();

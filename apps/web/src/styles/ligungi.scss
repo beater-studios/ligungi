@@ -3259,36 +3259,6 @@ body:has(main.ligungi-auth) #clinput {
     text-transform: uppercase;
   }
 
-  &__player {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 0.5rem;
-    min-width: 0;
-  }
-
-  &__name {
-    overflow: hidden;
-    color: $c-font-clear;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  &__rating {
-    margin-inline-start: 0.35rem;
-    color: $c-font-dim;
-  }
-
-  &__clock {
-    flex: none;
-    font-variant-numeric: tabular-nums;
-
-    &.is-running {
-      color: $c-font-clear;
-      font-weight: 700;
-    }
-  }
-
   &__meta {
     color: $c-font-dim;
     font-size: 0.85em;
@@ -3299,7 +3269,7 @@ body:has(main.ligungi-auth) #clinput {
     padding: 1rem;
     font-size: 1em;
 
-    .ligungi-tv-game__clock {
+    .ligungi-live-player__clock {
       font-size: 1.4rem;
     }
   }
@@ -3327,7 +3297,7 @@ body:has(main.ligungi-auth) #clinput {
     padding: 0.5rem;
     font-size: 0.8em;
 
-    .ligungi-tv-game__clock {
+    .ligungi-live-player__clock {
       display: none;
     }
   }
@@ -3739,6 +3709,37 @@ body:has(main.ligungi-auth) #clinput {
 
 .round__side .ligungi-game-info {
   margin-bottom: $block-gap;
+}
+
+/* ===== Live game sides (components/LivePlayer.tsx): name, rating and a ticking clock, on the TV and the home page ===== */
+.ligungi-live-player {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+
+  &__name {
+    overflow: hidden;
+    color: $c-font-clear;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__rating {
+    margin-inline-start: 0.35rem;
+    color: $c-font-dim;
+  }
+
+  &__clock {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+
+    &.is-running {
+      color: $c-font-clear;
+      font-weight: 700;
+    }
+  }
 }
 
 /* ===== TV channels: the list beside a watched game, or alone while a channel has nothing to show ===== */
@@ -4165,23 +4166,16 @@ body:has(main.ligungi-auth) #clinput {
   gap: 0.35rem;
   min-width: 0;
   color: $c-font;
+  font-size: 0.85em;
 
   &:hover {
     color: $c-link;
   }
 }
 
-.ligungi-home__live-players {
-  overflow: hidden;
-  color: $c-font-clear;
-  font-size: 0.85em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .ligungi-home__live-mode {
   color: $c-font-dim;
-  font-size: 0.8em;
+  font-size: 0.95em;
 }
 
 // Phones: one column in the mockup's order, quick pairing first and the learning card last.
@@ -4292,16 +4286,27 @@ body:has(main.ligungi-auth) #clinput {
     gap: 0.5rem;
   }
 
+  // Without the board, each game reads as a scoreboard: both sides stacked with their clocks, the mode beside them.
   .ligungi-home__live-game {
-    flex-direction: row;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
+    gap: 0.2rem 1rem;
     padding: 0.75rem;
     border-radius: 4px;
     background: $c-bg-zebra;
 
     .gg-mini {
       display: none;
+    }
+
+    .ligungi-live-player {
+      grid-column: 1;
+    }
+
+    .ligungi-home__live-mode {
+      grid-column: 2;
+      grid-row: 1 / span 2;
     }
   }
 }

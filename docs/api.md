@@ -82,7 +82,7 @@ Client to server:
 
 | Message | Effect |
 |---|---|
-| `{ t: 'sub', topic }` / `{ t: 'unsub', topic }` | Topics: `lobby`, `game:<id>`, `challenge:<id>`. Subscribing to a game or challenge that does not exist returns an error and subscribes to nothing; a connection holds at most 32 topics (`tooManySubscriptions`). |
+| `{ t: 'sub', topic }` / `{ t: 'unsub', topic }` | Topics: `lobby`, `tv`, `game:<id>`, `challenge:<id>`. Subscribing to a game or challenge that does not exist returns an error and subscribes to nothing; a connection holds at most 32 topics (`tooManySubscriptions`). |
 | `{ t: 'move', game, move, ply }` | Plays a move. `ply` is the number of moves already played. |
 | `{ t: 'resign' \| 'abort' \| 'claim', game }` | Resigns, aborts or claims victory. |
 | `{ t: 'draw' \| 'rematch', game, action }` | `action`: `offer`, `accept` or `decline`. |
@@ -96,6 +96,7 @@ Server to client:
 |---|---|
 | `{ t: 'game', game }` | Any change in a subscribed game (full state). |
 | `{ t: 'lobby', lobby }` | A change in the lobby. |
+| `{ t: 'tv', games }` | The live games of `GET /api/tv`: on subscribing to `tv`, and again when one of them changes (a move, a new game, an end), at most twice a second. |
 | `{ t: 'challenge', challenge }` | A change in a subscribed challenge. |
 | `{ t: 'incoming', challenges }` | To a signed-in player, on every socket: the open challenges sent to them from profiles. Sent on connecting and after each change. |
 | `{ t: 'turns', games }` | To a signed-in player, on every socket: their correspondence games waiting for their move (`GameSummary[]`). Sent on connecting and after each change to one of their correspondence games. |

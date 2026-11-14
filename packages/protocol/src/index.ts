@@ -490,7 +490,8 @@ export interface ModUserView {
 /** Seconds a player gives the opponent with the "extra time" button, as on lichess. */
 export const EXTRA_TIME_SECONDS = 15;
 
-export type Topic = 'lobby' | `game:${string}` | `challenge:${string}`;
+/** `tv`: the live games the TV and the home page show, sent on subscribing and again whenever one of them changes. */
+export type Topic = 'lobby' | 'tv' | `game:${string}` | `challenge:${string}`;
 
 export type ClientMessage =
   | { readonly t: 'sub'; readonly topic: Topic }
@@ -505,6 +506,8 @@ export type ClientMessage =
 export type ServerMessage =
   | { readonly t: 'game'; readonly game: GameView }
   | { readonly t: 'lobby'; readonly lobby: LobbyView }
+  /** Live games with at least one move, strongest first (as `GET /api/tv`). */
+  | { readonly t: 'tv'; readonly games: readonly GameSummary[] }
   | { readonly t: 'challenge'; readonly challenge: ChallengeView }
   /** The open challenges sent to the user, on connecting and after every change. */
   | { readonly t: 'incoming'; readonly challenges: readonly ChallengeView[] }

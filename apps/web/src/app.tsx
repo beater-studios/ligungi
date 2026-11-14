@@ -163,37 +163,41 @@ const Dasher = () => {
           {view === 'language' && (
             <div class="langs">
               {back(t.nav.language)}
-              <form role="group" aria-label={t.nav.language} onSubmit={(e) => e.preventDefault()}>
-                {(['auto', ...LANGS] as const).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    lang={option === 'auto' ? undefined : MESSAGES[option].locale}
-                    class={current.lang === option ? 'current' : ''}
-                    aria-pressed={current.lang === option}
-                    onClick={() => updatePrefs({ lang: option })}
-                  >
-                    {option === 'auto' ? t.settings.auto : MESSAGES[option].languageName}
-                  </button>
-                ))}
+              <form onSubmit={(e) => e.preventDefault()}>
+                <div role="group" aria-label={t.nav.language}>
+                  {(['auto', ...LANGS] as const).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      lang={option === 'auto' ? undefined : MESSAGES[option].locale}
+                      class={current.lang === option ? 'current' : ''}
+                      aria-pressed={current.lang === option}
+                      onClick={() => updatePrefs({ lang: option })}
+                    >
+                      {option === 'auto' ? t.settings.auto : MESSAGES[option].languageName}
+                    </button>
+                  ))}
+                </div>
               </form>
             </div>
           )}
           {view === 'theme' && (
             <div class="langs">
               {back(t.settings.theme)}
-              <form role="group" aria-label={t.settings.theme} onSubmit={(e) => e.preventDefault()}>
-                {THEMES.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    class={current.theme === option ? 'current' : ''}
-                    aria-pressed={current.theme === option}
-                    onClick={() => updatePrefs({ theme: option })}
-                  >
-                    {themeLabel(t, option)}
-                  </button>
-                ))}
+              <form onSubmit={(e) => e.preventDefault()}>
+                <div role="group" aria-label={t.settings.theme}>
+                  {THEMES.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      class={current.theme === option ? 'current' : ''}
+                      aria-pressed={current.theme === option}
+                      onClick={() => updatePrefs({ theme: option })}
+                    >
+                      {themeLabel(t, option)}
+                    </button>
+                  ))}
+                </div>
               </form>
             </div>
           )}

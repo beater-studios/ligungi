@@ -16,7 +16,7 @@
     "@ligungi/bot": "*",
     "@ligungi/engine": "*",
     "@ligungi/protocol": "*",
-    "preact": "10.29.8"
+    "preact": "11.2.0"
   },
   "devDependencies": {
     "preact-render-to-string": "6.8.2",

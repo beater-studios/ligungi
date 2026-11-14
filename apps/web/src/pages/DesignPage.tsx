@@ -1,8 +1,10 @@
 import { initialPosition } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
+import { Flag } from '../components/Flag.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PlayerTag } from '../components/PlayerTag.tsx';
+import { ProfileAbout, SiteIcon } from '../components/ProfileAbout.tsx';
 import { QrCode } from '../components/QrCode.tsx';
 import { RatingHistoryChart } from '../components/RatingHistoryChart.tsx';
 import { Checkbox, ColorField, Field, FieldRow, OptionCards, RadioGroup, Select, SettingRow, SubmitButton, Toggle } from '../components/ui.tsx';
@@ -184,6 +186,21 @@ export const DesignPage = () => {
                 <input id="ds-text" class="form-control" placeholder="Text input (.form-control)" />
               </Field>
             </FieldRow>
+            <Field
+              label={
+                <>
+                  <SiteIcon site="youtube" /> Prefixed input (.ligungi-prefixed): only the end of an address is typed
+                </>
+              }
+              htmlFor="ds-prefixed"
+            >
+              <div class="ligungi-prefixed">
+                <span class="ligungi-prefixed__prefix" aria-hidden="true">
+                  youtube.com/@
+                </span>
+                <input id="ds-prefixed" class="form-control" value="gon" readOnly />
+              </div>
+            </Field>
             <Checkbox id="ds-check" checked={checked} onChange={setChecked} label="Checkbox" help="Optional help, aligned with the label." />
             <Checkbox id="ds-check-off" checked={false} onChange={() => {}} label="Disabled checkbox" disabled />
             <Field label="RadioGroup">
@@ -495,6 +512,22 @@ export const DesignPage = () => {
                 Offline
               </a>
             </div>
+          </Example>
+          <Example label="Flags beside names (Flag, .ligungi-flag)">
+            <div class="ligungi-ds__row">
+              <span>
+                Gon <Flag country="br" />
+              </span>
+              <span>
+                Killua <Flag country="jp" />
+              </span>
+              <span>
+                Kite <Flag country="pt" />
+              </span>
+            </div>
+          </Example>
+          <Example label="Profile about: bio, social networks and profiles on other game sites (ProfileAbout)">
+            <ProfileAbout details={{ bio: 'Gungi every day.\nAdvanced mode, slow games.', country: 'br', links: { youtube: 'gon', twitch: 'gon_plays', lichess: 'Gon', lishogi: 'Gon' } }} />
           </Example>
           <Example label="Tabs (.number-menu--tabs)">
             <div class="number-menu number-menu--tabs">

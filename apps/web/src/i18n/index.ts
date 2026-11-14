@@ -68,5 +68,21 @@ export const formatClock = (ms: number): string => {
 /** Free text a person wrote (a moderator's reason), closed with a period when it has no final punctuation. */
 export const asSentence = (text: string): string => (/[.!?…]$/.test(text.trim()) ? text.trim() : `${text.trim()}.`);
 
+const regionNames = new Map<string, Intl.DisplayNames | null>();
+
+/** A country's name in the page's language, from the browser; the code itself where the browser has no names. */
+export const countryName = (t: Messages, code: string): string => {
+  let names = regionNames.get(t.locale);
+  if (names === undefined) {
+    try {
+      names = new Intl.DisplayNames([t.locale], { type: 'region' });
+    } catch {
+      names = null;
+    }
+    regionNames.set(t.locale, names);
+  }
+  return names?.of(code.toUpperCase()) ?? code.toUpperCase();
+};
+
 export const formatDate = (t: Messages, ms: number): string =>
   new Date(ms).toLocaleDateString(t.locale, { day: '2-digit', month: 'short', year: 'numeric' });

@@ -1,7 +1,9 @@
 import { MODES, MODE_RULES, type Color, type Mode, type Outcome } from '@ligungi/engine';
 import type { ErrorCode } from './errors.ts';
+import type { Country, ProfileDetails } from './profile.ts';
 
 export * from './errors.ts';
+export * from './profile.ts';
 
 /** Seconds. */
 export interface TimeControl {
@@ -241,6 +243,7 @@ export interface UserProfile {
   readonly followed: boolean;
   /** Whether the viewer may challenge this user from the profile (signed in, not themselves, allowed by them). */
   readonly canChallenge: boolean;
+  readonly details: ProfileDetails;
   readonly playing: readonly GameSummary[];
   readonly recent: readonly GameSummary[];
 }
@@ -284,6 +287,7 @@ export interface FriendView {
 
 export interface LeaderEntry {
   readonly user: UserRef;
+  readonly country: Country | null;
   readonly rating: number;
   readonly games: number;
   readonly online: boolean;
@@ -308,6 +312,7 @@ export interface ModeStanding {
 
 export interface OnlinePlayer {
   readonly user: UserRef;
+  readonly country: Country | null;
   /** Standing in each mode the player has rated games in. */
   readonly ratings: Readonly<Partial<Record<Mode, ModeStanding>>>;
   /** The game the player is in right now, if any. */
@@ -350,6 +355,7 @@ export interface RankingRow {
   /** Leaderboard position; tied ratings share it. */
   readonly rank: number;
   readonly user: UserRef;
+  readonly country: Country | null;
   readonly rating: number;
   readonly games: number;
   readonly record: ModeRecord;
@@ -464,7 +470,7 @@ export interface ReportView {
   readonly closedAt: number | null;
 }
 
-export type ModAction = 'grant' | 'revoke' | 'suspend' | 'unsuspend' | 'rename' | 'void' | 'closeReport';
+export type ModAction = 'grant' | 'revoke' | 'suspend' | 'unsuspend' | 'rename' | 'clearProfile' | 'void' | 'closeReport';
 
 /** One line of the moderation log. Names are kept as they were when the action was taken. */
 export interface ModLogEntry {

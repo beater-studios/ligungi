@@ -2,6 +2,7 @@ import { MODES, type Mode } from '@ligungi/engine';
 import { RANKING_QUERY_MAX, type ModeStanding, type RankingRow, type RankingView } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { Flag } from '../components/Flag.tsx';
 import { Checkbox } from '../components/ui.tsx';
 import { useT } from '../i18n/index.ts';
 import { session } from '../session.ts';
@@ -54,6 +55,7 @@ const Row = ({ row, me }: { row: RankingRow; me: boolean }) => {
           <i class="line" />
           {row.user.name}
         </a>
+        <Flag country={row.country} />
         {me && <span class="ligungi-tag">{t.players.you}</span>}
         {row.followed && <span class="ligungi-tag">{t.players.followed}</span>}
       </span>

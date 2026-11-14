@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ModUserView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ModUserView, type ProfileDetails, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { base32Decode, hotp, TOTP_STEP_MS } from '../src/totp.ts';
 import { Moderation, moderatorCommand } from '../src/moderation.ts';
@@ -1106,6 +1106,40 @@ describe('rating history', () => {
     expect(makeModerator('pokkle').code).toBe(0);
     await b.request('POST', `/api/mod/games/${first}/void`, { reason: 'Teste' });
     expect((await a.request<ModeStats>('GET', '/api/users/ponzu/stats/intro')).data.history.map((point) => point.gameId)).not.toContain(first);
+  });
+});
+
+describe('profile details', () => {
+  it('saves the bio, country and linked profiles, shows them on the profile and the ranking, and lets moderators clear them', async () => {
+    server = await startServer();
+    const a = client();
+    const mod = client();
+    await signup(a, 'Biscuit');
+    await signup(mod, 'Netero');
+    expect((await a.request<ProfileDetails>('GET', '/api/account/profile')).data).toEqual({ bio: '', country: null, links: {} });
+    expect((await client().request('POST', '/api/account/profile', { bio: '', country: null, links: {} })).status).toBe(401);
+    expect((await a.request('POST', '/api/account/profile', { bio: 'Oi', country: 'br', links: { youtube: 'https://evil.example/x' } })).data).toMatchObject({
+      code: 'invalidProfileLink',
+    });
+    const saved = await a.request<ProfileDetails>('POST', '/api/account/profile', {
+      bio: 'Treino todo dia.',
+      country: 'br',
+      links: { youtube: '@biscuit', lichess: 'lichess.org/@/Biscuit', instagram: '' },
+    });
+    expect(saved.data).toEqual({ bio: 'Treino todo dia.', country: 'br', links: { youtube: 'biscuit', lichess: 'Biscuit' } });
+    expect((await client().request<UserProfile>('GET', '/api/users/biscuit')).data.details).toEqual(saved.data);
+    const exported = (await a.request<{ profile: ProfileDetails }>('GET', '/api/account/export')).data;
+    expect(exported.profile).toEqual(saved.data);
+
+    // The ranking carries the country (rows come from rated games, so one is faked here).
+    server.app.db.prepare("insert into ratings (user_id, mode, rating, deviation, volatility, games) select id, 'intro', 1600, 50, 0.06, 10 from users where username_key = 'biscuit'").run();
+    expect((await client().request<RankingView>('GET', '/api/ranking/intro')).data.rows[0]).toMatchObject({ user: { name: 'Biscuit' }, country: 'br' });
+
+    expect(makeModerator('netero').code).toBe(0);
+    expect((await a.request('POST', '/api/mod/users/biscuit/clear-profile', { reason: 'x' })).data).toMatchObject({ code: 'notModerator' });
+    expect((await mod.request('POST', '/api/mod/users/biscuit/clear-profile', { reason: 'Link impróprio' })).status).toBe(200);
+    expect((await client().request<UserProfile>('GET', '/api/users/biscuit')).data.details).toEqual({ bio: '', country: 'br', links: {} });
+    expect((await mod.request<ModUserView>('GET', '/api/mod/users/biscuit')).data.log[0]).toMatchObject({ action: 'clearProfile', details: 'Link impróprio' });
   });
 });
 

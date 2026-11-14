@@ -217,7 +217,8 @@ export const pt: Content = {
       <h2>Partidas e perfil</h2>
       <p>
         Partidas, resultados, ratings e o nome de usuário são públicos: qualquer pessoa pode ver e exportar as partidas
-        jogadas no site.
+        jogadas no site. O que você escreve no perfil (bio e links para outros sites) também é público e não pode ofender,
+        enganar nem divulgar conteúdo impróprio; a moderação pode apagar o que violar essa regra.
       </p>
       <h2>Código e marcas</h2>
       <p>
@@ -287,6 +288,11 @@ export const pt: Content = {
           o tipo de navegador e o tempo de carregamento. Ele não usa cookies, não guarda nada no seu navegador e não
           identifica você. Só é ativado se você aceitar no aviso de cookies, e você pode mudar a escolha no fim desta
           página.
+        </li>
+        <li>
+          <b>Perfil:</b> a bio, o país e os nomes de usuário em outros sites que você escolher preencher na página da Conta.
+          Aparecem no seu perfil público, entram na cópia dos seus dados e são apagados com a conta. A moderação pode apagar a
+          bio e os links que violem os termos de uso.
         </li>
         <li>
           <b>Preferências:</b> idioma, tema, som e tamanho do tabuleiro ficam só no seu navegador (armazenamento local) e não

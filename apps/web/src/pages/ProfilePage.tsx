@@ -11,11 +11,13 @@ import {
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { CreateGame } from '../components/CreateGame.tsx';
+import { Flag } from '../components/Flag.tsx';
 import { ModPanel } from '../components/ModPanel.tsx';
+import { ProfileAbout } from '../components/ProfileAbout.tsx';
 import { RatingHistory } from '../components/RatingHistory.tsx';
 import { ReportButton } from '../components/ReportButton.tsx';
 import { Select } from '../components/ui.tsx';
-import { formatDate, playerName, speedText, useT } from '../i18n/index.ts';
+import { countryName, formatDate, playerName, speedText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
@@ -272,8 +274,11 @@ export const ProfilePage = ({ name }: { name: string }) => {
           {profile.user.name.charAt(0).toUpperCase()}
         </span>
         <div class="ligungi-profile__identity">
-          <h1>{profile.user.name}</h1>
+          <h1>
+            {profile.user.name} <Flag country={profile.details.country} />
+          </h1>
           <p class="ligungi-profile__since">
+            {profile.details.country && <>{countryName(t, profile.details.country)} · </>}
             <span class={profile.online ? 'ligungi-profile__online' : ''}>{profile.online ? t.common.online : t.common.offline}</span> ·{' '}
             {t.profile.memberSince(formatDate(t, profile.createdAt))}
           </p>
@@ -318,10 +323,19 @@ export const ProfilePage = ({ name }: { name: string }) => {
             </a>
           )}
           {!isMe && me && <ReportButton username={profile.user.name} />}
+          {isMe && (
+            <a class="button button-empty text" href="/account#profile" data-icon={icons.Pencil}>
+              {t.profile.edit}
+            </a>
+          )}
         </div>
       </section>
 
-      {moderator && !isMe && <ModPanel name={profile.user.name} />}
+      <ProfileAbout details={profile.details} />
+
+      {moderator && !isMe && (
+        <ModPanel name={profile.user.name} onProfileCleared={() => setProfile({ ...profile, details: { ...profile.details, bio: '', links: {} } })} />
+      )}
 
       <section class="ligungi-profile__ratings" aria-label={t.profile.ratingsLabel}>
         {MODES.map((mode) => (

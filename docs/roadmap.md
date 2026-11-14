@@ -19,6 +19,5 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more).
 | Coaches directory | Connects learners with teachers | S | Profiles that opt in, with languages and contact links. |
 | Videos library | Curated learning content | S | A curated list of links (YouTube and similar), filtered by language and level. |
 | Streamers and broadcasts | Shows Gungi streams and events on the site | M | Only once there are Gungi streams or events to show. |
-| Profile details (bio, country flag, links) | Personality on profiles; flags show up on leaderboards | S | Fields on the account page, shown on the profile; links checked and rendered as plain text links. |
 | Privacy settings: who can message or follow me | Reduces harassment | S | Who can challenge me already exists on the account page. Following can be limited now; messages once private messages exist. |
 | Kid mode (no chat or messages) | Safer for young players | S | Hides chat, messages and external links. Matters most once chat or messages exist. |

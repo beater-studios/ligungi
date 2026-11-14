@@ -3,6 +3,7 @@ import { RATING_BAND, type OnlinePlayer, type PlayersView } from '@ligungi/proto
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { CreateGame } from '../components/CreateGame.tsx';
+import { Flag } from '../components/Flag.tsx';
 import { RatingChart } from '../components/RatingChart.tsx';
 import { Checkbox, Select } from '../components/ui.tsx';
 import { useT } from '../i18n/index.ts';
@@ -52,6 +53,7 @@ const OnlineRow = ({ player, mode, me, onChallenge }: { player: OnlinePlayer; mo
           <i class="line" />
           {player.user.name}
         </a>
+        <Flag country={player.country} />
         {player.user.id === me && <span class="ligungi-tag">{t.players.you}</span>}
         {player.followed && <span class="ligungi-tag">{t.players.followed}</span>}
       </span>

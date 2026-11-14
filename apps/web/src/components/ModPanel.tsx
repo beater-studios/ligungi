@@ -7,10 +7,13 @@ import { navigate } from '../router.ts';
 import { ModLog } from './ModLog.tsx';
 import { Field, Select, SubmitButton } from './ui.tsx';
 
-type Action = 'suspend' | 'unsuspend' | 'rename';
+type Action = 'suspend' | 'unsuspend' | 'rename' | 'clearProfile';
 
-/** A moderator's card on a player's profile: their standing, the actions on them and their moderation history. */
-export const ModPanel = ({ name }: { name: string }) => {
+/**
+ * A moderator's card on a player's profile: their standing, the actions on them and their moderation history.
+ * `onProfileCleared` lets the page drop the bio and links it shows.
+ */
+export const ModPanel = ({ name, onProfileCleared }: { name: string; onProfileCleared?: () => void }) => {
   const t = useT();
   const [view, setView] = useState<ModUserView | null>(null);
   const [action, setAction] = useState<Action | null>(null);
@@ -45,7 +48,9 @@ export const ModPanel = ({ name }: { name: string }) => {
         navigate(`/@/${user.name}`);
         return;
       }
-      await api.post(`${path}/${action}`, action === 'suspend' ? { days, reason } : { reason });
+      const route = action === 'clearProfile' ? 'clear-profile' : action;
+      await api.post(`${path}/${route}`, action === 'suspend' ? { days, reason } : { reason });
+      if (action === 'clearProfile') onProfileCleared?.();
       start(null);
       setMessage({ ok: true, text: t.mod.done });
       await load();
@@ -82,6 +87,13 @@ export const ModPanel = ({ name }: { name: string }) => {
             <button type="button" class={`button button-empty${action === 'rename' ? ' active' : ''}`} onClick={() => start(action === 'rename' ? null : 'rename')}>
               {t.mod.rename}
             </button>
+            <button
+              type="button"
+              class={`button button-empty${action === 'clearProfile' ? ' active' : ''}`}
+              onClick={() => start(action === 'clearProfile' ? null : 'clearProfile')}
+            >
+              {t.mod.clearProfile}
+            </button>
           </div>
           {action && (
             <form class="form3 ligungi-mod-panel__form" onSubmit={submit}>
@@ -114,6 +126,7 @@ export const ModPanel = ({ name }: { name: string }) => {
                   </Field>
                 </>
               )}
+              {action === 'clearProfile' && <p class="ligungi-notice">{t.mod.clearProfileHelp}</p>}
               <Field label={t.mod.reason} htmlFor="mod-reason">
                 <input
                   id="mod-reason"
@@ -124,7 +137,7 @@ export const ModPanel = ({ name }: { name: string }) => {
                   onInput={(e) => setReason((e.target as HTMLInputElement).value)}
                 />
               </Field>
-              <SubmitButton disabled={busy}>{{ suspend: t.mod.suspend, unsuspend: t.mod.unsuspend, rename: t.mod.rename }[action]}</SubmitButton>
+              <SubmitButton disabled={busy}>{{ suspend: t.mod.suspend, unsuspend: t.mod.unsuspend, rename: t.mod.rename, clearProfile: t.mod.clearProfile }[action]}</SubmitButton>
             </form>
           )}
         </>

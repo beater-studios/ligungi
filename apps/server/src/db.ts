@@ -165,6 +165,11 @@ const MIGRATIONS = [
   `
   alter table games add column board_moves integer;
   `,
+  `
+  alter table users add column bio text not null default '';
+  alter table users add column country text;
+  alter table users add column links text not null default '{}';
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

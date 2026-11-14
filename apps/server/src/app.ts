@@ -12,6 +12,7 @@ import {
   type LeaderEntry,
   type Leaderboard,
   type ErrorCode,
+  parseProfileDetails,
   parseSettings,
   type ClientMessage,
   type LobbyView,
@@ -360,6 +361,7 @@ export const createApp = (config: ServerConfig): App => {
       .filter((user) => user !== undefined)
       .map((user) => ({
         user: { id: user.id, name: user.name },
+        country: user.country,
         ratings: Object.fromEntries(
           (ratings.get(user.id) ?? []).map((entry) => [
             entry.mode,
@@ -659,6 +661,16 @@ export const createApp = (config: ServerConfig): App => {
       moderation.log('rename', moderator.name, { id: target.id, name: username }, `${target.name} → ${username} · ${text}`);
       sendJson(ctx.res, 200, { user: { id: target.id, name: username } });
     })
+    .add('POST', '/api/mod/users/:name/clear-profile', async (ctx) => {
+      const moderator = requireModerator(ctx);
+      const target = sanctionable(ctx.params.name!);
+      const { reason } = (await ctx.body()) as { reason?: unknown };
+      const text = reasonOf(reason);
+      // The bio and the linked profiles are what can offend; the country stays.
+      users.setDetails(target.id, { ...users.details(target.id), bio: '', links: {} });
+      moderation.log('clearProfile', moderator.name, { id: target.id, name: target.name }, text);
+      sendJson(ctx.res, 200, { ok: true });
+    })
     .add('POST', '/api/mod/games/:id/void', async (ctx) => {
       const moderator = requireModerator(ctx);
       const { reason } = (await ctx.body()) as { reason?: unknown };
@@ -705,6 +717,7 @@ export const createApp = (config: ServerConfig): App => {
         exportedAt: iso(config.now()),
         account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
         settings: { challengePolicy: users.challengePolicy(userId) },
+        profile: users.details(userId),
         // What moderation holds about the account: the suspension in force, the reports it made and the actions taken on
         // it (without naming the moderator).
         moderation: {
@@ -781,6 +794,7 @@ export const createApp = (config: ServerConfig): App => {
         ...users.followCounts(user.id),
         followed: ctx.session.userId ? users.isFollowing(ctx.session.userId, user.id) : false,
         canChallenge: ctx.session.userId ? users.canChallenge(ctx.session.userId, user.id) : false,
+        details: users.details(user.id),
         playing: games.ongoing().filter((room) => room.colorOf('', user.id)).map((room) => room.summary()),
         recent: games.recentFor(user.id, 20),
       };
@@ -920,6 +934,14 @@ export const createApp = (config: ServerConfig): App => {
       if (!policy) throw new HttpError(400, 'invalidChallengePolicy');
       users.setChallengePolicy(userId, policy);
       sendJson(ctx.res, 200, { challengePolicy: policy });
+    })
+    .add('GET', '/api/account/profile', (ctx) => sendJson(ctx.res, 200, users.details(requireUser(ctx))))
+    .add('POST', '/api/account/profile', async (ctx) => {
+      const userId = requireUser(ctx);
+      const details = parseProfileDetails(await ctx.body());
+      if (isErrorCode(details)) throw new HttpError(400, details);
+      users.setDetails(userId, details);
+      sendJson(ctx.res, 200, details);
     })
     .add('GET', '/api/challenges/:id', (ctx) => {
       const challenge = lobby.challenge(ctx.params.id!);

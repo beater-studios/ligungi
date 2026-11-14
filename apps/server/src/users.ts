@@ -1,5 +1,5 @@
 import { MODES, type Mode } from '@ligungi/engine';
-import { CHALLENGE_POLICIES, type ChallengePolicy, type RatingView, type UserRef } from '@ligungi/protocol';
+import { CHALLENGE_POLICIES, COUNTRIES, EMPTY_PROFILE, parseProfileDetails, type ChallengePolicy, type Country, type ProfileDetails, type RatingView, type UserRef } from '@ligungi/protocol';
 import type { Db } from './db.ts';
 import { DEFAULT_RATING, PROVISIONAL_DEVIATION, type Rating } from './glicko.ts';
 import { randomId } from './ids.ts';
@@ -8,6 +8,7 @@ import { PERMANENT_SUSPENSION } from './moderation.ts';
 export interface UserRecord extends UserRef {
   readonly passwordHash: string;
   readonly createdAt: number;
+  readonly country: Country | null;
 }
 
 export const USERNAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{2,19}$/;
@@ -17,13 +18,17 @@ interface UserRow {
   username: string;
   password_hash: string;
   created_at: number;
+  country: string | null;
 }
+
+const toCountry = (code: string | null): Country | null => COUNTRIES.find((country) => country === code) ?? null;
 
 const toRecord = (row: UserRow): UserRecord => ({
   id: row.id,
   name: row.username,
   passwordHash: row.password_hash,
   createdAt: row.created_at,
+  country: toCountry(row.country),
 });
 
 export interface StoredRating extends Rating {
@@ -41,7 +46,7 @@ export class Users {
 
   create(username: string, passwordHash: string): UserRecord | undefined {
     if (this.findByName(username)) return undefined;
-    const record: UserRecord = { id: randomId(12), name: username, passwordHash, createdAt: this.#now() };
+    const record: UserRecord = { id: randomId(12), name: username, passwordHash, createdAt: this.#now(), country: null };
     this.#db
       .prepare('insert into users (id, username, username_key, password_hash, created_at) values (?, ?, ?, ?, ?)')
       .run(record.id, username, username.toLowerCase(), passwordHash, record.createdAt);
@@ -50,7 +55,7 @@ export class Users {
 
   findByName(username: string): UserRecord | undefined {
     const row = this.#db
-      .prepare('select id, username, password_hash, created_at from users where username_key = ?')
+      .prepare('select id, username, password_hash, created_at, country from users where username_key = ?')
       .get(username.toLowerCase()) as UserRow | undefined;
     return row && toRecord(row);
   }
@@ -85,7 +90,7 @@ export class Users {
 
   findById(id: string): UserRecord | undefined {
     const row = this.#db
-      .prepare('select id, username, password_hash, created_at from users where id = ?')
+      .prepare('select id, username, password_hash, created_at, country from users where id = ?')
       .get(id) as UserRow | undefined;
     return row && toRecord(row);
   }
@@ -144,6 +149,26 @@ export class Users {
     this.#db.prepare('update users set challenge_policy = ? where id = ?').run(policy, userId);
   }
 
+  /** Bio, country and linked profiles; read back through the same validation, so a bad stored value shows as empty. */
+  details(userId: string): ProfileDetails {
+    const row = this.#db.prepare('select bio, country, links from users where id = ?').get(userId) as
+      | { bio: string; country: string | null; links: string }
+      | undefined;
+    if (!row) return EMPTY_PROFILE;
+    let links: unknown = {};
+    try {
+      links = JSON.parse(row.links);
+    } catch {}
+    const parsed = parseProfileDetails({ bio: row.bio, country: toCountry(row.country), links });
+    return typeof parsed === 'string' ? { ...EMPTY_PROFILE, bio: row.bio, country: toCountry(row.country) } : parsed;
+  }
+
+  setDetails(userId: string, details: ProfileDetails): void {
+    this.#db
+      .prepare('update users set bio = ?, country = ?, links = ? where id = ?')
+      .run(details.bio, details.country, JSON.stringify(details.links), userId);
+  }
+
   count(): number {
     return (this.#db.prepare('select count(*) as n from users').get() as { n: number }).n;
   }
@@ -194,11 +219,17 @@ export class Users {
       and (?4 is null or user_id = ?4 or user_id in (select followed_id from follows where user_id = ?4))`;
     const args = [mode, PROVISIONAL_DEVIATION, filters.query.toLowerCase(), filters.followerId] as const;
     const rows = this.#db
-      .prepare(`with ranked as (${RANKED}) select user_id, username, rating, games, position from ranked ${where} order by row limit ?5 offset ?6`)
-      .all(...args, limit, offset) as Array<{ user_id: string; username: string; rating: number; games: number; position: number }>;
+      .prepare(`with ranked as (${RANKED}) select user_id, username, country, rating, games, position from ranked ${where} order by row limit ?5 offset ?6`)
+      .all(...args, limit, offset) as Array<{ user_id: string; username: string; country: string | null; rating: number; games: number; position: number }>;
     const { total } = this.#db.prepare(`with ranked as (${RANKED}) select count(*) as total from ranked ${where}`).get(...args) as { total: number };
     return {
-      rows: rows.map((row) => ({ user: { id: row.user_id, name: row.username }, rating: Math.round(row.rating), games: row.games, rank: row.position })),
+      rows: rows.map((row) => ({
+        user: { id: row.user_id, name: row.username },
+        country: toCountry(row.country),
+        rating: Math.round(row.rating),
+        games: row.games,
+        rank: row.position,
+      })),
       total,
     };
   }
@@ -287,13 +318,13 @@ export class Users {
   leaderboard(mode: Mode, limit: number): LeaderRow[] {
     const rows = this.#db
       .prepare(
-        `select users.id, users.username, ratings.rating, ratings.games from ratings
+        `select users.id, users.username, users.country, ratings.rating, ratings.games from ratings
          join users on users.id = ratings.user_id
          where ratings.mode = ? and ratings.games > 0 and ratings.deviation <= ?
          order by ratings.rating desc, ratings.games desc, users.username_key limit ?`,
       )
-      .all(mode, PROVISIONAL_DEVIATION, limit) as Array<{ id: string; username: string; rating: number; games: number }>;
-    return rows.map((row) => ({ user: { id: row.id, name: row.username }, rating: Math.round(row.rating), games: row.games }));
+      .all(mode, PROVISIONAL_DEVIATION, limit) as Array<{ id: string; username: string; country: string | null; rating: number; games: number }>;
+    return rows.map((row) => ({ user: { id: row.id, name: row.username }, country: toCountry(row.country), rating: Math.round(row.rating), games: row.games }));
   }
 
   /** Position on the leaderboard of a mode, or null when the player is not on it. */
@@ -325,7 +356,7 @@ export class Users {
  * Every established player of mode ?1 (deviation up to ?2): position as `rank` computes it and row order as `leaderboard`.
  * Banned players (suspended for good) are left out, so a cheater does not stay on the leaderboard.
  */
-const RANKED = `select ratings.user_id, users.username, users.username_key, ratings.rating, ratings.games,
+const RANKED = `select ratings.user_id, users.username, users.username_key, users.country, ratings.rating, ratings.games,
     rank() over (order by ratings.rating desc) as position,
     row_number() over (order by ratings.rating desc, ratings.games desc, users.username_key) as row
   from ratings join users on users.id = ratings.user_id
@@ -334,6 +365,7 @@ const RANKED = `select ratings.user_id, users.username, users.username_key, rati
 
 export interface LeaderRow {
   readonly user: UserRef;
+  readonly country: Country | null;
   readonly rating: number;
   readonly games: number;
 }

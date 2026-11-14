@@ -27,6 +27,7 @@ export const icons = {
   JumpPrev: '',
   Link: '',
   Microscope: '',
+  Pencil: '\ue04b',
   OneHalf: '',
   PlayTriangle: '',
   PlusButton: '\ue02d',

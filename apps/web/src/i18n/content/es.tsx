@@ -219,7 +219,8 @@ export const es: Content = {
       <h2>Partidas y perfil</h2>
       <p>
         Las partidas, resultados, puntuaciones y nombres de usuario son públicos: cualquiera puede ver y exportar las partidas
-        jugadas en el sitio.
+        jugadas en el sitio. Lo que escribes en tu perfil (bio y enlaces a otros sitios) también es público y no puede ofender,
+        engañar ni difundir contenido inapropiado; la moderación puede borrar lo que incumpla esta regla.
       </p>
       <h2>Código y marcas</h2>
       <p>
@@ -289,6 +290,11 @@ export const es: Content = {
           <b>Estadísticas de visitas:</b> Cloudflare Web Analytics cuenta, de forma agregada, las páginas visitadas, el país,
           el tipo de navegador y el tiempo de carga. No usa cookies, no guarda nada en tu navegador y no te identifica. Solo
           se activa si lo aceptas en el aviso de cookies, y puedes cambiar tu elección al final de esta página.
+        </li>
+        <li>
+          <b>Perfil:</b> la bio, el país y los nombres de usuario en otros sitios que elijas completar en la página de la Cuenta.
+          Aparecen en tu perfil público, forman parte de la copia de tus datos y se borran con la cuenta. La moderación puede
+          borrar la bio y los enlaces que incumplan los términos de uso.
         </li>
         <li>
           <b>Preferencias:</b> idioma, tema, sonido y tamaño del tablero quedan solo en tu navegador (almacenamiento local) y

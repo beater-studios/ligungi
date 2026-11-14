@@ -149,6 +149,18 @@ export const pt = {
   },
 
   account: {
+    profileTitle: 'Perfil',
+    profileText: 'Tudo aqui aparece no seu perfil para qualquer pessoa.',
+    bio: 'Bio',
+    bioHelp: (used: number, max: number) => `${used} de ${max} caracteres. Só texto: endereços escritos aqui não viram links.`,
+    country: 'País',
+    noCountry: 'Nenhum',
+    socialTitle: 'Redes sociais',
+    otherGamesTitle: 'Perfis em outros jogos',
+    linksHelp: 'Digite só o seu nome de usuário em cada site; o endereço completo é montado sozinho. Deixe vazio o que não usar.',
+    linkInvalid: 'Esse nome não é válido nesse site.',
+    profileSave: 'Salvar perfil',
+    profileSaved: 'Perfil salvo.',
     title: 'Conta',
     loginNeeded: 'Entre na sua conta para gerenciá-la.',
     passwordTitle: 'Trocar senha',
@@ -425,6 +437,10 @@ export const pt = {
   },
 
   profile: {
+    edit: 'Editar perfil',
+    aboutLabel: 'Sobre o jogador',
+    socialTitle: 'Redes sociais',
+    otherGamesTitle: 'Perfis em outros jogos',
     memberSince: (date: string) => `Membro desde ${date}`,
     noGames: 'Nenhuma partida terminada ainda.',
     result: 'Resultado',
@@ -606,7 +622,7 @@ export const pt = {
     detailsHelp: 'Opcional, até 500 caracteres: o que aconteceu e em qual partida.',
     send: 'Enviar denúncia',
     sent: 'Denúncia enviada. A moderação vai analisar.',
-    reasons: { cheating: 'Trapaça', name: 'Nome ofensivo', behavior: 'Comportamento', other: 'Outro' },
+    reasons: { cheating: 'Trapaça', name: 'Nome ou perfil ofensivo', behavior: 'Comportamento', other: 'Outro' },
   },
 
   mod: {
@@ -642,6 +658,8 @@ export const pt = {
     newName: 'Novo nome',
     done: 'Feito.',
     history: 'Histórico de moderação',
+    clearProfile: 'Limpar perfil',
+    clearProfileHelp: 'Apaga a bio e os links do perfil. O país fica.',
     voidGame: 'Anular partida',
     voidHelp: 'Para partidas ganhas com trapaça: o perdedor recebe de volta os pontos, o vencedor perde os que ganhou e a partida sai das estatísticas.',
     voided: 'Partida anulada pela moderação: os pontos de rating dela foram devolvidos.',
@@ -651,6 +669,7 @@ export const pt = {
       suspend: 'Suspensão',
       unsuspend: 'Suspensão removida',
       rename: 'Nome trocado',
+      clearProfile: 'Perfil limpo',
       void: 'Partida anulada',
       closeReport: 'Denúncia fechada',
     },

@@ -216,7 +216,11 @@ export const en: Content = {
         suspended player sees, when trying to sign in, until when and why, and can contest it through the contact page.
       </p>
       <h2>Games and profile</h2>
-      <p>Games, results, ratings and usernames are public: anyone can view and export games played on the site.</p>
+      <p>
+        Games, results, ratings and usernames are public: anyone can view and export games played on the site. What you write
+        on your profile (bio and links to other sites) is public too and must not offend, mislead or spread inappropriate
+        content; moderators may delete what breaks this rule.
+      </p>
       <h2>Code and trademarks</h2>
       <p>
         ligungi's code is open under the <Ext href={LINKS.agpl}>GNU AGPL-3.0</Ext>, which has its own rules for anyone who
@@ -284,6 +288,11 @@ export const en: Content = {
           <b>Visit statistics:</b> Cloudflare Web Analytics counts, in aggregate, the pages visited, the country, the type of
           browser and the loading time. It uses no cookies, stores nothing in your browser and does not identify you. It is
           only turned on if you accept it in the cookie notice, and you can change your choice at the bottom of this page.
+        </li>
+        <li>
+          <b>Profile:</b> the bio, the country and the usernames on other sites that you choose to fill in on the Account page.
+          They show on your public profile, are part of your data copy and are deleted with the account. Moderators may delete a
+          bio and links that break the terms of use.
         </li>
         <li>
           <b>Preferences:</b> language, theme, sound and board size stay in your browser (local storage) and are not sent to

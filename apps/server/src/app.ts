@@ -56,6 +56,7 @@ import type { ServerConfig } from './config.ts';
 import { openDatabase, type Db } from './db.ts';
 import { exportGame } from './export.ts';
 import { Games, type Player } from './games.ts';
+import { Tv } from './tv.ts';
 import { randomId } from './ids.ts';
 import {
   HttpError,
@@ -163,6 +164,8 @@ export const createApp = (config: ServerConfig): App => {
     claimAfterMs: config.claimAfterMs,
     broadcast: publishGame,
   });
+
+  const tv = new Tv(games, config.now);
 
   const lobbyView = (player: Player): LobbyView => ({
     seeks: lobby.seekViews(player),
@@ -844,16 +847,8 @@ export const createApp = (config: ServerConfig): App => {
       const origin = `${ctx.req.headers['x-forwarded-proto'] ?? 'http'}://${ctx.req.headers.host ?? SITE_NAME}`;
       sendText(ctx.res, 200, exportGame(room, origin));
     })
-    .add('GET', '/api/tv', (ctx) => {
-      const rating = (room: GameRoom) => (room.seats.white.rating ?? 1200) + (room.seats.black.rating ?? 1200);
-      const list = games
-        .live()
-        .filter((room) => room.plies > 0)
-        .sort((a, b) => rating(b) - rating(a) || b.createdAt - a.createdAt)
-        .slice(0, 24)
-        .map((room) => room.summary());
-      sendJson(ctx.res, 200, list);
-    })
+    .add('GET', '/api/tv', (ctx) => sendJson(ctx.res, 200, tv.live().slice(0, 24).map((room) => room.summary())))
+    .add('GET', '/api/tv/channels', (ctx) => sendJson(ctx.res, 200, tv.channels()))
     .add('GET', '/api/version', (ctx) => sendJson(ctx.res, 200, BUILD))
     .add('GET', '/api/lobby', (ctx) => sendJson(ctx.res, 200, lobbyView(ctx.player)))
     .add('POST', '/api/seeks', async (ctx) => {

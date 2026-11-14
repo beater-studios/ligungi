@@ -31,6 +31,12 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Bot accounts through a bot API (engines play on the site, list of online bots) | Lets engine authors join, gives players more opponents | L | Low | lichess, lishogi |
 | Simultaneous exhibitions | Strong players against many at once | L | Low | lichess, lidraughts, lishogi |
 
+## Watch
+
+| Item | Why | Size | Priority | Seen on |
+|---|---|---|---|---|
+| TV channel for games against the computer | Something to watch even when few people play. Games against the computer run in the browser, so the server never sees them; it needs bots that play on the server, as with bot accounts | S | Low | lishogi |
+
 ## Display and settings
 
 | Item | Why | Size | Priority | Seen on |

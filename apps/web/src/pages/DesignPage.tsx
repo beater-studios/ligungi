@@ -575,6 +575,22 @@ export const DesignPage = () => {
               <MiniBoard position={initialPosition('intro')} />
             </div>
           </Example>
+          <Example label="TV channel list, beside the watched game (.ligungi-tv-channels)">
+            <nav class="ligungi-card ligungi-tv-channels" aria-label="Channels" style={{ maxWidth: '16rem' }}>
+              <a class="ligungi-tv-channel active" href="#game" aria-current="page">
+                <strong>Top rated</strong>
+                <span>Netero × Meruem</span>
+              </a>
+              <a class="ligungi-tv-channel" href="#game">
+                <strong>Advanced</strong>
+                <span>Gon × Killua</span>
+              </a>
+              <a class="ligungi-tv-channel" href="#game">
+                <strong>Introductory</strong>
+                <span>No games right now</span>
+              </a>
+            </nav>
+          </Example>
         </Section>
       </div>
     </main>

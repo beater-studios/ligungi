@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { Clock } from '../src/clock.ts';
 import { openDatabase } from '../src/db.ts';
-import { Games } from '../src/games.ts';
+import { Games, type Player } from '../src/games.ts';
 import { legalMoves, moveToString } from '@ligungi/engine';
 import { DEFAULT_RATING, updateRating } from '../src/glicko.ts';
 import { base32Decode, base32Encode, hotp, matchStep, newRecoveryCodes, normalizeCode, otpauthUri, TOTP_STEP_MS } from '../src/totp.ts';
+import { TV_LINGER_MS, Tv } from '../src/tv.ts';
 import { TwoFactor } from '../src/two-factor.ts';
 import { Users } from '../src/users.ts';
 
@@ -144,6 +145,47 @@ describe('board moves', () => {
     db.prepare('update games set board_moves = null where id = ?').run(room.id);
     new Games(db, users, options);
     expect(stored()).toBe(boardMoves);
+    db.close();
+  });
+});
+
+describe('tv channels', () => {
+  it('shows the strongest game, keeps it while it is played and moves on a few seconds after it ends', () => {
+    let now = 1_000_000;
+    const db = openDatabase(':memory:');
+    const users = new Users(db, () => now);
+    const games = new Games(db, users, { now: () => now, abortAfterMs: 60_000, claimAfterMs: 30_000, broadcast: () => {} });
+    const tv = new Tv(games, () => now);
+    const start = (mode: 'intro' | 'advanced', white: Player, black: Player) => {
+      const room = games.create({ mode, rated: false, timeControl: null, daysPerMove: null, freeDraft: false, players: { white, black } });
+      // One move each, so resigning ends the game instead of aborting it.
+      for (const [ply, color] of (['white', 'black'] as const).entries()) {
+        expect(room.move(color, moveToString(legalMoves(room.game.position)[0]!), ply)).toBeNull();
+      }
+      return room;
+    };
+    const channel = (name: string) => tv.channels().find((view) => view.channel === name)!.game?.id ?? null;
+
+    expect(tv.channels().every((view) => view.game === null)).toBe(true);
+    // Guests count as 1200, so two accounts at the default 1500 make the stronger game.
+    const guests = start('intro', { sessionId: 'g1', userId: null, name: 'Gon' }, { sessionId: 'g2', userId: null, name: 'Killua' });
+    expect(channel('best')).toBe(guests.id);
+    expect(channel('intro')).toBe(guests.id);
+    expect(channel('advanced')).toBeNull();
+
+    const [white, black] = [users.create('Netero', 'x')!, users.create('Meruem', 'x')!];
+    const strong = start('advanced', { sessionId: 'w', userId: white.id, name: white.name }, { sessionId: 'b', userId: black.id, name: black.name });
+    expect(tv.live().map((room) => room.id)).toEqual([strong.id, guests.id]);
+    expect(channel('best')).toBe(guests.id);
+    expect(channel('advanced')).toBe(strong.id);
+
+    guests.resign('black');
+    now += TV_LINGER_MS - 1;
+    expect(channel('best')).toBe(guests.id);
+    expect(channel('intro')).toBe(guests.id);
+    now += 1;
+    expect(channel('best')).toBe(strong.id);
+    expect(channel('intro')).toBeNull();
     db.close();
   });
 });

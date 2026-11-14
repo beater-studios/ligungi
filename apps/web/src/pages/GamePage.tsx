@@ -1,5 +1,6 @@
 import { legalMoves, moveToString, opposite, type Color, type Move } from '@ligungi/engine';
 import { DAY_MS, EXTRA_TIME_SECONDS, type GameView } from '@ligungi/protocol';
+import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
@@ -13,7 +14,8 @@ import { VoidGame } from '../components/VoidGame.tsx';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
 
-export const GamePage = ({ id }: { id: string }) => {
+/** `tv`: the channel list, shown above the game details when the game is watched on a TV channel. */
+export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => {
   const t = useT();
   const { user, moderator } = useStore(session);
   const [view, setView] = useState<GameView | null>(null);
@@ -339,7 +341,7 @@ export const GamePage = ({ id }: { id: string }) => {
     </>
   );
 
-  const side = (
+  const info = (
     <section class="ligungi-card ligungi-game-info">
       <p class="ligungi-game-info__setup">
         {t.modes[view.mode]} · {speedText(t, view)} · {view.rated ? t.rated : t.casual}
@@ -365,6 +367,14 @@ export const GamePage = ({ id }: { id: string }) => {
         );
       })()}
     </section>
+  );
+  const side = tv ? (
+    <>
+      {tv}
+      {info}
+    </>
+  ) : (
+    info
   );
 
   return (

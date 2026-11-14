@@ -6,6 +6,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- TV channels: one for the strongest game on the site and one per mode, each following its game live on a full board (clocks, moves and the move list) and moving on to the next a few seconds after it ends. The channels sit beside the board with who is playing on each; the grid of every live game is still on the TV page, with a button to its channel.
 - Import a game (Tools > Import a game, or the button in the analysis): paste or upload a game exported from ligungi, or type the moves in rulebook or machine notation, and it opens in the analysis. Every move is checked against the rules, and a wrong or ambiguous one is reported with its line. Imported games never touch ratings.
 - Board editor (Tools > Board editor): place and stack pieces of both sides, fill the hands, pick the mode and who moves, starting from the Marshals alone or from a mode's starting position. The position is checked against the rules as you edit (one Marshal per side, nothing on a Marshal, piece counts, tower heights, no side left in check out of turn), and a valid one opens in the analysis or is shared as FEN or link.
 - Rating history on profiles: a chart of the rating after each rated game, one mode at a time (the most played first), with the current rating, the peak and the lowest with their dates, and the results by color and by game length. Hover or touch the chart for each game's rating and change; the points are also listed as a table.

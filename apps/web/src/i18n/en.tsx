@@ -656,6 +656,12 @@ export const en: Messages = {
     move: (n) => `move ${n}`,
     empty: 'No games in progress right now.',
     emptyMode: 'No games in progress in this mode right now.',
+    channels: 'Channels',
+    best: 'Top rated',
+    noGame: 'No games right now',
+    allGames: 'All games',
+    openChannel: 'Live channel',
+    channelEmpty: 'No games on this channel right now. As soon as someone starts one, it shows up here.',
   },
 
   beginner: {

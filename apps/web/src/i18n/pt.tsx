@@ -580,6 +580,12 @@ export const pt = {
     move: (n: number) => `lance ${n}`,
     empty: 'Nenhuma partida em andamento agora.',
     emptyMode: 'Nenhuma partida em andamento neste modo agora.',
+    channels: 'Canais',
+    best: 'Maior rating',
+    noGame: 'Sem partidas agora',
+    allGames: 'Todas as partidas',
+    openChannel: 'Canal ao vivo',
+    channelEmpty: 'Nenhuma partida neste canal agora. Quando alguém começar uma, ela aparece aqui.',
   },
 
   beginner: {

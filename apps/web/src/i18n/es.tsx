@@ -657,6 +657,12 @@ export const es: Messages = {
     move: (n) => `jugada ${n}`,
     empty: 'No hay partidas en curso ahora.',
     emptyMode: 'No hay partidas en curso en este modo ahora.',
+    channels: 'Canales',
+    best: 'Mayor puntuación',
+    noGame: 'Sin partidas ahora',
+    allGames: 'Todas las partidas',
+    openChannel: 'Canal en vivo',
+    channelEmpty: 'No hay partidas en este canal ahora. En cuanto alguien empiece una, aparecerá aquí.',
   },
 
   beginner: {

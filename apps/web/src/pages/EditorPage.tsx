@@ -206,7 +206,7 @@ export const EditorPage = () => {
               ))}
               <button
                 type="button"
-                class={`button button-empty ligungi-editor__erase${tool.kind === 'erase' ? ' active' : ''}`}
+                class={`button button-empty text ligungi-editor__erase${tool.kind === 'erase' ? ' active' : ''}`}
                 aria-pressed={tool.kind === 'erase'}
                 data-icon={icons.X}
                 onClick={() => setTool({ kind: 'erase' })}

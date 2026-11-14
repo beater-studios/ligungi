@@ -221,7 +221,7 @@ export const AnalysisPage = () => {
             FEN
             <input class="form-control copyable" readOnly value={toFen(position)} onFocus={(e) => (e.target as HTMLInputElement).select()} />
           </label>
-          <button type="button" class="button button-empty ligungi-import-open" data-icon={icons.Download} onClick={() => setImporting(true)}>
+          <button type="button" class="button button-empty text ligungi-import-open" data-icon={icons.Download} onClick={() => setImporting(true)}>
             {t.analysis.importTitle}
           </button>
         </div>

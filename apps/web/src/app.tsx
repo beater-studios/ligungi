@@ -26,8 +26,10 @@ import { EditorPage } from './pages/EditorPage.tsx';
 import { ChallengeBell } from './components/ChallengeBell.tsx';
 import { HeaderSearch } from './components/HeaderSearch.tsx';
 import { useDropdown } from './components/useDropdown.ts';
+import { TvChannelPage } from './pages/TvChannelPage.tsx';
 import { TvPage } from './pages/TvPage.tsx';
 import { MODES, type Mode } from '@ligungi/engine';
+import { TV_CHANNELS, type TvChannel } from '@ligungi/protocol';
 import { LANGS, THEMES, prefs, resolveLang, updatePrefs } from './prefs.ts';
 import { matchRoute, navigate, useLocation, type Route } from './router.ts';
 import { logout, session } from './session.ts';
@@ -44,6 +46,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/editor$/, render: () => <EditorPage /> },
   { pattern: /^\/learn$/, render: () => <LearnPage /> },
   { pattern: /^\/tv$/, render: () => <TvPage /> },
+  { pattern: new RegExp(`^/tv/(${TV_CHANNELS.join('|')})$`), render: ([channel]) => <TvChannelPage channel={channel as TvChannel} /> },
   { pattern: /^\/settings$/, render: () => <SettingsPage /> },
   { pattern: /^\/account$/, render: () => <AccountPage /> },
   { pattern: /^\/mod$/, render: () => <ModPage /> },

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { formatClock, playerName, speedText, useT } from '../i18n/index.ts';
+import { icons } from '../icons.ts';
 
 const REFRESH_MS = 5_000;
 
@@ -49,7 +50,7 @@ const GameCard = ({ game, since, featured = false }: { game: GameSummary; since:
   );
 };
 
-/** Games in progress: the strongest one large, the rest in a grid, with a filter by mode. */
+/** Games in progress: the strongest one large, the rest in a grid, with a filter by mode and a link to its live channel. */
 export const TvPage = () => {
   const t = useT();
   const [games, setGames] = useState<GameSummary[] | null>(null);
@@ -88,6 +89,9 @@ export const TvPage = () => {
             </button>
           ))}
         </div>
+        <a class="button button-empty text" href={`/tv/${mode ?? 'best'}`} data-icon={icons.AnalogTv}>
+          {t.tv.openChannel}
+        </a>
       </header>
       {games === null && <p class="ligungi-notice">{t.common.loading}</p>}
       {games !== null && !featured && <p class="ligungi-card ligungi-tv__empty">{games.length === 0 ? t.tv.empty : t.tv.emptyMode}</p>}

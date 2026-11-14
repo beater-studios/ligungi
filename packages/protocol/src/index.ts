@@ -132,6 +132,16 @@ export interface GameSummary {
   readonly voided: boolean;
 }
 
+/** TV channels: the strongest live game of the site, and of each mode. */
+export const TV_CHANNELS = ['best', ...MODES] as const;
+export type TvChannel = (typeof TV_CHANNELS)[number];
+
+/** The game a TV channel shows, kept until it ends and for a few seconds after; `null` when nothing is being played. */
+export interface TvChannelView {
+  readonly channel: TvChannel;
+  readonly game: GameSummary | null;
+}
+
 export interface Opponent {
   readonly name: string;
   readonly user: UserRef | null;

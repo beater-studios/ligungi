@@ -10,6 +10,8 @@ export const ERROR_MESSAGES = {
   invalidFirstPlayer: 'Primeiro jogador inválido.',
   invalidInitialTime: 'Tempo inicial deve ficar entre 1 e 180 minutos.',
   invalidIncrement: 'Incremento deve ficar entre 0 e 180 segundos.',
+  invalidDaysPerMove: 'Na correspondência, o prazo por lance é de 1, 3 ou 7 dias, sem relógio.',
+  correspondenceNeedsAccount: 'Entre na sua conta para jogar por correspondência.',
   unlimitedNotRated: 'Partidas sem relógio não valem rating.',
   invalidDraftOption: 'Opção de draft inválida.',
   ratedNeedsOfficialDraft: 'Partidas ranqueadas seguem a regra oficial do draft.',

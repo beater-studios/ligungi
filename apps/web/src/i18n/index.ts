@@ -1,6 +1,6 @@
 import type { PieceNames } from '@ligungi/board';
 import type { Outcome } from '@ligungi/engine';
-import { formatTimeControl, isErrorCode, type GameSettings, type TimeControl } from '@ligungi/protocol';
+import { DAY_MS, formatTimeControl, isErrorCode, type GameSettings, type TimeControl } from '@ligungi/protocol';
 import type { ColorChoice } from '@ligungi/protocol';
 import { prefs, resolveLang, type Lang, type Theme } from '../prefs.ts';
 import { useStore } from '../store.ts';
@@ -44,14 +44,20 @@ export const outcomeText = (t: Messages, outcome: Outcome | null, aborted = fals
 
 export const timeControlText = (t: Messages, tc: TimeControl | null): string => (tc ? formatTimeControl(tc) : t.noClock);
 
+/** The pace of a game: its clock, or the days per move of a correspondence game. */
+export const speedText = (t: Messages, game: { readonly timeControl: TimeControl | null; readonly daysPerMove: number | null }): string =>
+  game.daysPerMove ? t.daysPerMove(game.daysPerMove) : timeControlText(t, game.timeControl);
+
 export const settingsText = (
   t: Messages,
-  settings: Pick<GameSettings, 'mode' | 'rated' | 'timeControl'> & { readonly freeDraft?: boolean },
+  settings: Pick<GameSettings, 'mode' | 'rated' | 'timeControl' | 'daysPerMove'> & { readonly freeDraft?: boolean },
 ): string =>
-  `${t.modes[settings.mode]}${settings.freeDraft ? ` (${t.freeDraftTag})` : ''} · ${timeControlText(t, settings.timeControl)} · ${settings.rated ? t.rated : t.casual}`;
+  `${t.modes[settings.mode]}${settings.freeDraft ? ` (${t.freeDraftTag})` : ''} · ${speedText(t, settings)} · ${settings.rated ? t.rated : t.casual}`;
 
 export const formatClock = (ms: number): string => {
   const total = Math.max(0, ms);
+  // Correspondence: days and hours are enough; the minutes only matter on the last day.
+  if (total >= DAY_MS) return `${Math.floor(total / DAY_MS)}d ${Math.floor((total % DAY_MS) / 3_600_000)}h`;
   const minutes = Math.floor(total / 60_000);
   const seconds = Math.floor((total % 60_000) / 1000);
   if (total < 10_000) return `${seconds}.${Math.floor((total % 1000) / 100)}`;

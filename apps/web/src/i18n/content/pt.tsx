@@ -30,7 +30,7 @@ const sources = (
 );
 
 export const pt: Content = {
-  updated: 'Última atualização: 13 de novembro de 2026.',
+  updated: 'Última atualização: 14 de novembro de 2026.',
 
   about: (
     <>
@@ -253,7 +253,10 @@ export const pt: Content = {
         <li>
           <b>Partidas e atividade:</b> lances, resultados, ratings, jogadores que você segue e a data de criação da conta.
           Esses dados aparecem no seu perfil público. A opção de quem pode desafiar você pelo perfil fica salva na conta. Os
-          desafios enviados pelo perfil ficam só na memória do servidor enquanto esperam resposta.
+          desafios para partidas em tempo real ficam só na memória do servidor enquanto esperam resposta. Os desafios e as
+          partidas abertas por correspondência, que esperam até 7 dias, ficam guardados no banco de dados para não se
+          perderem quando o servidor reinicia: as partidas abertas são apagadas quando expiram e os desafios 14 dias depois de
+          criados, ou antes, se você excluir a conta, e entram na cópia dos seus dados.
         </li>
         <li>
           <b>Cookie de sessão (sid):</b> um cookie essencial que identifica o seu navegador para manter o login e as suas

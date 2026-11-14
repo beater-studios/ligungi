@@ -86,6 +86,37 @@ const MIGRATIONS = [
   `
   create index games_created on games(created_at);
   `,
+  `
+  alter table games add column days_per_move integer;
+  alter table games add column deadline integer;
+  `,
+  `
+  create table challenges (
+    id text primary key,
+    settings text not null,
+    owner_session text not null,
+    owner_user text,
+    owner_name text not null,
+    destination_user text,
+    destination_name text,
+    created_at integer not null,
+    status text not null,
+    game_id text
+  );
+  create index challenges_owner on challenges(owner_user);
+  create index challenges_destination on challenges(destination_user);
+  `,
+  `
+  create table seeks (
+    id text primary key,
+    settings text not null,
+    owner_session text not null,
+    owner_user text not null,
+    owner_name text not null,
+    created_at integer not null
+  );
+  create index seeks_owner on seeks(owner_user);
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

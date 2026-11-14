@@ -3,7 +3,7 @@ import type { ClockView, GameSummary } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { MiniBoard } from '../components/MiniBoard.tsx';
-import { formatClock, playerName, timeControlText, useT } from '../i18n/index.ts';
+import { formatClock, playerName, speedText, useT } from '../i18n/index.ts';
 
 const REFRESH_MS = 5_000;
 
@@ -43,7 +43,7 @@ const GameCard = ({ game, since, featured = false }: { game: GameSummary; since:
       <MiniBoard fen={game.fen} />
       <PlayerRow game={game} color="white" since={since} />
       <span class="ligungi-tv-game__meta">
-        {[t.modes[game.mode], timeControlText(t, game.timeControl), game.rated ? t.rated : t.casual, t.tv.move(game.plies)].join(' · ')}
+        {[t.modes[game.mode], speedText(t, game), game.rated ? t.rated : t.casual, t.tv.move(game.plies)].join(' · ')}
       </span>
     </a>
   );

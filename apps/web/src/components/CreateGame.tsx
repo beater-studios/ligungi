@@ -1,5 +1,5 @@
 import { MODES, MODE_RULES, type Mode } from '@ligungi/engine';
-import type { ChallengeView, ColorChoice, GameSettings } from '@ligungi/protocol';
+import { CORRESPONDENCE_DAYS, type ChallengeView, type ColorChoice, type GameSettings } from '@ligungi/protocol';
 import { useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { colorChoiceOptions, useT } from '../i18n/index.ts';
@@ -7,19 +7,23 @@ import { navigate } from '../router.ts';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
 import { Modal } from './Modal.tsx';
-import { Checkbox, Field, FieldRow, RadioGroup, Select, SubmitButton } from './ui.tsx';
+import { Checkbox, Field, FieldRow, OptionCards, RadioGroup, Select, SubmitButton } from './ui.tsx';
 
 const MINUTES = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120, 180];
 const INCREMENTS = [0, 1, 2, 3, 5, 10, 15, 20, 30, 45, 60];
 
 export type CreateTarget = 'lobby' | 'friend';
 
+/** Live with a clock, correspondence (days per move) or no clock at all. */
+type Speed = 'live' | 'correspondence' | 'unlimited';
+
 /** `to` turns the friend form into a challenge sent to that player from their profile. */
 export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?: string; onClose: () => void }) => {
   const t = useT();
   const { user } = useStore(session);
   const [mode, setMode] = useState<Mode>('advanced');
-  const [unlimited, setUnlimited] = useState(false);
+  const [speed, setSpeed] = useState<Speed>('live');
+  const [days, setDays] = useState(3);
   const [minutes, setMinutes] = useState(10);
   const [increment, setIncrement] = useState(5);
   const [rated, setRated] = useState(Boolean(user));
@@ -28,7 +32,7 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
   const [freeDraft, setFreeDraft] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const canRate = Boolean(user) && !unlimited;
+  const canRate = Boolean(user) && speed !== 'unlimited';
   const draftMode = MODE_RULES[mode].draft;
   const free = draftMode && freeDraft && !(canRate && rated);
 
@@ -39,7 +43,8 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
     const settings: GameSettings = {
       mode,
       rated: canRate && rated,
-      timeControl: unlimited ? null : { initial: minutes * 60, increment },
+      timeControl: speed === 'live' ? { initial: minutes * 60, increment } : null,
+      daysPerMove: speed === 'correspondence' ? days : null,
       color,
       firstPlayer,
       freeDraft: free,
@@ -69,8 +74,30 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
         <Field label={t.common.mode} htmlFor="cg-mode" help={t.modeDescriptions[mode]}>
           <Select id="cg-mode" value={mode} options={MODES.map((m) => ({ value: m, label: t.modes[m] }))} onChange={setMode} />
         </Field>
-        <Checkbox id="cg-unlimited" checked={unlimited} onChange={setUnlimited} label={t.noClock} />
-        {!unlimited && (
+        <OptionCards
+          name="cg-speed"
+          legend={t.create.speed}
+          layout="segmented"
+          value={speed}
+          options={[
+            { value: 'live' as const, label: t.create.speedLive },
+            { value: 'correspondence' as const, label: t.create.speedCorrespondence, disabled: !user, title: user ? '' : t.create.correspondenceLogin },
+            { value: 'unlimited' as const, label: t.noClock },
+          ]}
+          onChange={setSpeed}
+          {...(speed === 'correspondence' ? { help: t.create.correspondenceHelp } : {})}
+        />
+        {speed === 'correspondence' && (
+          <OptionCards
+            name="cg-days"
+            legend={t.create.daysPerMove}
+            layout="segmented"
+            value={days}
+            options={CORRESPONDENCE_DAYS.map((n) => ({ value: n, label: t.daysPerMove(n) }))}
+            onChange={setDays}
+          />
+        )}
+        {speed === 'live' && (
           <FieldRow>
             <Field label={t.create.minutes} htmlFor="cg-minutes">
               <Select id="cg-minutes" value={minutes} options={MINUTES.map((m) => ({ value: m, label: m }))} onChange={setMinutes} />

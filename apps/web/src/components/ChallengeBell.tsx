@@ -1,8 +1,9 @@
-import type { ChallengeView } from '@ligungi/protocol';
+import { opposite } from '@ligungi/engine';
+import type { ChallengeView, GameSummary } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
-import { incoming } from '../challenges.ts';
-import { settingsText, useT } from '../i18n/index.ts';
+import { incoming, turns } from '../challenges.ts';
+import { formatClock, playerName, settingsText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { navigate, useLocation } from '../router.ts';
 import { useStore } from '../store.ts';
@@ -56,31 +57,62 @@ const Item = ({ challenge, onError }: { challenge: ChallengeView; onError: (mess
   );
 };
 
-/** lila's challenge toggle in the top bar: a count badge and a dropdown to accept or decline. */
+/** A correspondence game waiting for the viewer's move: the opponent and how long is left. */
+const Turn = ({ game }: { game: GameSummary }) => {
+  const t = useT();
+  const opponent = game.players[opposite(game.turn ?? 'white')];
+  return (
+    <li class="ligungi-turn">
+      <a href={`/${game.id}`}>
+        <span class="ligungi-turn__name">{t.nav.turnAgainst(playerName(t, opponent))}</span>
+        <small>
+          {t.modes[game.mode]} · {game.deadlineIn !== null ? t.nav.timeLeft(formatClock(game.deadlineIn)) : ''}
+        </small>
+      </a>
+    </li>
+  );
+};
+
+/** lila's challenge toggle in the top bar: a count badge and a dropdown to accept or decline, and the games waiting for a move. */
 export const ChallengeBell = () => {
   const t = useT();
   const list = useStore(incoming);
+  const waiting = useStore(turns);
+  const count = list.length + waiting.length;
   const { shown, setShown, ref } = useDropdown();
   const [error, setError] = useState<string | null>(null);
   const { path } = useLocation();
   useEffect(() => setShown(false), [path]);
   useEffect(() => setError(null), [shown]);
-  const label = list.length ? `${t.nav.challenges} (${list.length})` : t.nav.challenges;
+  const label = count ? `${t.nav.challenges} (${count})` : t.nav.challenges;
   return (
     <div class={`ligungi-challenges${shown ? ' shown' : ''}`} ref={ref}>
       <button type="button" class="toggle link" title={label} aria-label={label} aria-expanded={shown} onClick={() => setShown(!shown)}>
-        <span class="data-count" data-count={list.length} data-icon={icons.Swords} />
+        <span class="data-count" data-count={count} data-icon={icons.Swords} />
       </button>
       {shown && (
         <div class="dropdown ligungi-challenges__list">
+          {waiting.length > 0 && (
+            <>
+              <p class="ligungi-challenges__heading">{t.nav.yourTurn}</p>
+              <ul>
+                {waiting.map((game) => (
+                  <Turn key={game.id} game={game} />
+                ))}
+              </ul>
+            </>
+          )}
           {list.length ? (
-            <ul>
-              {list.map((challenge) => (
-                <Item key={challenge.id} challenge={challenge} onError={setError} />
-              ))}
-            </ul>
+            <>
+              {waiting.length > 0 && <p class="ligungi-challenges__heading">{t.nav.challenges}</p>}
+              <ul>
+                {list.map((challenge) => (
+                  <Item key={challenge.id} challenge={challenge} onError={setError} />
+                ))}
+              </ul>
+            </>
           ) : (
-            <p class="ligungi-challenges__empty">{t.nav.noChallenges}</p>
+            waiting.length === 0 && <p class="ligungi-challenges__empty">{t.nav.noChallenges}</p>
           )}
           {error && <p class="error">{error}</p>}
         </div>

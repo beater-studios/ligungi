@@ -1,9 +1,9 @@
 import { legalMoves, moveToString, opposite, type Color, type Move } from '@ligungi/engine';
-import { EXTRA_TIME_SECONDS, type GameView } from '@ligungi/protocol';
+import { DAY_MS, EXTRA_TIME_SECONDS, type GameView } from '@ligungi/protocol';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
-import { errorText, getT, outcomeText, playerName, timeControlText, useT } from '../i18n/index.ts';
+import { errorText, getT, outcomeText, playerName, speedText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { replayGame } from '../replay.ts';
 import { socket } from '../socket.ts';
@@ -188,12 +188,20 @@ export const GamePage = ({ id }: { id: string }) => {
     };
   };
 
+  // Correspondence: the player to move sees their deadline run; the other one has the full days ahead.
+  const correspondenceClock = (color: Color) => {
+    const running = started && turn === color;
+    const ms = running && view.deadlineIn !== null ? view.deadlineIn : (view.daysPerMove ?? 0) * DAY_MS;
+    return { ms, since: receivedAt, running, mine: you === color, giveTime: null };
+  };
   const clocks = view.clock
     ? {
         white: { ms: view.clock.white, since: receivedAt, running: started && view.clock.running === 'white', mine: you === 'white', giveTime: opponent === 'white' ? giveTime : null },
         black: { ms: view.clock.black, since: receivedAt, running: started && view.clock.running === 'black', mine: you === 'black', giveTime: opponent === 'black' ? giveTime : null },
       }
-    : null;
+    : view.daysPerMove && started
+      ? { white: correspondenceClock('white'), black: correspondenceClock('black') }
+      : null;
 
   const status = started
     ? t.turnStatus(position.phase === 'draft', turn, myTurn ? 'you' : null)
@@ -329,7 +337,7 @@ export const GamePage = ({ id }: { id: string }) => {
   const side = (
     <section class="ligungi-card ligungi-game-info">
       <p class="ligungi-game-info__setup">
-        {t.modes[view.mode]} · {timeControlText(t, view.timeControl)} · {view.rated ? t.rated : t.casual}
+        {t.modes[view.mode]} · {speedText(t, view)} · {view.rated ? t.rated : t.casual}
       </p>
       {view.freeDraft && <p class="ligungi-notice">{t.freeDraftHint}</p>}
       {!started && <p class="ligungi-game-info__status">{outcomeText(t, view.outcome, view.status === 'aborted')}</p>}

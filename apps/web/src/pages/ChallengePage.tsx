@@ -1,7 +1,7 @@
 import type { ChallengeView } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
-import { playerName, timeControlText, useT } from '../i18n/index.ts';
+import { playerName, speedText, useT } from '../i18n/index.ts';
 import { navigate } from '../router.ts';
 import { session } from '../session.ts';
 import { socket } from '../socket.ts';
@@ -32,14 +32,14 @@ export const ChallengePage = ({ id }: { id: string }) => {
 
   if (error)
     return (
-      <main class="ligungi-page ligungi-challenge">
+      <main class="ligungi-page ligungi-challenge-page">
         <section class="ligungi-card ligungi-challenge__card">
           <h1>{t.challenge.title}</h1>
           <p class="error">{error}</p>
         </section>
       </main>
     );
-  if (!challenge) return <main class="ligungi-page ligungi-challenge" />;
+  if (!challenge) return <main class="ligungi-page ligungi-challenge-page" />;
 
   const link = `${window.location.origin}/challenge/${challenge.id}`;
   const accept = async () => {
@@ -79,14 +79,14 @@ export const ChallengePage = ({ id }: { id: string }) => {
   const personLink = (name: string) => (person.user ? <a href={`/@/${person.user.name}`}>{name}</a> : name);
   const tiles: Array<[string, string]> = [
     [t.common.mode, t.modes[settings.mode]],
-    [t.challenge.time, timeControlText(t, settings.timeControl)],
+    [t.challenge.time, speedText(t, settings)],
     [t.challenge.type, `${settings.rated ? t.rated : t.casual}${settings.freeDraft ? ` · ${t.freeDraftTag}` : ''}`],
     [bystander ? t.challenge.challengerColor : t.common.yourColor, t.colorChoices[myColor]],
     [t.common.whoStarts, t.colorChoices[settings.firstPlayer]],
   ];
 
   return (
-    <main class="ligungi-page ligungi-challenge">
+    <main class="ligungi-page ligungi-challenge-page">
       <section class="ligungi-card ligungi-challenge__card">
         <p class={`ligungi-challenge__label${challenge.mine || bystander ? '' : ' is-received'}`}>{label}</p>
         {challenge.mine && !destination ? (

@@ -12,7 +12,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { CreateGame } from '../components/CreateGame.tsx';
 import { Select } from '../components/ui.tsx';
-import { formatDate, playerName, timeControlText, useT } from '../i18n/index.ts';
+import { formatDate, playerName, speedText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
@@ -42,7 +42,7 @@ const GameRow = ({ game, userId }: { game: GameSummary; userId: string }) => {
   const reason = game.outcome ? t.reasons[game.outcome.reason] : null;
   const meta = [
     t.modes[game.mode],
-    timeControlText(t, game.timeControl),
+    speedText(t, game),
     game.rated ? t.rated : t.casual,
     ...(reason ? [`${reason} · ${t.profile.moves(game.plies)}`] : []),
   ].join(' · ');
@@ -327,7 +327,7 @@ export const ProfilePage = ({ name }: { name: string }) => {
           <span class="ligungi-live-badge">{t.profile.live}</span>
           <span class="ligungi-live-strip__text">
             {playerName(t, game.players.white)} × {playerName(t, game.players.black)} · {t.modes[game.mode]} ·{' '}
-            {timeControlText(t, game.timeControl)}
+            {speedText(t, game)}
           </span>
           <a class="button" href={`/${game.id}`}>
             {t.profile.watch}

@@ -14,8 +14,10 @@ export type ColorChoice = Color | 'random';
 export interface GameSettings {
   readonly mode: Mode;
   readonly rated: boolean;
-  /** `null` means no clock (casual games only). */
+  /** `null` means no clock: casual games only, unless `daysPerMove` makes it a correspondence game. */
   readonly timeControl: TimeControl | null;
+  /** Correspondence: days each player has for every move (`CORRESPONDENCE_DAYS`); `null` for games played live. */
+  readonly daysPerMove: number | null;
   /** Color of the player who creates the seek or challenge. */
   readonly color: ColorChoice;
   /** Color that places first in the draft and moves first in play. */
@@ -35,6 +37,14 @@ export const TIME_PRESETS: readonly TimeControl[] = [
   { initial: 1800, increment: 20 },
   { initial: 3600, increment: 30 },
 ];
+
+/** Days per move offered for correspondence games. */
+export const CORRESPONDENCE_DAYS: readonly number[] = [1, 3, 7];
+
+/** How long a correspondence challenge or seek waits for an answer, against two hours for other challenges. */
+export const CORRESPONDENCE_WAIT_DAYS = 7;
+
+export const DAY_MS = 24 * 60 * 60 * 1000;
 
 export const formatTimeControl = (tc: TimeControl | null): string =>
   tc ? `${tc.initial % 60 === 0 ? tc.initial / 60 : (tc.initial / 60).toFixed(1)}+${tc.increment}` : '∞';
@@ -78,6 +88,10 @@ export interface GameView {
   readonly status: GameStatus;
   readonly outcome: Outcome | null;
   readonly clock: ClockView | null;
+  /** Correspondence: days per move, see `GameSettings`. */
+  readonly daysPerMove: number | null;
+  /** Correspondence: milliseconds the player to move had left when the message was sent; `null` once the game is over. */
+  readonly deadlineIn: number | null;
   readonly drawOffer: Color | null;
   /** The player asking to take back their last move (casual games only). */
   readonly takebackOffer: Color | null;
@@ -109,6 +123,11 @@ export interface GameSummary {
   readonly endedAt: number | null;
   /** The clocks while the game is in progress; `null` without a clock or once it has ended. */
   readonly clock: ClockView | null;
+  readonly daysPerMove: number | null;
+  /** Correspondence: milliseconds the player to move had left; `null` once the game is over. */
+  readonly deadlineIn: number | null;
+  /** Whose move it is; `null` once the game is over. */
+  readonly turn: Color | null;
 }
 
 export interface Opponent {
@@ -392,6 +411,8 @@ export type ServerMessage =
   | { readonly t: 'challenge'; readonly challenge: ChallengeView }
   /** The open challenges sent to the user, on connecting and after every change. */
   | { readonly t: 'incoming'; readonly challenges: readonly ChallengeView[] }
+  /** The user's correspondence games waiting for their move, on connecting and after every change to one of them. */
+  | { readonly t: 'turns'; readonly games: readonly GameSummary[] }
   | { readonly t: 'redirect'; readonly path: string }
   | { readonly t: 'error'; readonly code: ErrorCode; readonly message: string }
   | { readonly t: 'pong' };
@@ -415,7 +436,12 @@ export const parseSettings = (input: unknown): GameSettings | ErrorCode => {
     if (!Number.isInteger(increment) || increment < 0 || increment > 180) return 'invalidIncrement';
     timeControl = { initial, increment };
   }
-  if (value.rated && !timeControl) return 'unlimitedNotRated';
+  let daysPerMove: number | null = null;
+  if (value.daysPerMove !== undefined && value.daysPerMove !== null) {
+    if (timeControl || !CORRESPONDENCE_DAYS.includes(value.daysPerMove as number)) return 'invalidDaysPerMove';
+    daysPerMove = value.daysPerMove as number;
+  }
+  if (value.rated && !timeControl && !daysPerMove) return 'unlimitedNotRated';
   if (value.freeDraft !== undefined && typeof value.freeDraft !== 'boolean') return 'invalidDraftOption';
   const freeDraft = value.freeDraft === true && MODE_RULES[value.mode as Mode].draft;
   if (value.rated && freeDraft) return 'ratedNeedsOfficialDraft';
@@ -423,6 +449,7 @@ export const parseSettings = (input: unknown): GameSettings | ErrorCode => {
     mode: value.mode as Mode,
     rated: value.rated,
     timeControl,
+    daysPerMove,
     color: value.color as ColorChoice,
     firstPlayer: value.firstPlayer as ColorChoice,
     freeDraft,

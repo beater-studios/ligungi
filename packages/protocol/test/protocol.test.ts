@@ -3,7 +3,7 @@ import { formatTimeControl, gameFiltersQuery, parseClientMessage, parseGameFilte
 
 describe('protocol', () => {
   it('validates game settings', () => {
-    const valid = { mode: 'advanced', rated: true, timeControl: { initial: 600, increment: 5 }, color: 'random', firstPlayer: 'white', freeDraft: false };
+    const valid = { mode: 'advanced', rated: true, timeControl: { initial: 600, increment: 5 }, daysPerMove: null, color: 'random', firstPlayer: 'white', freeDraft: false };
     expect(parseSettings(valid)).toEqual(valid);
     expect(parseSettings({ ...valid, freeDraft: undefined })).toEqual(valid);
     expect(parseSettings({ ...valid, freeDraft: true })).toBe('ratedNeedsOfficialDraft');
@@ -13,6 +13,16 @@ describe('protocol', () => {
     expect(parseSettings({ ...valid, timeControl: null })).toBe('unlimitedNotRated');
     expect(parseSettings({ ...valid, rated: false, timeControl: null })).toMatchObject({ timeControl: null });
     expect(typeof parseSettings({ ...valid, timeControl: { initial: 10, increment: 0 } })).toBe('string');
+    expect(parseSettings({ ...valid, daysPerMove: undefined })).toEqual(valid);
+  });
+
+  it('validates correspondence settings', () => {
+    const correspondence = { mode: 'intro', rated: true, timeControl: null, daysPerMove: 3, color: 'white', firstPlayer: 'white' };
+    expect(parseSettings(correspondence)).toMatchObject({ rated: true, timeControl: null, daysPerMove: 3 });
+    for (const days of [1, 7]) expect(parseSettings({ ...correspondence, daysPerMove: days })).toMatchObject({ daysPerMove: days });
+    expect(parseSettings({ ...correspondence, daysPerMove: 2 })).toBe('invalidDaysPerMove');
+    expect(parseSettings({ ...correspondence, daysPerMove: '3' })).toBe('invalidDaysPerMove');
+    expect(parseSettings({ ...correspondence, timeControl: { initial: 600, increment: 5 } })).toBe('invalidDaysPerMove');
   });
 
   it('formats time controls', () => {

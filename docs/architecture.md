@@ -48,6 +48,7 @@ Colors live in CSS variables (`--gg-board`, `--gg-line`, the piece faces and eve
 4. Moves go over WebSocket with the move number (`ply`), so stale moves are rejected. The server validates with the engine, updates the clock, persists, and sends the new view to all subscribers.
 5. The clock starts after each player's first move. Until then the game can be aborted, and it is aborted automatically if someone does not move in time.
 6. If a player stays disconnected from the game for `CLAIM_AFTER_MS`, the other one can claim victory.
+7. Correspondence games have no clock: each move sets a deadline (days per move) stored as a date in the `games` table, so it survives restarts unchanged, while a live clock resumes from the time left. The room's timer fires at the deadline (in steps beyond the 24.8 days a `setTimeout` allows). Being away never ends them, and the players get a `turns` message, wherever they are on the site, when a game waits for their move. Their challenges and seeks are stored too (`challenges.ts`, `seeks.ts`), since they wait days for an answer; the other challenges and seeks live in memory.
 
 Sending the full view on every change is simpler than sending diffs and solves reconnection for free: on reconnect, the client subscribes again and receives the current state.
 

@@ -1188,6 +1188,43 @@ body:has(main.ligungi-auth) #clinput {
     color: $c-font-dim;
     text-align: center;
   }
+
+  &__heading {
+    margin: 0;
+    padding: 0.8em 1em 0.2em;
+    color: $c-font-dim;
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
+
+// A correspondence game waiting for the viewer's move, in the bell's dropdown.
+.ligungi-turn {
+  & + & {
+    border-top: $border;
+  }
+
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    padding: 0.7em 1em;
+    color: $c-header-dropdown;
+
+    &:hover {
+      background: $c-bg-zebra;
+    }
+  }
+
+  &__name {
+    font-weight: 600;
+  }
+
+  small {
+    color: $c-font-dim;
+  }
 }
 
 .ligungi-challenge {
@@ -2323,7 +2360,7 @@ body:has(main.ligungi-auth) #clinput {
 }
 
 /* ===== Challenge ===== */
-.ligungi-challenge {
+.ligungi-challenge-page {
   align-items: center;
 }
 
@@ -3060,6 +3097,11 @@ body:has(main.ligungi-auth) #clinput {
 }
 
 /* ===== Option cards (components/ui.tsx OptionCards) ===== */
+// In the create game dialog the choices sit between lila's form groups, which carry their own bottom margin.
+.create-game .ligungi-choice {
+  margin-bottom: 1.5rem;
+}
+
 .ligungi-choice {
   min-width: 0;
   margin: 0;
@@ -3727,14 +3769,31 @@ body:has(main.ligungi-auth) #clinput {
   padding-bottom: 0.5rem;
 
   .ligungi-home__card-head {
+    align-items: center;
+    gap: 0.75rem 1rem;
     padding: 1rem 1.25rem;
     border-bottom: $border;
+
+    h2 {
+      display: inline;
+      margin-right: 0.75rem;
+    }
   }
 
   > .ligungi-notice {
     margin: 0;
     padding: 1rem 1.25rem;
   }
+}
+
+.ligungi-segmented.ligungi-home__open-tabs > button {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9em;
+}
+
+.ligungi-home__open-count {
+  margin-left: 0.25em;
+  color: $c-font-dim;
 }
 
 .ligungi-seeks {
@@ -4703,6 +4762,15 @@ body:has(main.ligungi-auth) #clinput {
   &__text {
     flex: 1 1 16rem;
     color: $c-font-clear;
+  }
+
+  &__deadline {
+    display: block;
+    color: $c-font-dim;
+  }
+
+  &.is-my-turn .ligungi-live-badge {
+    color: $c-good;
   }
 }
 

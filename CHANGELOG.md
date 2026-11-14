@@ -6,6 +6,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Correspondence games: challenge a player from their profile or by link, or open a game in the lobby's Correspondence tab, with 1, 3 or 7 days per move, rated or casual, and play without being online at the same time. Whoever runs out of days loses (a game nobody started is aborted), being away never does. The bell in the header counts the games waiting for your move and lists them, with a sound when a move arrives, and your games on the home page say whose turn it is and how long is left. They stay off the TV and the live counts, so their players remain free to challenge. Their challenges and open games wait up to 7 days, even with you away, and survive server restarts. Needs an account.
 - Takebacks in casual games: ask to take back your last move, and the opponent accepts or declines. Not available in rated games or for the first two moves.
 - Give your opponent 15 seconds with the + button on their clock, in any game with a clock.
 - Players page (Community > Players), made to find someone to play: how many are online and free, quick game and create game buttons, and the list of signed-in players online with their rating and leaderboard position in the chosen mode, whether they are free or playing, and a Challenge or Watch button. Filters for free players, people you follow and a name search. On the side, the site's numbers and a rating distribution chart that marks where you stand.

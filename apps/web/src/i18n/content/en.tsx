@@ -32,7 +32,7 @@ const sources = (
 );
 
 export const en: Content = {
-  updated: 'Last updated: November 13, 2026.',
+  updated: 'Last updated: November 14, 2026.',
 
   about: (
     <>
@@ -252,7 +252,10 @@ export const en: Content = {
         <li>
           <b>Games and activity:</b> moves, results, ratings, players you follow and your account creation date. This data
           appears on your public profile. Who may challenge you from your profile is saved with your account.
-          Challenges sent from a profile are kept only in the server's memory while they wait for an answer.
+          Challenges for live games are kept only in the server's memory while they wait for an answer. Correspondence
+          challenges and open games, which wait up to 7 days, are stored in the database so a server restart does not lose
+          them: open games are deleted when they expire and challenges 14 days after they were made, or sooner if you delete
+          your account, and they are part of your data download.
         </li>
         <li>
           <b>Session cookie (sid):</b> an essential cookie that identifies your browser to keep you signed in and keep your

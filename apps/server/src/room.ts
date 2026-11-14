@@ -9,7 +9,7 @@ import {
   type Mode,
   type Outcome,
 } from '@ligungi/engine';
-import { EXTRA_TIME_SECONDS, type ErrorCode, type GameStatus, type GameSummary, type GameView, type PlayerView, type TimeControl } from '@ligungi/protocol';
+import { DAY_MS, EXTRA_TIME_SECONDS, type ErrorCode, type GameStatus, type GameSummary, type GameView, type PlayerView, type TimeControl } from '@ligungi/protocol';
 import { Clock } from './clock.ts';
 
 export interface Seat {
@@ -34,6 +34,9 @@ export interface RoomInit {
   readonly status?: GameStatus;
   readonly outcome?: Outcome | null;
   readonly clock?: { white: number; black: number; running: Color | null } | null;
+  readonly daysPerMove?: number | null;
+  /** Correspondence: when the player to move runs out of time (epoch ms), as stored. */
+  readonly deadline?: number | null;
   readonly rematchId?: string | null;
   readonly endedAt?: number | null;
 }
@@ -54,6 +57,9 @@ export type Action = 'offer' | 'accept' | 'decline';
 
 const REPLAY_ERROR = 'Stored game cannot be replayed';
 
+/** setTimeout fires at once beyond this delay (about 24.8 days); later deadlines are reached in steps. */
+const MAX_TIMER_MS = 2 ** 31 - 1;
+
 export class GameRoom {
   readonly id: string;
   readonly mode: Mode;
@@ -65,6 +71,13 @@ export class GameRoom {
   readonly createdAt: number;
   readonly game: Game;
   readonly clock: Clock | null;
+  /** Correspondence: days per move, `null` for live games. */
+  readonly daysPerMove: number | null;
+  /**
+   * Correspondence: when the player to move loses on time (epoch ms). Absolute, so a server restart does not give
+   * anyone extra days, unlike the live clock, which resumes from the time left.
+   */
+  deadline: number | null;
   status: GameStatus;
   outcome: Outcome | null;
   drawOffer: Color | null = null;
@@ -102,6 +115,8 @@ export class GameRoom {
     this.#absentSince = { white: now, black: now };
     this.clock = init.timeControl ? new Clock(init.timeControl, init.clock ?? undefined) : null;
     if (this.clock && init.clock?.running && this.status === 'started') this.clock.start(init.clock.running, now);
+    this.daysPerMove = init.daysPerMove ?? null;
+    this.deadline = this.daysPerMove && this.status === 'started' ? (init.deadline ?? now + this.daysPerMove * DAY_MS) : null;
     this.#schedule();
   }
 
@@ -121,9 +136,11 @@ export class GameRoom {
     return this.status === 'started' && this.plies < 2;
   }
 
+  /** Leaving is normal in a correspondence game: only the deadline ends it, never the opponent's absence. */
   canClaim(color: Color): boolean {
     const since = this.#absentSince[opposite(color)];
     return (
+      this.daysPerMove === null &&
       this.status === 'started' &&
       this.plies >= 2 &&
       since !== null &&
@@ -135,6 +152,10 @@ export class GameRoom {
     if (this.status !== 'started') return 'gameOver';
     // A move that arrives after the flag but before the timer fires must not save the player.
     if (this.clock?.running === color && this.clock.timeLeft(color, this.#hooks.now()) <= 0) {
+      this.tick();
+      return 'gameOver';
+    }
+    if (this.deadline !== null && this.#hooks.now() >= this.deadline) {
       this.tick();
       return 'gameOver';
     }
@@ -153,6 +174,7 @@ export class GameRoom {
       if (this.clock.running) this.clock.press(color, next, now);
       else if (this.plies >= 2) this.clock.start(next, now);
     }
+    if (this.daysPerMove) this.deadline = now + this.daysPerMove * DAY_MS;
     this.#turnStartedAt = now;
     if (this.drawOffer && this.drawOffer !== color) this.drawOffer = null;
     // A takeback request is about the position it was made in; any move makes it moot.
@@ -298,7 +320,16 @@ export class GameRoom {
       this.#end(this.game.outcome!);
       return;
     }
-    if (this.plies < 2 && now - this.#turnStartedAt >= this.#hooks.abortAfterMs) {
+    if (this.deadline !== null && now >= this.deadline) {
+      // As on lichess: a game nobody really started is aborted, not lost.
+      if (this.plies < 2) this.#finish('aborted', null);
+      else {
+        this.game.timeout(this.game.position.turn);
+        this.#end(this.game.outcome!);
+      }
+      return;
+    }
+    if (this.daysPerMove === null && this.plies < 2 && now - this.#turnStartedAt >= this.#hooks.abortAfterMs) {
       this.#finish('aborted', null);
       return;
     }
@@ -343,6 +374,8 @@ export class GameRoom {
       status: this.status,
       outcome: this.outcome,
       clock: this.clock?.view(now) ?? null,
+      daysPerMove: this.daysPerMove,
+      deadlineIn: this.deadline === null ? null : Math.max(0, this.deadline - now),
       drawOffer: this.drawOffer,
       takebackOffer: this.takebackOffer,
       rematchOffer: this.rematchOffer,
@@ -376,6 +409,9 @@ export class GameRoom {
       createdAt: this.createdAt,
       endedAt: this.endedAt,
       clock: this.status === 'started' ? (this.clock?.view(this.#hooks.now()) ?? null) : null,
+      daysPerMove: this.daysPerMove,
+      deadlineIn: this.deadline === null ? null : Math.max(0, this.deadline - this.#hooks.now()),
+      turn: this.status === 'started' ? this.game.position.turn : null,
     };
   }
 
@@ -400,6 +436,7 @@ export class GameRoom {
       this.clock.stop(now);
       this.clock.start(this.game.position.turn, now);
     }
+    if (this.daysPerMove) this.deadline = now + this.daysPerMove * DAY_MS;
     this.#turnStartedAt = now;
     this.drawOffer = null;
     this.#changed();
@@ -417,6 +454,7 @@ export class GameRoom {
     this.drawOffer = null;
     this.takebackOffer = null;
     this.clock?.stop(now);
+    this.deadline = null;
     this.dispose();
     if (status === 'ended') this.#hooks.onEnd(this);
     this.#hooks.onChange(this);
@@ -434,16 +472,19 @@ export class GameRoom {
     const deadlines: number[] = [];
     const running = this.clock?.running;
     if (running) deadlines.push(now + this.clock!.timeLeft(running, now));
-    if (this.plies < 2) deadlines.push(this.#turnStartedAt + this.#hooks.abortAfterMs);
-    for (const color of ['white', 'black'] as const) {
-      const since = this.#absentSince[color];
-      if (since !== null && this.plies >= 2) {
-        const at = since + this.#hooks.claimAfterMs;
-        if (at > now) deadlines.push(at);
+    if (this.deadline !== null) deadlines.push(this.deadline);
+    if (this.daysPerMove === null) {
+      if (this.plies < 2) deadlines.push(this.#turnStartedAt + this.#hooks.abortAfterMs);
+      for (const color of ['white', 'black'] as const) {
+        const since = this.#absentSince[color];
+        if (since !== null && this.plies >= 2) {
+          const at = since + this.#hooks.claimAfterMs;
+          if (at > now) deadlines.push(at);
+        }
       }
     }
     if (deadlines.length === 0) return;
-    const delay = Math.max(0, Math.min(...deadlines) - now) + 20;
+    const delay = Math.min(MAX_TIMER_MS, Math.max(0, Math.min(...deadlines) - now) + 20);
     this.#timer = setTimeout(() => this.tick(), delay);
     this.#timer.unref?.();
   }

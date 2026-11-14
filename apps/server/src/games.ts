@@ -16,6 +16,7 @@ export interface NewGame {
   readonly mode: Mode;
   readonly rated: boolean;
   readonly timeControl: TimeControl | null;
+  readonly daysPerMove: number | null;
   readonly firstPlayer: Color;
   readonly freeDraft: boolean;
   readonly players: Record<Color, Player>;
@@ -59,6 +60,8 @@ interface GameRow {
   clock_white: number | null;
   clock_black: number | null;
   clock_running: Color | null;
+  days_per_move: number | null;
+  deadline: number | null;
   rematch_id: string | null;
   created_at: number;
   ended_at: number | null;
@@ -133,6 +136,7 @@ export class Games {
         mode: game.mode,
         rated: game.rated,
         timeControl: game.timeControl,
+        daysPerMove: game.daysPerMove,
         firstPlayer: game.firstPlayer,
         freeDraft: game.freeDraft,
         seats: { white: seat('white'), black: seat('black') },
@@ -211,6 +215,14 @@ export class Games {
 
   ongoing(): GameRoom[] {
     return [...this.#rooms.values()].filter((room) => room.status === 'started');
+  }
+
+  /**
+   * Games being played right now: correspondence games are left out, since a player in one is not busy for the days it
+   * lasts (they stay free to challenge, and the TV and the live counts show only games played at the board).
+   */
+  live(): GameRoom[] {
+    return this.ongoing().filter((room) => room.daysPerMove === null);
   }
 
   playingFor(sessionId: string, userId: string | null): GameSummary[] {
@@ -391,6 +403,7 @@ export class Games {
       mode: room.mode,
       rated: room.rated,
       timeControl: room.timeControl,
+      daysPerMove: room.daysPerMove,
       firstPlayer: room.firstPlayer,
       freeDraft: room.freeDraft,
       players: { white: player(room.seats.black), black: player(room.seats.white) },
@@ -429,6 +442,8 @@ export class Games {
         row.clock_white === null || row.clock_black === null
           ? null
           : { white: row.clock_white, black: row.clock_black, running: row.clock_running },
+      daysPerMove: row.days_per_move,
+      deadline: row.deadline,
       rematchId: row.rematch_id,
       endedAt: row.ended_at,
     };
@@ -445,14 +460,14 @@ export class Games {
         `insert into games (id, mode, rated, clock_initial, clock_increment, first_player, free_draft,
           white_session, white_user, white_name, white_rating, white_provisional, white_diff,
           black_session, black_user, black_name, black_rating, black_provisional, black_diff,
-          moves, status, winner, reason, clock_white, clock_black, clock_running, rematch_id,
+          moves, status, winner, reason, clock_white, clock_black, clock_running, days_per_move, deadline, rematch_id,
           created_at, ended_at, updated_at)
-         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          on conflict (id) do update set white_session = excluded.white_session, black_session = excluded.black_session,
           white_diff = excluded.white_diff, black_diff = excluded.black_diff,
           moves = excluded.moves, status = excluded.status, winner = excluded.winner, reason = excluded.reason,
           clock_white = excluded.clock_white, clock_black = excluded.clock_black, clock_running = excluded.clock_running,
-          rematch_id = excluded.rematch_id, ended_at = excluded.ended_at, updated_at = excluded.updated_at`,
+          deadline = excluded.deadline, rematch_id = excluded.rematch_id, ended_at = excluded.ended_at, updated_at = excluded.updated_at`,
       )
       .run(
         room.id,
@@ -481,6 +496,8 @@ export class Games {
         clock?.white ?? null,
         clock?.black ?? null,
         clock?.running ?? null,
+        room.daysPerMove,
+        room.deadline,
         room.rematchId,
         room.createdAt,
         room.endedAt,

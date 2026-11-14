@@ -921,6 +921,122 @@ describe('search and health', () => {
   });
 });
 
+describe('correspondence', () => {
+  const corr = (days: number, extra: object = {}) => ({ ...casual, mode: 'intro', rated: true, timeControl: null, daysPerMove: days, ...extra });
+
+  it('creates games with an account and 1, 3 or 7 days per move', async () => {
+    server = await startServer();
+    const anon = client();
+    const a = client();
+    await signup(a, 'Leorio');
+    await a.connect();
+    expect((await anon.request('POST', '/api/seeks', corr(3, { rated: false }))).data).toMatchObject({ code: 'correspondenceNeedsAccount' });
+    expect((await a.request('POST', '/api/challenges', corr(2))).data).toMatchObject({ code: 'invalidDaysPerMove' });
+    expect((await a.request('POST', '/api/challenges', corr(3, { timeControl: { initial: 600, increment: 5 } }))).data).toMatchObject({
+      code: 'invalidDaysPerMove',
+    });
+    expect((await anon.request('POST', '/api/challenges', corr(3, { rated: false }))).data).toMatchObject({ code: 'correspondenceNeedsAccount' });
+    const link = await a.request<ChallengeView>('POST', '/api/challenges', corr(3));
+    expect(link.data.settings).toMatchObject({ daysPerMove: 3, timeControl: null, rated: true });
+    expect((await anon.request('POST', `/api/challenges/${link.data.id}/accept`)).data).toMatchObject({ code: 'correspondenceNeedsAccount' });
+  });
+
+  it('keeps a seek in the lobby for days, with its owner away or playing, and pairs it only with the same pace', async () => {
+    let now = 1_000_000;
+    server = await startServer({ now: () => now });
+    const a = client();
+    const b = client();
+    const c = client();
+    await signup(a, 'Gon');
+    await signup(b, 'Killua');
+    await signup(c, 'Alluka');
+    // No connection needed: the seek does not depend on its owner staying online.
+    const seek = await a.request<{ seekId: string }>('POST', '/api/seeks', corr(3));
+    expect(seek.data.seekId).toBeDefined();
+    await a.connect();
+    a.disconnect();
+    // Not the same pace: a game without a clock, or with other days per move, opens its own seek.
+    await b.connect();
+    expect((await b.request('POST', '/api/seeks', { ...casual, color: 'black', timeControl: null })).data).toHaveProperty('seekId');
+    expect((await b.request('POST', '/api/seeks', corr(7, { color: 'black' }))).data).toHaveProperty('seekId');
+    // A live game of the owner leaves it waiting.
+    await startGame(a, c);
+    const lobby = () => b.request<LobbyView>('GET', '/api/lobby').then((r) => r.data.seeks.map((s) => s.id));
+    expect(await lobby()).toContain(seek.data.seekId);
+    now += 6 * 24 * 60 * 60 * 1000;
+    const paired = await b.request<{ gameId: string }>('POST', '/api/seeks', corr(3, { color: 'black' }));
+    expect(paired.data.gameId).toBeDefined();
+    const view = (await b.request<GameView>('GET', `/api/games/${paired.data.gameId}`)).data;
+    expect(view).toMatchObject({ daysPerMove: 3, rated: true });
+    expect(await lobby()).not.toContain(seek.data.seekId);
+    // Seven days without an answer: gone from the lobby.
+    const old = (await c.request<{ seekId: string }>('POST', '/api/seeks', corr(1))).data.seekId;
+    now += 7 * 24 * 60 * 60 * 1000;
+    // Any lobby write sweeps first (as does a timer every minute).
+    await b.request('POST', '/api/seeks', corr(1, { mode: 'advanced' }));
+    expect(await lobby()).not.toContain(old);
+  });
+
+  it('keeps a challenge to a player while its sender is away, for days', async () => {
+    let now = 1_000_000;
+    server = await startServer({ now: () => now });
+    const a = client();
+    const b = client();
+    await signup(a, 'Kurapika');
+    await signup(b, 'Pairo');
+    await a.connect();
+    const sent = await a.request<ChallengeView>('POST', '/api/challenges', { ...corr(7), to: 'pairo' });
+    a.disconnect();
+    now += 3 * 60 * 60 * 1000;
+    expect((await b.request<ChallengeView>('GET', `/api/challenges/${sent.data.id}`)).data.status).toBe('open');
+    now += 7 * 24 * 60 * 60 * 1000;
+    expect((await b.request<ChallengeView>('GET', `/api/challenges/${sent.data.id}`)).data.status).toBe('canceled');
+  });
+
+  it('gives each player days per move, never a win for absence, and ends on the deadline', async () => {
+    let now = 1_000_000;
+    server = await startServer({ now: () => now });
+    const a = client();
+    const b = client();
+    await signup(a, 'Melody');
+    await signup(b, 'Senritsu');
+    const day = 24 * 60 * 60 * 1000;
+
+    // No move by the deadline: aborted, as nobody really started the game.
+    let { id } = await startGame(a, b, corr(1));
+    let view = (await a.request<GameView>('GET', `/api/games/${id}`)).data;
+    expect(view).toMatchObject({ daysPerMove: 1, clock: null, deadlineIn: day });
+    now += day;
+    server.app.games.get(id)!.tick();
+    expect((await a.waitGame(id, (g) => g.status !== 'started')).status).toBe('aborted');
+
+    ({ id } = await startGame(a, b, corr(1)));
+    view = (await a.request<GameView>('GET', `/api/games/${id}`)).data;
+    view = await play(a, b, view);
+    now += 20 * 60 * 60 * 1000;
+    view = await play(b, a, view);
+    // The deadline starts over with every move.
+    expect(view.deadlineIn).toBe(day);
+    // Not a game being played right now: kept off the TV and the live count, and its players stay free.
+    expect((await a.request<GameSummary[]>('GET', '/api/tv')).data).toEqual([]);
+    expect((await a.request<LobbyView>('GET', '/api/lobby')).data.playing).toBe(0);
+    expect((await a.request<PlayersView>('GET', '/api/players')).data.counts).toMatchObject({ playing: 0, free: 2 });
+    const [summary] = (await a.request<Me>('GET', '/api/me')).data.playing;
+    expect(summary).toMatchObject({ id, daysPerMove: 1, deadlineIn: day, turn: 'white' });
+    // White is told, wherever they are on the site, that the game waits for them; Black no longer has it in the list.
+    await a.waitFor((m) => m.t === 'turns' && m.games.some((game) => game.id === id));
+    await b.waitFor((m) => m.t === 'turns' && !m.games.some((game) => game.id === id));
+    b.disconnect();
+    now += 60_000;
+    expect((await a.request<GameView>('GET', `/api/games/${id}`)).data.canClaimVictory).toBe(false);
+    now += day;
+    server.app.games.get(id)!.tick();
+    const ended = await a.waitGame(id, (g) => g.status === 'ended');
+    expect(ended.outcome).toEqual({ winner: 'black', reason: 'timeout' });
+    expect(ended.players.white.ratingDiff).not.toBeNull();
+  });
+});
+
 describe('persistence', () => {
   it('keeps ongoing and finished games across restarts', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'ligungi-'));
@@ -956,6 +1072,108 @@ describe('persistence', () => {
       later.cookie = restored.cookie;
       const finished = (await later.request<GameView>('GET', `/api/games/${id}`)).data;
       expect(finished.outcome).toEqual({ winner: 'black', reason: 'resign' });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps correspondence seeks across restarts, exports them and forgets them with the account', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ligungi-'));
+    const databasePath = join(dir, 'test.db');
+    try {
+      server = await startServer({ databasePath });
+      const a = client();
+      await signup(a, 'Ikalgo');
+      await a.connect();
+      const correspondence = (await a.request<{ seekId: string }>('POST', '/api/seeks', { ...casual, timeControl: null, daysPerMove: 3 })).data.seekId;
+      await a.request('POST', '/api/seeks', casual);
+      a.disconnect();
+      await server.close();
+
+      server = await startServer({ databasePath });
+      const ikalgo = new Client(server.base);
+      ikalgo.cookie = a.cookie;
+      clients.push(ikalgo);
+      const lobby = (await ikalgo.request<LobbyView>('GET', '/api/lobby')).data;
+      expect(lobby.seeks).toEqual([expect.objectContaining({ id: correspondence, mine: true, settings: expect.objectContaining({ daysPerMove: 3 }) })]);
+      const exported = (await ikalgo.request<{ seeks: Array<{ id: string }> }>('GET', '/api/account/export')).data;
+      expect(exported.seeks).toEqual([expect.objectContaining({ id: correspondence })]);
+      expect((await ikalgo.request('POST', '/api/account/delete', { password: 'segredo123' })).status).toBe(200);
+      expect((server.app.db.prepare('select count(*) as n from seeks').get() as { n: number }).n).toBe(0);
+      expect((await ikalgo.request<LobbyView>('GET', '/api/lobby')).data.seeks).toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps correspondence challenges across restarts, exports them and forgets them with the account', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ligungi-'));
+    const databasePath = join(dir, 'test.db');
+    try {
+      server = await startServer({ databasePath });
+      const a = client();
+      const b = client();
+      await signup(a, 'Biscuit');
+      await signup(b, 'Wing');
+      await a.connect();
+      const correspondence = (await a.request<ChallengeView>('POST', '/api/challenges', { ...casual, timeControl: null, daysPerMove: 3, to: 'wing' })).data;
+      const live = (await a.request<ChallengeView>('POST', '/api/challenges', casual)).data;
+      a.disconnect();
+      await server.close();
+
+      server = await startServer({ databasePath });
+      const wing = new Client(server.base);
+      wing.cookie = b.cookie;
+      clients.push(wing);
+      expect((await wing.request<ChallengeView>('GET', `/api/challenges/${correspondence.id}`)).data).toMatchObject({ status: 'open', destination: { name: 'Wing' } });
+      expect((await wing.request('GET', `/api/challenges/${live.id}`)).status).toBe(404);
+      const exported = (await wing.request<{ challenges: Array<{ id: string; sent: boolean; opponent: string; status: string }> }>('GET', '/api/account/export')).data;
+      expect(exported.challenges).toEqual([expect.objectContaining({ id: correspondence.id, sent: false, opponent: 'Biscuit', status: 'open' })]);
+      const accepted = await wing.request<{ gameId: string }>('POST', `/api/challenges/${correspondence.id}/accept`);
+      expect(accepted.status).toBe(200);
+      await server.close();
+
+      server = await startServer({ databasePath });
+      const again = new Client(server.base);
+      again.cookie = b.cookie;
+      clients.push(again);
+      expect((await again.request<ChallengeView>('GET', `/api/challenges/${correspondence.id}`)).data).toMatchObject({ status: 'accepted' });
+      const count = () => (server!.app.db.prepare('select count(*) as n from challenges').get() as { n: number }).n;
+      expect(count()).toBe(1);
+      // Deleting the account needs no game in progress: resign the correspondence game first.
+      await again.connect();
+      again.send({ t: 'sub', topic: `game:${accepted.data.gameId}` });
+      await again.waitGame(accepted.data.gameId);
+      again.send({ t: 'resign', game: accepted.data.gameId });
+      await again.waitGame(accepted.data.gameId, (g) => g.status !== 'started');
+      expect((await again.request('POST', '/api/account/delete', { password: 'segredo123' })).status).toBe(200);
+      expect(count()).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps a correspondence deadline across restarts instead of starting it over', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ligungi-'));
+    const databasePath = join(dir, 'test.db');
+    let now = 1_000_000;
+    try {
+      server = await startServer({ databasePath, now: () => now });
+      const a = client();
+      const b = client();
+      await signup(a, 'Neon');
+      await signup(b, 'Nostrade');
+      const { id } = await startGame(a, b, { ...casual, timeControl: null, daysPerMove: 3 });
+      a.disconnect();
+      b.disconnect();
+      await server.close();
+
+      now += 2 * 24 * 60 * 60 * 1000;
+      server = await startServer({ databasePath, now: () => now });
+      const restored = new Client(server.base);
+      restored.cookie = a.cookie;
+      clients.push(restored);
+      expect((await restored.request<GameView>('GET', `/api/games/${id}`)).data.deadlineIn).toBe(24 * 60 * 60 * 1000);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

@@ -44,6 +44,7 @@ import {
   type Session,
 } from './auth.ts';
 import { BUILD } from './build.ts';
+import { ChallengeStore } from './challenges.ts';
 import type { ServerConfig } from './config.ts';
 import { openDatabase, type Db } from './db.ts';
 import { exportGame } from './export.ts';
@@ -64,6 +65,7 @@ import {
 import { Hub, type Client } from './hub.ts';
 import { Lobby } from './lobby.ts';
 import type { GameRoom } from './room.ts';
+import { SeekStore } from './seeks.ts';
 import { USERNAME_PATTERN, Users } from './users.ts';
 
 /** Stored name of players without an account; the site shows a translated label instead. */
@@ -123,11 +125,23 @@ export const createApp = (config: ServerConfig): App => {
     return { sessionId: session.id, userId: user?.id ?? null, name: user?.name ?? ANONYMOUS_NAME };
   };
 
-  const publishGame = (room: GameRoom) =>
+  /** Sends a user, on every device, the correspondence games waiting for their move. */
+  const sendTurns = (userId: string): void => {
+    const waiting = games
+      .ongoing()
+      .filter((room) => room.daysPerMove !== null && room.seats[room.game.position.turn].userId === userId)
+      .map((room) => room.summary());
+    for (const client of hub.clients()) if (client.player.userId === userId) hub.send(client, { t: 'turns', games: waiting });
+  };
+
+  const publishGame = (room: GameRoom) => {
     hub.publish(`game:${room.id}`, (client) => ({
       t: 'game',
       game: room.view(client.player.sessionId, client.player.userId),
     }));
+    // The other player may be anywhere on the site, waiting for this move.
+    if (room.daysPerMove !== null) for (const seat of Object.values(room.seats)) if (seat.userId) sendTurns(seat.userId);
+  };
 
   const games = new Games(db, users, {
     now: config.now,
@@ -138,14 +152,18 @@ export const createApp = (config: ServerConfig): App => {
 
   const lobbyView = (player: Player): LobbyView => ({
     seeks: lobby.seekViews(player),
-    playing: games.ongoing().length,
+    playing: games.live().length,
     online: hub.onlineCount(),
   });
   const publishLobby = () => hub.publish('lobby', (client) => ({ t: 'lobby', lobby: lobbyView(client.player) }));
 
+  const challengeStore = new ChallengeStore(db);
+  const seekStore = new SeekStore(db);
   const lobby: Lobby = new Lobby(games, users, {
     now: config.now,
     random: Math.random,
+    challengeStore,
+    seekStore,
     onSeeksChange: publishLobby,
     onChallengeChange: (challenge) => {
       hub.publish(`challenge:${challenge.id}`, (client) => ({
@@ -157,6 +175,7 @@ export const createApp = (config: ServerConfig): App => {
     onGameStart: (room) => {
       for (const seat of Object.values(room.seats)) {
         hub.toSession(seat.sessionId, seat.userId, { t: 'redirect', path: `/${room.id}` });
+        if (room.daysPerMove !== null && seat.userId) sendTurns(seat.userId);
       }
       publishLobby();
     },
@@ -178,7 +197,7 @@ export const createApp = (config: ServerConfig): App => {
 
   const playingByUser = () => {
     const map = new Map<string, string>();
-    for (const room of games.ongoing()) {
+    for (const room of games.live()) {
       for (const seat of Object.values(room.seats)) if (seat.userId) map.set(seat.userId, room.id);
     }
     return map;
@@ -259,7 +278,7 @@ export const createApp = (config: ServerConfig): App => {
       };
     }
     const cache = playersCache;
-    const ongoing = games.ongoing();
+    const ongoing = games.live();
     const playingIn = new Map<string, string>();
     for (const room of ongoing) for (const seat of Object.values(room.seats)) if (seat.userId) playingIn.set(seat.userId, room.id);
     const signedIn = [...onlineUsers()];
@@ -460,6 +479,17 @@ export const createApp = (config: ServerConfig): App => {
           browser: session.userAgent,
         })),
         games: games.exportFor(userId),
+        // Only correspondence challenges and seeks are stored; the others live in memory for at most two hours.
+        seeks: seekStore.forUser(userId).map((seek) => ({ id: seek.id, createdAt: iso(seek.createdAt), settings: seek.settings })),
+        challenges: challengeStore.forUser(userId).map((challenge) => ({
+          id: challenge.id,
+          createdAt: iso(challenge.createdAt),
+          sent: challenge.owner.userId === userId,
+          opponent: challenge.owner.userId === userId ? (challenge.destination?.name ?? null) : challenge.owner.name,
+          status: challenge.status,
+          settings: challenge.settings,
+          gameId: challenge.gameId,
+        })),
       };
       ctx.res.setHeader('content-disposition', `attachment; filename="ligungi-${user.name}.json"`);
       ctx.res.setHeader('cache-control', 'no-store');
@@ -575,7 +605,7 @@ export const createApp = (config: ServerConfig): App => {
     .add('GET', '/api/tv', (ctx) => {
       const rating = (room: GameRoom) => (room.seats.white.rating ?? 1200) + (room.seats.black.rating ?? 1200);
       const list = games
-        .ongoing()
+        .live()
         .filter((room) => room.plies > 0)
         .sort((a, b) => rating(b) - rating(a) || b.createdAt - a.createdAt)
         .slice(0, 24)
@@ -769,7 +799,10 @@ export const createApp = (config: ServerConfig): App => {
       }
       publishLobby();
     });
-    if (player.userId) sendIncoming(player.userId);
+    if (player.userId) {
+      sendIncoming(player.userId);
+      sendTurns(player.userId);
+    }
     publishLobby();
   };
 

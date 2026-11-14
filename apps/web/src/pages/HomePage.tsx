@@ -1,11 +1,12 @@
 import { MODES, type Mode } from '@ligungi/engine';
 import { TIME_PRESETS, type GameSettings, type GameSummary, type LobbyView, type Me, type SeekView, type TimeControl } from '@ligungi/protocol';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { turns } from '../challenges.ts';
 import { CreateGame, type CreateTarget } from '../components/CreateGame.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { Modal } from '../components/Modal.tsx';
-import { playerName, settingsText, timeControlText, useT } from '../i18n/index.ts';
+import { formatClock, playerName, settingsText, speedText, timeControlText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
@@ -125,11 +126,11 @@ const SeekRow = ({ seek, onAccept, onCancel }: { seek: SeekView; onAccept: (s: S
         <span class="ligungi-seek__name">{playerName(t, seek.player)}</span>
         {seek.player.rating !== null && <span class="ligungi-seek__rating">{seek.player.rating}</span>}
       </span>
-      <span class="ligungi-seek__time">{timeControlText(t, settings.timeControl)}</span>
+      <span class="ligungi-seek__time">{settings.daysPerMove ? t.days(settings.daysPerMove) : speedText(t, settings)}</span>
       <span class="ligungi-seek__mode">{mode}</span>
       <span class="ligungi-seek__kind">{kind}</span>
       {/* Phones: the settings on one line under the name. */}
-      <span class="ligungi-seek__meta">{[mode, timeControlText(t, settings.timeControl), kind].join(' · ')}</span>
+      <span class="ligungi-seek__meta">{[mode, speedText(t, settings), kind].join(' · ')}</span>
       {seek.mine ? (
         <button type="button" class="button button-empty button-red ligungi-seek__action" onClick={() => onCancel(seek)}>
           {t.home.cancel}
@@ -212,7 +213,11 @@ export const HomePage = () => {
   const [create, setCreate] = useState<CreateTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<SeekView | null>(null);
-  const mine = lobby?.seeks.filter((seek) => seek.mine) ?? [];
+  const [tab, setTab] = useState<'live' | 'correspondence'>('live');
+  const correspondence = lobby?.seeks.filter((seek) => seek.settings.daysPerMove) ?? [];
+  const liveSeeks = lobby?.seeks.filter((seek) => !seek.settings.daysPerMove) ?? [];
+  // Correspondence seeks wait for days, so they never hold the quick pairing grid.
+  const mine = liveSeeks.filter((seek) => seek.mine);
   const rated = Boolean(user);
 
   useEffect(() => {
@@ -229,7 +234,6 @@ export const HomePage = () => {
       if (message.t === 'lobby') setLobby(message.lobby);
     });
     api.get<LobbyView>('/api/lobby').then(setLobby).catch(() => {});
-    api.get<Me>('/api/me').then(setMe).catch(() => {});
     api
       .get<GameSummary[]>('/api/tv')
       .then((games) => setLive(games.slice(0, LIVE_GAMES)))
@@ -239,6 +243,21 @@ export const HomePage = () => {
       off();
     };
   }, [user?.id]);
+
+  // Reloaded when a correspondence move arrives, so the strips below say whose turn it is.
+  const waiting = useStore(turns);
+  useEffect(() => {
+    api.get<Me>('/api/me').then(setMe).catch(() => {});
+  }, [user?.id, waiting]);
+
+  // A correspondence game just created waits in its own tab, so show that tab.
+  const myCorrespondence = correspondence.filter((seek) => seek.mine).length;
+  const lastMyCorrespondence = useRef<number | null>(null);
+  useEffect(() => {
+    if (lobby === null) return;
+    if (lastMyCorrespondence.current !== null && myCorrespondence > lastMyCorrespondence.current) setTab('correspondence');
+    lastMyCorrespondence.current = myCorrespondence;
+  }, [lobby, myCorrespondence]);
 
   const pickMode = (next: Mode) => {
     setMode(next);
@@ -263,15 +282,23 @@ export const HomePage = () => {
     run(() => api.post('/api/seeks', { mode, rated, timeControl, color: 'random', firstPlayer: 'random', freeDraft: false }));
   const accept = (seek: SeekView) => run(() => api.post(`/api/seeks/${seek.id}/accept`));
   const cancel = (seek: SeekView) => run(() => api.delete(`/api/seeks/${seek.id}`));
-  const seeks = lobby?.seeks ?? [];
+  const seeks = tab === 'live' ? liveSeeks : correspondence;
+  // The viewer's side, known only with an account (an anonymous game has no user to match).
+  const isMyTurn = (game: GameSummary) => game.turn !== null && user !== null && game.players[game.turn].user?.id === user.id;
+  const ongoing = [...(me?.playing ?? [])].sort((a, b) => Number(isMyTurn(b)) - Number(isMyTurn(a)));
 
   return (
     <main class="ligungi-page ligungi-home">
-      {me?.playing.map((game) => (
-        <section key={game.id} class="ligungi-card ligungi-live-strip">
-          <span class="ligungi-live-badge">{t.home.yourGame}</span>
+      {ongoing.map((game) => (
+        <section key={game.id} class={`ligungi-card ligungi-live-strip${isMyTurn(game) ? ' is-my-turn' : ''}`}>
+          <span class="ligungi-live-badge">{isMyTurn(game) ? t.nav.yourTurn : t.home.yourGame}</span>
           <span class="ligungi-live-strip__text">
-            {playerName(t, game.players.white)} × {playerName(t, game.players.black)} · {t.modes[game.mode]} · {timeControlText(t, game.timeControl)}
+            {playerName(t, game.players.white)} × {playerName(t, game.players.black)} · {t.modes[game.mode]} · {speedText(t, game)}
+            {game.daysPerMove !== null && game.deadlineIn !== null && (
+              <small class="ligungi-live-strip__deadline">
+                {isMyTurn(game) ? t.nav.timeLeft(formatClock(game.deadlineIn)) : t.home.theirTurn}
+              </small>
+            )}
           </span>
           <a class="button" href={`/${game.id}`}>
             {t.home.resume}
@@ -285,11 +312,25 @@ export const HomePage = () => {
           {error && <p class="error ligungi-home__error">{error}</p>}
           <section class="ligungi-card ligungi-home__open">
             <div class="ligungi-home__card-head">
-              <h2>{t.home.openTitle}</h2>
-              <span class="ligungi-home__card-note">{t.home.openHint}</span>
+              <div>
+                <h2>{t.home.openTitle}</h2>
+                <span class="ligungi-home__card-note">{t.home.openHint}</span>
+              </div>
+              <div class="ligungi-segmented ligungi-home__open-tabs" role="group" aria-label={t.create.speed}>
+                {(
+                  [
+                    ['live', t.create.speedLive, liveSeeks.length],
+                    ['correspondence', t.create.speedCorrespondence, correspondence.length],
+                  ] as const
+                ).map(([value, label, count]) => (
+                  <button key={value} type="button" class={tab === value ? 'active' : ''} aria-pressed={tab === value} onClick={() => setTab(value)}>
+                    {label} <span class="ligungi-home__open-count">{count}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             {seeks.length === 0 ? (
-              <p class="ligungi-notice">{t.home.noSeeks}</p>
+              <p class="ligungi-notice">{tab === 'live' ? t.home.noSeeks : t.home.noCorrespondenceSeeks}</p>
             ) : (
               <ul class="ligungi-seeks">
                 {seeks.map((seek) => (

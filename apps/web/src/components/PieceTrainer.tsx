@@ -1,7 +1,4 @@
-import { pieceName } from '@ligungi/board';
 import {
-  ROLES,
-  ROLE_INFO,
   applyMove,
   emptyBoard,
   emptyHand,
@@ -12,10 +9,11 @@ import {
   type Position,
   type Role,
 } from '@ligungi/engine';
+import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { usePieceNames, useT } from '../i18n/index.ts';
+import { useT } from '../i18n/index.ts';
 import { BoardView } from './BoardView.tsx';
-import { Checkbox, RadioGroup } from './ui.tsx';
+import { Checkbox, OptionCards } from './ui.tsx';
 
 const ENEMIES: Record<string, Piece[]> = {
   d7: [{ role: 'soldier', color: 'black' }],
@@ -43,14 +41,27 @@ const setup = (role: Role, level: number, enemies: boolean): Position => {
   };
 };
 
-/** Interactive lesson: move one piece on its own, at any tower level, with optional enemies. */
-export const PieceTrainer = () => {
+/**
+ * Interactive lesson: move one piece on its own, at any tower level, with optional enemies. The page picks the piece,
+ * puts its own heading above the controls (`head`) and anything else under them on wide screens, after the board on
+ * phones (`children`).
+ */
+export const PieceTrainer = ({
+  role,
+  head,
+  description,
+  children,
+}: {
+  role: Role;
+  head?: ComponentChildren;
+  /** What the page says about the piece, under the heading. */
+  description?: ComponentChildren;
+  children?: ComponentChildren;
+}) => {
   const t = useT();
-  const pieceNames = usePieceNames();
-  const [role, setRole] = useState<Role>('lancer');
   const [level, setLevel] = useState(1);
   const [enemies, setEnemies] = useState(false);
-  const [position, setPosition] = useState(() => setup('lancer', 1, false));
+  const [position, setPosition] = useState(() => setup(role, 1, false));
   const [lastMove, setLastMove] = useState<Move | null>(null);
   const [hands, setHands] = useState<{ top: HTMLElement; bottom: HTMLElement } | null>(null);
   const top = useRef<HTMLDivElement>(null);
@@ -70,23 +81,16 @@ export const PieceTrainer = () => {
   return (
     <div class="ligungi-trainer">
       <div class="ligungi-trainer__controls">
-        <div class="ligungi-trainer__roles">
-          {ROLES.filter((r) => r !== 'marshal').map((r) => (
-            <button
-              key={r}
-              type="button"
-              class={`button button-metal${r === role ? ' active' : ''}`}
-              title={pieceName(r, pieceNames)}
-              onClick={() => setRole(r)}
-            >
-              <span class="ligungi-trainer__kanji">{ROLE_INFO[r].kanji}</span>
-            </button>
-          ))}
-        </div>
-        <p>
-          <strong>{pieceName(role, pieceNames)}</strong>. {t.trainer.hint}
-        </p>
-        <RadioGroup name="trainer-level" value={level} options={[1, 2, 3].map((n) => ({ value: n, label: t.trainer.level(n) }))} onChange={setLevel} />
+        {head}
+        {description}
+        <OptionCards
+          name="trainer-level"
+          legend={t.trainer.towerLevel}
+          layout="segmented"
+          value={level}
+          options={[1, 2, 3].map((n) => ({ value: n, label: t.trainer.level(n) }))}
+          onChange={setLevel}
+        />
         <Checkbox id="trainer-enemies" checked={enemies} onChange={setEnemies} label={t.trainer.enemies} />
         <button type="button" class="button button-empty" onClick={() => (setPosition(setup(role, level, enemies)), setLastMove(null))}>
           {t.trainer.restart}
@@ -94,22 +98,24 @@ export const PieceTrainer = () => {
       </div>
       <div class="ligungi-trainer__board">
         {hands && (
-        <BoardView
-          position={position}
-          orientation="white"
-          movableColor="white"
-          moves={moves}
-          lastMove={lastMove}
-          handElements={hands}
-          onMove={(move) => {
-            setLastMove(move);
-            setPosition({ ...applyMove(position, move), turn: 'white' });
-          }}
-        />
+          <BoardView
+            position={position}
+            orientation="white"
+            movableColor="white"
+            moves={moves}
+            lastMove={lastMove}
+            handElements={hands}
+            onMove={(move) => {
+              setLastMove(move);
+              setPosition({ ...applyMove(position, move), turn: 'white' });
+            }}
+          />
         )}
         <div hidden ref={top} />
         <div hidden ref={bottom} />
+        <p class="ligungi-trainer__hint">{t.trainer.hint}</p>
       </div>
+      {children !== undefined && <div class="ligungi-trainer__extra">{children}</div>}
     </div>
   );
 };

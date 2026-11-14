@@ -609,13 +609,13 @@ export const en: Messages = {
     hint: 'Click the piece to see where it can go, and move it freely.',
     level: (n) => `Tier ${n}`,
     enemies: 'Add other pieces (to practice capturing, stacking and the height rule)',
+    towerLevel: 'Tower level',
     restart: 'Restart',
   },
 
   learn: {
     title: 'How to play Gungi',
     lead: 'Gungi (軍儀) is the board game from HUNTER×HUNTER. We use the official rules published by Universal Music (2022). The full specification, with sources and interpretations, is in the project repository.',
-    tryIt: 'Try it',
     objectiveTitle: 'Goal',
     objective: (
       <>
@@ -648,6 +648,11 @@ export const en: Messages = {
       </>
     ),
     movementTitle: 'How the pieces move',
+    contents: 'On this page',
+    piecesHint: 'Pick a piece to see how far it reaches at each tower level and to practise on the board.',
+    previousPiece: 'Previous piece',
+    nextPiece: 'Next piece',
+    modesTitle: 'Game modes',
     sourcesTitle: 'Rule sources',
     tier: (n) => `tier ${n}`,
     notes: {

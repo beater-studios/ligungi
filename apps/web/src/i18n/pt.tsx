@@ -548,13 +548,13 @@ export const pt = {
     hint: 'Clique na peça para ver os destinos e mova à vontade.',
     level: (n: number) => `Nível ${n}`,
     enemies: 'Colocar outras peças (para treinar captura, empilhamento e a regra de altura)',
+    towerLevel: 'Nível da torre',
     restart: 'Recomeçar',
   },
 
   learn: {
     title: 'Como jogar Gungi',
     lead: 'Gungi (軍儀) é o jogo de tabuleiro de HUNTER×HUNTER. Aqui usamos as regras oficiais publicadas pela Universal Music (2022). A especificação completa, com fontes e interpretações, fica no repositório do projeto.',
-    tryIt: 'Experimente',
     objectiveTitle: 'Objetivo',
     objective: (
       <>
@@ -586,6 +586,11 @@ export const pt = {
       </>
     ),
     movementTitle: 'Movimento das peças',
+    contents: 'Nesta página',
+    piecesHint: 'Escolha uma peça para ver até onde ela vai em cada nível da torre e treinar no tabuleiro.',
+    previousPiece: 'Peça anterior',
+    nextPiece: 'Próxima peça',
+    modesTitle: 'Modos de jogo',
     sourcesTitle: 'Fontes das regras',
     tier: (n: number) => `nível ${n}`,
     notes: {

@@ -170,6 +170,11 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   min-height: 3.2rem;
 }
 
+// Hands handed to the board but kept out of sight (the learn trainer): the board's display rule would show them.
+.gg-hand[hidden] {
+  display: none;
+}
+
 .pocket .gg-hand {
   flex: 1;
   min-height: 3rem;
@@ -273,58 +278,6 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   display: flex;
   flex-wrap: wrap;
   gap: 0.5em;
-}
-
-/* Learn page */
-.learn section {
-  margin-bottom: 1.5em;
-}
-
-.learn .legend span {
-  display: inline-block;
-  padding: 0.1rem 0.5rem;
-  border-radius: 4px;
-  margin-right: 0.3rem;
-  font-size: 0.85rem;
-  color: #123;
-
-  &.tier-1 {
-    background: #9fd8ea;
-  }
-
-  &.tier-2 {
-    background: #2f8fd8;
-    color: #fff;
-  }
-
-  &.tier-3 {
-    background: #6cc63f;
-  }
-}
-
-.learn .piece-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 1.2rem;
-
-  figure {
-    margin: 0;
-  }
-
-  figcaption {
-    display: grid;
-    gap: 0.15rem;
-    margin-top: 0.35rem;
-
-    small {
-      color: $c-font-dim;
-    }
-  }
-}
-
-.learn ul {
-  list-style: disc;
-  padding-left: 1.4em;
 }
 
 .auth .alternative {
@@ -599,42 +552,53 @@ html.light {
 .ligungi-trainer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  grid-template-rows: auto 1fr;
   gap: 1.5em;
   align-items: start;
 
   @include mq-is-col1 {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+
+  // Wide screens: the extra content sits under the controls, beside the board; phones keep the page order.
+  &__board {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    width: 100%;
+    max-width: 440px;
+
+    @include mq-is-col1 {
+      grid-row: auto;
+      grid-column: auto;
+    }
+  }
+
+  &__hint {
+    margin: 0.5rem 0 0;
+    color: $c-font-dim;
+    font-size: 0.85em;
+    text-align: center;
   }
 
   &__controls {
     display: grid;
     gap: 0.9em;
-  }
+    align-content: start;
 
-  &__roles {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(2.8rem, 1fr));
-    gap: 0.35em;
+    p {
+      margin: 0;
+    }
+
+    .ligungi-check {
+      margin: 0;
+    }
 
     .button {
-      padding: 0.35em 0;
-    }
-
-    .button.active {
-      outline: 2px solid $c-accent;
+      justify-self: start;
     }
   }
 
-  &__kanji {
-    font-family: $kanji-font;
-    font-size: 1.3em;
-    font-weight: 700;
-  }
-
-  &__board {
-    max-width: 440px;
-    width: 100%;
-  }
 }
 
 .player-tag {
@@ -1495,13 +1459,6 @@ body:has(main.auth) #clinput {
   }
 }
 
-.learn #sources {
-  ol li {
-    list-style: decimal inside;
-    margin-bottom: 0.35rem;
-  }
-}
-
 /* ===== Site footer: brand, three link columns, then the legal line ===== */
 .ligungi-footer {
   // lila's dim text is below 4.5:1 on the light theme at this size; halfway to the main text passes on both themes.
@@ -2009,6 +1966,284 @@ body:has(main.auth) #clinput {
     &--large &__marker {
       font-size: 20px;
     }
+  }
+}
+
+/* ===== Learn ===== */
+.ligungi-page.ligungi-learn {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.ligungi-learn__toc {
+  position: sticky;
+  top: 4.5rem;
+  flex: 0 0 13.5rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+
+  a {
+    padding: 0.6rem 0.8rem;
+    border-radius: 4px;
+    color: $c-font;
+
+    &:hover {
+      background: $c-bg-zebra;
+      color: $c-font-clear;
+    }
+
+    &.active {
+      background: $c-bg-zebra2;
+      box-shadow: inset 3px 0 0 $c-primary;
+      color: $c-font-clear;
+    }
+  }
+}
+
+.ligungi-learn__body {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ligungi-learn__intro,
+.ligungi-learn__section {
+  padding: 1.5rem;
+  line-height: 1.6;
+  scroll-margin-top: 4.5rem;
+
+  h1 {
+    margin: 0 0 0.5rem;
+    color: $c-font-clear;
+    font-size: 1.9rem;
+    font-weight: 500;
+  }
+
+  h2 {
+    margin: 0 0 0.6rem;
+    color: $c-font-clear;
+    font-size: 1.35rem;
+    font-weight: 500;
+  }
+
+  h3 {
+    margin: 0 0 0.4rem;
+    color: $c-font-clear;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.4em;
+    list-style: disc;
+  }
+
+  li {
+    list-style: disc;
+  }
+
+  li + li {
+    margin-top: 0.35rem;
+  }
+}
+
+.ligungi-learn__intro p {
+  color: $c-font-dim;
+}
+
+.ligungi-learn__pieces {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.6rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.ligungi-learn__piece {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid $c-border;
+  border-radius: 6px;
+  background: $c-bg-zebra;
+  color: $c-font;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    border-color: color-mix(in srgb, #{$c-primary} 50%, #{$c-border});
+  }
+
+  &.is-selected {
+    border-color: $c-primary;
+    background: color-mix(in srgb, #{$c-primary} 14%, #{$c-bg-box});
+  }
+}
+
+.ligungi-learn__glyph {
+  flex: none;
+  width: 2.5rem;
+
+  .gg-mini-piece {
+    width: 100%;
+    font-size: 1.15rem;
+  }
+}
+
+.ligungi-learn__piece-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.ligungi-learn__piece-name {
+  overflow: hidden;
+  color: $c-font-clear;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ligungi-learn__piece-meta {
+  color: $c-font-dim;
+  font-size: 0.8em;
+}
+
+// The piece's name with the previous and next arrows, at the top of the trainer's controls.
+.ligungi-learn__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  h3 {
+    flex: 1;
+    margin: 0;
+    text-align: center;
+  }
+
+  .button {
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    box-shadow: inset 0 0 0 1px $c-border;
+  }
+}
+
+.ligungi-learn__detail {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 0.9rem;
+  border-top: $border;
+}
+
+.ligungi-learn__diagram {
+  max-width: 15rem;
+  margin: 0;
+}
+
+.ligungi-learn__legend {
+  margin-top: 0.5rem;
+
+  span {
+    display: inline-block;
+    margin-right: 0.3rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    color: #123;
+    font-size: 0.85rem;
+  }
+
+  .tier-1 {
+    background: #9fd8ea;
+  }
+
+  .tier-2 {
+    background: #2f8fd8;
+    color: #fff;
+  }
+
+  .tier-3 {
+    background: #6cc63f;
+  }
+}
+
+.ligungi-learn__modes {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+
+  dt {
+    color: $c-font-clear;
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-learn #sources ol {
+  padding-left: 1.4em;
+
+  li {
+    list-style: decimal;
+    margin-bottom: 0.35rem;
+  }
+}
+
+// Phones: the contents become a row of chips that scrolls sideways above the sections.
+@media (max-width: at-most($small)) {
+  .ligungi-page.ligungi-learn {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ligungi-card.ligungi-learn__toc {
+    position: static;
+    flex: none;
+    flex-direction: row;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+
+    a {
+      flex: none;
+      padding: 0.45rem 0.9rem;
+      border: 1px solid $c-border;
+      border-radius: 99px;
+      white-space: nowrap;
+
+      &.active {
+        border-color: $c-primary;
+        box-shadow: none;
+      }
+    }
+  }
+
+  .ligungi-learn__intro,
+  .ligungi-learn__section {
+    padding: 1rem;
+  }
+
+  .ligungi-learn__intro h1 {
+    font-size: 1.5rem;
+  }
+
+  .ligungi-learn__pieces {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

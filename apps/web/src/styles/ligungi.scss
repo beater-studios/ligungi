@@ -280,12 +280,6 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   gap: 0.5em;
 }
 
-.auth .alternative {
-  display: flex;
-  gap: 1.5em;
-  margin-top: 1em;
-}
-
 /*
  * lila loads each page's CSS separately; ligungi bundles them, so the analysis pocket rules would
  * override the round ones. Scope pocket placement per page, with lila's breakpoints.
@@ -1070,8 +1064,8 @@ select.ligungi-select {
   margin-inline-end: 0.5rem;
 }
 
-body:has(main.auth) .site-buttons .signin-or-signup,
-body:has(main.auth) #clinput {
+body:has(main.ligungi-auth) .site-buttons .signin-or-signup,
+body:has(main.ligungi-auth) #clinput {
   display: none;
 }
 
@@ -1950,6 +1944,129 @@ body:has(main.auth) #clinput {
     &--large &__marker {
       font-size: 20px;
     }
+  }
+}
+
+/* ===== Sign in and sign up ===== */
+.ligungi-page.ligungi-auth {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem 3rem;
+  max-width: 58rem;
+  margin-inline: auto;
+  padding-top: 1.5rem;
+}
+
+.ligungi-auth__pitch {
+  flex: 1 1 18rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+
+  h1 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1.25;
+  }
+
+  p {
+    margin: 0;
+    color: $c-font-dim;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    gap: 0.6rem;
+
+    &::before {
+      content: '✓';
+      color: $c-good;
+      font-weight: 700;
+    }
+  }
+
+  a {
+    align-self: flex-start;
+  }
+}
+
+.ligungi-auth__note {
+  font-size: 0.85em;
+}
+
+.ligungi-auth__card {
+  flex: 1 1 22rem;
+  max-width: 26rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.75rem;
+
+  .form3 .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .ligungi-actions {
+    margin: 0;
+  }
+
+  .ligungi-submit {
+    width: 100%;
+    min-height: 3rem;
+  }
+}
+
+.ligungi-segmented.ligungi-auth__tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  a {
+    text-align: center;
+  }
+}
+
+.ligungi-auth--signup .button.ligungi-submit {
+  background: $c-good;
+}
+
+.ligungi-auth__warning {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 4px;
+  background: $c-bg-zebra;
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+
+// Phones: the form first, what an account gives below it.
+@media (max-width: at-most($small)) {
+  .ligungi-page.ligungi-auth {
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 0;
+  }
+
+  .ligungi-auth__card {
+    order: -1;
+    max-width: none;
+    padding: 1.25rem;
+  }
+
+  .ligungi-auth__pitch h1 {
+    font-size: 1.4rem;
   }
 }
 

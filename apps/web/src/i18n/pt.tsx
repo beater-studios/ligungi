@@ -499,6 +499,7 @@ export const pt = {
   },
 
   settings: {
+    menu: 'Configurações',
     title: 'Preferências',
     groupGeneral: 'Geral',
     groupPieces: 'Aparência do tabuleiro',

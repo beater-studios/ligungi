@@ -874,13 +874,6 @@ select.ligungi-select {
 
 /* ===== Preferences page: groups of setting rows, some with a preview on the right ===== */
 .ligungi-prefs-group {
-  & + & {
-    margin-top: 2.6rem;
-  }
-
-  h2 {
-    margin-bottom: 0.4rem;
-  }
 
   &__help {
     margin: 0 0 0.6rem;
@@ -945,10 +938,6 @@ select.ligungi-select {
     font-size: 0.88em;
     line-height: 1.45;
 
-    // lila's account pages set `.account section a { color: inherit }`.
-    .account & a {
-      color: $c-link;
-    }
   }
 
   &__control {
@@ -1256,10 +1245,6 @@ body:has(main.auth) #clinput {
 }
 
 /* ===== Account page ===== */
-.account section + section {
-  margin-top: 3rem;
-}
-
 .ligungi-success {
   color: $c-good;
 }
@@ -1307,6 +1292,10 @@ body:has(main.auth) #clinput {
 }
 
 .ligungi-danger-zone {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, #{$c-bad} 45%, transparent),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+
   h2 {
     color: $c-bad;
   }
@@ -1603,11 +1592,6 @@ body:has(main.auth) #clinput {
   .ligungi-consent__actions {
     margin-top: 0.8rem;
   }
-}
-
-.account .radio + .ligungi-success,
-.account .radio + .error {
-  margin-top: 0.8em;
 }
 
 // lila loads each page's stylesheet on its own; with all of them in one bundle, the game layout's
@@ -1966,6 +1950,146 @@ body:has(main.auth) #clinput {
     &--large &__marker {
       font-size: 20px;
     }
+  }
+}
+
+/* ===== Preferences and account ===== */
+// Hidden from sight, still read by screen readers.
+.ligungi-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ligungi-page.ligungi-settings {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.ligungi-settings__menu {
+  flex: 0 0 13.5rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+
+  a {
+    padding: 0.7rem 0.9rem;
+    border-radius: 4px;
+    color: $c-font;
+
+    &:hover {
+      background: $c-bg-zebra;
+      color: $c-font-clear;
+    }
+
+    &.active {
+      background: $c-bg-zebra2;
+      box-shadow: inset 3px 0 0 $c-primary;
+      color: $c-font-clear;
+    }
+  }
+}
+
+.ligungi-settings__body {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  > h1 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.9rem;
+    font-weight: 400;
+  }
+
+  .ligungi-prefs {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  > .ligungi-notice {
+    margin: 0;
+  }
+}
+
+.ligungi-settings__card {
+  padding: 1.25rem 1.5rem;
+
+  h2 {
+    margin: 0 0 0.5rem;
+    color: $c-font-clear;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+
+  > p {
+    margin: 0 0 0.9rem;
+  }
+
+  .form3 .form-group {
+    margin-bottom: 1rem;
+  }
+}
+
+// A choice row on the preferences page: the option cards take the whole width.
+.ligungi-setting > .ligungi-choice {
+  flex: 1;
+}
+
+.ligungi-account__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.ligungi-account__column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.button.ligungi-account__download {
+  display: inline-flex;
+  box-shadow: inset 0 0 0 1px $c-border;
+}
+
+@media (max-width: at-most($small)) {
+  .ligungi-page.ligungi-settings {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ligungi-card.ligungi-settings__menu {
+    flex: none;
+    flex-direction: row;
+    gap: 4px;
+    padding: 4px;
+    background: $c-bg-page;
+    box-shadow: none;
+
+    a {
+      flex: 1;
+      text-align: center;
+
+      &.active {
+        box-shadow: none;
+      }
+    }
+  }
+
+  .ligungi-settings__body > h1 {
+    font-size: 1.5rem;
+  }
+
+  .ligungi-settings__card {
+    padding: 1rem;
   }
 }
 

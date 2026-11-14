@@ -560,6 +560,7 @@ export const en: Messages = {
   },
 
   settings: {
+    menu: 'Settings',
     title: 'Preferences',
     groupGeneral: 'General',
     groupPieces: 'Board appearance',

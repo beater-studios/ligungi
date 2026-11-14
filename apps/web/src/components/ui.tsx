@@ -135,12 +135,14 @@ interface OptionCardsProps<T> {
   readonly help?: ComponentChildren;
   /** `cards` stack into rows on phones, `row` stays side by side, `segmented` is a compact switch. */
   readonly layout?: 'cards' | 'row' | 'segmented';
+  /** Keeps the legend for screen readers only, when a heading right above already names the choice. */
+  readonly hideLegend?: boolean;
 }
 
 /** One choice among a few, as cards: native radio inputs, so the keyboard and screen readers treat it as a group. */
-export const OptionCards = <T,>({ name, legend, value, options, onChange, help, layout = 'cards' }: OptionCardsProps<T>) => (
+export const OptionCards = <T,>({ name, legend, value, options, onChange, help, layout = 'cards', hideLegend = false }: OptionCardsProps<T>) => (
   <fieldset class={`ligungi-choice ligungi-choice--${layout}`}>
-    <legend class="ligungi-choice__legend">{legend}</legend>
+    <legend class={`ligungi-choice__legend${hideLegend ? ' ligungi-sr-only' : ''}`}>{legend}</legend>
     <div class="ligungi-choice__options">
       {options.map((option) => {
         const id = `${name}-${String(option.value)}`;

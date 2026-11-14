@@ -1,7 +1,8 @@
 import type { ChallengePolicy, SessionView } from '@ligungi/protocol';
+import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
-import { Checkbox, Field, RadioGroup, SubmitButton } from '../components/ui.tsx';
+import { Checkbox, Field, OptionCards, SubmitButton } from '../components/ui.tsx';
 import { formatDate, useT } from '../i18n/index.ts';
 import { describeUserAgent } from '../userAgent.ts';
 import { navigate } from '../router.ts';
@@ -9,20 +10,26 @@ import { loadSession, session } from '../session.ts';
 import { socket } from '../socket.ts';
 import { useStore } from '../store.ts';
 
-export const SettingsMenu = ({ active }: { active: 'settings' | 'account' }) => {
+/** The preferences and account pages: a menu between the two beside (on phones above) the page's cards. */
+export const SettingsShell = ({ active, title, children }: { active: 'settings' | 'account'; title: string; children: ComponentChildren }) => {
   const t = useT();
   const { user } = useStore(session);
+  const link = (key: typeof active, href: string, label: string) => (
+    <a class={active === key ? 'active' : ''} href={href} aria-current={active === key ? 'page' : undefined}>
+      {label}
+    </a>
+  );
   return (
-    <nav class="page-menu__menu subnav">
-      <a class={active === 'settings' ? 'active' : ''} href="/settings">
-        {t.settings.title}
-      </a>
-      {user && (
-        <a class={active === 'account' ? 'active' : ''} href="/account">
-          {t.account.title}
-        </a>
-      )}
-    </nav>
+    <main class="ligungi-page ligungi-settings">
+      <nav class="ligungi-card ligungi-settings__menu" aria-label={t.settings.menu}>
+        {link('settings', '/settings', t.settings.title)}
+        {user && link('account', '/account', t.account.title)}
+      </nav>
+      <div class="ligungi-settings__body">
+        <h1>{title}</h1>
+        {children}
+      </div>
+    </main>
   );
 };
 
@@ -167,8 +174,11 @@ const ChallengeSettings = () => {
     <form class="form3" onSubmit={(e) => e.preventDefault()}>
       <p>{t.account.challengesText}</p>
       {policy && (
-        <RadioGroup
+        <OptionCards
           name="acc-challenges"
+          legend={t.account.challengesTitle}
+          hideLegend
+          layout="segmented"
           value={policy}
           options={[
             { value: 'everyone' as const, label: t.account.policyEveryone },
@@ -234,42 +244,44 @@ export const AccountPage = () => {
   const t = useT();
   const { user, loaded } = useStore(session);
   return (
-    <main class="account page-menu">
-      <SettingsMenu active="account" />
-      <div class="page-menu__content box box-pad">
-        <h1 class="box__top">{t.account.title}</h1>
-        {loaded && !user ? (
+    <SettingsShell active="account" title={t.account.title}>
+      {loaded && !user ? (
+        <section class="ligungi-card ligungi-settings__card">
           <p>
             {t.account.loginNeeded} <a href="/login">{t.nav.signIn}</a>
           </p>
-        ) : (
-          <>
-            <section>
+        </section>
+      ) : (
+        <>
+          <div class="ligungi-account__grid">
+            <section class="ligungi-card ligungi-settings__card">
               <h2>{t.account.passwordTitle}</h2>
               <PasswordForm />
             </section>
-            <section>
-              <h2>{t.account.challengesTitle}</h2>
-              <ChallengeSettings />
-            </section>
-            <section>
-              <h2>{t.account.sessionsTitle}</h2>
-              <Sessions />
-            </section>
-            <section>
-              <h2>{t.account.dataTitle}</h2>
-              <p>{t.account.dataText}</p>
-              <a class="button button-empty" href="/api/account/export" download>
-                {t.account.dataDownload}
-              </a>
-            </section>
-            <section class="ligungi-danger-zone">
-              <h2>{t.account.deleteTitle}</h2>
-              <DeleteForm />
-            </section>
-          </>
-        )}
-      </div>
-    </main>
+            <div class="ligungi-account__column">
+              <section class="ligungi-card ligungi-settings__card">
+                <h2>{t.account.challengesTitle}</h2>
+                <ChallengeSettings />
+              </section>
+              <section class="ligungi-card ligungi-settings__card">
+                <h2>{t.account.dataTitle}</h2>
+                <p>{t.account.dataText}</p>
+                <a class="button button-empty ligungi-account__download" href="/api/account/export" download>
+                  {t.account.dataDownload}
+                </a>
+              </section>
+            </div>
+          </div>
+          <section class="ligungi-card ligungi-settings__card">
+            <h2>{t.account.sessionsTitle}</h2>
+            <Sessions />
+          </section>
+          <section class="ligungi-card ligungi-settings__card ligungi-danger-zone">
+            <h2>{t.account.deleteTitle}</h2>
+            <DeleteForm />
+          </section>
+        </>
+      )}
+    </SettingsShell>
   );
 };

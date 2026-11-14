@@ -1,16 +1,16 @@
 import type { ComponentChildren } from 'preact';
 import { MoveListPreview } from '../components/MoveListPreview.tsx';
 import { PiecePreview } from '../components/PiecePreview.tsx';
-import { RadioGroup, SettingRow, Toggle } from '../components/ui.tsx';
+import { OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
 import { MESSAGES, themeLabel, useT } from '../i18n/index.ts';
 import { BOARD_SIZES, BOARD_THEMES, LANGS, THEMES, prefs, updatePrefs, type Prefs } from '../prefs.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
-import { SettingsMenu } from './AccountPage.tsx';
+import { SettingsShell } from './AccountPage.tsx';
 
 /** A titled group of settings; with a preview, the rows sit on the left and the preview on the right. */
 const Group = ({ title, help, preview, children }: { title: string; help?: string; preview?: ComponentChildren; children: ComponentChildren }) => (
-  <section class={`ligungi-prefs-group${preview ? ' ligungi-prefs-group--preview' : ''}`}>
+  <section class={`ligungi-card ligungi-settings__card ligungi-prefs-group${preview ? ' ligungi-prefs-group--preview' : ''}`}>
     <h2>{title}</h2>
     {help && <p class="ligungi-prefs-group__help">{help}</p>}
     <div class="ligungi-prefs-group__body">
@@ -26,13 +26,23 @@ export const SettingsPage = () => {
   const t = useT();
   const s = t.settings;
   const current = useStore(prefs);
-  const radio = <K extends keyof Prefs>(key: K, options: Array<[Prefs[K], string]>) => (
-    <RadioGroup
-      name={`pref-${key}`}
-      value={current[key]}
-      options={options.map(([value, label]) => ({ value, label }))}
-      onChange={(value) => updatePrefs({ [key]: value } as Partial<Prefs>)}
-    />
+  const choice = <K extends keyof Prefs>(
+    key: K,
+    title: string,
+    options: Array<[Prefs[K], string]>,
+    extra: { help?: ComponentChildren; layout?: 'row' | 'segmented' } = {},
+  ) => (
+    <div class="ligungi-setting">
+      <OptionCards
+        name={`pref-${key}`}
+        legend={title}
+        layout={extra.layout ?? 'segmented'}
+        value={current[key]}
+        options={options.map(([value, label]) => ({ value, label }))}
+        onChange={(value) => updatePrefs({ [key]: value } as Partial<Prefs>)}
+        {...(extra.help !== undefined ? { help: extra.help } : {})}
+      />
+    </div>
   );
   const toggle = (key: BooleanPref, title: string, help?: string) => (
     <SettingRow title={title} htmlFor={`pref-${key}`} {...(help ? { help } : {})}>
@@ -41,18 +51,11 @@ export const SettingsPage = () => {
   );
 
   return (
-    <main class="account page-menu">
-      <SettingsMenu active="settings" />
-      <div class="page-menu__content box box-pad">
-        <h1 class="box__top">{s.title}</h1>
+    <SettingsShell active="settings" title={s.title}>
         <form class="form3 ligungi-prefs" onSubmit={(e) => e.preventDefault()}>
           <Group title={s.groupGeneral}>
-            <SettingRow title={s.language} stacked>
-              {radio('lang', [['auto', s.auto], ...LANGS.map((lang): [Prefs['lang'], string] => [lang, MESSAGES[lang].languageName])])}
-            </SettingRow>
-            <SettingRow title={s.theme} stacked>
-              {radio('theme', THEMES.map((theme) => [theme, themeLabel(t, theme)]))}
-            </SettingRow>
+            {choice('lang', s.language, [['auto', s.auto], ...LANGS.map((lang): [Prefs['lang'], string] => [lang, MESSAGES[lang].languageName])])}
+            {choice('theme', s.theme, THEMES.map((theme) => [theme, themeLabel(t, theme)]))}
             <SettingRow title={s.sound} htmlFor="pref-sound" help={s.soundHelp}>
               <div class="ligungi-setting__inline">
                 <button type="button" class="button button-empty" onClick={() => playSound('move')}>
@@ -64,65 +67,69 @@ export const SettingsPage = () => {
           </Group>
 
           <Group title={s.groupPieces} help={s.groupPiecesHelp} preview={<PiecePreview />}>
-            <SettingRow title={s.boardTheme} help={s.boardThemeHelp} stacked>
-              {radio(
-                'boardTheme',
-                BOARD_THEMES.map((name) => [
-                  name,
-                  { wood: s.boardThemeWood, walnut: s.boardThemeWalnut, slate: s.boardThemeSlate, contrast: s.boardThemeContrast }[name],
-                ]),
-              )}
-            </SettingRow>
-            <SettingRow title={s.pieceStyle} stacked>
-              {radio('pieceStyle', [
-                ['illustrated', s.pieceStyleIllustrated],
-                ['kanji', s.pieceStyleKanji],
-              ])}
-            </SettingRow>
+            {choice(
+              'boardTheme',
+              s.boardTheme,
+              BOARD_THEMES.map((name) => [
+                name,
+                { wood: s.boardThemeWood, walnut: s.boardThemeWalnut, slate: s.boardThemeSlate, contrast: s.boardThemeContrast }[name],
+              ]),
+              { help: s.boardThemeHelp, layout: 'row' },
+            )}
+            {choice('pieceStyle', s.pieceStyle, [
+              ['illustrated', s.pieceStyleIllustrated],
+              ['kanji', s.pieceStyleKanji],
+            ])}
             {toggle('moveGuides', s.moveGuides, s.moveGuidesHelp)}
             {toggle('coordinates', s.coordinates, s.coordinatesHelp)}
           </Group>
 
           <Group title={s.groupRecord} help={s.groupRecordHelp} preview={<MoveListPreview />}>
-            <SettingRow title={s.pieceNames} help={s.pieceNamesHelp} stacked>
-              {radio('pieceNames', [
+            {choice(
+              'pieceNames',
+              s.pieceNames,
+              [
                 ['local', s.pieceNamesLocal],
                 ['ja', s.pieceNamesJapanese],
-              ])}
-            </SettingRow>
-            <SettingRow title={s.notation} help={s.notationHelp} stacked>
-              {radio('notation', [
+              ],
+              { help: s.pieceNamesHelp },
+            )}
+            {choice(
+              'notation',
+              s.notation,
+              [
                 ['named', s.notationNamed],
                 ['rulebook', s.notationRulebook],
                 ['machine', s.notationMachine],
-              ])}
-            </SettingRow>
+              ],
+              { help: s.notationHelp },
+            )}
           </Group>
 
           <Group title={s.groupBoard}>
-            <SettingRow
-              title={s.boardSize}
-              help={
-                <a href="/analysis" target="_blank" rel="noopener">
-                  {s.viewOnBoard}
-                </a>
-              }
-              stacked
-            >
-              {radio('zoom', [
+            {choice(
+              'zoom',
+              s.boardSize,
+              [
                 [BOARD_SIZES[0], s.sizeSmall],
                 [BOARD_SIZES[1], s.sizeMedium],
                 [BOARD_SIZES[2], s.sizeLarge],
                 [BOARD_SIZES[3], s.sizeMax],
-              ])}
-            </SettingRow>
+              ],
+              {
+                help: (
+                  <a href="/analysis" target="_blank" rel="noopener">
+                    {s.viewOnBoard}
+                  </a>
+                ),
+              },
+            )}
             {toggle('hoverReach', s.hoverReach, s.hoverReachHelp)}
             {toggle('animation', s.animation, s.animationHelp)}
           </Group>
 
         </form>
         <p class="ligungi-notice">{s.saved}</p>
-      </div>
-    </main>
+    </SettingsShell>
   );
 };

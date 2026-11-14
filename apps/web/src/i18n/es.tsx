@@ -560,6 +560,7 @@ export const es: Messages = {
   },
 
   settings: {
+    menu: 'Configuración',
     title: 'Preferencias',
     groupGeneral: 'General',
     groupPieces: 'Apariencia del tablero',

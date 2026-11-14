@@ -197,14 +197,16 @@ export const DesignPage = () => {
             </Field>
             <SubmitButton>SubmitButton</SubmitButton>
           </form>
-          <Example label="Settings rows (SettingRow + Toggle), as on the preferences page">
+          <Example label="Settings rows (SettingRow + Toggle, OptionCards for choices), as on the preferences page">
             <div class="form3" style={{ width: '100%' }}>
               <SettingRow title="Toggle setting" help="Simple on or off settings use a switch; the title toggles it too." htmlFor="ds-switch">
                 <Toggle id="ds-switch" checked={switched} onChange={setSwitched} label="Toggle setting" />
               </SettingRow>
-              <SettingRow title="Stacked setting" help="Wide controls, such as option groups, go under the text." stacked>
-                <RadioGroup
+              <div class="ligungi-setting">
+                <OptionCards
                   name="ds-stacked"
+                  legend="Choice setting"
+                  layout="segmented"
                   value={choice}
                   options={[
                     { value: 'white', label: 'White' },
@@ -212,8 +214,9 @@ export const DesignPage = () => {
                     { value: 'black', label: 'Black' },
                   ]}
                   onChange={setChoice}
+                  help="A choice among a few options is a segmented OptionCards in a .ligungi-setting row."
                 />
-              </SettingRow>
+              </div>
             </div>
           </Example>
           <Example label="OptionCards: one choice among a few, as cards (layout cards, row or segmented); cards stack on phones">

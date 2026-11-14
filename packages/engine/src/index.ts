@@ -8,3 +8,4 @@ export * from './apply.ts';
 export * from './fen.ts';
 export * from './notation.ts';
 export * from './game.ts';
+export * from './validate.ts';

@@ -5637,3 +5637,222 @@ body:has(main.ligungi-auth) #clinput {
     font-weight: 600;
   }
 }
+
+/* ===== Board editor (pages/EditorPage.tsx) ===== */
+.ligungi-page.ligungi-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ligungi-editor__head {
+  h1 {
+    margin: 0 0 0.35rem;
+    color: $c-font-clear;
+    font-size: 1.6rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-editor__layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.ligungi-editor__board-column {
+  flex: 1 1 26rem;
+  max-width: 36rem;
+  min-width: 0;
+}
+
+.ligungi-editor__board {
+  border-radius: 4px;
+}
+
+// Squares are buttons: no button look, a hover tint and a clear focus ring.
+.ligungi-editor__sq {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, #{$c-primary} 18%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $c-primary;
+    outline-offset: -2px;
+  }
+}
+
+.ligungi-editor__hint {
+  margin: 0.5rem 0 0;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-editor__panel {
+  flex: 1 1 22rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.ligungi-card.ligungi-editor__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .form-group,
+  .ligungi-choice {
+    margin-bottom: 0;
+  }
+
+  > p {
+    margin: 0;
+  }
+}
+
+.ligungi-editor__palette {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ligungi-editor__palette-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.ligungi-editor__tool {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: $c-bg-zebra;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $c-border;
+  }
+
+  &.active {
+    border-color: $c-primary;
+    background: color-mix(in srgb, #{$c-primary} 15%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $c-primary;
+  }
+}
+
+// Small pieces outside a board get a fixed size (the board ones scale with it).
+.ligungi-editor__tool,
+.ligungi-editor__hand li {
+  .gg-mini-piece {
+    width: 2rem;
+    font-size: 1.05rem;
+  }
+}
+
+.ligungi-editor__erase {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+
+  &.active {
+    outline: 2px solid $c-primary;
+  }
+}
+
+.ligungi-editor__hand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+}
+
+.ligungi-editor__hand-title {
+  color: $c-font-dim;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ligungi-editor__step {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: $border;
+  border-radius: 4px;
+  background: $c-bg-box;
+  color: $c-font;
+  line-height: 1;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.ligungi-editor__count {
+  min-width: 1.2rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.ligungi-editor__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ligungi-editor__fen {
+  margin: 0;
+}
+
+.ligungi-editor__load {
+  display: flex;
+  gap: 0.5rem;
+
+  .form-control {
+    flex: 1;
+    min-width: 0;
+  }
+}

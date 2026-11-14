@@ -22,6 +22,7 @@ import { RankingPage } from './pages/RankingPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
 import { AccountPage } from './pages/AccountPage.tsx';
 import { ModPage } from './pages/ModPage.tsx';
+import { EditorPage } from './pages/EditorPage.tsx';
 import { ChallengeBell } from './components/ChallengeBell.tsx';
 import { HeaderSearch } from './components/HeaderSearch.tsx';
 import { useDropdown } from './components/useDropdown.ts';
@@ -40,6 +41,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/$/, render: () => <HomePage /> },
   { pattern: /^\/computer$/, render: () => <ComputerPage /> },
   { pattern: /^\/analysis$/, render: () => <AnalysisPage /> },
+  { pattern: /^\/editor$/, render: () => <EditorPage /> },
   { pattern: /^\/learn$/, render: () => <LearnPage /> },
   { pattern: /^\/tv$/, render: () => <TvPage /> },
   { pattern: /^\/settings$/, render: () => <SettingsPage /> },
@@ -274,6 +276,7 @@ const Header = () => {
             <a href="/analysis">{t.nav.tools}</a>
             <div role="group">
               <a href="/analysis">{t.nav.analysis}</a>
+              <a href="/editor">{t.nav.editor}</a>
             </div>
           </section>
         </nav>
@@ -329,6 +332,7 @@ export const SiteFooter = () => {
         ['/learn', t.nav.learn],
         ['/computer', t.nav.playComputer],
         ['/analysis', t.nav.analysis],
+        ['/editor', t.nav.editor],
         ['/players', t.nav.playerList],
         ['/ranking', t.nav.players],
         ['/tv', t.nav.liveGames],

@@ -20,6 +20,7 @@ All code is TypeScript. The server runs directly with `node src/main.ts` (Node 2
 - `legalMoves(position)` generates the legal moves; `applyMove` applies a move without validating it; `Game` keeps the history and decides the end (mate, repetition, insufficient material).
 - Own FEN and move notation (described in `fen.ts` and `notation.ts`), plus the rulebook notation (`4-7-2 侍`).
 - `positionProblems(position)` (`validate.ts`) tells why a position set up by hand cannot come from a game: Marshals missing, doubled, in hand, covered or stacked where the mode forbids it, more pieces than the mode has (`pieceLimits`), towers too high, or the side that just moved left in check. The board editor uses it.
+- `parseGameRecord(text)` (`record.ts`) reads a game in the export format back, or moves typed by hand in rulebook or machine notation, checking every move. Rulebook notation names no starting square, so it is matched against the legal moves and a move two pieces could make is reported as ambiguous. The analysis imports games with it, entirely in the browser.
 - Every rule follows [rules.md](rules.md). The tests cover the examples from the rulebook and the official FAQ, and the 7 Archer images.
 
 ## Board (`packages/board`)

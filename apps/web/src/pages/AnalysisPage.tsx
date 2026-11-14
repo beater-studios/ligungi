@@ -14,13 +14,14 @@ import type { GameView } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { BoardView } from '../components/BoardView.tsx';
+import { ImportGame } from '../components/ImportGame.tsx';
 import { DraftPanel, TowerPanel } from '../components/Panels.tsx';
 import { Select } from '../components/ui.tsx';
 import { outcomeText, useT } from '../i18n/index.ts';
 import { useMoveText } from '../notation.ts';
 import { icons } from '../icons.ts';
 import { useLocalGame } from '../localGame.ts';
-import { useLocation } from '../router.ts';
+import { navigate, useLocation } from '../router.ts';
 
 export const AnalysisPage = () => {
   const t = useT();
@@ -36,6 +37,7 @@ export const AnalysisPage = () => {
   const bottomHand = useRef<HTMLDivElement>(null);
   const tree = useRef<HTMLDivElement>(null);
   const [inspected, setInspected] = useState<number | null>(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     if (topHand.current && bottomHand.current) setHands({ top: topHand.current, bottom: bottomHand.current });
@@ -46,6 +48,8 @@ export const AnalysisPage = () => {
     const gameId = params.get('game');
     const fen = params.get('fen');
     const queryMode = params.get('mode') as Mode | null;
+    // The Tools menu opens the import dialog through ?import.
+    if (params.has('import')) setImporting(true);
     if (gameId) {
       api
         .get<GameView>(`/api/games/${gameId}`)
@@ -217,8 +221,20 @@ export const AnalysisPage = () => {
             FEN
             <input class="form-control copyable" readOnly value={toFen(position)} onFocus={(e) => (e.target as HTMLInputElement).select()} />
           </label>
+          <button type="button" class="button button-empty ligungi-import-open" data-icon={icons.Download} onClick={() => setImporting(true)}>
+            {t.analysis.importTitle}
+          </button>
         </div>
       </div>
+      {importing && (
+        <ImportGame
+          onClose={() => {
+            setImporting(false);
+            // Drop ?import, so the menu link opens the dialog again next time.
+            if (new URLSearchParams(search).has('import')) navigate('/analysis', true);
+          }}
+        />
+      )}
     </main>
   );
 };

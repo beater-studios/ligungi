@@ -9,3 +9,4 @@ export * from './fen.ts';
 export * from './notation.ts';
 export * from './game.ts';
 export * from './validate.ts';
+export * from './record.ts';

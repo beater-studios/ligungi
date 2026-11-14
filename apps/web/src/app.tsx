@@ -277,6 +277,7 @@ const Header = () => {
             <div role="group">
               <a href="/analysis">{t.nav.analysis}</a>
               <a href="/editor">{t.nav.editor}</a>
+              <a href="/analysis?import">{t.nav.importGame}</a>
             </div>
           </section>
         </nav>

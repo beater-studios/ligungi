@@ -3550,12 +3550,6 @@ body:has(main.ligungi-auth) #clinput {
   }
 }
 
-.ligungi-computer__pair {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.25rem;
-}
-
 @media (max-width: at-most($small)) {
   .ligungi-computer__form {
     gap: 1.25rem;
@@ -3566,9 +3560,6 @@ body:has(main.ligungi-auth) #clinput {
     font-size: 1.4rem;
   }
 
-  .ligungi-computer__pair {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* ===== Game page (lila's round grid): player rows that hold the clock, labelled controls, info card ===== */

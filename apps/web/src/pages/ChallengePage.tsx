@@ -82,7 +82,6 @@ export const ChallengePage = ({ id }: { id: string }) => {
     [t.challenge.time, speedText(t, settings)],
     [t.challenge.type, `${settings.rated ? t.rated : t.casual}${settings.freeDraft ? ` · ${t.freeDraftTag}` : ''}`],
     [bystander ? t.challenge.challengerColor : t.common.yourColor, t.colorChoices[myColor]],
-    [t.common.whoStarts, t.colorChoices[settings.firstPlayer]],
   ];
 
   return (

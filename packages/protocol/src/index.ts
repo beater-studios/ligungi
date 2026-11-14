@@ -18,10 +18,8 @@ export interface GameSettings {
   readonly timeControl: TimeControl | null;
   /** Correspondence: days each player has for every move (`CORRESPONDENCE_DAYS`); `null` for games played live. */
   readonly daysPerMove: number | null;
-  /** Color of the player who creates the seek or challenge. */
+  /** Color of the player who creates the seek or challenge. White always places first in the draft and moves first. */
   readonly color: ColorChoice;
-  /** Color that places first in the draft and moves first in play. */
-  readonly firstPlayer: ColorChoice;
   /**
    * Casual draft modes only: the draft ends when both players declare done, instead of the
    * rulebook rule where the second player's declaration ends it for both.
@@ -81,6 +79,7 @@ export interface GameView {
   readonly rated: boolean;
   readonly timeControl: TimeControl | null;
   readonly players: Readonly<Record<Color, PlayerView>>;
+  /** White for every new game; games created before White always started may say black. */
   readonly firstPlayer: Color;
   readonly freeDraft: boolean;
   /** Machine notation, see `moveToString` in the engine. */
@@ -514,7 +513,6 @@ export const parseSettings = (input: unknown): GameSettings | ErrorCode => {
   if (!(MODES as readonly unknown[]).includes(value.mode)) return 'invalidMode';
   if (typeof value.rated !== 'boolean') return 'invalidRated';
   if (!COLOR_CHOICES.includes(value.color as string)) return 'invalidColor';
-  if (!COLOR_CHOICES.includes(value.firstPlayer as string)) return 'invalidFirstPlayer';
   let timeControl: TimeControl | null = null;
   if (value.timeControl !== null) {
     const tc = value.timeControl as Record<string, unknown> | undefined;
@@ -539,7 +537,6 @@ export const parseSettings = (input: unknown): GameSettings | ErrorCode => {
     timeControl,
     daysPerMove,
     color: value.color as ColorChoice,
-    firstPlayer: value.firstPlayer as ColorChoice,
     freeDraft,
   };
 };

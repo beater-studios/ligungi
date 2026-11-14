@@ -279,7 +279,7 @@ export const HomePage = () => {
   };
 
   const quick = (timeControl: TimeControl) =>
-    run(() => api.post('/api/seeks', { mode, rated, timeControl, color: 'random', firstPlayer: 'random', freeDraft: false }));
+    run(() => api.post('/api/seeks', { mode, rated, timeControl, color: 'random', freeDraft: false }));
   const accept = (seek: SeekView) => run(() => api.post(`/api/seeks/${seek.id}/accept`));
   const cancel = (seek: SeekView) => run(() => api.delete(`/api/seeks/${seek.id}`));
   const seeks = tab === 'live' ? liveSeeks : correspondence;

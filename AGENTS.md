@@ -38,7 +38,7 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 - Source priority: official rulebook > official Universal Music FAQ > everything else. Never use pre-2022 fan rules, gungi.io or Komugi behavior as a source when they differ from the rulebook.
 - Do not change a rule without a cited source. Record any interpretation in section 11 of `docs/rules.md`.
 - Every rule change needs tests in `packages/engine/test`, ideally reproducing a rulebook or FAQ example.
-- Settled decisions (do not revisit without the maintainer): moves that expose your own Marshal are not offered and having no safe move is a loss; betrayal is all or nothing and also works on an own-topped tower with enemy pieces below; color and first player are independent; the draft follows the rulebook (second player's "done" ends it), with "free draft" as a casual-only option.
+- Settled decisions (do not revisit without the maintainer): moves that expose your own Marshal are not offered and having no safe move is a loss; betrayal is all or nothing and also works on an own-topped tower with enemy pieces below; White always moves first (the rulebook draws who starts, but every mode is symmetric, so we follow the chess convention; see section 11 of `docs/rules.md`); the draft follows the rulebook (second player's "done" ends it), with "free draft" as a casual-only option.
 
 ## Conventions
 

@@ -138,7 +138,7 @@ Instead of moving, a player may place a piece from their hand on the board. This
 
 ### 7.1 Draft (Intermediate and Advanced modes)
 
-1. The first player (先手) is decided. As in the rulebook, color and order are independent: either color may start. On the platform, both are set when the game is created (the challenger's choice or a random draw).
+1. The first player (先手) is decided. In the rulebook (p. 6), one player holds the White and the Black Marshal in their hands and lets them fall on the center of the board; the player whose Marshal lands closer to the center goes first, so either color may start. On the platform White always goes first, and the colors are set when the game is created (the challenger's choice or a random draw). See section 11, item 9.
 2. Starting with the first player, each player places one piece at a time in their starting territory (3 rows).
 3. Each player's first piece must be the Marshal.
 4. Stacking is allowed during the draft (up to `max`), except on the Marshal. Only own pieces exist in the starting territory, so only own stacking happens.
@@ -180,6 +180,8 @@ Setup 2 (Beginner):
 
 Each player's hand: 小 x2, 槍 x2, 忍 x1, 馬 x1, 兵 x1. Out of the game: 砲, 筒, 謀.
 
+In both setups White moves first, as in the draft modes (section 7.1, item 1).
+
 ## 8. Modes
 
 | Mode | Setup | Special pieces | Max stacking | Marshal stacks |
@@ -217,7 +219,7 @@ Rulebook notation (for display): `column-row-tier piece`, and `新` for a drop. 
 
 ## 11. Interpreted points
 
-Where the rulebook is ambiguous, or where Komugi differs from the rulebook and the FAQ, we decided as follows:
+Where the rulebook is ambiguous, where Komugi differs from the rulebook and the FAQ, or where the platform settles something the rulebook leaves to the players, we decided as follows:
 
 1. **Drops outside the starting territory.** Komugi limits drops to the 3 starting rows. The text and the diagram on page 10 show the zone going from the edge to the most advanced piece, beyond the 3 rows. We follow the rulebook.
 2. **Marshal stacking.** Komugi forbids the Marshal from stacking in every mode. The rulebook and FAQ Q14 say only the Introductory and Beginner modes forbid it. We follow the rulebook.
@@ -227,5 +229,5 @@ Where the rulebook is ambiguous, or where Komugi differs from the rulebook and t
 6. **Most advanced piece for drops.** FAQ Q25 settles it: only own pieces on top count. Komugi also counts covered ones.
 7. **Exposing your own Marshal.** The rulebook does not forbid it. The platform does not offer such a move, and declares mate when there is no safe move, attacked or not (section 9). The result is the same as in the rulebook. The only practical difference: in the rulebook, whoever exposes their Marshal only loses if the opponent notices and captures; here that move does not exist. We do not adopt the gungi.io rule where having no safe move without being attacked is a draw: that changes the rulebook result.
 8. **End of the draft.** gungi.io lets the first player keep going after the second declares done. By default we follow the rulebook (section 7.1, item 7), confirmed by 軍儀Web and kyproduce.com. The gungi.io rule exists as the "free draft" option, in casual games only.
-9. **First player.** We follow the rulebook: color and order are independent. Whoever starts the draft starts the game (FAQ Q20). In the fixed setups, the setup is the same and only who moves first changes.
+9. **First player.** The rulebook draws who goes first once each player has a color (p. 6: both Marshals are dropped on the center of the board, and the one that lands closer starts), so either color may start; 軍儀Web says only that any player may go first. Most games of this family tie the order to a color instead: White starts in chess and international draughts, Black in go, Red in xiangqi, and in shogi the first player (先手) is called Black (☗) in game records. Every Gungi mode is symmetric (the fixed setups under a 180 degree rotation, the draft from an empty board with equal hands), so Black starting is the same game as White starting with the colors swapped. We follow the chess convention: White always places first in the draft and moves first, and whoever starts the draft starts the game (FAQ Q20). The rulebook's draw survives as a random color, which decides who goes first just the same; the only thing lost is the combination of the Black pieces with the first move. The engine, FEN and game records still accept Black as the first player, so games recorded with the rulebook's draw, and games played on ligungi before this change, replay as they were.
 10. **Insufficient material.** Not in the rulebook. We adopt it to end games that have no way to finish. It does not apply when the two Marshals are neighbours, since the player to move can capture (as in gungi.js). In ligungi that position cannot come from legal play, because the last capture would put a Marshal next to the other, which exposes it; it can only come from a position set up by hand.

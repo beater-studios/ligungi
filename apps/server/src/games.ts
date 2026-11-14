@@ -28,7 +28,6 @@ export interface NewGame {
   readonly rated: boolean;
   readonly timeControl: TimeControl | null;
   readonly daysPerMove: number | null;
-  readonly firstPlayer: Color;
   readonly freeDraft: boolean;
   readonly players: Record<Color, Player>;
 }
@@ -169,7 +168,7 @@ export class Games {
         rated: game.rated,
         timeControl: game.timeControl,
         daysPerMove: game.daysPerMove,
-        firstPlayer: game.firstPlayer,
+        firstPlayer: 'white',
         freeDraft: game.freeDraft,
         seats: { white: seat('white'), black: seat('black') },
         createdAt: this.#options.now(),
@@ -524,7 +523,6 @@ export class Games {
       rated: room.rated,
       timeControl: room.timeControl,
       daysPerMove: room.daysPerMove,
-      firstPlayer: room.firstPlayer,
       freeDraft: room.freeDraft,
       players: { white: player(room.seats.black), black: player(room.seats.white) },
     });

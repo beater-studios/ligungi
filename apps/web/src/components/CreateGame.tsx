@@ -28,7 +28,6 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
   const [increment, setIncrement] = useState(5);
   const [rated, setRated] = useState(Boolean(user));
   const [color, setColor] = useState<ColorChoice>('random');
-  const [firstPlayer, setFirstPlayer] = useState<ColorChoice>('random');
   const [freeDraft, setFreeDraft] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -46,7 +45,6 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
       timeControl: speed === 'live' ? { initial: minutes * 60, increment } : null,
       daysPerMove: speed === 'correspondence' ? days : null,
       color,
-      firstPlayer,
       freeDraft: free,
     };
     try {
@@ -132,11 +130,8 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
             }}
           />
         )}
-        <Field label={t.common.yourColor}>
+        <Field label={t.common.yourColor} help={t.common.whiteStarts}>
           <RadioGroup name="cg-color" value={color} options={colorOptions} onChange={setColor} />
-        </Field>
-        <Field label={t.common.whoStarts}>
-          <RadioGroup name="cg-first" value={firstPlayer} options={colorOptions} onChange={setFirstPlayer} />
         </Field>
         {error && <p class="error">{error}</p>}
         <SubmitButton disabled={busy}>{to ? t.create.sendChallenge : target === 'friend' ? t.create.createLink : t.create.create}</SubmitButton>

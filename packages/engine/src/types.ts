@@ -43,7 +43,10 @@ export interface Position {
   readonly board: readonly Tower[];
   readonly hands: Readonly<Record<Color, Hand>>;
   readonly turn: Color;
-  /** Who places first in the draft and moves first in play. Independent of color (rulebook p.6). */
+  /**
+   * Who places first in the draft and moves first in play. The platform always starts with White (docs/rules.md, section
+   * 11); Black is kept so games recorded with the rulebook's draw (p.6), and older games of the site, still replay.
+   */
   readonly firstPlayer: Color;
   /**
    * Draft rule. `false` (rulebook): the draft ends as soon as the second player declares done.

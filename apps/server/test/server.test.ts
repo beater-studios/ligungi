@@ -9,7 +9,7 @@ import { Moderation, moderatorCommand } from '../src/moderation.ts';
 import { Users } from '../src/users.ts';
 import { Client, firstMove, startServer, type TestServer } from './helpers.ts';
 
-const casual = { mode: 'intro', rated: false, timeControl: { initial: 600, increment: 5 }, color: 'white', firstPlayer: 'white' };
+const casual = { mode: 'intro', rated: false, timeControl: { initial: 600, increment: 5 }, color: 'white' };
 
 let server: TestServer | undefined;
 const clients: Client[] = [];
@@ -118,17 +118,19 @@ describe('playing online', () => {
     await a.connect();
     a.send({ t: 'sub', topic: 'lobby' });
     await a.waitFor((m) => m.t === 'lobby');
-    const seek = { ...casual, color: 'random', firstPlayer: 'random' };
+    const seek = { ...casual, color: 'random' };
     expect((await a.request<{ seekId: string }>('POST', '/api/seeks', seek)).data.seekId).toBeTruthy();
     const lobby = await a.waitFor((m) => m.t === 'lobby' && m.lobby.seeks.length === 1);
     expect((lobby as { lobby: LobbyView }).lobby.seeks[0]!.mine).toBe(true);
     await b.connect();
-    const paired = await b.request<{ gameId: string }>('POST', '/api/seeks', { ...seek, color: 'black' });
+    // A first player sent by an older page is ignored: White always starts.
+    const paired = await b.request<{ gameId: string }>('POST', '/api/seeks', { ...seek, color: 'black', firstPlayer: 'black' });
     expect(paired.data.gameId).toBeTruthy();
     const redirect = await a.waitFor((m) => m.t === 'redirect');
     expect(redirect).toEqual({ t: 'redirect', path: `/${paired.data.gameId}` });
     const game = (await a.request<GameView>('GET', `/api/games/${paired.data.gameId}`)).data;
     expect(game.you).toBe('white');
+    expect(game.firstPlayer).toBe('white');
   });
 
   it('updates ratings after a rated game and shows it on the profiles', async () => {
@@ -158,7 +160,7 @@ describe('playing online', () => {
     server = await startServer();
     const a = client();
     const b = client();
-    const settings = { ...casual, mode: 'advanced', color: 'white', firstPlayer: 'white', freeDraft: true };
+    const settings = { ...casual, mode: 'advanced', color: 'white', freeDraft: true };
     const { id, view } = await startGame(a, b, settings);
     expect(view.freeDraft).toBe(true);
     const send = async (c: Client, move: string, ply: number) => {
@@ -178,7 +180,7 @@ describe('playing online', () => {
     const d = client();
     await c.connect();
     await d.connect();
-    const seek = { ...casual, color: 'random', firstPlayer: 'random' };
+    const seek = { ...casual, color: 'random' };
     expect((await c.request<{ seekId?: string }>('POST', '/api/seeks', { ...seek, mode: 'advanced', freeDraft: false })).data.seekId).toBeTruthy();
     const other = await d.request<{ seekId?: string; gameId?: string }>('POST', '/api/seeks', { ...seek, mode: 'advanced', freeDraft: true });
     expect(other.data.gameId).toBeUndefined();
@@ -598,7 +600,7 @@ describe('sessions, lobby and robustness', () => {
     server = await startServer();
     const a = client();
     const b = client();
-    const seek = { ...casual, color: 'random', firstPlayer: 'random' };
+    const seek = { ...casual, color: 'random' };
     const offline = await a.request<{ code: string }>('POST', '/api/seeks', seek);
     expect(offline.status).toBe(409);
     expect(offline.data.code).toBe('connectionRequired');

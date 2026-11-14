@@ -57,7 +57,6 @@ export const es: Messages = {
     invalidMode: 'Modo no válido.',
     invalidRated: 'Indica si la partida es puntuable.',
     invalidColor: 'Color no válido.',
-    invalidFirstPlayer: 'Primer jugador no válido.',
     invalidInitialTime: 'El tiempo inicial debe estar entre 1 y 180 minutos.',
     invalidIncrement: 'El incremento debe estar entre 0 y 180 segundos.',
     invalidDaysPerMove: 'Por correspondencia, el plazo por jugada es de 1, 3 o 7 días, sin reloj.',
@@ -297,7 +296,7 @@ export const es: Messages = {
     you: 'Tú',
     anonymous: 'Anónimo',
     yourColor: 'Tu color',
-    whoStarts: 'Quién empieza',
+    whiteStarts: 'Las blancas empiezan.',
     mode: 'Modo',
     flip: 'Girar tablero',
     first: 'Inicio',
@@ -893,7 +892,7 @@ export const es: Messages = {
     setupTitle: 'Preparación',
     setup: (
       <>
-        En los modos Introducción y Principiante, la posición inicial es fija. En los modos Intermedio y Avanzado, los
+        Las blancas siempre empiezan. En los modos Introducción y Principiante, la posición inicial es fija. En los modos Intermedio y Avanzado, los
         jugadores se turnan para colocar piezas en su propio territorio, empezando por el Mariscal. Quien no quiera colocar
         más piezas declara <b>済み (listo)</b>. Si el primer jugador declara, el segundo puede seguir; cuando el segundo
         declara, el draft termina para los dos. En partidas casuales, quien crea la partida puede elegir la opción{' '}

@@ -3,8 +3,10 @@ import { formatTimeControl, gameFiltersQuery, parseClientMessage, parseGameFilte
 
 describe('protocol', () => {
   it('validates game settings', () => {
-    const valid = { mode: 'advanced', rated: true, timeControl: { initial: 600, increment: 5 }, daysPerMove: null, color: 'random', firstPlayer: 'white', freeDraft: false };
+    const valid = { mode: 'advanced', rated: true, timeControl: { initial: 600, increment: 5 }, daysPerMove: null, color: 'random', freeDraft: false };
     expect(parseSettings(valid)).toEqual(valid);
+    // Older pages still send who moves first; White always does now, so the field is dropped.
+    expect(parseSettings({ ...valid, firstPlayer: 'black' })).toEqual(valid);
     expect(parseSettings({ ...valid, freeDraft: undefined })).toEqual(valid);
     expect(parseSettings({ ...valid, freeDraft: true })).toBe('ratedNeedsOfficialDraft');
     expect(parseSettings({ ...valid, rated: false, freeDraft: true })).toMatchObject({ freeDraft: true });
@@ -17,7 +19,7 @@ describe('protocol', () => {
   });
 
   it('validates correspondence settings', () => {
-    const correspondence = { mode: 'intro', rated: true, timeControl: null, daysPerMove: 3, color: 'white', firstPlayer: 'white' };
+    const correspondence = { mode: 'intro', rated: true, timeControl: null, daysPerMove: 3, color: 'white' };
     expect(parseSettings(correspondence)).toMatchObject({ rated: true, timeControl: null, daysPerMove: 3 });
     for (const days of [1, 7]) expect(parseSettings({ ...correspondence, daysPerMove: days })).toMatchObject({ daysPerMove: days });
     expect(parseSettings({ ...correspondence, daysPerMove: 2 })).toBe('invalidDaysPerMove');

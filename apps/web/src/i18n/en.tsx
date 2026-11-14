@@ -57,7 +57,6 @@ export const en: Messages = {
     invalidMode: 'Invalid mode.',
     invalidRated: 'Say whether the game is rated.',
     invalidColor: 'Invalid color.',
-    invalidFirstPlayer: 'Invalid first player.',
     invalidInitialTime: 'Initial time must be between 1 and 180 minutes.',
     invalidIncrement: 'Increment must be between 0 and 180 seconds.',
     invalidDaysPerMove: 'Correspondence games give 1, 3 or 7 days per move, without a clock.',
@@ -297,7 +296,7 @@ export const en: Messages = {
     you: 'You',
     anonymous: 'Anonymous',
     yourColor: 'Your color',
-    whoStarts: 'Who moves first',
+    whiteStarts: 'White moves first.',
     mode: 'Mode',
     flip: 'Flip board',
     first: 'First',
@@ -892,7 +891,7 @@ export const en: Messages = {
     setupTitle: 'Setup',
     setup: (
       <>
-        In the Introductory and Beginner modes the starting position is fixed. In the Intermediate and Advanced modes the
+        White always moves first. In the Introductory and Beginner modes the starting position is fixed. In the Intermediate and Advanced modes the
         players take turns placing pieces in their own territory, starting with the Marshal. A player who does not want to
         place more pieces declares <b>済み (done)</b>. If the first player declares, the second may keep going; when the
         second declares, the draft ends for both. In casual games, whoever creates the game can choose the{' '}

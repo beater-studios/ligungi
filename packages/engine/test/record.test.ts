@@ -32,6 +32,16 @@ describe('game records', () => {
     expect(strings(record.moves)).toEqual(strings(game.moves));
   });
 
+  it('still reads games where Black moved first, as the rulebook allows and older games of the site did', () => {
+    const game = new Game(initialPosition('intro', 'black'));
+    const first = game.legalMoves().find((move) => move.kind === 'move')!;
+    game.play(first);
+    const text = `[Mode "intro"]\n[FirstPlayer "black"]\n\n1. ${moveToString(first)}\n`;
+    const record = parseGameRecord(text) as GameRecord;
+    expect(record.firstPlayer).toBe('black');
+    expect(strings(record.moves)).toEqual([moveToString(first)]);
+  });
+
   it('reads moves in rulebook notation alone, several on a line, with the mode chosen on the page', () => {
     const game = playSome('intro', 6);
     const replay = new Game(initialPosition('intro'));

@@ -7,7 +7,6 @@ export const ERROR_MESSAGES = {
   invalidMode: 'Modo inválido.',
   invalidRated: 'Informe se a partida vale rating.',
   invalidColor: 'Cor inválida.',
-  invalidFirstPlayer: 'Primeiro jogador inválido.',
   invalidInitialTime: 'Tempo inicial deve ficar entre 1 e 180 minutos.',
   invalidIncrement: 'Incremento deve ficar entre 0 e 180 segundos.',
   invalidDaysPerMove: 'Na correspondência, o prazo por lance é de 1, 3 ou 7 dias, sem relógio.',

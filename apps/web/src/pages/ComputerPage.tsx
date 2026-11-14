@@ -18,7 +18,6 @@ export const ComputerPage = () => {
   const [mode, setMode] = useState<Mode>('beginner');
   const [level, setLevel] = useState<BotLevel>(2);
   const [colorChoice, setColorChoice] = useState<ColorChoice>('white');
-  const [firstChoice, setFirstChoice] = useState<ColorChoice>('white');
   const [freeDraft, setFreeDraft] = useState(false);
   const [me, setMe] = useState<Color | null>(null);
   const [flipped, setFlipped] = useState(false);
@@ -78,7 +77,7 @@ export const ComputerPage = () => {
     const color = pick(colorChoice);
     setMe(color);
     setFlipped(false);
-    local.reset(initialPosition(mode, pick(firstChoice), { freeDraft }));
+    local.reset(initialPosition(mode, 'white', { freeDraft }));
     playSound('notify');
   };
 
@@ -112,17 +111,15 @@ export const ComputerPage = () => {
           {MODE_RULES[mode].draft && (
             <Checkbox id="ai-free" checked={freeDraft} onChange={setFreeDraft} label={t.freeDraftLabel} help={t.freeDraftHint} />
           )}
-          <div class="ligungi-computer__pair">
-            <OptionCards
-              name="ai-color"
-              legend={t.common.yourColor}
-              layout="row"
-              value={colorChoice}
-              options={colorOptions.map((option) => ({ ...option, icon: disc(option.value) }))}
-              onChange={setColorChoice}
-            />
-            <OptionCards name="ai-first" legend={t.common.whoStarts} layout="row" value={firstChoice} options={colorOptions} onChange={setFirstChoice} />
-          </div>
+          <OptionCards
+            name="ai-color"
+            legend={t.common.yourColor}
+            layout="row"
+            value={colorChoice}
+            options={colorOptions.map((option) => ({ ...option, icon: disc(option.value) }))}
+            onChange={setColorChoice}
+            help={t.common.whiteStarts}
+          />
           <SubmitButton>{t.computer.start}</SubmitButton>
         </form>
       </main>

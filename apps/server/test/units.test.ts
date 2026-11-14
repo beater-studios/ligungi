@@ -120,7 +120,6 @@ describe('board moves', () => {
       rated: true,
       timeControl: null,
       daysPerMove: null,
-      firstPlayer: 'white',
       freeDraft: false,
       players: { white: { sessionId: 'w', userId: white.id, name: white.name }, black: { sessionId: 'b', userId: black.id, name: black.name } },
     });

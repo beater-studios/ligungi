@@ -9,10 +9,7 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
 | Password recovery by email | Needs an outgoing email service | M | Medium | lichess, internal, lishogi |
-| Profile details (bio, country flag, links) | Personality on profiles; flags show up on leaderboards | S | Low | lichess, lidraughts, libaduk, lishogi |
 | Captcha instead of the per-username login lockout | Today 20 wrong passwords lock an account for 15 minutes, which an attacker can abuse | M | Low | internal |
-| Privacy settings: who can challenge, message or follow me | Reduces harassment once social features exist | S | Low | lichess |
-| Kid mode (no chat or messages) | Safer for young players | S | Low | lichess |
 
 ## Operations
 
@@ -33,29 +30,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Tournaments: Arena and Swiss, then calendar, shields, ladders, round robin and team battles | Main engagement driver on lichess-style sites | L | Medium | lichess, lidraughts, lishogi |
 | Bot accounts through a bot API (engines play on the site, list of online bots) | Lets engine authors join, gives players more opponents | L | Low | lichess, lishogi |
 | Simultaneous exhibitions | Strong players against many at once | L | Low | lichess, lidraughts, lishogi |
-
-## Learn
-
-| Item | Why | Size | Priority | Seen on |
-|---|---|---|---|---|
-| Interactive lessons with saved progress (rules, pieces, fundamentals, etiquette, each with exercises on the board) | Gungi is new to almost everyone; learning by playing converts far better than a rules page. The piece trainer is a starting point | L | High | lichess, libaduk, lishogi |
-| Mate problems (tsume style): find the forced mate in N moves | Mates can be found and verified by search, so problems can be generated without a strong evaluation; a natural first puzzle type | M | High | lishogi |
-| Puzzles: daily and random, with ratings, themes and a personal dashboard | Daily reason to come back. Needs a stronger engine or a curated set | L | Medium | lichess, lidraughts, libaduk, lishogi |
-| Timed puzzle modes (Streak, Storm, Racer against other players) | Short, competitive sessions that bring players back | M | Low | lichess |
-| Practice positions against the computer | Learn key situations by playing them out | M | Low | lichess |
-| Coordinate trainer, in the notation the player chose | Board fluency | M | Low | lichess, lidraughts, lishogi |
-| Game library (curated collections of notable games) | Study material once there are good games to show | M | Low | libaduk |
-| Studies (shared annotated analysis with chapters) | Teaching and community content | L | Low | lichess, lidraughts, lishogi |
-| Coaches directory | Connects learners with teachers | S | Low | lichess, lishogi |
-| Videos library | Curated learning content | S | Low | lichess |
-
-## Watch
-
-| Item | Why | Size | Priority | Seen on |
-|---|---|---|---|---|
-| TV channels per mode and for computer games | Something to watch in every mode | S | Low | lishogi |
-| Clocks on the home featured game | Livelier home page | S | Low | libaduk |
-| Streamers and broadcasts | Only when there are Gungi streams or events | M | Low | lichess, lidraughts, libaduk, lishogi |
 
 ## Display and settings
 
@@ -79,9 +53,9 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Profile tab counts follow the mode filter | Counts are global today while the list is filtered | S | Low | internal |
 | Head-to-head record between two players (crosstable) | Rivalries; shown on game pages and profiles | S | Low | lichess |
 | Activity timeline on profiles and a feed of followed players | Social glue for the follow feature that already exists | M | Low | lichess |
-| Private messages and a notification bell | Base for direct challenges, follows and moderation notices. Only after moderation tools exist | M | Medium | lichess |
+| Private messages, and notices for follows and moderation in the bell | The bell already lists challenges and correspondence games; moderation tools now exist | M | Medium | lichess |
 | User blogs | Community content | M | Low | lichess |
-| Chat in games, on TV and a site chat room | Social core of lichess. Only after moderation tools exist | M | Medium | lichess, lidraughts, libaduk, lishogi |
+| Chat in games, on TV and a site chat room | Social core of lichess. Moderation tools and reports now exist | M | Medium | lichess, lidraughts, libaduk, lishogi |
 | Teams, forum and blog | Community spaces | L | Low | lichess, lidraughts, lishogi |
 | Friendly sites page | Cross-links with other lichess-style sites | S | Low | lishogi |
 
@@ -89,7 +63,7 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
-| Record a game played on a physical board (kifu), move by move with players and result | Gungi has an official physical board; owners could record home games and analyse them here | M | High | libaduk |
+| Record a game played on a physical board (kifu), move by move with players and result | Gungi has an official physical board; owners could record home games and analyse them here. Import already opens a written game in the analysis board; what is missing is a screen to enter it move by move with names, date and result, saved to the account | S | High | libaduk |
 | Computer analysis in the browser (evaluation, best line, mistakes in a finished game) | Core study tool on lichess-style sites. Needs a stronger engine | L | Medium | lichess, lishogi |
 | Learn from your mistakes: replay the critical moments of your own games | The most loved study feature on lichess. Needs the computer analysis | M | Medium | lichess |
 | Personal insights (where you win and lose, by mode, color, phase) | Self-improvement | L | Low | lichess |

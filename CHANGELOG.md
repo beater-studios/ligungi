@@ -17,6 +17,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Changed
 
+- White always moves first, in every mode, as in chess. The physical game draws who starts, but Gungi is symmetric, so the draw now picks the colors instead: creating a game, a challenge or a game against the computer asks only for your color. Older games where Black started still open and replay as before.
 - The site runs on Preact 11 (from 10), with the same look and behavior on every page.
 
 ## [0.3.0] - 2026-11-14

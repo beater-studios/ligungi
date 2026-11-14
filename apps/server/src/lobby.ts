@@ -106,7 +106,6 @@ export class Lobby {
       const merged: GameSettings = {
         ...match.settings,
         color: match.settings.color === 'random' && settings.color !== 'random' ? opposite(settings.color) : match.settings.color,
-        firstPlayer: match.settings.firstPlayer === 'random' ? settings.firstPlayer : match.settings.firstPlayer,
       };
       const room = this.#start(merged, match.owner, owner);
       this.#options.onSeeksChange();
@@ -329,7 +328,6 @@ export class Lobby {
       rated: settings.rated,
       timeControl: settings.timeControl,
       daysPerMove: settings.daysPerMove,
-      firstPlayer: pickColor(settings.firstPlayer),
       freeDraft: settings.freeDraft,
       players: ownerColor === 'white' ? { white: owner, black: acceptor } : { white: acceptor, black: owner },
     });
@@ -378,5 +376,4 @@ const compatible = (a: GameSettings, b: GameSettings): boolean =>
   a.freeDraft === b.freeDraft &&
   sameTimeControl(a.timeControl, b.timeControl) &&
   a.daysPerMove === b.daysPerMove &&
-  (a.color === 'random' || b.color === 'random' || a.color !== b.color) &&
-  (a.firstPlayer === 'random' || b.firstPlayer === 'random' || a.firstPlayer === b.firstPlayer);
+  (a.color === 'random' || b.color === 'random' || a.color !== b.color);

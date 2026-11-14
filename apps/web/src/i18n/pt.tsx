@@ -217,7 +217,7 @@ export const pt = {
     you: 'Você',
     anonymous: 'Anônimo',
     yourColor: 'Sua cor',
-    whoStarts: 'Quem começa',
+    whiteStarts: 'As brancas começam.',
     mode: 'Modo',
     flip: 'Girar tabuleiro',
     first: 'Início',
@@ -815,7 +815,7 @@ export const pt = {
     setupTitle: 'Preparação',
     setup: (
       <>
-        Nos modos Introdução e Iniciante, a posição inicial é fixa. Nos modos Intermediário e Avançado, os jogadores se
+        As brancas sempre começam. Nos modos Introdução e Iniciante, a posição inicial é fixa. Nos modos Intermediário e Avançado, os jogadores se
         alternam colocando peças no próprio território, começando pelo Marechal. Quem não quiser colocar mais peças declara{' '}
         <b>済み (pronto)</b>. Se o primeiro jogador declarar, o segundo pode continuar; quando o segundo declara, o draft
         termina para os dois. Em partidas casuais, quem cria a partida pode escolher a opção <b>draft livre</b>, em que cada

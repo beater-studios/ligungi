@@ -207,7 +207,13 @@ export const pt: Content = {
         <li>assediar, ofender ou ameaçar outros jogadores;</li>
         <li>atacar, sobrecarregar ou tentar contornar as proteções do site.</li>
       </ul>
-      <p>Contas que violarem estas regras podem ser suspensas ou removidas.</p>
+      <p>
+        Qualquer jogador com conta pode denunciar outro pelo perfil ou pela partida. A moderação analisa as denúncias e pode
+        trocar um nome de usuário ofensivo, anular partidas ganhas com trapaça (devolvendo os pontos de rating ao
+        adversário) e suspender contas por um tempo ou de forma permanente; as partidas em andamento de uma conta suspensa
+        contam como derrota. Quem é suspenso vê, ao tentar entrar, até quando e o motivo, e pode contestar pela página de
+        contato.
+      </p>
       <h2>Partidas e perfil</h2>
       <p>
         Partidas, resultados, ratings e o nome de usuário são públicos: qualquer pessoa pode ver e exportar as partidas
@@ -267,6 +273,12 @@ export const pt: Content = {
           entrada e de último uso, para você ver na página Conta onde a sua conta está aberta.
         </li>
         <li>
+          <b>Moderação:</b> as denúncias (quem denunciou, quem foi denunciado, o motivo, o texto e a partida) ficam guardadas
+          para a moderação analisar, e são apagadas se a conta de uma das duas pessoas for excluída. As ações de moderação
+          (suspensões, trocas de nome e partidas anuladas) ficam num registro com o moderador, a data e o motivo. A cópia
+          dos seus dados inclui as denúncias que você fez e as ações sobre a sua conta.
+        </li>
+        <li>
           <b>Endereço IP:</b> usado no momento da requisição para limitar tentativas de login e proteger o site contra
           abusos. Não fica guardado no nosso banco de dados.
         </li>
@@ -285,6 +297,7 @@ export const pt: Content = {
       <ul>
         <li>Conta, partidas e sessão: para prestar o serviço que você pediu (execução de contrato).</li>
         <li>IP e proteções: legítimo interesse em manter o site seguro e funcionando.</li>
+        <li>Denúncias e moderação: legítimo interesse em manter as partidas justas e o site livre de abusos, como dizem os termos de uso.</li>
         <li>Estatísticas de visita: o seu consentimento, que pode ser retirado a qualquer momento.</li>
       </ul>
       <h2>Com quem compartilhamos</h2>
@@ -299,6 +312,7 @@ export const pt: Content = {
         <li>Conta e partidas: enquanto a conta existir. As partidas compõem o histórico público do site.</li>
         <li>Sessões: até expirarem, como descrito acima.</li>
         <li>Cópias de segurança: até 14 dias.</li>
+        <li>Registro de moderação: mantido mesmo depois da exclusão da conta, como histórico das decisões tomadas.</li>
       </ul>
       <h2>Seus direitos</h2>
       <p>

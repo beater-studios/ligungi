@@ -209,7 +209,12 @@ export const en: Content = {
         <li>harass, insult or threaten other players;</li>
         <li>attack, overload or try to bypass the site's protections.</li>
       </ul>
-      <p>Accounts that break these rules may be suspended or removed.</p>
+      <p>
+        Any player with an account can report another from their profile or from a game. The moderators look into reports
+        and may change an offensive username, void games won by cheating (giving the rating points back to the opponent)
+        and suspend accounts for a while or for good; games in progress of a suspended account count as losses. A
+        suspended player sees, when trying to sign in, until when and why, and can contest it through the contact page.
+      </p>
       <h2>Games and profile</h2>
       <p>Games, results, ratings and usernames are public: anyone can view and export games played on the site.</p>
       <h2>Code and trademarks</h2>
@@ -266,6 +271,12 @@ export const en: Content = {
           and when it signed in and was last used, so you can see on the Account page where your account is open.
         </li>
         <li>
+          <b>Moderation:</b> reports (who reported whom, the reason, the text and the game) are kept for the moderators to
+          look into, and are deleted when either account is deleted. Moderator actions (suspensions, name changes and voided
+          games) go to a log with the moderator, the date and the reason. Your data download includes the reports you made
+          and the actions on your account.
+        </li>
+        <li>
           <b>IP address:</b> used at request time to limit login attempts and protect the site from abuse. It is not stored in
           our database.
         </li>
@@ -283,6 +294,7 @@ export const en: Content = {
       <ul>
         <li>Account, games and session: to provide the service you asked for (performance of a contract).</li>
         <li>IP and protections: legitimate interest in keeping the site safe and running.</li>
+        <li>Reports and moderation: legitimate interest in keeping games fair and the site free of abuse, as the terms of use say.</li>
         <li>Visit statistics: your consent, which you can withdraw at any time.</li>
       </ul>
       <h2>Who we share it with</h2>
@@ -297,6 +309,7 @@ export const en: Content = {
         <li>Account and games: while the account exists. Games are part of the site's public history.</li>
         <li>Sessions: until they expire, as described above.</li>
         <li>Backups: up to 14 days.</li>
+        <li>Moderation log: kept even after an account is deleted, as the record of the decisions taken.</li>
       </ul>
       <h2>Your rights</h2>
       <p>

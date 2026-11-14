@@ -65,5 +65,8 @@ export const formatClock = (ms: number): string => {
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 };
 
+/** Free text a person wrote (a moderator's reason), closed with a period when it has no final punctuation. */
+export const asSentence = (text: string): string => (/[.!?…]$/.test(text.trim()) ? text.trim() : `${text.trim()}.`);
+
 export const formatDate = (t: Messages, ms: number): string =>
   new Date(ms).toLocaleDateString(t.locale, { day: '2-digit', month: 'short', year: 'numeric' });

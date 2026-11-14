@@ -23,6 +23,11 @@ import {
   RANKING_PAGE_SIZE,
   RANKING_QUERY_MAX,
   RATING_BAND,
+  REPORT_DETAILS_MAX,
+  REPORT_REASONS,
+  SUSPENSION_DAYS,
+  type ModUserView,
+  type ReportReason,
   type ModeStanding,
   type OnlinePlayer,
   type PlayersView,
@@ -66,6 +71,7 @@ import {
 } from './http.ts';
 import { Hub, type Client } from './hub.ts';
 import { Lobby } from './lobby.ts';
+import { Moderation } from './moderation.ts';
 import type { GameRoom } from './room.ts';
 import { SeekStore } from './seeks.ts';
 import { otpauthUri } from './totp.ts';
@@ -113,6 +119,7 @@ export const createApp = (config: ServerConfig): App => {
   const db = openDatabase(config.databasePath);
   const sessions = new Sessions(db, config.now);
   const twoFactor = new TwoFactor(db, config.now);
+  const moderation = new Moderation(db, config.now);
   const users = new Users(db, config.now);
   const hub = new Hub();
   const authLimiter = new RateLimiter(10, 60_000, config.now);
@@ -122,6 +129,8 @@ export const createApp = (config: ServerConfig): App => {
   const sessionLimiter = new RateLimiter(30, 60_000, config.now);
   /** The export reads every game of the account: a few per minute is plenty. */
   const exportLimiter = new RateLimiter(5, 60_000, config.now);
+  /** Reports a player can file per hour: enough for real cases, too few to flood the queue. */
+  const reportLimiter = new RateLimiter(10, 60 * 60_000, config.now);
   const csp = contentSecurityPolicy(config.cloudflareWebAnalytics);
   let closing = false;
 
@@ -224,6 +233,28 @@ export const createApp = (config: ServerConfig): App => {
       loginFailures.allow(key);
       throw new HttpError(401, 'wrongTwoFactorCode');
     }
+  };
+
+  /** The signed-in moderator, with their name for the log. */
+  const requireModerator = (ctx: Context): { id: string; name: string } => {
+    const userId = requireUser(ctx);
+    const user = users.findById(userId);
+    if (!user || !moderation.isModerator(userId)) throw new HttpError(403, 'notModerator');
+    return { id: user.id, name: user.name };
+  };
+
+  /** A moderator's reason or note: required, at most as long as a report. */
+  const reasonOf = (value: unknown): string => {
+    const reason = typeof value === 'string' ? value.trim() : '';
+    if (!reason || reason.length > REPORT_DETAILS_MAX) throw new HttpError(400, 'reasonRequired');
+    return reason;
+  };
+
+  /** A player a moderator acts on; moderators are out of reach (only the server command changes them). */
+  const sanctionable = (name: string) => {
+    const user = findUser(name);
+    if (moderation.isModerator(user.id)) throw new HttpError(403, 'cannotModerateModerator');
+    return user;
   };
 
   const findUser = (name: string) => {
@@ -385,7 +416,11 @@ export const createApp = (config: ServerConfig): App => {
 
   router
     .add('GET', '/api/me', (ctx) => {
-      const me: Me = { user: userPayload(ctx.session), playing: games.playingFor(ctx.session.id, ctx.session.userId) };
+      const me: Me = {
+        user: userPayload(ctx.session),
+        playing: games.playingFor(ctx.session.id, ctx.session.userId),
+        moderator: moderation.isModerator(ctx.session.userId),
+      };
       sendJson(ctx.res, 200, me);
     })
     .add('POST', '/api/signup', async (ctx) => {
@@ -412,6 +447,8 @@ export const createApp = (config: ServerConfig): App => {
         loginFailures.allow(key);
         throw new HttpError(401, 'wrongCredentials');
       }
+      const suspension = moderation.suspension(user.id);
+      if (suspension) throw new HttpError(403, 'accountSuspended', { until: suspension.until, reason: suspension.reason });
       // The client sends the password again with the code, so no half signed-in state lives on the server.
       if (twoFactor.isEnabled(user.id)) {
         if (code === undefined || code === '') throw new HttpError(401, 'twoFactorRequired');
@@ -518,6 +555,101 @@ export const createApp = (config: ServerConfig): App => {
       twoFactor.disable(userId);
       sendJson(ctx.res, 200, { ok: true });
     })
+    .add('POST', '/api/reports', async (ctx) => {
+      const userId = requireUser(ctx);
+      if (!reportLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
+      const { username, reason, details, gameId } = (await ctx.body()) as Record<string, unknown>;
+      const target = typeof username === 'string' ? users.findByName(username) : undefined;
+      if (!target) throw new HttpError(404, 'userNotFound');
+      if (target.id === userId) throw new HttpError(400, 'cannotReportSelf');
+      const text = typeof details === 'string' ? details.trim() : '';
+      if (!REPORT_REASONS.includes(reason as ReportReason) || text.length > REPORT_DETAILS_MAX) throw new HttpError(400, 'invalidReport');
+      const game = typeof gameId === 'string' && games.get(gameId) ? gameId : null;
+      const result = moderation.report(userId, target.id, reason as ReportReason, text, game);
+      if (result === 'alreadyReported') throw new HttpError(409, 'alreadyReported');
+      sendJson(ctx.res, 200, { ok: true });
+    })
+    .add('GET', '/api/mod/reports', (ctx) => {
+      requireModerator(ctx);
+      const status = ctx.url.searchParams.get('status') === 'closed' ? 'closed' : 'open';
+      sendJson(ctx.res, 200, moderation.reports(status));
+    })
+    .add('POST', '/api/mod/reports/:id/close', async (ctx) => {
+      const moderator = requireModerator(ctx);
+      const report = moderation.reportById(ctx.params.id!);
+      if (!report) throw new HttpError(404, 'reportNotFound');
+      const { resolution } = (await ctx.body()) as { resolution?: unknown };
+      const text = reasonOf(resolution);
+      moderation.closeReport(report.id, moderator.name, text);
+      moderation.log('closeReport', moderator.name, report.target, text, report.gameId);
+      sendJson(ctx.res, 200, { ok: true });
+    })
+    .add('GET', '/api/mod/log', (ctx) => {
+      requireModerator(ctx);
+      sendJson(ctx.res, 200, moderation.entries());
+    })
+    .add('GET', '/api/mod/users/:name', (ctx) => {
+      requireModerator(ctx);
+      const user = findUser(ctx.params.name!);
+      const view: ModUserView = {
+        user: { id: user.id, name: user.name },
+        moderator: moderation.isModerator(user.id),
+        suspension: moderation.suspension(user.id),
+        openReports: moderation.openReportsAbout(user.id),
+        log: moderation.entries(user.id, 50),
+      };
+      sendJson(ctx.res, 200, view);
+    })
+    .add('POST', '/api/mod/users/:name/suspend', async (ctx) => {
+      const moderator = requireModerator(ctx);
+      const target = sanctionable(ctx.params.name!);
+      const { days, reason } = (await ctx.body()) as { days?: unknown; reason?: unknown };
+      if (!SUSPENSION_DAYS.includes(days as number | null)) throw new HttpError(400, 'invalidSuspension');
+      const text = reasonOf(reason);
+      moderation.suspend(target.id, days as number | null, text);
+      // Out everywhere at once: no session, no socket, nothing left waiting in the lobby, and the games in progress lost.
+      lobby.cancelUser(target.id);
+      games.forfeitAll(target.id);
+      closeSessionSockets(sessions.deleteOtherSessions(target.id, ''));
+      closeUserSockets(target.id);
+      moderation.log('suspend', moderator.name, { id: target.id, name: target.name }, `${days === null ? '∞' : `${String(days)}d`} · ${text}`);
+      sendJson(ctx.res, 200, { ok: true });
+    })
+    .add('POST', '/api/mod/users/:name/unsuspend', async (ctx) => {
+      const moderator = requireModerator(ctx);
+      const target = findUser(ctx.params.name!);
+      if (!moderation.suspension(target.id)) throw new HttpError(409, 'notSuspended');
+      const { reason } = (await ctx.body()) as { reason?: unknown };
+      const text = reasonOf(reason);
+      moderation.unsuspend(target.id);
+      moderation.log('unsuspend', moderator.name, { id: target.id, name: target.name }, text);
+      sendJson(ctx.res, 200, { ok: true });
+    })
+    .add('POST', '/api/mod/users/:name/rename', async (ctx) => {
+      const moderator = requireModerator(ctx);
+      const target = sanctionable(ctx.params.name!);
+      const { username, reason } = (await ctx.body()) as { username?: unknown; reason?: unknown };
+      if (typeof username !== 'string' || !USERNAME_PATTERN.test(username)) throw new HttpError(400, 'invalidUsername');
+      const text = reasonOf(reason);
+      if (!users.rename(target.id, username)) throw new HttpError(409, 'usernameTaken');
+      games.renameUser(target.id, username);
+      lobby.renameUser(target.id, username);
+      // Their sockets carry the old name: reconnecting picks up the new one.
+      closeUserSockets(target.id);
+      moderation.log('rename', moderator.name, { id: target.id, name: username }, `${target.name} → ${username} · ${text}`);
+      sendJson(ctx.res, 200, { user: { id: target.id, name: username } });
+    })
+    .add('POST', '/api/mod/games/:id/void', async (ctx) => {
+      const moderator = requireModerator(ctx);
+      const { reason } = (await ctx.body()) as { reason?: unknown };
+      const text = reasonOf(reason);
+      const room = games.voidGame(ctx.params.id!);
+      if (room === 'gameNotFound') throw new HttpError(404, 'gameNotFound');
+      if (room === 'gameNotVoidable') throw new HttpError(409, 'gameNotVoidable');
+      moderation.log('void', moderator.name, null, text, room.id);
+      publishGame(room);
+      sendJson(ctx.res, 200, { ok: true });
+    })
     .add('GET', '/api/account/sessions', (ctx) => {
       const userId = requireUser(ctx);
       const list: SessionView[] = sessions.listForUser(userId).map((session) => ({
@@ -553,6 +685,20 @@ export const createApp = (config: ServerConfig): App => {
         exportedAt: iso(config.now()),
         account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
         settings: { challengePolicy: users.challengePolicy(userId) },
+        // What moderation holds about the account: the suspension in force, the reports it made and the actions taken on
+        // it (without naming the moderator).
+        moderation: {
+          suspension: moderation.suspension(userId),
+          reportsMade: moderation.reportsBy(userId).map((report) => ({
+            createdAt: iso(report.createdAt),
+            player: report.target.name,
+            reason: report.reason,
+            details: report.details,
+            gameId: report.gameId,
+            status: report.status,
+          })),
+          actionsOnAccount: moderation.entries(userId).map((entry) => ({ action: entry.action, date: iso(entry.createdAt), details: entry.details })),
+        },
         // Whether it is on, never the secret or the recovery codes (stored only as hashes).
         twoFactor: (({ enabled, enabledAt, recoveryCodesLeft }) => ({
           enabled,
@@ -836,7 +982,7 @@ export const createApp = (config: ServerConfig): App => {
   const server = createServer((req, res) => {
     handleRequest(req, res).catch((error: unknown) => {
       if (error instanceof HttpError) {
-        if (!res.headersSent) sendError(res, error.status, error.code);
+        if (!res.headersSent) sendError(res, error.status, error.code, error.details);
         return;
       }
       console.error(error);

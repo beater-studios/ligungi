@@ -21,6 +21,7 @@ import { PlayersPage } from './pages/PlayersPage.tsx';
 import { RankingPage } from './pages/RankingPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
 import { AccountPage } from './pages/AccountPage.tsx';
+import { ModPage } from './pages/ModPage.tsx';
 import { ChallengeBell } from './components/ChallengeBell.tsx';
 import { HeaderSearch } from './components/HeaderSearch.tsx';
 import { useDropdown } from './components/useDropdown.ts';
@@ -43,6 +44,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/tv$/, render: () => <TvPage /> },
   { pattern: /^\/settings$/, render: () => <SettingsPage /> },
   { pattern: /^\/account$/, render: () => <AccountPage /> },
+  { pattern: /^\/mod$/, render: () => <ModPage /> },
   { pattern: /^\/friends$/, render: () => <FriendsPage /> },
   { pattern: /^\/design$/, render: () => <DesignPage /> },
   { pattern: new RegExp(`^/(${INFO_KINDS.join('|')})$`), render: ([kind]) => (isInfoKind(kind!) ? <InfoPage kind={kind} /> : <NotFound />) },
@@ -76,7 +78,7 @@ type DasherView = 'main' | 'language' | 'theme';
  */
 const Dasher = () => {
   const t = useT();
-  const { user } = useStore(session);
+  const { user, moderator } = useStore(session);
   const current = useStore(prefs);
   const { shown, setShown, ref } = useDropdown();
   const [view, setView] = useState<DasherView>('main');
@@ -131,6 +133,11 @@ const Dasher = () => {
                 {user && (
                   <a class="text" href="/account" data-icon={icons.AccountCircle}>
                     {t.nav.account}
+                  </a>
+                )}
+                {moderator && (
+                  <a class="text" href="/mod" data-icon={icons.Agent}>
+                    {t.nav.moderation}
                   </a>
                 )}
                 {user && (

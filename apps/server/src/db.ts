@@ -130,6 +130,38 @@ const MIGRATIONS = [
     primary key (user_id, code_hash)
   );
   `,
+  `
+  alter table users add column role text not null default 'player';
+  alter table users add column suspended_until integer;
+  alter table users add column suspension_reason text;
+  alter table games add column voided integer not null default 0;
+  create table reports (
+    id text primary key,
+    reporter_id text not null references users(id),
+    target_id text not null references users(id),
+    game_id text,
+    reason text not null,
+    details text not null,
+    created_at integer not null,
+    status text not null default 'open',
+    resolution text,
+    closed_by text,
+    closed_at integer
+  );
+  create index reports_status on reports(status, created_at);
+  create index reports_target on reports(target_id);
+  create table mod_log (
+    id integer primary key autoincrement,
+    moderator_name text not null,
+    action text not null,
+    target_id text,
+    target_name text,
+    game_id text,
+    details text,
+    created_at integer not null
+  );
+  create index mod_log_target on mod_log(target_id);
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

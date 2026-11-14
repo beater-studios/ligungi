@@ -39,6 +39,7 @@ export interface RoomInit {
   readonly deadline?: number | null;
   readonly rematchId?: string | null;
   readonly endedAt?: number | null;
+  readonly voided?: boolean;
 }
 
 export interface RoomHooks {
@@ -85,6 +86,8 @@ export class GameRoom {
   rematchOffer: Color | null = null;
   rematchId: string | null;
   endedAt: number | null;
+  /** A moderator voided this finished game (see `Games.voidGame`). */
+  voided: boolean;
   readonly #absentSince: Record<Color, number | null>;
   readonly #hooks: RoomHooks;
   #turnStartedAt: number;
@@ -110,6 +113,7 @@ export class GameRoom {
     this.outcome = init.outcome ?? null;
     this.rematchId = init.rematchId ?? null;
     this.endedAt = init.endedAt ?? null;
+    this.voided = init.voided ?? false;
     const now = hooks.now();
     this.#turnStartedAt = now;
     this.#absentSince = { white: now, black: now };
@@ -341,6 +345,26 @@ export class GameRoom {
    * Moves anonymous seats from one session to another when the session id rotates (login, signup, logout), so a
    * player keeps their game. Seats of signed-in players are matched by user id and need no change.
    */
+  /** Shows a renamed account's new name in its seat. */
+  renameSeat(userId: string, name: string): void {
+    for (const color of ['white', 'black'] as const) {
+      const seat = this.seats[color];
+      if (seat.userId === userId) this.seats[color] = { ...seat, name };
+    }
+    this.#changed();
+  }
+
+  /** The player was suspended: the game is lost as by abandonment, or aborted while nobody has really started. */
+  forfeit(color: Color): void {
+    if (this.status !== 'started') return;
+    if (this.canAbort()) {
+      this.#finish('aborted', null);
+      return;
+    }
+    this.game.abandon(color);
+    this.#end(this.game.outcome!);
+  }
+
   rebindSession(from: string, to: string): boolean {
     let changed = false;
     for (const color of ['white', 'black'] as const) {
@@ -378,6 +402,7 @@ export class GameRoom {
       deadlineIn: this.deadline === null ? null : Math.max(0, this.deadline - now),
       drawOffer: this.drawOffer,
       takebackOffer: this.takebackOffer,
+      voided: this.voided,
       rematchOffer: this.rematchOffer,
       rematchId: this.rematchId,
       you,
@@ -412,6 +437,7 @@ export class GameRoom {
       daysPerMove: this.daysPerMove,
       deadlineIn: this.deadline === null ? null : Math.max(0, this.deadline - this.#hooks.now()),
       turn: this.status === 'started' ? this.game.position.turn : null,
+      voided: this.voided,
     };
   }
 

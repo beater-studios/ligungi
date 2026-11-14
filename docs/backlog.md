@@ -6,11 +6,8 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 
 ## Accounts, moderation and policies
 
-The first item closes a gap between what the terms promise and what the site can do today.
-
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
-| Moderation tools: suspend or ban accounts, rename offensive usernames, void games won by cheating, user reports | The terms say accounts may be suspended, but there is no tool to do it | M | High | internal |
 | Password recovery by email | Needs an outgoing email service | M | Medium | lichess, internal, lishogi |
 | Profile details (bio, country flag, links) | Personality on profiles; flags show up on leaderboards | S | Low | lichess, lidraughts, libaduk, lishogi |
 | Captcha instead of the per-username login lockout | Today 20 wrong passwords lock an account for 15 minutes, which an attacker can abuse | M | Low | internal |
@@ -80,7 +77,6 @@ The first item closes a gap between what the terms promise and what the site can
 | Recent activity feed (finished games, new players) | Same | S | Low | libaduk |
 | Leaderboard: drop inactive players, show rating trend | lichess convention | S | Low | lichess, lidraughts, lishogi |
 | Profile tab counts follow the mode filter | Counts are global today while the list is filtered | S | Low | internal |
-| Rating history chart and per-mode performance stats on the profile | Players love seeing progress | M | Medium | lichess |
 | Head-to-head record between two players (crosstable) | Rivalries; shown on game pages and profiles | S | Low | lichess |
 | Activity timeline on profiles and a feed of followed players | Social glue for the follow feature that already exists | M | Low | lichess |
 | Private messages and a notification bell | Base for direct challenges, follows and moderation notices. Only after moderation tools exist | M | Medium | lichess |
@@ -94,11 +90,8 @@ The first item closes a gap between what the terms promise and what the site can
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
 | Record a game played on a physical board (kifu), move by move with players and result | Gungi has an official physical board; owners could record home games and analyse them here | M | High | libaduk |
-| Board editor (set up any position, fill hands, save and download) | Study and puzzle creation | M | Medium | lichess, lidraughts, libaduk, lishogi |
-| Import a game from the export format | Pairs with the export that already exists | M | Medium | lichess, lidraughts, libaduk, lishogi |
 | Computer analysis in the browser (evaluation, best line, mistakes in a finished game) | Core study tool on lichess-style sites. Needs a stronger engine | L | Medium | lichess, lishogi |
 | Learn from your mistakes: replay the critical moments of your own games | The most loved study feature on lichess. Needs the computer analysis | M | Medium | lichess |
-| Draft explorer: statistics of popular setups and first moves, from played games | The Gungi counterpart of the lichess opening explorer; the draft is where games are won or lost | M | Medium | lichess |
 | Personal insights (where you win and lose, by mode, color, phase) | Self-improvement | L | Low | lichess |
 | Bookmarks and private notes on games | Keep track of interesting games | S | Low | lichess |
 | Advanced game search | Find games by player, mode, rating, result and date across the site | M | Low | lichess, lidraughts, lishogi |
@@ -110,4 +103,3 @@ The first item closes a gap between what the terms promise and what the site can
 |---|---|---|---|---|
 | Public API with personal tokens (and OAuth for third-party apps) | Lets the community build tools, bots and integrations | L | Medium | lichess |
 | Donations or patrons | Funding, if wanted | S | Low | lichess, lidraughts, lishogi |
-| Preact 11 | Dependabot update; CI fails on stricter ARIA types, and the prerender needs a compatible preact-render-to-string; a major runtime release, so it needs a full UI pass | M | Medium | internal |

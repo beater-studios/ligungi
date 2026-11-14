@@ -95,6 +95,8 @@ export interface GameView {
   readonly drawOffer: Color | null;
   /** The player asking to take back their last move (casual games only). */
   readonly takebackOffer: Color | null;
+  /** A moderator voided the game (won by cheating): its rating changes were undone. */
+  readonly voided: boolean;
   readonly rematchOffer: Color | null;
   readonly rematchId: string | null;
   /** Color of the viewer in this game, if any. */
@@ -128,6 +130,7 @@ export interface GameSummary {
   readonly deadlineIn: number | null;
   /** Whose move it is; `null` once the game is over. */
   readonly turn: Color | null;
+  readonly voided: boolean;
 }
 
 export interface Opponent {
@@ -400,6 +403,53 @@ export const gameFiltersQuery = (filters: GameFilters): URLSearchParams => {
 export interface Me {
   readonly user: UserRef | null;
   readonly playing: readonly GameSummary[];
+  /** The signed-in user moderates the site (see the moderation routes). */
+  readonly moderator: boolean;
+}
+
+/** Why a player reports another. */
+export const REPORT_REASONS = ['cheating', 'name', 'behavior', 'other'] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number];
+export const REPORT_DETAILS_MAX = 500;
+
+/** Suspension lengths a moderator can pick, in days; `null` is permanent. */
+export const SUSPENSION_DAYS: readonly (number | null)[] = [1, 3, 7, 30, null];
+
+export interface ReportView {
+  readonly id: string;
+  readonly reporter: UserRef;
+  readonly target: UserRef;
+  readonly gameId: string | null;
+  readonly reason: ReportReason;
+  readonly details: string;
+  readonly createdAt: number;
+  readonly status: 'open' | 'closed';
+  readonly resolution: string | null;
+  readonly closedBy: string | null;
+  readonly closedAt: number | null;
+}
+
+export type ModAction = 'grant' | 'revoke' | 'suspend' | 'unsuspend' | 'rename' | 'void' | 'closeReport';
+
+/** One line of the moderation log. Names are kept as they were when the action was taken. */
+export interface ModLogEntry {
+  readonly id: number;
+  readonly moderator: string;
+  readonly action: ModAction;
+  readonly target: string | null;
+  readonly gameId: string | null;
+  readonly details: string | null;
+  readonly createdAt: number;
+}
+
+/** What a moderator sees about a player. */
+export interface ModUserView {
+  readonly user: UserRef;
+  readonly moderator: boolean;
+  /** The current suspension, if any; `until` is `null` for a permanent one. */
+  readonly suspension: { readonly until: number | null; readonly reason: string } | null;
+  readonly openReports: number;
+  readonly log: readonly ModLogEntry[];
 }
 
 /** Seconds a player gives the opponent with the "extra time" button, as on lichess. */

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { ApiError } from '../api.ts';
 import { Field, SubmitButton } from '../components/ui.tsx';
-import { useT } from '../i18n/index.ts';
+import { asSentence, formatDate, useT } from '../i18n/index.ts';
 import { navigate } from '../router.ts';
 import { login } from '../session.ts';
 
@@ -27,7 +27,12 @@ export const AuthPage = ({ signup }: { signup: boolean }) => {
       navigate('/');
     } catch (err) {
       if (err instanceof ApiError && err.code === 'twoFactorRequired') setNeedCode(true);
-      else setError((err as Error).message);
+      else if (err instanceof ApiError && err.code === 'accountSuspended') {
+        // The server says until when and why, so the player knows what happened and that it can be contested.
+        const until = typeof err.data.until === 'number' ? formatDate(t, err.data.until) : null;
+        const reason = asSentence(typeof err.data.reason === 'string' ? err.data.reason : '');
+        setError(`${until ? t.auth.suspended(until, reason) : t.auth.suspendedForever(reason)} ${t.auth.contest}`);
+      } else setError((err as Error).message);
     } finally {
       setBusy(false);
     }

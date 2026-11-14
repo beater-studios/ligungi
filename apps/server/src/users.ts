@@ -3,6 +3,7 @@ import { CHALLENGE_POLICIES, type ChallengePolicy, type RatingView, type UserRef
 import type { Db } from './db.ts';
 import { DEFAULT_RATING, PROVISIONAL_DEVIATION, type Rating } from './glicko.ts';
 import { randomId } from './ids.ts';
+import { PERMANENT_SUSPENSION } from './moderation.ts';
 
 export interface UserRecord extends UserRef {
   readonly passwordHash: string;
@@ -54,6 +55,30 @@ export class Users {
     return row && toRecord(row);
   }
 
+  /**
+   * A new username, also in every stored copy of the old one (games, challenges, seeks), so a name a moderator removed
+   * does not live on in game histories. `false` when the name is taken.
+   */
+  rename(userId: string, username: string): boolean {
+    const taken = this.findByName(username);
+    if (taken && taken.id !== userId) return false;
+    this.#db.exec('begin');
+    try {
+      this.#db.prepare('update users set username = ?, username_key = ? where id = ?').run(username, username.toLowerCase(), userId);
+      for (const color of ['white', 'black'] as const) {
+        this.#db.prepare(`update games set ${color}_name = ? where ${color}_user = ?`).run(username, userId);
+      }
+      this.#db.prepare('update challenges set owner_name = ? where owner_user = ?').run(username, userId);
+      this.#db.prepare('update challenges set destination_name = ? where destination_user = ?').run(username, userId);
+      this.#db.prepare('update seeks set owner_name = ? where owner_user = ?').run(username, userId);
+      this.#db.exec('commit');
+    } catch (error) {
+      this.#db.exec('rollback');
+      throw error;
+    }
+    return true;
+  }
+
   updatePasswordHash(userId: string, passwordHash: string): void {
     this.#db.prepare('update users set password_hash = ? where id = ?').run(passwordHash, userId);
   }
@@ -99,6 +124,8 @@ export class Users {
       this.#db.prepare('delete from ratings where user_id = ?').run(userId);
       this.#db.prepare('delete from sessions where user_id = ?').run(userId);
       this.#db.prepare('delete from recovery_codes where user_id = ?').run(userId);
+      // Reports go with the account, made or received; the moderation log keeps its entries as the record of what was done.
+      this.#db.prepare('delete from reports where reporter_id = ? or target_id = ?').run(userId, userId);
       this.#db.prepare('delete from two_factor where user_id = ?').run(userId);
       this.#db.prepare('delete from users where id = ?').run(userId);
       this.#db.exec('commit');
@@ -294,12 +321,16 @@ export class Users {
   }
 }
 
-/** Every established player of mode ?1 (deviation up to ?2): position as `rank` computes it and row order as `leaderboard`. */
+/**
+ * Every established player of mode ?1 (deviation up to ?2): position as `rank` computes it and row order as `leaderboard`.
+ * Banned players (suspended for good) are left out, so a cheater does not stay on the leaderboard.
+ */
 const RANKED = `select ratings.user_id, users.username, users.username_key, ratings.rating, ratings.games,
     rank() over (order by ratings.rating desc) as position,
     row_number() over (order by ratings.rating desc, ratings.games desc, users.username_key) as row
   from ratings join users on users.id = ratings.user_id
-  where ratings.mode = ?1 and ratings.games > 0 and ratings.deviation <= ?2`;
+  where ratings.mode = ?1 and ratings.games > 0 and ratings.deviation <= ?2
+    and (users.suspended_until is null or users.suspended_until < ${PERMANENT_SUSPENSION})`;
 
 export interface LeaderRow {
   readonly user: UserRef;

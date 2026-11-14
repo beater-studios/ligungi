@@ -18,10 +18,19 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 | `GET /api/health` | `{ ok: true, version, commit }` after a database query succeeds, `503` otherwise. Meant for uptime monitors. |
 | `GET /api/me` | The session's user and their ongoing games. |
 | `POST /api/signup` `{ username, password }` | Creates an account and signs in. |
-| `POST /api/login` `{ username, password, code? }` | Signs in. For an account with two-step verification on, a request without `code` answers `401 twoFactorRequired` after checking the password; the client sends the password again with `code`, a 6-digit code from the authenticator app or a recovery code (`401 wrongTwoFactorCode` when wrong or already used). Wrong codes count as failed logins of the account. |
+| `POST /api/login` `{ username, password, code? }` | Signs in. A suspended account gets `403 accountSuspended` with `until` (epoch ms, `null` for a permanent suspension) and `reason`. For an account with two-step verification on, a request without `code` answers `401 twoFactorRequired` after checking the password; the client sends the password again with `code`, a 6-digit code from the authenticator app or a recovery code (`401 wrongTwoFactorCode` when wrong or already used). Wrong codes count as failed logins of the account. |
 | `POST /api/logout` | Signs out. |
 | `POST /api/account/password` `{ current, next }` | Changes the password (`wrongPassword` when `current` does not match). Signs out every other session and rotates the current one. |
 | `POST /api/account/delete` `{ password }` | Deletes the account: ratings, follows and sessions are removed, seeks and challenges cancelled, and finished games keep the moves with the player shown as `Anonymous`. Refused with `409 activeGame` while the player has an ongoing game. Returns `{ user: null }`. |
+| `POST /api/reports` `{ username, reason, details, gameId? }` | Reports a player to the moderators (signed in): `reason` is `cheating`, `name`, `behavior` or `other`, `details` up to 500 characters. One open report per reporter and player (`409 alreadyReported`), at most 10 per hour. |
+| `GET /api/mod/reports?status=open\|closed` | Moderators: the reports (`ReportView[]`), open ones oldest first, closed ones latest first. Anyone else gets `403 notModerator`. |
+| `POST /api/mod/reports/:id/close` `{ resolution }` | Moderators: closes a report with a note. |
+| `GET /api/mod/log` | Moderators: the latest 100 entries of the moderation log (`ModLogEntry[]`). |
+| `GET /api/mod/users/:name` | Moderators: a player's standing (`ModUserView`): moderator or not, the suspension in force, open reports about them and their log. |
+| `POST /api/mod/users/:name/suspend` `{ days, reason }` | Moderators: suspends for 1, 3, 7 or 30 days, or for good with `days: null`. Ends the player's sessions, cancels their seeks and challenges and loses their games in progress. Not on moderators (`403 cannotModerateModerator`). |
+| `POST /api/mod/users/:name/unsuspend` `{ reason }` | Moderators: lifts a suspension (`409 notSuspended` without one). |
+| `POST /api/mod/users/:name/rename` `{ username, reason }` | Moderators: a new username, also in the stored games, challenges and seeks. |
+| `POST /api/mod/games/:id/void` `{ reason }` | Moderators: voids a finished rated game, undoing both players' rating changes from it (`409 gameNotVoidable` otherwise). `GameView` and `GameSummary` carry `voided`. |
 | `GET /api/account/two-factor` | Two-step verification status (`TwoFactorView`): whether it is on and how many recovery codes are left. |
 | `POST /api/account/two-factor/setup` `{ password }` | Starts the setup and returns `TwoFactorSetup`: a new secret in base32 and the `otpauth://` link for the QR code. Nothing changes until it is confirmed; `409 twoFactorEnabled` when already on. |
 | `DELETE /api/account/two-factor/setup` | Drops a setup that was not confirmed (the site calls it on Cancel or when leaving the page). An unconfirmed setup also expires after 30 minutes. |

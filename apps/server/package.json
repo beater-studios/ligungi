@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning src/main.ts",
     "dev": "node --disable-warning=ExperimentalWarning --watch src/main.ts",
+    "cli": "node --disable-warning=ExperimentalWarning src/cli.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

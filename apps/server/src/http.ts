@@ -30,16 +30,19 @@ interface Route {
 export class HttpError extends Error {
   readonly status: number;
   readonly code: ErrorCode;
+  /** Extra fields for the client, sent beside the code (for example when a suspension ends). */
+  readonly details: Readonly<Record<string, unknown>>;
 
-  constructor(status: number, code: ErrorCode) {
+  constructor(status: number, code: ErrorCode, details: Readonly<Record<string, unknown>> = {}) {
     super(ERROR_MESSAGES[code]);
     this.status = status;
     this.code = code;
+    this.details = details;
   }
 }
 
-export const sendError = (res: ServerResponse, status: number, code: ErrorCode): void =>
-  sendJson(res, status, { error: ERROR_MESSAGES[code], code });
+export const sendError = (res: ServerResponse, status: number, code: ErrorCode, details: Readonly<Record<string, unknown>> = {}): void =>
+  sendJson(res, status, { ...details, error: ERROR_MESSAGES[code], code });
 
 /** `decodeURIComponent` that returns null on malformed input instead of throwing. */
 export const safeDecode = (value: string): string | null => {

@@ -4,11 +4,14 @@ import { errorText, getT } from './i18n/index.ts';
 export class ApiError extends Error {
   readonly status: number;
   readonly code: ErrorCode | null;
+  /** The whole error body, for the fields some codes carry (when a suspension ends, for example). */
+  readonly data: Readonly<Record<string, unknown>>;
 
-  constructor(status: number, code: ErrorCode | null, message: string) {
+  constructor(status: number, code: ErrorCode | null, message: string, data: Readonly<Record<string, unknown>> = {}) {
     super(message);
     this.status = status;
     this.code = code;
+    this.data = data;
   }
 }
 
@@ -26,7 +29,7 @@ const request = async <T,>(method: string, path: string, body?: unknown): Promis
   } catch {}
   if (!res.ok) {
     const { code, error } = (data ?? {}) as { code?: ErrorCode; error?: string };
-    throw new ApiError(res.status, code ?? null, errorText(getT(), code, error));
+    throw new ApiError(res.status, code ?? null, errorText(getT(), code, error), (data ?? {}) as Record<string, unknown>);
   }
   return data as T;
 };

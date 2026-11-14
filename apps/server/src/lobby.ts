@@ -167,6 +167,29 @@ export class Lobby {
     this.#options.onSeeksChange();
   }
 
+  /** A suspended account: its seeks go and its open challenges, sent or received, are canceled. */
+  cancelUser(userId: string): void {
+    for (const seek of [...this.#seeks.values()]) if (seek.owner.userId === userId) this.#dropSeek(seek);
+    for (const challenge of this.#challenges.values()) {
+      if ((challenge.owner.userId === userId || challenge.destination?.id === userId) && challenge.status === 'open') {
+        challenge.status = 'canceled';
+        this.#changed(challenge);
+      }
+    }
+    this.#options.onSeeksChange();
+  }
+
+  /** A renamed account, in the seeks and challenges kept in memory (the stored ones are renamed with the account). */
+  renameUser(userId: string, name: string): void {
+    for (const item of [...this.#seeks.values(), ...this.#challenges.values()]) {
+      if (item.owner.userId === userId) item.owner = { ...item.owner, name };
+    }
+    for (const [id, challenge] of this.#challenges) {
+      if (challenge.destination?.id === userId) this.#challenges.set(id, { ...challenge, destination: { ...challenge.destination, name } });
+    }
+    this.#options.onSeeksChange();
+  }
+
   /** Live seeks vanish when their owner leaves, as on lichess; correspondence seeks wait for an answer. */
   removeSeeksOf(sessionId: string): void {
     let changed = false;

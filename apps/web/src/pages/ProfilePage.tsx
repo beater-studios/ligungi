@@ -11,6 +11,8 @@ import {
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { CreateGame } from '../components/CreateGame.tsx';
+import { ModPanel } from '../components/ModPanel.tsx';
+import { ReportButton } from '../components/ReportButton.tsx';
 import { Select } from '../components/ui.tsx';
 import { formatDate, playerName, speedText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
@@ -45,6 +47,7 @@ const GameRow = ({ game, userId }: { game: GameSummary; userId: string }) => {
     speedText(t, game),
     game.rated ? t.rated : t.casual,
     ...(reason ? [`${reason} · ${t.profile.moves(game.plies)}`] : []),
+    ...(game.voided ? [t.profile.voided] : []),
   ].join(' · ');
   return (
     <li>
@@ -172,7 +175,7 @@ const FilterForm = ({ name, filters }: { name: string; filters: GameFilters }) =
 
 export const ProfilePage = ({ name }: { name: string }) => {
   const t = useT();
-  const { user: me } = useStore(session);
+  const { user: me, moderator } = useStore(session);
   const { search } = useLocation();
   const filters = readFilters(search);
   const filterKey = gameFiltersQuery(filters).toString();
@@ -313,8 +316,11 @@ export const ProfilePage = ({ name }: { name: string }) => {
               {t.profile.follow}
             </a>
           )}
+          {!isMe && me && <ReportButton username={profile.user.name} />}
         </div>
       </section>
+
+      {moderator && !isMe && <ModPanel name={profile.user.name} />}
 
       <section class="ligungi-profile__ratings" aria-label={t.profile.ratingsLabel}>
         {MODES.map((mode) => (

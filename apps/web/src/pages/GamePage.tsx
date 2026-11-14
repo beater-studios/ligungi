@@ -8,9 +8,14 @@ import { icons } from '../icons.ts';
 import { replayGame } from '../replay.ts';
 import { socket } from '../socket.ts';
 import { playSound } from '../sound.ts';
+import { ReportButton } from '../components/ReportButton.tsx';
+import { VoidGame } from '../components/VoidGame.tsx';
+import { session } from '../session.ts';
+import { useStore } from '../store.ts';
 
 export const GamePage = ({ id }: { id: string }) => {
   const t = useT();
+  const { user, moderator } = useStore(session);
   const [view, setView] = useState<GameView | null>(null);
   const [receivedAt, setReceivedAt] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -343,9 +348,22 @@ export const GamePage = ({ id }: { id: string }) => {
       {!started && <p class="ligungi-game-info__status">{outcomeText(t, view.outcome, view.status === 'aborted')}</p>}
       {notice && <p class="ligungi-notice">{notice}</p>}
       {premove && <p class="ligungi-notice">{t.game.premove(moveToString(premove))}</p>}
+      {view.voided && <p class="ligungi-notice ligungi-game-info__voided">{t.mod.voided}</p>}
       <a class="text" href={`/api/games/${view.id}/export`} target="_blank" rel="noopener" data-icon={icons.Download}>
         {t.game.export}
       </a>
+      {(() => {
+        // A player can report their opponent from the game; a moderator can void a finished rated one.
+        const rival = opponent ? view.players[opponent].user : null;
+        const canVoid = moderator && view.status === 'ended' && view.rated && !view.voided;
+        if (!(user && rival) && !canVoid) return null;
+        return (
+          <div class="ligungi-game-info__actions">
+            {user && rival && <ReportButton username={rival.name} gameId={view.id} />}
+            {canVoid && <VoidGame gameId={view.id} />}
+          </div>
+        );
+      })()}
     </section>
   );
 

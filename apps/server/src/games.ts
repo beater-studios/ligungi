@@ -65,6 +65,7 @@ interface GameRow {
   rematch_id: string | null;
   created_at: number;
   ended_at: number | null;
+  voided: number;
 }
 
 /** One game in the account data export (`GET /api/account/export`). */
@@ -184,6 +185,44 @@ export class Games {
         this.#rooms.delete(id);
       }
     }
+  }
+
+  /** A renamed account: its ongoing games show the new name; finished ones are read again from the database. */
+  renameUser(userId: string, name: string): void {
+    for (const [id, room] of this.#rooms) {
+      if (!Object.values(room.seats).some((seat) => seat.userId === userId)) continue;
+      if (room.status === 'started') room.renameSeat(userId, name);
+      else {
+        room.dispose();
+        this.#rooms.delete(id);
+      }
+    }
+  }
+
+  /** A suspended player loses every game in progress (or it is aborted, before both players have moved). */
+  forfeitAll(userId: string): void {
+    for (const room of this.ongoing()) {
+      const color = (['white', 'black'] as const).find((c) => room.seats[c].userId === userId);
+      if (color) room.forfeit(color);
+    }
+  }
+
+  /**
+   * Voids a finished rated game won by cheating: both players' rating changes from it are undone on their current
+   * rating (the victim gets the points back, the cheater loses those gained), and it leaves the statistics.
+   */
+  voidGame(id: string): GameRoom | 'gameNotFound' | 'gameNotVoidable' {
+    const room = this.get(id);
+    if (!room) return 'gameNotFound';
+    if (room.status !== 'ended' || !room.rated || room.voided) return 'gameNotVoidable';
+    for (const seat of Object.values(room.seats)) {
+      if (!seat.userId || seat.ratingDiff === null) continue;
+      const current = this.#users.rating(seat.userId, room.mode);
+      this.#users.saveRating(seat.userId, room.mode, { ...current, rating: current.rating - seat.ratingDiff });
+    }
+    room.voided = true;
+    this.#db.prepare('update games set voided = 1 where id = ?').run(id);
+    return room;
   }
 
   /** Moves anonymous seats to a new session id after login, signup or logout. */
@@ -310,7 +349,7 @@ export class Games {
           sum(case when (winner = 'white' and white_user = ?1) or (winner = 'black' and black_user = ?1) then 1 else 0 end) as wins,
           sum(case when winner is not null and not ((winner = 'white' and white_user = ?1) or (winner = 'black' and black_user = ?1)) then 1 else 0 end) as losses,
           sum(case when status = 'ended' and winner is null then 1 else 0 end) as draws
-         from games where (white_user = ?1 or black_user = ?1) and status = 'ended'`,
+         from games where (white_user = ?1 or black_user = ?1) and status = 'ended' and voided = 0`,
       )
       .get(userId) as { games: number; rated: number | null; wins: number | null; losses: number | null; draws: number | null };
     return { games: row.games, rated: row.rated ?? 0, wins: row.wins ?? 0, losses: row.losses ?? 0, draws: row.draws ?? 0 };
@@ -324,7 +363,7 @@ export class Games {
           sum(case when (winner = 'white' and white_user = ?1) or (winner = 'black' and black_user = ?1) then 1 else 0 end) as wins,
           sum(case when winner is null then 1 else 0 end) as draws,
           sum(case when winner is not null and not ((winner = 'white' and white_user = ?1) or (winner = 'black' and black_user = ?1)) then 1 else 0 end) as losses
-         from games where (white_user = ?1 or black_user = ?1) and status = 'ended' and rated = 1
+         from games where (white_user = ?1 or black_user = ?1) and status = 'ended' and rated = 1 and voided = 0
          group by mode`,
       )
       .all(userId) as Array<{ mode: Mode; wins: number; draws: number; losses: number }>;
@@ -347,13 +386,13 @@ export class Games {
              case when winner = 'white' then 1 else 0 end as win,
              case when winner is null then 1 else 0 end as draw,
              case when winner = 'black' then 1 else 0 end as loss
-           from games where mode = ? and rated = 1 and status = 'ended' and white_user in (${ids})
+           from games where mode = ? and rated = 1 and status = 'ended' and voided = 0 and white_user in (${ids})
            union all
            select black_user,
              case when winner = 'black' then 1 else 0 end,
              case when winner is null then 1 else 0 end,
              case when winner = 'white' then 1 else 0 end
-           from games where mode = ? and rated = 1 and status = 'ended' and black_user in (${ids})
+           from games where mode = ? and rated = 1 and status = 'ended' and voided = 0 and black_user in (${ids})
          ) group by user_id`,
       )
       .all(mode, ...userIds, mode, ...userIds) as Array<{ user_id: string; wins: number; draws: number; losses: number }>;
@@ -446,6 +485,7 @@ export class Games {
       deadline: row.deadline,
       rematchId: row.rematch_id,
       endedAt: row.ended_at,
+      voided: row.voided === 1,
     };
     return new GameRoom(init, this.#hooks());
   }

@@ -40,7 +40,7 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 | `GET /api/ranking/:mode?page=<n>&q=<text>&followed=1` | The ranking page (`RankingView`): one page of 50 rows of the mode's full leaderboard, each with position (ties share it), rating, rated games, wins, draws and losses, online status and whether the viewer follows the player. `q` keeps names containing the text and `followed=1` (signed in) keeps the viewer and the players they follow; `total` counts the matching rows. Also the number of ranked players per mode with the viewer's standing in each, and the viewer's position and page in this mode. Without `:mode`, the viewer's most played mode, otherwise the one with the most ranked players. |
 | `GET /api/games/:id` | Full game state (`GameView`). |
 | `GET /api/games/:id/export` | The game as text, in the spirit of PGN: headers and one move per line, in both the rulebook and the machine notation. |
-| `GET /api/tv` | Ongoing games, strongest first. |
+| `GET /api/tv` | Ongoing games with at least one move (`GameSummary[]`, at most 24), strongest first by the sum of both ratings. Each summary carries `clock` (milliseconds left for each side and who is running) while the game is in progress, `null` without a clock or once it has ended. |
 | `GET /api/lobby` | Open seeks and counters. |
 | `POST /api/seeks` (`GameSettings`) | Creates a seek, or returns `{ gameId }` if it pairs immediately. A seek that has to wait needs a live WebSocket from the same session (otherwise `409 connectionRequired`), and it disappears when that connection closes or when the player starts any game. |
 | `POST /api/seeks/:id/accept` | Accepts a seek. |

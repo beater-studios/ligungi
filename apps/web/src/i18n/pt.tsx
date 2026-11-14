@@ -465,7 +465,15 @@ export const pt = {
     onlineBox: 'Amigos online',
   },
 
-  tv: { empty: 'Nenhuma partida em andamento agora.' },
+  tv: {
+    title: 'Gungi TV',
+    all: 'Todos',
+    liveCount: (n: number) => `${n} ao vivo`,
+    featured: 'Em destaque · maior rating',
+    move: (n: number) => `lance ${n}`,
+    empty: 'Nenhuma partida em andamento agora.',
+    emptyMode: 'Nenhuma partida em andamento neste modo agora.',
+  },
 
   beginner: {
     title: 'Novo no Gungi?',

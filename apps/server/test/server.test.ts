@@ -402,6 +402,28 @@ describe('community', () => {
     expect((await a.request<UserProfile>('GET', '/api/users/killua')).data).toMatchObject({ followed: false, followers: 0 });
   });
 
+  it('lists live games on the TV with their clocks, and drops the clock once a game ends', async () => {
+    server = await startServer();
+    const a = client();
+    const b = client();
+    await signup(a, 'Knov');
+    await signup(b, 'Morel');
+    const { id, view } = await startGame(a, b);
+    expect((await a.request<GameSummary[]>('GET', '/api/tv')).data).toEqual([]);
+    // The clock starts once both players have made their first move.
+    await play(b, a, await play(a, b, view));
+    const [live] = (await a.request<GameSummary[]>('GET', '/api/tv')).data;
+    expect(live).toMatchObject({ id, plies: 2, clock: { running: 'white' } });
+    expect(live!.clock!.white).toBeGreaterThan(0);
+    expect(live!.clock!.black).toBeGreaterThan(0);
+
+    a.send({ t: 'resign', game: id });
+    await a.waitGame(id, (g) => g.status === 'ended');
+    expect((await a.request<GameSummary[]>('GET', '/api/tv')).data).toEqual([]);
+    const [ended] = (await a.request<GameSummary[]>('GET', '/api/users/knov/games')).data;
+    expect(ended).toMatchObject({ id, status: 'ended', clock: null });
+  });
+
   it('ranks established players per mode and shows the rank on the profile', async () => {
     server = await startServer();
     const a = client();

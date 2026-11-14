@@ -526,7 +526,15 @@ export const en: Messages = {
     onlineBox: 'Friends online',
   },
 
-  tv: { empty: 'No games in play right now.' },
+  tv: {
+    title: 'Gungi TV',
+    all: 'All',
+    liveCount: (n) => `${n} live`,
+    featured: 'Featured · highest rating',
+    move: (n) => `move ${n}`,
+    empty: 'No games in progress right now.',
+    emptyMode: 'No games in progress in this mode right now.',
+  },
 
   beginner: {
     title: 'New to Gungi?',

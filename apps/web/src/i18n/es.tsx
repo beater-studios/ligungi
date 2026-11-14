@@ -526,7 +526,15 @@ export const es: Messages = {
     onlineBox: 'Amigos conectados',
   },
 
-  tv: { empty: 'No hay partidas en curso ahora.' },
+  tv: {
+    title: 'Gungi TV',
+    all: 'Todos',
+    liveCount: (n) => `${n} en vivo`,
+    featured: 'Destacada · mayor puntuación',
+    move: (n) => `jugada ${n}`,
+    empty: 'No hay partidas en curso ahora.',
+    emptyMode: 'No hay partidas en curso en este modo ahora.',
+  },
 
   beginner: {
     title: '¿Nuevo en Gungi?',

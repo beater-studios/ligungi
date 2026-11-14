@@ -2016,6 +2016,151 @@ body:has(main.auth) #clinput {
   }
 }
 
+/* ===== TV ===== */
+.ligungi-tv__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem 1rem;
+
+  h1 {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 2rem;
+    font-weight: 400;
+  }
+
+  .ligungi-live-badge {
+    font-size: 0.85rem;
+  }
+}
+
+.ligungi-tv__empty {
+  margin: 0;
+  padding: 1.25rem;
+  color: $c-font-dim;
+}
+
+.ligungi-tv__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.25rem;
+
+  > .ligungi-tv-game--featured {
+    flex: 2 1 24rem;
+  }
+}
+
+.ligungi-tv__grid {
+  flex: 3 1 32rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+  gap: 1rem;
+}
+
+.ligungi-tv-game {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.75rem;
+  color: $c-font;
+  font-size: 0.9em;
+
+  &:hover {
+    color: $c-font;
+    box-shadow:
+      0 0 0 1px $c-primary,
+      0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+
+  &__label {
+    color: $c-brag;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__player {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  &__name {
+    overflow: hidden;
+    color: $c-font-clear;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__rating {
+    margin-inline-start: 0.35rem;
+    color: $c-font-dim;
+  }
+
+  &__clock {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+
+    &.is-running {
+      color: $c-font-clear;
+      font-weight: 700;
+    }
+  }
+
+  &__meta {
+    color: $c-font-dim;
+    font-size: 0.85em;
+  }
+
+  &--featured {
+    gap: 0.75rem;
+    padding: 1rem;
+    font-size: 1em;
+
+    .ligungi-tv-game__clock {
+      font-size: 1.4rem;
+    }
+  }
+}
+
+@media (max-width: at-most($small)) {
+  .ligungi-tv__head h1 {
+    font-size: 1.5rem;
+  }
+
+  .ligungi-segmented.ligungi-tv__modes {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .ligungi-tv__grid {
+    flex-basis: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  // Small cards: the names and the board are enough; the clocks stay on the featured game.
+  .ligungi-tv__grid .ligungi-tv-game {
+    padding: 0.5rem;
+    font-size: 0.8em;
+
+    .ligungi-tv-game__clock {
+      display: none;
+    }
+  }
+}
+
 /* ===== Option cards (components/ui.tsx OptionCards) ===== */
 .ligungi-choice {
   min-width: 0;
@@ -2853,7 +2998,7 @@ body:has(main.auth) #clinput {
     order: 9;
   }
 
-  .ligungi-home__modes {
+  .ligungi-segmented.ligungi-home__modes {
     flex-wrap: nowrap;
     max-width: 100%;
     overflow-x: auto;

@@ -375,6 +375,7 @@ export class GameRoom {
       fen: toFen(this.game.position),
       createdAt: this.createdAt,
       endedAt: this.endedAt,
+      clock: this.status === 'started' ? (this.clock?.view(this.#hooks.now()) ?? null) : null,
     };
   }
 

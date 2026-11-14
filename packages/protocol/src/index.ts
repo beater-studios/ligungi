@@ -107,6 +107,8 @@ export interface GameSummary {
   readonly fen: string;
   readonly createdAt: number;
   readonly endedAt: number | null;
+  /** The clocks while the game is in progress; `null` without a clock or once it has ended. */
+  readonly clock: ClockView | null;
 }
 
 export interface Opponent {

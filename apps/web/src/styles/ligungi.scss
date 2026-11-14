@@ -1969,6 +1969,142 @@ body:has(main.auth) #clinput {
   }
 }
 
+/* ===== Challenge ===== */
+.ligungi-challenge {
+  align-items: center;
+}
+
+.ligungi-challenge__card {
+  width: 100%;
+  max-width: 34rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.75rem;
+
+  h1 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.5rem;
+    font-weight: 500;
+
+    a {
+      color: inherit;
+    }
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.ligungi-challenge__label {
+  color: $c-font-dim;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &.is-received {
+    color: $c-brag;
+  }
+}
+
+.ligungi-challenge__who {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  p {
+    color: $c-font-dim;
+    font-size: 0.9em;
+  }
+}
+
+.ligungi-challenge__tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+
+  div {
+    padding: 0.6rem 0.8rem;
+    border-radius: 6px;
+    background: $c-bg-zebra;
+  }
+
+  dt {
+    color: $c-font-dim;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0.15rem 0 0;
+    color: $c-font-clear;
+  }
+}
+
+.ligungi-challenge__waiting {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  &::before {
+    content: '';
+    flex: none;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: $c-primary;
+    animation: ligungi-pulse 1.6s ease-in-out infinite alternate;
+  }
+}
+
+.ligungi-challenge__cancel {
+  align-self: flex-start;
+}
+
+.ligungi-challenge__notice {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background: $c-bg-zebra;
+  color: $c-font-dim;
+}
+
+.ligungi-challenge__actions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.6rem;
+
+  &.is-single {
+    grid-template-columns: 1fr;
+  }
+
+  .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+  }
+
+  .button-red {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, #{$c-error} 45%, transparent);
+  }
+}
+
+@media (max-width: at-most($small)) {
+  .ligungi-challenge__card {
+    padding: 1.25rem;
+  }
+
+  .ligungi-challenge__who {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
 /* ===== Learn ===== */
 .ligungi-page.ligungi-learn {
   flex-direction: row;

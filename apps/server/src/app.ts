@@ -12,6 +12,9 @@ import {
   type LeaderEntry,
   type Leaderboard,
   type ErrorCode,
+  LESSON_EXERCISES,
+  LESSON_PROGRESS_BATCH,
+  LESSON_STARS_MAX,
   MATES_SOLVED_BATCH,
   parseProfileDetails,
   parseSettings,
@@ -92,6 +95,7 @@ const PLAYERS_CACHE_MS = 60_000;
 const CHALLENGE_SWEEP_MS = 60_000;
 const MAX_TOPICS_PER_CLIENT = 32;
 const MATE_IDS: ReadonlySet<string> = new Set(MATE_PROBLEMS.map((problem) => problem.id));
+const LESSON_IDS: ReadonlySet<string> = new Set(LESSON_EXERCISES.map((exercise) => exercise.id));
 /** Live games listed for the TV and the home page. */
 const TV_GAMES = 24;
 const TV_PUBLISH_MS = 500;
@@ -732,6 +736,7 @@ export const createApp = (config: ServerConfig): App => {
         settings: { challengePolicy: users.challengePolicy(userId) },
         profile: users.details(userId),
         matesSolved: users.solvedMates(userId),
+        lessons: users.lessonProgress(userId),
         // What moderation holds about the account: the suspension in force, the reports it made and the actions taken on
         // it (without naming the moderator).
         moderation: {
@@ -956,6 +961,19 @@ export const createApp = (config: ServerConfig): App => {
       if (isErrorCode(details)) throw new HttpError(400, details);
       users.setDetails(userId, details);
       sendJson(ctx.res, 200, details);
+    })
+    .add('GET', '/api/lessons/progress', (ctx) => sendJson(ctx.res, 200, users.lessonProgress(requireUser(ctx))))
+    .add('POST', '/api/lessons/progress', async (ctx) => {
+      const userId = requireUser(ctx);
+      const { results } = (await ctx.body()) as { results?: unknown };
+      const entries = typeof results === 'object' && results !== null && !Array.isArray(results) ? Object.entries(results) : null;
+      const valid =
+        entries !== null &&
+        entries.length <= LESSON_PROGRESS_BATCH &&
+        entries.every(([id, stars]) => LESSON_IDS.has(id) && Number.isInteger(stars) && (stars as number) >= 1 && (stars as number) <= LESSON_STARS_MAX);
+      if (!valid) throw new HttpError(400, 'invalidLessonProgress');
+      users.saveLessonProgress(userId, Object.fromEntries(entries) as Record<string, number>);
+      sendJson(ctx.res, 200, users.lessonProgress(userId));
     })
     .add('GET', '/api/mates/solved', (ctx) => sendJson(ctx.res, 200, users.solvedMates(requireUser(ctx))))
     .add('POST', '/api/mates/solved', async (ctx) => {

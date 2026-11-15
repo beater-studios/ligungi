@@ -53,6 +53,7 @@ const DEFAULTS: Config = {
   inspector: true,
   onInspect: null,
   hoverReach: false,
+  targets: [],
 };
 
 const sameSelection = (a: Selection | null, b: Selection | null): boolean =>
@@ -525,6 +526,7 @@ export class Board implements Api {
         : undefined;
     const dragging = this.#drag?.ghost && this.#selection?.kind === 'square' ? this.#selection.square : undefined;
     const premoving = this.#isPremoving();
+    const targets = new Set(this.#config.targets);
 
     this.#wrap.dataset.orientation = orientation;
     this.#wrap.classList.toggle('gg-has-coords', coordinates);
@@ -537,8 +539,9 @@ export class Board implements Api {
       if (dests.has(square)) classes.push(occupied ? 'gg-dest-occupied' : 'gg-dest', ...(premoving ? ['gg-pre'] : []));
       if (marshal === square) classes.push('gg-check');
       if (dragging === square) classes.push('gg-drag-origin');
+      if (targets.has(square)) classes.push('gg-target');
       node.className = classes.join(' ');
-      node.innerHTML = this.#towerHtml(square);
+      node.innerHTML = this.#towerHtml(square) + (targets.has(square) ? '<span class="gg-goal" aria-hidden="true"></span>' : '');
       node.title = this.#squareTitle(square);
     }
 

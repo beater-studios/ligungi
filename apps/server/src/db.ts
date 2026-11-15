@@ -178,6 +178,15 @@ const MIGRATIONS = [
     primary key (user_id, problem_id)
   );
   `,
+  `
+  create table lesson_progress (
+    user_id text not null references users(id),
+    exercise_id text not null,
+    stars integer not null,
+    updated_at integer not null,
+    primary key (user_id, exercise_id)
+  );
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

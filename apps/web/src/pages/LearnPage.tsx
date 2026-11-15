@@ -106,6 +106,9 @@ export const LearnPage = () => {
         <header class="ligungi-card ligungi-learn__intro">
           <h1>{l.title}</h1>
           <p>{l.lead}</p>
+          <a class="button ligungi-learn__lessons" href="/lessons">
+            {t.lessons.cta}
+          </a>
         </header>
 
         <section id="objective" class="ligungi-card ligungi-learn__section">

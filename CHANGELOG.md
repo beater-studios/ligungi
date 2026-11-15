@@ -6,6 +6,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Lessons (Learn > Lessons): learn Gungi by playing, in eight stages of short exercises on the board: the pieces, towers, pieces in hand, the jumping pieces, betrayal, the Marshal in danger, mate and the draft. Each exercise has a goal and a hint, and earns up to three stars by the number of moves (in mates, by the wrong tries). The map shows the stars of every stage and returns to the first exercise not yet mastered. Progress is kept on your account, or in the browser without one, and moves to the account when you sign in. The rules page links to them.
 - Mate problems (Learn > Mate problems): find the forced mate in 1, 2 or 3 moves, in every mode, with the tsume convention of shogi (every one of your moves must attack the Marshal). The computer answers with the longest defense, any move that also forces mate is accepted, and a wrong move is taken back with a hint. Filter by mode and length, see the solution step by step or open the position in the analysis. Solved problems are kept on your account, or in the browser without one, and move to the account when you sign in.
 
 ### Fixed

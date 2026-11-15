@@ -16,6 +16,7 @@ export interface Page {
 export const PAGES: readonly Page[] = (
   [
     ['/', 'home'],
+    ['/lessons', 'lessons'],
     ['/learn', 'learn'],
     ['/problems', 'mates'],
     ['/computer', 'computer'],
@@ -55,6 +56,7 @@ export interface HeadInfo {
 const SECTIONS: ReadonlyArray<readonly [RegExp, Page['key']]> = [
   [/^\/tv\//, 'tv'],
   [/^\/problems\//, 'mates'],
+  [/^\/lessons\//, 'lessons'],
   [/^\/ranking\//, 'ranking'],
 ];
 

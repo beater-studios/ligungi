@@ -133,6 +133,7 @@ export class Users {
       this.#db.prepare('delete from reports where reporter_id = ? or target_id = ?').run(userId, userId);
       this.#db.prepare('delete from two_factor where user_id = ?').run(userId);
       this.#db.prepare('delete from mates_solved where user_id = ?').run(userId);
+      this.#db.prepare('delete from lesson_progress where user_id = ?').run(userId);
       this.#db.prepare('delete from users where id = ?').run(userId);
       this.#db.exec('commit');
     } catch (error) {
@@ -162,6 +163,22 @@ export class Users {
     const insert = this.#db.prepare('insert or ignore into mates_solved (user_id, problem_id, solved_at) values (?, ?, ?)');
     const now = this.#now();
     for (const id of problemIds) insert.run(userId, id, now);
+  }
+
+  /** The best stars the player earned in each lesson exercise they finished. */
+  lessonProgress(userId: string): Record<string, number> {
+    const rows = this.#db.prepare('select exercise_id, stars from lesson_progress where user_id = ?').all(userId) as Array<{ exercise_id: string; stars: number }>;
+    return Object.fromEntries(rows.map((row) => [row.exercise_id, row.stars]));
+  }
+
+  /** Records lesson results, keeping the best stars of each exercise. */
+  saveLessonProgress(userId: string, results: Readonly<Record<string, number>>): void {
+    const upsert = this.#db.prepare(
+      `insert into lesson_progress (user_id, exercise_id, stars, updated_at) values (?, ?, ?, ?)
+       on conflict (user_id, exercise_id) do update set stars = max(stars, excluded.stars), updated_at = excluded.updated_at`,
+    );
+    const now = this.#now();
+    for (const [id, stars] of Object.entries(results)) upsert.run(userId, id, stars, now);
   }
 
   /** Bio, country and linked profiles; read back through the same validation, so a bad stored value shows as empty. */

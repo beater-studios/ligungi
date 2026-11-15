@@ -295,8 +295,8 @@ export const pt: Content = {
           bio e os links que violem os termos de uso.
         </li>
         <li>
-          <b>Problemas de mate:</b> quais você resolveu e quando, guardados na conta para o progresso aparecer em qualquer
-          aparelho. Sem conta, ficam só no seu navegador. Entram na cópia dos seus dados e são apagados com a conta.
+          <b>Lições e problemas de mate:</b> as estrelas de cada exercício das lições e os problemas que você resolveu, com a
+          data, guardados na conta para o progresso aparecer em qualquer aparelho. Sem conta, ficam só no seu navegador. Entram na cópia dos seus dados e são apagados com a conta.
         </li>
         <li>
           <b>Preferências:</b> idioma, tema, som e tamanho do tabuleiro ficam só no seu navegador (armazenamento local) e não

@@ -53,6 +53,8 @@ export interface Config {
   onInspect: ((square: Square | null) => void) | null;
   /** Marks the squares a hovered piece (of either side) could reach. */
   hoverReach: boolean;
+  /** Squares marked with a star, such as the goals of a lesson. */
+  targets: readonly Square[];
 }
 
 export interface Api {

@@ -4,6 +4,7 @@ import type { Country, ProfileDetails } from './profile.ts';
 
 export * from './errors.ts';
 export * from './profile.ts';
+export * from './lessons.ts';
 
 /** Seconds. */
 export interface TimeControl {

@@ -16,6 +16,7 @@ import { INFO_KINDS, InfoPage, isInfoKind } from './pages/InfoPage.tsx';
 import { GamePage } from './pages/GamePage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LearnPage } from './pages/LearnPage.tsx';
+import { LessonsPage } from './pages/LessonsPage.tsx';
 import { MatesPage } from './pages/MatesPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { PlayersPage } from './pages/PlayersPage.tsx';
@@ -30,7 +31,7 @@ import { useDropdown } from './components/useDropdown.ts';
 import { TvChannelPage } from './pages/TvChannelPage.tsx';
 import { TvPage } from './pages/TvPage.tsx';
 import { MODES, type Mode } from '@ligungi/engine';
-import { TV_CHANNELS, type TvChannel } from '@ligungi/protocol';
+import { LESSON_STAGE_IDS, TV_CHANNELS, type TvChannel } from '@ligungi/protocol';
 import { LANGS, THEMES, prefs, resolveLang, updatePrefs } from './prefs.ts';
 import { matchRoute, navigate, useLocation, type Route } from './router.ts';
 import { logout, session } from './session.ts';
@@ -46,6 +47,9 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/analysis$/, render: () => <AnalysisPage /> },
   { pattern: /^\/editor$/, render: () => <EditorPage /> },
   { pattern: /^\/learn$/, render: () => <LearnPage /> },
+  { pattern: /^\/lessons$/, render: () => <LessonsPage /> },
+  { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})$`), render: ([stage]) => <LessonsPage stage={stage!} /> },
+  { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})/(\\d{1,2})$`), render: ([stage, n]) => <LessonsPage stage={stage!} exercise={Number(n)} /> },
   { pattern: /^\/problems$/, render: () => <MatesPage /> },
   { pattern: /^\/problems\/([0-9a-f]{8})$/, render: ([id]) => <MatesPage id={id!} /> },
   { pattern: /^\/tv$/, render: () => <TvPage /> },
@@ -261,6 +265,7 @@ const Header = () => {
           <section>
             <a href="/learn">{t.nav.learn}</a>
             <div role="group">
+              <a href="/lessons">{t.nav.lessons}</a>
               <a href="/learn">{t.nav.rules}</a>
               <a href="/problems">{t.nav.mates}</a>
             </div>
@@ -337,7 +342,8 @@ export const SiteFooter = () => {
     {
       title: t.footer.playTitle,
       links: [
-        ['/learn', t.nav.learn],
+        ['/lessons', t.nav.lessons],
+        ['/learn', t.nav.rules],
         ['/problems', t.nav.mates],
         ['/computer', t.nav.playComputer],
         ['/analysis', t.nav.analysis],

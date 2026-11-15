@@ -771,6 +771,23 @@
   background: radial-gradient(transparent 0%, transparent 79%, var(--gg-premove-dest) 80%);
 }
 
+/* A star on a goal square: in the middle of an empty square, in the corner above a piece. */
+.gg-goal {
+  position: absolute;
+  inset: 24%;
+  background: var(--gg-goal, #f2b705);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+}
+
+.gg-sq:has(.gg-piece) .gg-goal {
+  inset: 2% 2% auto auto;
+  width: 34%;
+  height: 34%;
+  z-index: 6;
+}
+
 .gg-sq.gg-reach::before {
   content: '';
   position: absolute;

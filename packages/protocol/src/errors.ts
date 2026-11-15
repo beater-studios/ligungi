@@ -34,6 +34,7 @@ export const ERROR_MESSAGES = {
   invalidProfile: 'Perfil inválido.',
   bioTooLong: 'A bio pode ter até 400 caracteres.',
   invalidCountry: 'País inválido.',
+  invalidLessonProgress: 'Progresso de lição inválido.',
   invalidMateProblem: 'Problema de mate desconhecido.',
   invalidProfileLink: 'Algum dos nomes de usuário não é válido nesse site.',
   userNotFound: 'Usuário não encontrado.',

@@ -1145,6 +1145,27 @@ describe('mate problems', () => {
   });
 });
 
+describe('lessons', () => {
+  it('keeps the best stars of each exercise, only for known ones and with an account', async () => {
+    server = await startServer();
+    const a = client();
+    expect((await a.request('POST', '/api/lessons/progress', { results: { 'pieces-marshal': 3 } })).status).toBe(401);
+    await signup(a, 'Wing');
+    expect((await a.request('GET', '/api/lessons/progress')).data).toEqual({});
+    for (const results of [{ nope: 3 }, { 'pieces-marshal': 4 }, { 'pieces-marshal': 0 }, { 'pieces-marshal': 2.5 }, ['pieces-marshal']]) {
+      expect((await a.request('POST', '/api/lessons/progress', { results })).data).toMatchObject({ code: 'invalidLessonProgress' });
+    }
+    expect((await a.request('POST', '/api/lessons/progress', { results: { 'pieces-marshal': 2, 'mate-general': 3 } })).data).toEqual({
+      'pieces-marshal': 2,
+      'mate-general': 3,
+    });
+    // A worse result never lowers the stars; a better one raises them.
+    await a.request('POST', '/api/lessons/progress', { results: { 'mate-general': 1, 'pieces-marshal': 3 } });
+    expect((await a.request('GET', '/api/lessons/progress')).data).toEqual({ 'pieces-marshal': 3, 'mate-general': 3 });
+    expect((await a.request<{ lessons: Record<string, number> }>('GET', '/api/account/export')).data.lessons).toEqual({ 'pieces-marshal': 3, 'mate-general': 3 });
+  });
+});
+
 describe('profile details', () => {
   it('saves the bio, country and linked profiles, shows them on the profile and the ranking, and lets moderators clear them', async () => {
     server = await startServer();

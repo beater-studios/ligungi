@@ -1,12 +1,14 @@
-import { initialPosition } from '@ligungi/engine';
+import { initialPosition, parseFen, parseSquare } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
+import { BoardView } from '../components/BoardView.tsx';
 import { Flag } from '../components/Flag.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PlayerTag } from '../components/PlayerTag.tsx';
 import { ProfileAbout, SiteIcon } from '../components/ProfileAbout.tsx';
 import { QrCode } from '../components/QrCode.tsx';
 import { RatingHistoryChart } from '../components/RatingHistoryChart.tsx';
+import { Stars } from '../components/Stars.tsx';
 import { Checkbox, ColorField, Field, FieldRow, OptionCards, RadioGroup, Select, SettingRow, SubmitButton, Toggle } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
@@ -49,6 +51,8 @@ const Example = ({ label, children }: { label: string; children: ComponentChildr
     <div class="ligungi-ds__demo">{children}</div>
   </div>
 );
+
+const lessonPosition = parseFen('9/9/9/9/9/9/4P4/4S4/9 w - advanced p w');
 
 export const DesignPage = () => {
   const { theme } = useStore(prefs);
@@ -606,6 +610,28 @@ export const DesignPage = () => {
           <Example label="Static board (MiniBoard)">
             <div class="ligungi-ds__board">
               <MiniBoard position={initialPosition('intro')} />
+            </div>
+          </Example>
+          <Example label="Lesson stars (Stars, .ligungi-stars) and a stage card of the lessons map (.ligungi-lesson-stage)">
+            <div class="ligungi-ds__row">
+              <Stars filled={3} label="3 of 3" />
+              <Stars filled={2} label="2 of 3" />
+              <Stars filled={0} label="0 of 3" />
+            </div>
+            <a class="ligungi-card ligungi-lesson-stage" href="#game" style={{ maxWidth: '18rem', marginTop: '1rem' }}>
+              <span class="ligungi-lesson-stage__number">Stage 2</span>
+              <strong class="ligungi-lesson-stage__title">Towers</strong>
+              <span class="ligungi-lesson-stage__intro">A piece can climb onto another instead of going to an empty square.</span>
+              <span class="ligungi-lesson-stage__dots" aria-hidden="true">
+                <i class="is-3" />
+                <i class="is-2" />
+                <i class="is-0" />
+              </span>
+            </a>
+          </Example>
+          <Example label="Goal stars on the board (the board's targets option), on empty squares and above a piece">
+            <div class="ligungi-ds__board">
+              <BoardView position={lessonPosition} orientation="white" targets={[parseSquare('e5')!, parseSquare('e3')!]} />
             </div>
           </Example>
           <Example label="TV channel list, beside the watched game (.ligungi-tv-channels)">

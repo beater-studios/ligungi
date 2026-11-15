@@ -188,7 +188,7 @@ export const createApp = (config: ServerConfig): App => {
   const lobbyView = (player: Player): LobbyView => ({
     seeks: lobby.seekViews(player),
     playing: games.live().length,
-    online: hub.onlineCount(),
+    online: onlineCount(player.sessionId),
   });
   const publishLobby = () => hub.publish('lobby', (client) => ({ t: 'lobby', lobby: lobbyView(client.player) }));
 
@@ -228,7 +228,17 @@ export const createApp = (config: ServerConfig): App => {
     }
   };
 
-  const onlineUsers = () => new Set(hub.clients().flatMap((client) => (client.player.userId ? [client.player.userId] : [])));
+  /**
+   * Signed-in players with a socket open. Whoever is asking counts too: a page loaded with F5 asks before its socket
+   * connects, and would otherwise show its own player offline.
+   */
+  const onlineUsers = (viewerId: string | null) => {
+    const online = new Set(hub.clients().flatMap((client) => (client.player.userId ? [client.player.userId] : [])));
+    if (viewerId) online.add(viewerId);
+    return online;
+  };
+  /** Connected browsers, counting the one asking even before its socket opens. */
+  const onlineCount = (sessionId: string) => hub.onlineCount() + (hub.hasSession(sessionId) ? 0 : 1);
 
   const playingByUser = () => {
     const map = new Map<string, string>();
@@ -316,7 +326,7 @@ export const createApp = (config: ServerConfig): App => {
     const followerId = viewerId && params.get('followed') === '1' ? viewerId : null;
     const { rows, total } = users.rankingPage(mode, { query, followerId }, (page - 1) * RANKING_PAGE_SIZE, RANKING_PAGE_SIZE);
     const records = games.recordsIn(mode, rows.map((row) => row.user.id));
-    const online = onlineUsers();
+    const online = onlineUsers(viewerId);
     const followed = new Set(viewerId ? users.following(viewerId).map((user) => user.id) : []);
     const place = viewerId ? users.rankingPlace(viewerId, mode) : null;
     return {
@@ -335,7 +345,7 @@ export const createApp = (config: ServerConfig): App => {
     };
   };
 
-  const playersView = (viewerId: string | null): PlayersView => {
+  const playersView = (viewerId: string | null, sessionId: string): PlayersView => {
     const now = config.now();
     if (!playersCache || now - playersCache.at >= PLAYERS_CACHE_MS) {
       const { recent, finished } = games.activity(now - 24 * 3_600_000);
@@ -351,7 +361,7 @@ export const createApp = (config: ServerConfig): App => {
     const ongoing = games.live();
     const playingIn = new Map<string, string>();
     for (const room of ongoing) for (const seat of Object.values(room.seats)) if (seat.userId) playingIn.set(seat.userId, room.id);
-    const signedIn = [...onlineUsers()];
+    const signedIn = [...onlineUsers(viewerId)];
     const ids = signedIn.slice(0, 500);
     const ratings = users.playedRatings(viewerId ? [...ids, viewerId] : ids);
     const followed = new Set(viewerId ? users.following(viewerId).map((user) => user.id) : []);
@@ -378,7 +388,7 @@ export const createApp = (config: ServerConfig): App => {
     return {
       online,
       counts: {
-        online: hub.onlineCount(),
+        online: onlineCount(sessionId),
         signedIn: signedIn.length,
         free: signedIn.filter((id) => !playingIn.has(id)).length,
         playing: ongoing.length,
@@ -767,7 +777,7 @@ export const createApp = (config: ServerConfig): App => {
     .add('GET', '/api/users', (ctx) => {
       const query = ctx.url.searchParams.get('q')?.trim() ?? '';
       if (!/^[A-Za-z0-9_-]{2,20}$/.test(query)) return sendJson(ctx.res, 200, []);
-      const online = onlineUsers();
+      const online = onlineUsers(ctx.session.userId);
       const results: UserSearchResult[] = users
         .search(query, SEARCH_LIMIT)
         .map((user) => ({ user, online: online.has(user.id) }));
@@ -786,7 +796,7 @@ export const createApp = (config: ServerConfig): App => {
       const profile: UserProfile = {
         user: { id: user.id, name: user.name },
         createdAt: user.createdAt,
-        online: onlineUsers().has(user.id),
+        online: onlineUsers(ctx.session.userId).has(user.id),
         ratings: users.ratings(user.id),
         ranks: Object.fromEntries(MODES.map((mode) => [mode, users.rank(user.id, mode)])) as Record<Mode, number | null>,
         counts: games.counts(user.id),
@@ -838,7 +848,7 @@ export const createApp = (config: ServerConfig): App => {
     })
     .add('GET', '/api/following', (ctx) => {
       const userId = requireUser(ctx);
-      const online = onlineUsers();
+      const online = onlineUsers(userId);
       const playing = playingByUser();
       const list: FriendView[] = users.following(userId).map((user) => ({
         user,
@@ -849,7 +859,7 @@ export const createApp = (config: ServerConfig): App => {
       }));
       sendJson(ctx.res, 200, list);
     })
-    .add('GET', '/api/players', (ctx) => sendJson(ctx.res, 200, playersView(ctx.session.userId)))
+    .add('GET', '/api/players', (ctx) => sendJson(ctx.res, 200, playersView(ctx.session.userId, ctx.session.id)))
     .add('GET', '/api/ranking', (ctx) => sendJson(ctx.res, 200, rankingView(null, ctx.url.searchParams, ctx.session.userId)))
     .add('GET', '/api/ranking/:mode', (ctx) => {
       const mode = ctx.params.mode as Mode;
@@ -857,7 +867,7 @@ export const createApp = (config: ServerConfig): App => {
       sendJson(ctx.res, 200, rankingView(mode, ctx.url.searchParams, ctx.session.userId));
     })
     .add('GET', '/api/leaderboard', (ctx) => {
-      const online = onlineUsers();
+      const online = onlineUsers(ctx.session.userId);
       const board = Object.fromEntries(MODES.map((mode) => [mode, leaders(mode, LEADERBOARD_TOP, online)])) as unknown as Leaderboard;
       sendJson(ctx.res, 200, board);
     })
@@ -865,7 +875,7 @@ export const createApp = (config: ServerConfig): App => {
       const mode = ctx.params.mode as Mode;
       if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
       const limit = Math.min(LEADERBOARD_MAX, Math.max(1, Math.trunc(Number(ctx.url.searchParams.get('limit'))) || LEADERBOARD_MAX));
-      sendJson(ctx.res, 200, leaders(mode, limit, onlineUsers()));
+      sendJson(ctx.res, 200, leaders(mode, limit, onlineUsers(ctx.session.userId)));
     })
     .add('GET', '/api/games/:id', (ctx) => {
       const room = games.get(ctx.params.id!);

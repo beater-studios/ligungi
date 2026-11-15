@@ -123,9 +123,10 @@ export const AnalysisPage = () => {
     for (const j of [i, i + 1]) {
       const move = replay.moves[j];
       if (!move) continue;
+      const { text, full } = moveText(replay.positions[j]!, move);
       rows.push(
-        <move key={`m${j}`} class={j + 1 === current ? 'active' : ''} onClick={() => go(j + 1)}>
-          {moveText(replay.positions[j]!, move)}
+        <move key={`m${j}`} class={j + 1 === current ? 'active' : ''} title={full} aria-label={full} onClick={() => go(j + 1)}>
+          {text}
         </move>,
       );
     }

@@ -52,10 +52,10 @@ export const MoveListPreview = () => {
       const step = steps[j]!;
       // Every other notation and naming is laid out invisibly in the same cell, so the preview keeps the width of the
       // longest one and the form beside it does not shift while the player compares the options.
-      const others = NOTATIONS.flatMap((n) => [local, 'ja' as const].map((names) => moveText(n, step.position, step.move, t, names)));
+      const others = NOTATIONS.flatMap((n) => [local, 'ja' as const].map((names) => moveText(n, step.position, step.move, t, names, true)));
       rows.push(
         <span key={j} class={`ligungi-moves-preview__move${j === steps.length - 1 ? ' active' : ''}`}>
-          <span>{moveText(notation, step.position, step.move, t, shown)}</span>
+          <span>{moveText(notation, step.position, step.move, t, shown, true)}</span>
           {others.map((text, k) => (
             <span key={k} class="ligungi-moves-preview__sizer">
               {text}

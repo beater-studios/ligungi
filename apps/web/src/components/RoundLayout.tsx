@@ -177,9 +177,10 @@ const MoveTable = ({ positions, moves, ply, onPly, onFlip, analysisHref, status 
         rows.push(<z7yx key={`m${j}`} class="empty" />);
         continue;
       }
+      const { text, full } = moveText(positions[j]!, move);
       rows.push(
-        <z7yx key={`m${j}`} class={j + 1 === current ? 'a1t' : ''} onClick={() => go(j + 1)}>
-          {moveText(positions[j]!, move)}
+        <z7yx key={`m${j}`} class={j + 1 === current ? 'a1t' : ''} title={full} aria-label={full} onClick={() => go(j + 1)}>
+          {text}
         </z7yx>,
       );
     }

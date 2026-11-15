@@ -4,15 +4,16 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-14
+
 ### Added
 
 - TV channels: one for the strongest game on the site and one per mode, each following its game live on a full board (clocks, moves and the move list) and moving on to the next a few seconds after it ends. The channels sit beside the board with who is playing on each; the grid of every live game is still on the TV page, with a button to its channel.
 - Profile details, on the Account page: a bio (up to 400 characters), your country, shown as a flag beside your name on the profile, the ranking and the players page, and your profiles on social networks (YouTube, Twitch, Instagram, X, TikTok, Bluesky, Reddit, GitHub) and on other game sites (lichess, lishogi, lidraughts, libaduk). You type only your username and the site builds the address, so links can only lead to those sites. Moderators can clear a bio and its links, and the "offensive name" report reason now covers the profile too.
-- The live games on the home page and on the TV page follow every move as it is played, with both clocks running, instead of showing a position loaded once (home) or refreshed every 5 seconds (TV). On phones the home page lists them as scoreboards, each side with its clock.
 - Import a game (Tools > Import a game, or the button in the analysis): paste or upload a game exported from ligungi, or type the moves in rulebook or machine notation, and it opens in the analysis. Every move is checked against the rules, and a wrong or ambiguous one is reported with its line. Imported games never touch ratings.
 - Board editor (Tools > Board editor): place and stack pieces of both sides, fill the hands, pick the mode and who moves, starting from the Marshals alone or from a mode's starting position. The position is checked against the rules as you edit (one Marshal per side, nothing on a Marshal, piece counts, tower heights, no side left in check out of turn), and a valid one opens in the analysis or is shared as FEN or link.
 - Rating history on profiles: a chart of the rating after each rated game, one mode at a time (the most played first), with the current rating, the peak and the lowest with their dates, and the results by color and by game length. Hover or touch the chart for each game's rating and change; the points are also listed as a table.
-- Moderation: report a player from their profile or a game (cheating, offensive name, behavior or other), and moderators handle the reports on their own page. They can suspend an account for a while or for good (its sessions end, its games in progress are lost and signing in shows until when and why), rename an offensive username everywhere, and void a game won by cheating, giving the opponent their rating points back. Every action is logged with its reason. The terms of use and the privacy policy describe it.
+- Moderation: report a player from their profile or a game (cheating, offensive name or profile, behavior or other), and moderators handle the reports on their own page. They can suspend an account for a while or for good (its sessions end, its games in progress are lost and signing in shows until when and why), rename an offensive username everywhere, and void a game won by cheating, giving the opponent their rating points back. Every action is logged with its reason. The terms of use and the privacy policy describe it.
 - New piece looks in Preferences, to combine freely: the shape (the disc, or a wooden koma pointing at the opponent, as in shogi), what each piece shows (icon, the icon as an outline, kanji or two letters of its name in the chosen language), the kanji typeface (the device's own, or brush, serif, gothic and pop typefaces that come with the site and look the same everywhere) and the colors (lacquer, indigo, jade and bronze for the disc; light and dark wood, cherry and ebony, bamboo and walnut, and lacquer for the koma; or your own colors, with a warning when the symbol loses contrast or the sides look alike).
 - Hidden pieces, a memory training in Preferences: the board shows only the color of each piece, while the hands still show them. Applies to casual games, the computer and analysis, with an option to peek by hovering a square.
 - Custom board theme in Preferences: pick the board and line colors, with the preview following along. The move marks (last move, selection, destinations and reach) switch on their own to the built-in colors that stand out most on that board, and a note warns when lines, pieces or marks would be hard to see. Saved in the browser.
@@ -20,8 +21,14 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Changed
 
+- The live games on the home page and on the TV page follow every move as it is played, with both clocks running, instead of showing a position loaded once (home) or refreshed every 5 seconds (TV). On phones the home page lists them as scoreboards, each side with its clock.
 - White always moves first, in every mode, as in chess. The physical game draws who starts, but Gungi is symmetric, so the draw now picks the colors instead: creating a game, a challenge or a game against the computer asks only for your color. Older games where Black started still open and replay as before.
 - The site runs on Preact 11 (from 10), with the same look and behavior on every page.
+- Move lists keep each move on one line: with piece names, the longest ones are abbreviated (Ten.-Gen., Maj. Gen., Mosq.) and the full move shows on hover, and the capture and betrayal marks come before the name (`5-3-1 ×Samurai`). The analysis move list uses the site's font, like the game's.
+
+### Fixed
+
+- After reloading a page (F5), your own account showed as offline on the players page, your profile and the ranking, and was left out of the online counts, until the page refreshed again.
 
 ## [0.3.0] - 2026-11-14
 
@@ -162,7 +169,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/beater-studios/ligungi/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/beater-studios/ligungi/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/beater-studios/ligungi/compare/v0.1.4...v0.2.0
 [0.1.4]: https://github.com/beater-studios/ligungi/compare/v0.1.3...v0.1.4

@@ -359,6 +359,23 @@ describe('playing online', () => {
 });
 
 describe('community', () => {
+  it('counts whoever is asking as online, before their socket connects (a page reloaded with F5)', async () => {
+    server = await startServer();
+    const a = client();
+    await signup(a, 'Zushi');
+    const players = (await a.request<PlayersView>('GET', '/api/players')).data;
+    expect(players.online.map((player) => player.user.name)).toEqual(['Zushi']);
+    expect(players.counts).toMatchObject({ online: 1, signedIn: 1, free: 1 });
+    expect((await a.request<UserProfile>('GET', '/api/users/zushi')).data.online).toBe(true);
+    expect((await a.request<LobbyView>('GET', '/api/lobby')).data.online).toBe(1);
+    // Someone else sees the account offline until it really connects, and the count does not grow with the socket.
+    expect((await client().request<UserProfile>('GET', '/api/users/zushi')).data.online).toBe(false);
+    await a.connect();
+    a.send({ t: 'sub', topic: 'lobby' });
+    await a.waitFor((m) => m.t === 'lobby');
+    expect((await a.request<PlayersView>('GET', '/api/players')).data.counts).toMatchObject({ online: 1, signedIn: 1 });
+  });
+
   it('lists online players, site counts and the rating distribution', async () => {
     let now = 1_000_000_000;
     server = await startServer({ now: () => now });

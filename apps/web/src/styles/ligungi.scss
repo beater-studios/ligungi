@@ -284,8 +284,26 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   color: $c-font-dim;
 }
 
-.tview2 move {
-  font-family: $kanji-font;
+// In the move lists laid out in columns, a move never wraps: long piece names are abbreviated, and a slightly smaller
+// text with less room on the right lets the named notation fit; what still does not fit is cut, and the full move is in
+// its title. On phones the game's moves run in one scrolling line, which needs none of this.
+@mixin move-cell {
+  min-width: 0;
+  overflow: hidden;
+  padding-inline-end: 0.2em;
+  font-size: 0.95em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tview2-column move {
+  @include move-cell;
+}
+
+@include mq-at-least-col2 {
+  .rmoves z7yx {
+    @include move-cell;
+  }
 }
 
 /* Dialog (create game) */

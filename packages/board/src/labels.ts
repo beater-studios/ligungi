@@ -68,6 +68,17 @@ const NAMES: Readonly<Record<PieceNames, Readonly<Record<Role, string>>>> = {
 
 export const pieceName = (role: Role, names: PieceNames): string => NAMES[names][role];
 
+/** Abbreviations of the names longer than 9 letters, so a move fits on one line of the move list. */
+const SHORT_NAMES: Readonly<Record<PieceNames, Readonly<Partial<Record<Role, string>>>>> = {
+  pt: { lieutenant: 'Ten.-Gen.', major: 'Maj.-Gen.', musketeer: 'Mosq.', tactician: 'Estrat.' },
+  en: { lieutenant: 'Lt. Gen.', major: 'Maj. Gen.' },
+  es: { lieutenant: 'Tte. Gral.', major: 'May. Gral.', musketeer: 'Mosq.' },
+  ja: {},
+};
+
+/** The piece's name for tight spaces such as the move list: the abbreviation when there is one. */
+export const pieceShortName = (role: Role, names: PieceNames): string => SHORT_NAMES[names][role] ?? NAMES[names][role];
+
 /**
  * Two-letter abbreviations for the letters piece style: the first letter and the one that tells the piece apart, both
  * initials for compound names. No two pieces share one within a language; with Japanese names, the readings' romaji.

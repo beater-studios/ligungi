@@ -170,6 +170,14 @@ const MIGRATIONS = [
   alter table users add column country text;
   alter table users add column links text not null default '{}';
   `,
+  `
+  create table mates_solved (
+    user_id text not null references users(id),
+    problem_id text not null,
+    solved_at integer not null,
+    primary key (user_id, problem_id)
+  );
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

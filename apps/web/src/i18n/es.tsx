@@ -135,6 +135,7 @@ export const es: Messages = {
     invalidProfile: 'Perfil no válido.',
     bioTooLong: 'La bio puede tener hasta 400 caracteres.',
     invalidCountry: 'País no válido.',
+    invalidMateProblem: 'Problema de mate desconocido.',
     invalidProfileLink: 'Alguno de los nombres de usuario no es válido en ese sitio.',
   },
   genericError: 'Algo salió mal. Inténtalo de nuevo.',
@@ -161,6 +162,7 @@ export const es: Messages = {
     playComputer: 'Jugar contra la computadora',
     learn: 'Aprender',
     rules: 'Reglas del Gungi',
+    mates: 'Problemas de mate',
     watch: 'Ver',
     liveGames: 'Partidas en vivo',
     tools: 'Herramientas',
@@ -669,6 +671,30 @@ export const es: Messages = {
 
   info: { pages: 'Páginas' },
 
+  mates: {
+    title: 'Problemas de mate',
+    intro: 'Encuentra el mate forzado. Como en el tsume del shogi, cada jugada tuya debe atacar al Mariscal, y la computadora se defiende lo mejor que puede.',
+    task: (color, n) => `Juegan las ${color.toLowerCase()} y dan mate en ${n}`,
+    correct: '¡Bien! El rival se defiende...',
+    notCheck: 'Cada jugada debe atacar al Mariscal. Prueba otra.',
+    wrong: 'Esa jugada no fuerza el mate. Prueba otra.',
+    solved: '¡Mate! Problema resuelto.',
+    revealed: 'Esta es la solución: avanza por la lista de jugadas.',
+    retry: 'Empezar de nuevo',
+    showSolution: 'Ver solución',
+    next: 'Siguiente problema',
+    defender: 'Defensa',
+    allModes: 'Todos',
+    length: 'Longitud',
+    allLengths: 'Todas',
+    mateIn: (n) => `Mate en ${n}`,
+    progress: (solved, total) => `${solved} de ${total} resueltos`,
+    none: 'No hay problemas con estos filtros.',
+    loginToSave: 'Entra para guardar el progreso en tu cuenta.',
+    notFound: 'Problema no encontrado.',
+    solvedTag: 'Resuelto',
+  },
+
   tv: {
     title: 'Gungi TV',
     all: 'Todos',
@@ -990,6 +1016,10 @@ export const es: Messages = {
       ranking: {
         title: 'Clasificación de Gungi · ligungi',
         description: 'Los mejores jugadores de Gungi en cada modo (introducción, principiante, intermedio y avanzado), según la puntuación Glicko-2.',
+      },
+      mates: {
+        title: 'Problemas de mate de Gungi · ligungi',
+        description: 'Entrena Gungi con problemas de mate en 1, 2 y 3 jugadas, al estilo del tsume del shogi, en todos los modos del juego.',
       },
       tv: {
         title: 'Gungi en vivo · ligungi TV',

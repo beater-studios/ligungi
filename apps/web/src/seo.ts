@@ -17,6 +17,7 @@ export const PAGES: readonly Page[] = (
   [
     ['/', 'home'],
     ['/learn', 'learn'],
+    ['/problems', 'mates'],
     ['/computer', 'computer'],
     ['/analysis', 'analysis'],
     ['/editor', 'editor'],
@@ -50,10 +51,17 @@ export interface HeadInfo {
   readonly noindex: boolean;
 }
 
+/** Routes under a public page (a TV channel, a mate problem, a mode's ranking) take that page's title and description. */
+const SECTIONS: ReadonlyArray<readonly [RegExp, Page['key']]> = [
+  [/^\/tv\//, 'tv'],
+  [/^\/problems\//, 'mates'],
+  [/^\/ranking\//, 'ranking'],
+];
+
 /** Title and description of any route; routes without their own text get the site defaults. */
 export const headInfo = (t: Messages, path: string, found: boolean): HeadInfo => {
-  const page = pageFor(path);
-  const text = t.seo.pages[page?.key ?? 'default'];
+  const key = pageFor(path)?.key ?? SECTIONS.find(([pattern]) => pattern.test(path))?.[1] ?? 'default';
+  const text = t.seo.pages[key];
   return { ...text, noindex: !found || PRIVATE.test(path) };
 };
 

@@ -12,6 +12,7 @@ import {
   type LeaderEntry,
   type Leaderboard,
   type ErrorCode,
+  MATES_SOLVED_BATCH,
   parseProfileDetails,
   parseSettings,
   type ClientMessage,
@@ -39,6 +40,7 @@ import {
   type UserRef,
   type UserSearchResult,
 } from '@ligungi/protocol';
+import { MATE_PROBLEMS } from '@ligungi/protocol/mates';
 import { WebSocketServer, type WebSocket } from 'ws';
 import {
   SESSION_COOKIE,
@@ -57,7 +59,6 @@ import type { ServerConfig } from './config.ts';
 import { openDatabase, type Db } from './db.ts';
 import { exportGame } from './export.ts';
 import { Games, type Player } from './games.ts';
-import { Tv } from './tv.ts';
 import { randomId } from './ids.ts';
 import {
   HttpError,
@@ -77,6 +78,7 @@ import { Moderation } from './moderation.ts';
 import type { GameRoom } from './room.ts';
 import { SeekStore } from './seeks.ts';
 import { otpauthUri } from './totp.ts';
+import { Tv } from './tv.ts';
 import { TwoFactor } from './two-factor.ts';
 import { USERNAME_PATTERN, Users } from './users.ts';
 
@@ -89,6 +91,7 @@ const PLAYERS_CACHE_MS = 60_000;
 /** Expired challenges are canceled within this delay even if nobody opens them (the receiver's list updates). */
 const CHALLENGE_SWEEP_MS = 60_000;
 const MAX_TOPICS_PER_CLIENT = 32;
+const MATE_IDS: ReadonlySet<string> = new Set(MATE_PROBLEMS.map((problem) => problem.id));
 /** Live games listed for the TV and the home page. */
 const TV_GAMES = 24;
 const TV_PUBLISH_MS = 500;
@@ -728,6 +731,7 @@ export const createApp = (config: ServerConfig): App => {
         account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
         settings: { challengePolicy: users.challengePolicy(userId) },
         profile: users.details(userId),
+        matesSolved: users.solvedMates(userId),
         // What moderation holds about the account: the suspension in force, the reports it made and the actions taken on
         // it (without naming the moderator).
         moderation: {
@@ -952,6 +956,16 @@ export const createApp = (config: ServerConfig): App => {
       if (isErrorCode(details)) throw new HttpError(400, details);
       users.setDetails(userId, details);
       sendJson(ctx.res, 200, details);
+    })
+    .add('GET', '/api/mates/solved', (ctx) => sendJson(ctx.res, 200, users.solvedMates(requireUser(ctx))))
+    .add('POST', '/api/mates/solved', async (ctx) => {
+      const userId = requireUser(ctx);
+      const { ids } = (await ctx.body()) as { ids?: unknown };
+      if (!Array.isArray(ids) || ids.length > MATES_SOLVED_BATCH || !ids.every((id) => typeof id === 'string' && MATE_IDS.has(id))) {
+        throw new HttpError(400, 'invalidMateProblem');
+      }
+      users.markMatesSolved(userId, ids as string[]);
+      sendJson(ctx.res, 200, users.solvedMates(userId));
     })
     .add('GET', '/api/challenges/:id', (ctx) => {
       const challenge = lobby.challenge(ctx.params.id!);

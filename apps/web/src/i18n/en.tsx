@@ -135,6 +135,7 @@ export const en: Messages = {
     invalidProfile: 'Invalid profile.',
     bioTooLong: 'The bio can be up to 400 characters.',
     invalidCountry: 'Invalid country.',
+    invalidMateProblem: 'Unknown mate problem.',
     invalidProfileLink: 'One of the usernames is not valid on that site.',
   },
   genericError: 'Something went wrong. Try again.',
@@ -161,6 +162,7 @@ export const en: Messages = {
     playComputer: 'Play against the computer',
     learn: 'Learn',
     rules: 'Gungi rules',
+    mates: 'Mate problems',
     watch: 'Watch',
     liveGames: 'Live games',
     tools: 'Tools',
@@ -668,6 +670,30 @@ export const en: Messages = {
 
   info: { pages: 'Pages' },
 
+  mates: {
+    title: 'Mate problems',
+    intro: 'Find the forced mate. As in shogi tsume, every move of yours must attack the Marshal, and the computer defends as well as it can.',
+    task: (color, n) => `${color} to play and mate in ${n}`,
+    correct: 'Right! Your opponent defends...',
+    notCheck: 'Every move must attack the Marshal. Try another one.',
+    wrong: 'That move does not force mate. Try another one.',
+    solved: 'Mate! Problem solved.',
+    revealed: 'This is the solution: step through the move list.',
+    retry: 'Start over',
+    showSolution: 'Show solution',
+    next: 'Next problem',
+    defender: 'Defense',
+    allModes: 'All',
+    length: 'Length',
+    allLengths: 'All',
+    mateIn: (n) => `Mate in ${n}`,
+    progress: (solved, total) => `${solved} of ${total} solved`,
+    none: 'No problems with these filters.',
+    loginToSave: 'Sign in to keep your progress on your account.',
+    notFound: 'Problem not found.',
+    solvedTag: 'Solved',
+  },
+
   tv: {
     title: 'Gungi TV',
     all: 'All',
@@ -989,6 +1015,10 @@ export const en: Messages = {
       ranking: {
         title: 'Gungi leaderboard · ligungi',
         description: 'The best Gungi players in each mode (introductory, beginner, intermediate and advanced), by Glicko-2 rating.',
+      },
+      mates: {
+        title: 'Gungi mate problems · ligungi',
+        description: 'Train Gungi with mate in 1, 2 and 3 problems, in the style of shogi tsume, in every mode of the game.',
       },
       tv: {
         title: 'Gungi live · ligungi TV',

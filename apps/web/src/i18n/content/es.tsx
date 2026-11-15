@@ -297,6 +297,11 @@ export const es: Content = {
           borrar la bio y los enlaces que incumplan los términos de uso.
         </li>
         <li>
+          <b>Problemas de mate:</b> cuáles resolviste y cuándo, guardados en la cuenta para que el progreso aparezca en
+          cualquier dispositivo. Sin cuenta, quedan solo en tu navegador. Forman parte de la copia de tus datos y se borran con
+          la cuenta.
+        </li>
+        <li>
           <b>Preferencias:</b> idioma, tema, sonido y tamaño del tablero quedan solo en tu navegador (almacenamiento local) y
           no se nos envían.
         </li>

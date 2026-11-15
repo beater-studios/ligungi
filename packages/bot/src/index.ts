@@ -17,6 +17,7 @@ import {
 import { Searcher, VALUE, type Random, type SearchLimits } from './search.ts';
 
 export { Searcher, evaluate as evaluateForSideToMove, type Random, type SearchLimits, type SearchResult } from './search.ts';
+export { checkingMoves, isForcedMate, longestDefense, mateDistance, mateSolutions, matesWithin } from './mate.ts';
 
 export type BotLevel = 1 | 2 | 3 | 4 | 5;
 

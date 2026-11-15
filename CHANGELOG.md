@@ -4,6 +4,14 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Mate problems (Learn > Mate problems): find the forced mate in 1, 2 or 3 moves, in every mode, with the tsume convention of shogi (every one of your moves must attack the Marshal). The computer answers with the longest defense, any move that also forces mate is accepted, and a wrong move is taken back with a hint. Filter by mode and length, see the solution step by step or open the position in the analysis. Solved problems are kept on your account, or in the browser without one, and move to the account when you sign in.
+
+### Fixed
+
+- TV channels and a mode's ranking showed the site's generic title in the browser tab; they now carry the TV and ranking titles.
+
 ## [0.4.0] - 2026-11-14
 
 ### Added

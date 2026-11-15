@@ -295,6 +295,10 @@ export const en: Content = {
           bio and links that break the terms of use.
         </li>
         <li>
+          <b>Mate problems:</b> which ones you solved and when, kept on the account so your progress shows on any device.
+          Without an account they stay in your browser only. They are part of your data copy and are deleted with the account.
+        </li>
+        <li>
           <b>Preferences:</b> language, theme, sound and board size stay in your browser (local storage) and are not sent to
           us.
         </li>

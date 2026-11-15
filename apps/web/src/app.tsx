@@ -16,6 +16,7 @@ import { INFO_KINDS, InfoPage, isInfoKind } from './pages/InfoPage.tsx';
 import { GamePage } from './pages/GamePage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LearnPage } from './pages/LearnPage.tsx';
+import { MatesPage } from './pages/MatesPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { PlayersPage } from './pages/PlayersPage.tsx';
 import { RankingPage } from './pages/RankingPage.tsx';
@@ -45,6 +46,8 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/analysis$/, render: () => <AnalysisPage /> },
   { pattern: /^\/editor$/, render: () => <EditorPage /> },
   { pattern: /^\/learn$/, render: () => <LearnPage /> },
+  { pattern: /^\/problems$/, render: () => <MatesPage /> },
+  { pattern: /^\/problems\/([0-9a-f]{8})$/, render: ([id]) => <MatesPage id={id!} /> },
   { pattern: /^\/tv$/, render: () => <TvPage /> },
   { pattern: new RegExp(`^/tv/(${TV_CHANNELS.join('|')})$`), render: ([channel]) => <TvChannelPage channel={channel as TvChannel} /> },
   { pattern: /^\/settings$/, render: () => <SettingsPage /> },
@@ -259,6 +262,7 @@ const Header = () => {
             <a href="/learn">{t.nav.learn}</a>
             <div role="group">
               <a href="/learn">{t.nav.rules}</a>
+              <a href="/problems">{t.nav.mates}</a>
             </div>
           </section>
           <section>
@@ -334,6 +338,7 @@ export const SiteFooter = () => {
       title: t.footer.playTitle,
       links: [
         ['/learn', t.nav.learn],
+        ['/problems', t.nav.mates],
         ['/computer', t.nav.playComputer],
         ['/analysis', t.nav.analysis],
         ['/editor', t.nav.editor],

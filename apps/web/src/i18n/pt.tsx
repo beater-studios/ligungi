@@ -78,6 +78,7 @@ export const pt = {
     playComputer: 'Jogar contra o computador',
     learn: 'Aprender',
     rules: 'Regras do Gungi',
+    mates: 'Problemas de mate',
     watch: 'Assistir',
     liveGames: 'Partidas ao vivo',
     tools: 'Ferramentas',
@@ -588,6 +589,30 @@ export const pt = {
 
   info: { pages: 'Páginas' },
 
+  mates: {
+    title: 'Problemas de mate',
+    intro: 'Encontre o mate forçado. Como no tsume do shogi, todo lance seu precisa atacar o Marechal, e o computador se defende da melhor forma.',
+    task: (color: string, n: number) => `${color} joga e dá mate em ${n}`,
+    correct: 'Isso! O adversário se defende...',
+    notCheck: 'Todo lance precisa atacar o Marechal. Tente outro.',
+    wrong: 'Esse lance não força o mate. Tente outro.',
+    solved: 'Mate! Problema resolvido.',
+    revealed: 'Esta é a solução: avance pela lista de lances.',
+    retry: 'Recomeçar',
+    showSolution: 'Ver solução',
+    next: 'Próximo problema',
+    defender: 'Defesa',
+    allModes: 'Todos',
+    length: 'Tamanho',
+    allLengths: 'Todos',
+    mateIn: (n: number) => `Mate em ${n}`,
+    progress: (solved: number, total: number) => `${solved} de ${total} resolvidos`,
+    none: 'Nenhum problema com esses filtros.',
+    loginToSave: 'Entre para guardar o progresso na sua conta.',
+    notFound: 'Problema não encontrado.',
+    solvedTag: 'Resolvido',
+  },
+
   tv: {
     title: 'Gungi TV',
     all: 'Todos',
@@ -908,6 +933,10 @@ export const pt = {
       ranking: {
         title: 'Ranking de Gungi · ligungi',
         description: 'Os melhores jogadores de Gungi em cada modo (introdução, iniciante, intermediário e avançado), pelo rating Glicko-2.',
+      },
+      mates: {
+        title: 'Problemas de mate de Gungi · ligungi',
+        description: 'Treine Gungi com problemas de mate em 1, 2 e 3 lances, no estilo do tsume do shogi, em todos os modos do jogo.',
       },
       tv: {
         title: 'Gungi ao vivo · ligungi TV',

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ModUserView, type ProfileDetails, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { MATE_PROBLEMS } from '@ligungi/protocol/mates';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { base32Decode, hotp, TOTP_STEP_MS } from '../src/totp.ts';
 import { Moderation, moderatorCommand } from '../src/moderation.ts';
@@ -1123,6 +1124,24 @@ describe('rating history', () => {
     expect(makeModerator('pokkle').code).toBe(0);
     await b.request('POST', `/api/mod/games/${first}/void`, { reason: 'Teste' });
     expect((await a.request<ModeStats>('GET', '/api/users/ponzu/stats/intro')).data.history.map((point) => point.gameId)).not.toContain(first);
+  });
+});
+
+describe('mate problems', () => {
+  it('keeps the problems a player solved, only known ones and only with an account', async () => {
+    server = await startServer();
+    const a = client();
+    const [first, second] = MATE_PROBLEMS;
+    expect((await a.request('POST', '/api/mates/solved', { ids: [first!.id] })).status).toBe(401);
+    await signup(a, 'Gotoh');
+    expect((await a.request<string[]>('GET', '/api/mates/solved')).data).toEqual([]);
+    expect((await a.request('POST', '/api/mates/solved', { ids: ['ffffffff'] })).data).toMatchObject({ code: 'invalidMateProblem' });
+    expect((await a.request('POST', '/api/mates/solved', { ids: 'x' })).data).toMatchObject({ code: 'invalidMateProblem' });
+    const ids = second ? [first!.id, second.id] : [first!.id];
+    expect((await a.request<string[]>('POST', '/api/mates/solved', { ids })).data.sort()).toEqual([...ids].sort());
+    // Marking one again changes nothing.
+    expect((await a.request<string[]>('POST', '/api/mates/solved', { ids: [first!.id] })).data).toHaveLength(ids.length);
+    expect((await a.request<{ matesSolved: string[] }>('GET', '/api/account/export')).data.matesSolved.sort()).toEqual([...ids].sort());
   });
 });
 

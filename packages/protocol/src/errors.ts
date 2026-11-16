@@ -39,6 +39,7 @@ export const ERROR_MESSAGES = {
   invalidExplorerQuery: 'Consulta inválida no explorador de draft.',
   invalidPracticeProgress: 'Progresso de prática inválido.',
   invalidPuzzle: 'Puzzle inválido.',
+  invalidBookmarkNote: 'A nota pode ter até 1000 caracteres.',
   invalidPuzzleRun: 'Resultado de corrida de puzzles inválido.',
   puzzleNotFound: 'Puzzle não encontrado.',
   noPuzzleLeft: 'Não sobrou nenhum puzzle com esses filtros.',

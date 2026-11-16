@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { applyMove, initialPosition, parseMove, toFen } from '@ligungi/engine';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EXTRA_TIME_SECONDS, puzzleInfo, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type Crosstable, type ExplorerView, type ModUserView, type ProfileDetails, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleRunsView, type PuzzleView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, puzzleInfo, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type BookmarkedGame, type BookmarkView, type Crosstable, type ExplorerView, type ModUserView, type ProfileDetails, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleRunsView, type PuzzleView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
 import { PUZZLES } from '@ligungi/protocol/puzzles';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { base32Decode, hotp, TOTP_STEP_MS } from '../src/totp.ts';
@@ -1259,6 +1259,43 @@ describe('draft explorer', () => {
     expect((await a.request('GET', '/api/explorer?mode=advanced&band=nope')).data).toMatchObject({ code: 'invalidExplorerQuery' });
     const playFen = toFen(initialPosition('intro'));
     expect((await a.request('GET', `/api/explorer?mode=advanced&fen=${encodeURIComponent(playFen)}`)).data).toMatchObject({ code: 'invalidExplorerQuery' });
+  });
+});
+
+describe('bookmarks', () => {
+  it('bookmarks games with a private note, lists them for their owner only and drops them with the account data', async () => {
+    server = await startServer();
+    const a = client();
+    const b = client();
+    await signup(a, 'Biscuit');
+    await signup(b, 'Wing');
+    const { id: first } = await startGame(a, b, casual);
+    const { id: second } = await startGame(a, b, casual);
+
+    expect((await client().request('POST', `/api/games/${first}/bookmark`, {})).status).toBe(401);
+    expect((await a.request('POST', '/api/games/nope1234/bookmark', {})).status).toBe(404);
+    expect((await a.request<BookmarkView>('GET', `/api/games/${first}/bookmark`)).data).toEqual({ bookmarked: false, note: '' });
+    expect((await a.request<BookmarkView>('POST', `/api/games/${first}/bookmark`, {})).data).toEqual({ bookmarked: true, note: '' });
+    expect((await a.request<BookmarkView>('POST', `/api/games/${first}/bookmark`, { note: '  Lindo sacrifício no lance 30  ' })).data).toEqual({
+      bookmarked: true,
+      note: 'Lindo sacrifício no lance 30',
+    });
+    expect((await a.request('POST', `/api/games/${first}/bookmark`, { note: 'x'.repeat(1001) })).data).toMatchObject({ code: 'invalidBookmarkNote' });
+    expect((await a.request('POST', `/api/games/${first}/bookmark`, { note: 7 })).data).toMatchObject({ code: 'invalidBookmarkNote' });
+    await a.request('POST', `/api/games/${second}/bookmark`, {});
+
+    const list = (await a.request<BookmarkedGame[]>('GET', '/api/bookmarks')).data;
+    expect(list.map((bookmark) => [bookmark.game.id, bookmark.note])).toEqual([
+      [second, ''],
+      [first, 'Lindo sacrifício no lance 30'],
+    ]);
+    // Someone else's bookmarks stay theirs.
+    expect((await b.request<BookmarkedGame[]>('GET', '/api/bookmarks')).data).toEqual([]);
+    expect((await b.request<BookmarkView>('GET', `/api/games/${first}/bookmark`)).data.bookmarked).toBe(false);
+
+    expect((await a.request<BookmarkView>('DELETE', `/api/games/${second}/bookmark`)).data).toEqual({ bookmarked: false, note: '' });
+    const exported = (await a.request<{ bookmarks: Array<{ game: string; note: string }> }>('GET', '/api/account/export')).data.bookmarks;
+    expect(exported.map((bookmark) => bookmark.game)).toEqual([first]);
   });
 });
 

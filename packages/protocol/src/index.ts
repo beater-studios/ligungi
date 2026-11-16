@@ -237,6 +237,24 @@ export interface GameCounts {
   readonly draws: number;
 }
 
+/** A private note on a bookmarked game holds up to this many characters. */
+export const BOOKMARK_NOTE_MAX = 1000;
+/** How many bookmarked games `GET /api/bookmarks` returns at most. */
+export const BOOKMARKS_MAX = 200;
+
+/** Whether the viewer bookmarked a game, and their private note on it (empty without one). */
+export interface BookmarkView {
+  readonly bookmarked: boolean;
+  readonly note: string;
+}
+
+/** A game the player bookmarked, with their note, newest bookmark first. */
+export interface BookmarkedGame {
+  readonly game: GameSummary;
+  readonly note: string;
+  readonly bookmarkedAt: number;
+}
+
 /** The record between two players (lichess's crosstable): every finished game they played against each other. */
 export interface Crosstable {
   readonly users: readonly [UserRef, UserRef];

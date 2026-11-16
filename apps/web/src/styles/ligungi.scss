@@ -5106,6 +5106,48 @@ $lesson-star: #e8a800;
   }
 }
 
+/* ===== Bookmarks (components/BookmarkPanel.tsx): the star on a game page, the private note, the note in the bookmarks list ===== */
+.ligungi-bookmark {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+
+  &__star {
+    align-self: flex-start;
+
+    &.is-on span {
+      color: $lesson-star;
+    }
+  }
+
+  &__note {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    .form-group {
+      margin: 0;
+    }
+
+    .button {
+      align-self: flex-start;
+    }
+  }
+}
+
+.ligungi-game-row__note {
+  display: -webkit-box;
+  overflow: hidden;
+  color: $c-font-dim;
+  font-size: 0.85em;
+  font-style: italic;
+  white-space: pre-line;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
 /* ===== Rating trend (components/RatingTrend.tsx): the week's change beside a rating ===== */
 .ligungi-trend {
   font-size: 0.75em;

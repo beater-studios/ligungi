@@ -3,6 +3,7 @@ import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type GameView } from '@ligungi/p
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { BookmarkPanel } from '../components/BookmarkPanel.tsx';
 import { Crosstable } from '../components/Crosstable.tsx';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
 import { errorText, getT, outcomeText, playerName, speedText, useT } from '../i18n/index.ts';
@@ -356,6 +357,7 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
       <a class="text" href={`/api/games/${view.id}/export`} target="_blank" rel="noopener" data-icon={icons.Download}>
         {t.game.export}
       </a>
+      {user && <BookmarkPanel gameId={view.id} />}
       {(() => {
         // A player can report their opponent from the game; a moderator can void a finished rated one.
         const rival = opponent ? view.players[opponent].user : null;

@@ -247,6 +247,17 @@ const MIGRATIONS = [
       and (games.white_user = ratings.user_id or games.black_user = ratings.user_id)
   );
   `,
+  `
+  create table game_bookmarks (
+    user_id text not null references users(id),
+    game_id text not null references games(id),
+    note text not null default '',
+    created_at integer not null,
+    updated_at integer not null,
+    primary key (user_id, game_id)
+  );
+  create index game_bookmarks_user on game_bookmarks(user_id, created_at);
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

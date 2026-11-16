@@ -1,8 +1,11 @@
 import { moveToString, opposite, type Color, type Mode, type Outcome } from '@ligungi/engine';
 import {
+  BOOKMARKS_MAX,
   CROSSTABLE_RECENT,
   GAME_LENGTHS,
   RATING_HISTORY_MAX,
+  type BookmarkedGame,
+  type BookmarkView,
   type Crosstable,
   type GameCounts,
   type GameFilters,
@@ -406,6 +409,44 @@ export class Games {
       )
       .get(...params) as { games: number; rated: number | null; wins: number | null; losses: number | null; draws: number | null };
     return { games: row.games, rated: row.rated ?? 0, wins: row.wins ?? 0, losses: row.losses ?? 0, draws: row.draws ?? 0 };
+  }
+
+  exists(id: string): boolean {
+    return this.#rooms.has(id) || Boolean(this.#db.prepare('select 1 from games where id = ?').get(id));
+  }
+
+  bookmark(userId: string, gameId: string): BookmarkView {
+    const row = this.#db.prepare('select note from game_bookmarks where user_id = ? and game_id = ?').get(userId, gameId) as { note: string } | undefined;
+    return row ? { bookmarked: true, note: row.note } : { bookmarked: false, note: '' };
+  }
+
+  /** Bookmarks a game for a player, or changes the note of one already bookmarked. */
+  saveBookmark(userId: string, gameId: string, note: string): BookmarkView {
+    const now = this.#options.now();
+    this.#db
+      .prepare(
+        `insert into game_bookmarks (user_id, game_id, note, created_at, updated_at) values (?, ?, ?, ?, ?)
+         on conflict (user_id, game_id) do update set note = excluded.note, updated_at = excluded.updated_at`,
+      )
+      .run(userId, gameId, note, now, now);
+    return { bookmarked: true, note };
+  }
+
+  removeBookmark(userId: string, gameId: string): BookmarkView {
+    this.#db.prepare('delete from game_bookmarks where user_id = ? and game_id = ?').run(userId, gameId);
+    return { bookmarked: false, note: '' };
+  }
+
+  /** A player's bookmarked games, newest bookmark first, each as it stands now (an ongoing game included). */
+  bookmarks(userId: string): BookmarkedGame[] {
+    const rows = this.#db
+      .prepare(
+        `select games.*, game_bookmarks.note as bookmark_note, game_bookmarks.created_at as bookmarked_at from game_bookmarks
+         join games on games.id = game_bookmarks.game_id
+         where game_bookmarks.user_id = ? order by game_bookmarks.created_at desc, game_bookmarks.rowid desc limit ?`,
+      )
+      .all(userId, BOOKMARKS_MAX) as unknown as Array<GameRow & { bookmark_note: string; bookmarked_at: number }>;
+    return rows.map((row) => ({ game: this.#rooms.get(row.id)?.summary() ?? this.#summaryOf(row), note: row.bookmark_note, bookmarkedAt: row.bookmarked_at }));
   }
 
   /** Rating points each user won or lost in a mode's rated games since `since` (ms), voided games aside; 0 without games. */

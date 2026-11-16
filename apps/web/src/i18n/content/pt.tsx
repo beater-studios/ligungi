@@ -296,7 +296,7 @@ export const pt: Content = {
         </li>
         <li>
           <b>Lições, puzzles e prática:</b> as estrelas de cada exercício das lições, o seu rating de puzzle e as suas
-          tentativas, com a data e o resultado, os resultados do Puzzle Streak e do Puzzle Storm e as posições de prática concluídas, guardados na conta para o progresso aparecer em qualquer aparelho. Sem conta, ficam só no seu navegador. Entram na cópia dos seus dados e são apagados com a conta.
+          tentativas, com a data e o resultado, os resultados do Puzzle Streak e do Puzzle Storm, as posições de prática concluídas e as partidas que você marcou como favoritas, com as suas notas privadas, guardados na conta para o progresso aparecer em qualquer aparelho. Sem conta, ficam só no seu navegador. Entram na cópia dos seus dados e são apagados com a conta.
         </li>
         <li>
           <b>Preferências:</b> idioma, tema, som e tamanho do tabuleiro ficam só no seu navegador (armazenamento local) e não

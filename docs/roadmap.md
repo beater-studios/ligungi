@@ -18,5 +18,4 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more).
 | Activity timeline on profiles and a feed of followed players | Social glue for the follow feature that already exists | M | What a player did each day (games, puzzles, lessons) on their profile, and the activity of followed players on the home page. |
 | Recent activity feed (finished games, new players) | Shows a live site even with few players online | S | On the home page or the community page. |
 | Personal insights (where you win and lose, by mode, color, phase) | Self-improvement | L | From the player's finished games: results by mode, color, game length, phase and draft choices. |
-| Bookmarks and private notes on games | Keep track of interesting games | S | A star on any game and a private note, listed on the player's profile. |
 | Advanced game search | Find games by player, mode, rating, result and date across the site | M | A search page over every finished game, with filters, linked from the Tools menu. |

@@ -4,6 +4,7 @@ import {
   ERROR_MESSAGES,
   LEADERBOARD_MAX,
   LEADERBOARD_TOP,
+  BOOKMARK_NOTE_MAX,
   RATING_TREND_DAYS,
   DAY_MS,
   MAX_FOLLOWS,
@@ -760,6 +761,7 @@ export const createApp = (config: ServerConfig): App => {
           const { best } = puzzles.runs(userId);
           return { rating, tries: history, solved: puzzles.solved(userId), runs: puzzles.allRuns(userId), best };
         })(),
+        bookmarks: games.bookmarks(userId).map((bookmark) => ({ game: bookmark.game.id, note: bookmark.note, bookmarkedAt: iso(bookmark.bookmarkedAt) })),
         lessons: users.lessonProgress(userId),
         practice: users.practiceProgress(userId),
         // What moderation holds about the account: the suspension in force, the reports it made and the actions taken on
@@ -932,6 +934,24 @@ export const createApp = (config: ServerConfig): App => {
       if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
       const limit = Math.min(LEADERBOARD_MAX, Math.max(1, Math.trunc(Number(ctx.url.searchParams.get('limit'))) || LEADERBOARD_MAX));
       sendJson(ctx.res, 200, leaders(mode, limit, onlineUsers(ctx.session.userId)));
+    })
+    .add('GET', '/api/bookmarks', (ctx) => sendJson(ctx.res, 200, games.bookmarks(requireUser(ctx))))
+    .add('GET', '/api/games/:id/bookmark', (ctx) => {
+      const userId = requireUser(ctx);
+      if (!games.exists(ctx.params.id!)) throw new HttpError(404, 'gameNotFound');
+      sendJson(ctx.res, 200, games.bookmark(userId, ctx.params.id!));
+    })
+    .add('POST', '/api/games/:id/bookmark', async (ctx) => {
+      const userId = requireUser(ctx);
+      if (!games.exists(ctx.params.id!)) throw new HttpError(404, 'gameNotFound');
+      const { note = '' } = (await ctx.body()) as { note?: unknown };
+      if (typeof note !== 'string' || note.length > BOOKMARK_NOTE_MAX) throw new HttpError(400, 'invalidBookmarkNote');
+      sendJson(ctx.res, 200, games.saveBookmark(userId, ctx.params.id!, note.trim()));
+    })
+    .add('DELETE', '/api/games/:id/bookmark', (ctx) => {
+      const userId = requireUser(ctx);
+      if (!games.exists(ctx.params.id!)) throw new HttpError(404, 'gameNotFound');
+      sendJson(ctx.res, 200, games.removeBookmark(userId, ctx.params.id!));
     })
     .add('GET', '/api/games/:id', (ctx) => {
       const room = games.get(ctx.params.id!);

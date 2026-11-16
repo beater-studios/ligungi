@@ -5,6 +5,7 @@ import {
   isErrorCode,
   parseGameFilters,
   type GameFilters,
+  type BookmarkedGame,
   type GameCounts,
   type GameSummary,
   type ResultFilter,
@@ -40,7 +41,7 @@ const resultOf = (game: GameSummary, color: Color): GameResult => {
 const signed = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `\u2212${-n}` : '0');
 
 /** One finished game from the profile owner's side: result, opponent, how it went, rating change and date. */
-const GameRow = ({ game, userId }: { game: GameSummary; userId: string }) => {
+const GameRow = ({ game, userId, note }: { game: GameSummary; userId: string; note?: string }) => {
   const t = useT();
   const color: Color = game.players.white.user?.id === userId ? 'white' : 'black';
   const own = game.players[color];
@@ -65,6 +66,7 @@ const GameRow = ({ game, userId }: { game: GameSummary; userId: string }) => {
             {opponent.rating !== null && <span class="ligungi-game-row__rating"> {opponent.rating}</span>}
           </span>
           <span class="ligungi-game-row__meta">{meta}</span>
+          {note && <span class="ligungi-game-row__note">{note}</span>}
         </span>
         <span class="ligungi-game-row__diff">{own.ratingDiff !== null ? signed(own.ratingDiff) : ''}</span>
         <span class="ligungi-game-row__date">{formatDate(t, game.createdAt)}</span>
@@ -192,6 +194,20 @@ export const ProfilePage = ({ name }: { name: string }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loaded, setLoaded] = useState<{ key: string; games: GameSummary[] } | null>(null);
   const [filteredCounts, setFilteredCounts] = useState<{ key: string; counts: GameCounts } | null>(null);
+  const [bookmarks, setBookmarks] = useState<BookmarkedGame[] | null>(null);
+  // `?bookmarks=1` on one's own profile lists the games they bookmarked instead of the history.
+  const showBookmarks = Boolean(me && me.name.toLowerCase() === name.toLowerCase()) && new URLSearchParams(search).get('bookmarks') === '1';
+  useEffect(() => {
+    if (!showBookmarks) return;
+    let alive = true;
+    api
+      .get<BookmarkedGame[]>('/api/bookmarks')
+      .then((list) => alive && setBookmarks(list))
+      .catch(() => alive && setBookmarks([]));
+    return () => {
+      alive = false;
+    };
+  }, [showBookmarks]);
   const games = loaded?.key === `${name}?${filterKey}` ? loaded.games : null;
   const [error, setError] = useState<string | null>(null);
   const [more, setMore] = useState(false);
@@ -284,7 +300,7 @@ export const ProfilePage = ({ name }: { name: string }) => {
   const isMe = me?.id === profile.user.id;
   const { result, rated, ...rest } = filters;
   const tab = (label: string, count: number | undefined, patch: { result?: ResultFilter; rated?: boolean }) => {
-    const activeTab = result === patch.result && rated === patch.rated;
+    const activeTab = !showBookmarks && result === patch.result && rated === patch.rated;
     return (
       <a class={activeTab ? 'active' : ''} href={hrefFor(profile.user.name, { ...rest, ...patch })}>
         {label} <strong>{count ?? '-'}</strong>
@@ -394,21 +410,42 @@ export const ProfilePage = ({ name }: { name: string }) => {
             {tab(t.profile.tabWins, counts?.wins, { result: 'win' })}
             {tab(t.profile.tabLosses, counts?.losses, { result: 'loss' })}
             {tab(t.profile.tabDraws, counts?.draws, { result: 'draw' })}
+            {isMe && (
+              <a class={showBookmarks ? 'active' : ''} href={`/@/${profile.user.name}?bookmarks=1`}>
+                <span aria-hidden="true">★</span> {t.profile.tabBookmarks} {showBookmarks && bookmarks && <strong>{bookmarks.length}</strong>}
+              </a>
+            )}
           </nav>
         </div>
-        <FilterForm name={profile.user.name} filters={filters} />
-        {games === null && <p class="ligungi-notice ligungi-profile__empty">{t.common.loading}</p>}
-        {games?.length === 0 && (
-          <p class="ligungi-notice ligungi-profile__empty">{filterKey ? t.profile.noMatch : t.profile.noGames}</p>
+        {showBookmarks ? (
+          bookmarks === null ? (
+            <p class="ligungi-notice ligungi-profile__empty">{t.common.loading}</p>
+          ) : bookmarks.length === 0 ? (
+            <p class="ligungi-notice ligungi-profile__empty">{t.profile.noBookmarks}</p>
+          ) : (
+            <ul class="ligungi-game-list">
+              {bookmarks.map((bookmark) => (
+                <GameRow key={bookmark.game.id} game={bookmark.game} userId={profile.user.id} note={bookmark.note} />
+              ))}
+            </ul>
+          )
+        ) : (
+          <>
+            <FilterForm name={profile.user.name} filters={filters} />
+            {games === null && <p class="ligungi-notice ligungi-profile__empty">{t.common.loading}</p>}
+            {games?.length === 0 && (
+              <p class="ligungi-notice ligungi-profile__empty">{filterKey ? t.profile.noMatch : t.profile.noGames}</p>
+            )}
+            {games && games.length > 0 && (
+              <ul class="ligungi-game-list">
+                {games.map((game) => (
+                  <GameRow key={game.id} game={game} userId={profile.user.id} />
+                ))}
+              </ul>
+            )}
+          </>
         )}
-        {games && games.length > 0 && (
-          <ul class="ligungi-game-list">
-            {games.map((game) => (
-              <GameRow key={game.id} game={game} userId={profile.user.id} />
-            ))}
-          </ul>
-        )}
-        {more && games && games.length > 0 && (
+        {!showBookmarks && more && games && games.length > 0 && (
           <div class="ligungi-profile__more">
             <button type="button" class="button button-empty" onClick={loadMore}>
               {t.profile.loadMore}

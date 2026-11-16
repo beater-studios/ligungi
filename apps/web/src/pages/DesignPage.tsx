@@ -3,6 +3,7 @@ import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { BoardView } from '../components/BoardView.tsx';
 import { CrosstableView } from '../components/Crosstable.tsx';
+import { RatingTrend } from '../components/RatingTrend.tsx';
 import { Flag } from '../components/Flag.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PlayerTag } from '../components/PlayerTag.tsx';
@@ -743,6 +744,16 @@ export const DesignPage = () => {
                 ))}
               </ul>
             </section>
+          </Example>
+          <Example label="Rating trend beside a rating (components/RatingTrend.tsx): the change over the last 7 days, nothing when it did not move">
+            <span style={{ display: 'flex', gap: '1.5rem' }}>
+              <span>
+                <strong>1712</strong> <RatingTrend value={24} />
+              </span>
+              <span>
+                <strong>1688</strong> <RatingTrend value={-9} />
+              </span>
+            </span>
           </Example>
           <Example label="Head to head between two players (components/Crosstable.tsx): score, draws and the latest results from the first player's side">
             <div style={{ maxWidth: '20rem', width: '100%' }}>

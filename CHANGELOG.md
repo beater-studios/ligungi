@@ -12,6 +12,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Changed
 
+- The leaderboards keep only players who played a rated game in the mode in the last 30 days (they come back with the next one, rating untouched; their profile marks the mode as inactive instead of showing a position), and show beside each rating how much it moved in the last 7 days.
 - The window to create a game (also to play a friend or challenge a player) fits without scrolling: the mode, pace, clock, type and color are buttons side by side, the clock values are sliders under a summary of the time control (10+5, 10|3×30s) and a sentence that says what it means, and on phones every choice fills the width.
 - The home page fits on one screen: the puzzle of the day and the strongest live game (with how many players are online and playing) moved to a column on the left of quick pairing, and the page is wider on large screens. Below the open games, a new card shows the best players of each mode. Signed in, the account and learning cards give way to your online friends and a new Train card with your puzzle rating, your Puzzle Storm and Streak records and how far you are in the lessons.
 - The menu under your name (or the gear without an account) changes the board and the pieces right there, as on lichess: Board picks the board theme and Pieces the shape, what each piece shows and its colors, each with a color sample, plus a link to the other options in Settings. Its first link now reads Profile instead of repeating your name.

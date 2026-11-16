@@ -483,17 +483,23 @@ describe('community', () => {
     const a = client();
     for (const name of ['Netero', 'Zeno', 'Isaac', 'Novato']) await signup(a, name);
     const { db } = server.app;
-    const set = (name: string, mode: string, rating: number, deviation: number, games: number) =>
+    const set = (name: string, mode: string, rating: number, deviation: number, games: number, playedAt = Date.now()) =>
       db
-        .prepare('insert into ratings (user_id, mode, rating, deviation, volatility, games) select id, ?, ?, ?, 0.06, ? from users where username = ?')
-        .run(mode, rating, deviation, games, name);
+        .prepare('insert into ratings (user_id, mode, rating, deviation, volatility, games, played_at) select id, ?, ?, ?, 0.06, ?, ? from users where username = ?')
+        .run(mode, rating, deviation, games, playedAt, name);
     set('Netero', 'advanced', 2100.4, 60, 40);
     set('Zeno', 'advanced', 1950, 80, 25);
     set('Isaac', 'advanced', 2400, 200, 3);
     set('Novato', 'intro', 1600, 90, 12);
+    // Established, but without a rated game for longer than the leaderboard allows.
+    await signup(a, 'Ging');
+    set('Ging', 'advanced', 2300, 50, 60, Date.now() - 31 * 86_400_000);
 
     const board = (await a.request<Leaderboard>('GET', '/api/leaderboard')).data;
     expect(board.advanced.map((entry) => entry.user.name)).toEqual(['Netero', 'Zeno']);
+    expect(board.advanced[0]).toMatchObject({ trend: 0 });
+    expect((await a.request<UserProfile>('GET', '/api/users/ging')).data.ranks.advanced).toBeNull();
+    expect((await a.request<RankingView>('GET', '/api/ranking/advanced')).data.modes.advanced.players).toBe(2);
     expect(board.advanced[0]).toMatchObject({ rating: 2100, games: 40 });
     expect(board.intro.map((entry) => entry.user.name)).toEqual(['Novato']);
     expect(board.beginner).toEqual([]);
@@ -514,10 +520,10 @@ describe('community', () => {
     const a = client();
     for (const name of ['Netero', 'Zeno', 'Meruem', 'Isaac', 'Gon']) await signup(a, name);
     const { db } = server.app;
-    const set = (name: string, mode: string, rating: number, deviation: number, games: number) =>
+    const set = (name: string, mode: string, rating: number, deviation: number, games: number, playedAt = Date.now()) =>
       db
-        .prepare('insert into ratings (user_id, mode, rating, deviation, volatility, games) select id, ?, ?, ?, 0.06, ? from users where username = ?')
-        .run(mode, rating, deviation, games, name);
+        .prepare('insert into ratings (user_id, mode, rating, deviation, volatility, games, played_at) select id, ?, ?, ?, 0.06, ?, ? from users where username = ?')
+        .run(mode, rating, deviation, games, playedAt, name);
     set('Netero', 'advanced', 2100, 60, 40);
     set('Zeno', 'advanced', 1950, 80, 25);
     set('Meruem', 'advanced', 1950, 80, 10);
@@ -1345,7 +1351,7 @@ describe('profile details', () => {
     expect(exported.profile).toEqual(saved.data);
 
     // The ranking carries the country (rows come from rated games, so one is faked here).
-    server.app.db.prepare("insert into ratings (user_id, mode, rating, deviation, volatility, games) select id, 'intro', 1600, 50, 0.06, 10 from users where username_key = 'biscuit'").run();
+    server.app.db.prepare("insert into ratings (user_id, mode, rating, deviation, volatility, games, played_at) select id, 'intro', 1600, 50, 0.06, 10, ? from users where username_key = 'biscuit'").run(Date.now());
     expect((await client().request<RankingView>('GET', '/api/ranking/intro')).data.rows[0]).toMatchObject({ user: { name: 'Biscuit' }, country: 'br' });
 
     expect(makeModerator('netero').code).toBe(0);

@@ -1,5 +1,6 @@
 import { MODES, opposite, type Color, type Mode } from '@ligungi/engine';
 import {
+  LEADERBOARD_ACTIVE_DAYS,
   gameFiltersQuery,
   isErrorCode,
   parseGameFilters,
@@ -80,11 +81,15 @@ const RatingCard = ({ profile, mode }: { profile: UserProfile; mode: Mode }) => 
   const { wins, draws, losses } = profile.records[mode];
   const total = wins + draws + losses;
   const share = (n: number) => `${(n / total) * 100}%`;
+  // Off the leaderboard: provisional, or established but without a recent rated game in the mode.
+  const inactive = rank === null && rating.games > 0 && !rating.provisional;
   return (
     <a class={`ligungi-card ligungi-rating-card${rating.games ? '' : ' ligungi-rating-card--empty'}`} href={`/ranking/${mode}`}>
       <span class="ligungi-rating-card__head">
         <span class="ligungi-rating-card__mode">{t.modes[mode]}</span>
-        <span class="ligungi-rating-card__rank">{rank !== null ? `#${rank}` : rating.games ? t.profile.provisional : ''}</span>
+        <span class="ligungi-rating-card__rank" title={inactive ? t.profile.inactiveHint(LEADERBOARD_ACTIVE_DAYS) : undefined}>
+          {rank !== null ? `#${rank}` : inactive ? t.profile.inactive : rating.games ? t.profile.provisional : ''}
+        </span>
       </span>
       <strong class="ligungi-rating-card__rating">
         {rating.rating}

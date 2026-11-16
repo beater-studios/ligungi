@@ -19,6 +19,7 @@ import { turns } from '../challenges.ts';
 import { CreateGame, type CreateTarget } from '../components/CreateGame.tsx';
 import { LivePlayer } from '../components/LivePlayer.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
+import { RatingTrend } from '../components/RatingTrend.tsx';
 import { Modal } from '../components/Modal.tsx';
 import { formatClock, playerName, settingsText, speedText, timeControlText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
@@ -225,7 +226,10 @@ const Leaders = () => {
                   {entry.user.name}
                 </a>
               </span>
-              <strong>{entry.rating}</strong>
+              <span class="ligungi-home__leader-rating">
+                <strong>{entry.rating}</strong>
+                <RatingTrend value={entry.trend} />
+              </span>
             </li>
           ))}
         </ul>

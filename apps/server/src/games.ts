@@ -408,6 +408,26 @@ export class Games {
     return { games: row.games, rated: row.rated ?? 0, wins: row.wins ?? 0, losses: row.losses ?? 0, draws: row.draws ?? 0 };
   }
 
+  /** Rating points each user won or lost in a mode's rated games since `since` (ms), voided games aside; 0 without games. */
+  ratingTrends(mode: Mode, userIds: readonly string[], since: number): Map<string, number> {
+    const trends = new Map<string, number>(userIds.map((id) => [id, 0]));
+    if (userIds.length === 0) return trends;
+    // Only the number of placeholders is built here; the ids themselves are bound.
+    const ids = userIds.map(() => '?').join(', ');
+    const rows = this.#db
+      .prepare(
+        `select white_user, black_user, white_diff, black_diff from games
+         where mode = ? and rated = 1 and status = 'ended' and voided = 0 and ended_at >= ?
+           and (white_user in (${ids}) or black_user in (${ids}))`,
+      )
+      .all(mode, since, ...userIds, ...userIds) as Array<{ white_user: string | null; black_user: string | null; white_diff: number | null; black_diff: number | null }>;
+    for (const row of rows) {
+      if (row.white_user && trends.has(row.white_user)) trends.set(row.white_user, trends.get(row.white_user)! + (row.white_diff ?? 0));
+      if (row.black_user && trends.has(row.black_user)) trends.set(row.black_user, trends.get(row.black_user)! + (row.black_diff ?? 0));
+    }
+    return trends;
+  }
+
   /** Every finished game between two users (voided ones aside): the wins of each, the draws and the latest results. */
   crosstable(a: UserRef, b: UserRef): Crosstable {
     const rows = this.#db
@@ -584,7 +604,7 @@ export class Games {
     for (const color of ['white', 'black'] as const) {
       const seat = room.seats[color];
       const updated = updateRating(before[color], before[opposite(color)], score(color));
-      this.#users.saveRating(seat.userId!, room.mode, { ...updated, games: before[color].games + 1 });
+      this.#users.saveRating(seat.userId!, room.mode, { ...updated, games: before[color].games + 1 }, true);
       seat.ratingDiff = Math.round(updated.rating) - Math.round(before[color].rating);
     }
   }

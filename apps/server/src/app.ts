@@ -4,6 +4,8 @@ import {
   ERROR_MESSAGES,
   LEADERBOARD_MAX,
   LEADERBOARD_TOP,
+  RATING_TREND_DAYS,
+  DAY_MS,
   MAX_FOLLOWS,
   isErrorCode,
   parseClientMessage,
@@ -344,6 +346,7 @@ export const createApp = (config: ServerConfig): App => {
     const followerId = viewerId && params.get('followed') === '1' ? viewerId : null;
     const { rows, total } = users.rankingPage(mode, { query, followerId }, (page - 1) * RANKING_PAGE_SIZE, RANKING_PAGE_SIZE);
     const records = games.recordsIn(mode, rows.map((row) => row.user.id));
+    const trends = games.ratingTrends(mode, rows.map((row) => row.user.id), trendSince());
     const online = onlineUsers(viewerId);
     const followed = new Set(viewerId ? users.following(viewerId).map((user) => user.id) : []);
     const place = viewerId ? users.rankingPlace(viewerId, mode) : null;
@@ -354,6 +357,7 @@ export const createApp = (config: ServerConfig): App => {
         record: records.get(row.user.id) ?? { wins: 0, draws: 0, losses: 0 },
         online: online.has(row.user.id),
         followed: followed.has(row.user.id),
+        trend: trends.get(row.user.id) ?? 0,
       })),
       total,
       page,
@@ -417,8 +421,12 @@ export const createApp = (config: ServerConfig): App => {
     };
   };
 
-  const leaders = (mode: Mode, limit: number, online: Set<string>): LeaderEntry[] =>
-    users.leaderboard(mode, limit).map((row) => ({ ...row, online: online.has(row.user.id) }));
+  const trendSince = () => config.now() - RATING_TREND_DAYS * DAY_MS;
+  const leaders = (mode: Mode, limit: number, online: Set<string>): LeaderEntry[] => {
+    const rows = users.leaderboard(mode, limit);
+    const trends = games.ratingTrends(mode, rows.map((row) => row.user.id), trendSince());
+    return rows.map((row) => ({ ...row, online: online.has(row.user.id), trend: trends.get(row.user.id) ?? 0 }));
+  };
 
   /**
    * Login, signup and logout replace the session id (against session fixation). Anonymous seats, seeks and

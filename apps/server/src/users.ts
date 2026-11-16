@@ -1,5 +1,5 @@
 import { MODES, type Mode } from '@ligungi/engine';
-import { CHALLENGE_POLICIES, COUNTRIES, EMPTY_PROFILE, parseProfileDetails, type ChallengePolicy, type Country, type ProfileDetails, type RatingView, type UserRef } from '@ligungi/protocol';
+import { CHALLENGE_POLICIES, COUNTRIES, DAY_MS, EMPTY_PROFILE, LEADERBOARD_ACTIVE_DAYS, parseProfileDetails, type ChallengePolicy, type Country, type ProfileDetails, type RatingView, type UserRef } from '@ligungi/protocol';
 import type { Db } from './db.ts';
 import { DEFAULT_RATING, PROVISIONAL_DEVIATION, type Rating } from './glicko.ts';
 import { randomId } from './ids.ts';
@@ -102,14 +102,20 @@ export class Users {
     return row ? { ...row } : { ...DEFAULT_RATING, games: 0 };
   }
 
-  saveRating(userId: string, mode: Mode, rating: StoredRating): void {
+  /** Saves a rating; `played` marks a rated game just played, which keeps the player on the leaderboard (a voided game does not). */
+  saveRating(userId: string, mode: Mode, rating: StoredRating, played = false): void {
     this.#db
       .prepare(
-        `insert into ratings (user_id, mode, rating, deviation, volatility, games) values (?, ?, ?, ?, ?, ?)
+        `insert into ratings (user_id, mode, rating, deviation, volatility, games, played_at) values (?, ?, ?, ?, ?, ?, ?)
          on conflict (user_id, mode) do update set rating = excluded.rating, deviation = excluded.deviation,
-         volatility = excluded.volatility, games = excluded.games`,
+         volatility = excluded.volatility, games = excluded.games, played_at = coalesce(excluded.played_at, ratings.played_at)`,
       )
-      .run(userId, mode, rating.rating, rating.deviation, rating.volatility, rating.games);
+      .run(userId, mode, rating.rating, rating.deviation, rating.volatility, rating.games, played ? this.#now() : null);
+  }
+
+  /** The oldest last rated game that still keeps a player on the leaderboard. */
+  #activeSince(): number {
+    return this.#now() - LEADERBOARD_ACTIVE_DAYS * DAY_MS;
   }
 
   /** Usernames starting with `prefix` (case-insensitive), alphabetical. */
@@ -226,17 +232,17 @@ export class Users {
     const rows = this.#db
       .prepare(
         `select user_id, rank() over (order by rating desc) as position from ratings
-         where mode = ? and games > 0 and deviation <= ?`,
+         where mode = ? and games > 0 and deviation <= ? and played_at >= ?`,
       )
-      .all(mode, PROVISIONAL_DEVIATION) as Array<{ user_id: string; position: number }>;
+      .all(mode, PROVISIONAL_DEVIATION, this.#activeSince()) as Array<{ user_id: string; position: number }>;
     return new Map(rows.map((row) => [row.user_id, row.position]));
   }
 
   /** Established players per mode, the ones on the leaderboard. */
   rankedCounts(): Record<Mode, number> {
     const rows = this.#db
-      .prepare('select mode, count(*) as players from ratings where games > 0 and deviation <= ? group by mode')
-      .all(PROVISIONAL_DEVIATION) as Array<{ mode: Mode; players: number }>;
+      .prepare('select mode, count(*) as players from ratings where games > 0 and deviation <= ? and played_at >= ? group by mode')
+      .all(PROVISIONAL_DEVIATION, this.#activeSince()) as Array<{ mode: Mode; players: number }>;
     const counts = Object.fromEntries(MODES.map((mode) => [mode, 0])) as Record<Mode, number>;
     for (const row of rows) counts[row.mode] = row.players;
     return counts;
@@ -252,11 +258,11 @@ export class Users {
     offset: number,
     limit: number,
   ): { rows: Array<LeaderRow & { rank: number }>; total: number } {
-    const where = `where (?3 = '' or instr(username_key, ?3) > 0)
-      and (?4 is null or user_id = ?4 or user_id in (select followed_id from follows where user_id = ?4))`;
-    const args = [mode, PROVISIONAL_DEVIATION, filters.query.toLowerCase(), filters.followerId] as const;
+    const where = `where (?4 = '' or instr(username_key, ?4) > 0)
+      and (?5 is null or user_id = ?5 or user_id in (select followed_id from follows where user_id = ?5))`;
+    const args = [mode, PROVISIONAL_DEVIATION, this.#activeSince(), filters.query.toLowerCase(), filters.followerId] as const;
     const rows = this.#db
-      .prepare(`with ranked as (${RANKED}) select user_id, username, country, rating, games, position from ranked ${where} order by row limit ?5 offset ?6`)
+      .prepare(`with ranked as (${RANKED}) select user_id, username, country, rating, games, position from ranked ${where} order by row limit ?6 offset ?7`)
       .all(...args, limit, offset) as Array<{ user_id: string; username: string; country: string | null; rating: number; games: number; position: number }>;
     const { total } = this.#db.prepare(`with ranked as (${RANKED}) select count(*) as total from ranked ${where}`).get(...args) as { total: number };
     return {
@@ -274,8 +280,8 @@ export class Users {
   /** A player's position and row number (1-based, for paging) on a mode's leaderboard; null when not on it. */
   rankingPlace(userId: string, mode: Mode): { rank: number; row: number } | null {
     const place = this.#db
-      .prepare(`with ranked as (${RANKED}) select position, row from ranked where user_id = ?3`)
-      .get(mode, PROVISIONAL_DEVIATION, userId) as { position: number; row: number } | undefined;
+      .prepare(`with ranked as (${RANKED}) select position, row from ranked where user_id = ?4`)
+      .get(mode, PROVISIONAL_DEVIATION, this.#activeSince(), userId) as { position: number; row: number } | undefined;
     return place ? { rank: place.position, row: place.row } : null;
   }
 
@@ -357,25 +363,26 @@ export class Users {
       .prepare(
         `select users.id, users.username, users.country, ratings.rating, ratings.games from ratings
          join users on users.id = ratings.user_id
-         where ratings.mode = ? and ratings.games > 0 and ratings.deviation <= ?
+         where ratings.mode = ? and ratings.games > 0 and ratings.deviation <= ? and ratings.played_at >= ?
          order by ratings.rating desc, ratings.games desc, users.username_key limit ?`,
       )
-      .all(mode, PROVISIONAL_DEVIATION, limit) as Array<{ id: string; username: string; country: string | null; rating: number; games: number }>;
+      .all(mode, PROVISIONAL_DEVIATION, this.#activeSince(), limit) as Array<{ id: string; username: string; country: string | null; rating: number; games: number }>;
     return rows.map((row) => ({ user: { id: row.id, name: row.username }, country: toCountry(row.country), rating: Math.round(row.rating), games: row.games }));
   }
 
   /** Position on the leaderboard of a mode, or null when the player is not on it. */
   rank(userId: string, mode: Mode): number | null {
     const own = this.#db
-      .prepare('select rating, deviation, games from ratings where user_id = ? and mode = ?')
-      .get(userId, mode) as { rating: number; deviation: number; games: number } | undefined;
-    if (!own || own.games === 0 || own.deviation > PROVISIONAL_DEVIATION) return null;
+      .prepare('select rating, deviation, games, played_at from ratings where user_id = ? and mode = ?')
+      .get(userId, mode) as { rating: number; deviation: number; games: number; played_at: number | null } | undefined;
+    const since = this.#activeSince();
+    if (!own || own.games === 0 || own.deviation > PROVISIONAL_DEVIATION || (own.played_at ?? 0) < since) return null;
     const row = this.#db
       .prepare(
         `select count(*) as above from ratings
-         where mode = ? and games > 0 and deviation <= ? and rating > ?`,
+         where mode = ? and games > 0 and deviation <= ? and played_at >= ? and rating > ?`,
       )
-      .get(mode, PROVISIONAL_DEVIATION, own.rating) as { above: number };
+      .get(mode, PROVISIONAL_DEVIATION, since, own.rating) as { above: number };
     return row.above + 1;
   }
 
@@ -390,14 +397,15 @@ export class Users {
 }
 
 /**
- * Every established player of mode ?1 (deviation up to ?2): position as `rank` computes it and row order as `leaderboard`.
+ * Every established player of mode ?1 (deviation up to ?2) with a rated game since ?3: position as `rank` computes it and
+ * row order as `leaderboard`.
  * Banned players (suspended for good) are left out, so a cheater does not stay on the leaderboard.
  */
 const RANKED = `select ratings.user_id, users.username, users.username_key, users.country, ratings.rating, ratings.games,
     rank() over (order by ratings.rating desc) as position,
     row_number() over (order by ratings.rating desc, ratings.games desc, users.username_key) as row
   from ratings join users on users.id = ratings.user_id
-  where ratings.mode = ?1 and ratings.games > 0 and ratings.deviation <= ?2
+  where ratings.mode = ?1 and ratings.games > 0 and ratings.deviation <= ?2 and ratings.played_at >= ?3
     and (users.suspended_until is null or users.suspended_until < ${PERMANENT_SUSPENSION})`;
 
 export interface LeaderRow {

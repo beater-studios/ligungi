@@ -172,6 +172,42 @@ describe('board moves', () => {
   });
 });
 
+describe('rating trends', () => {
+  it('add up the rating changes of recent rated games and keep the date of the last one', () => {
+    let now = 1_000_000_000;
+    const db = openDatabase(':memory:');
+    const users = new Users(db, () => now);
+    const games = new Games(db, users, { now: () => now, abortAfterMs: 60_000, claimAfterMs: 30_000, broadcast: () => {} });
+    const [white, black] = [users.create('Kite', 'x')!, users.create('Knov', 'x')!];
+    const room = games.create({
+      mode: 'intro',
+      rated: true,
+      timeControl: { initial: 600, increment: 0 },
+      daysPerMove: null,
+      freeDraft: false,
+      players: { white: { sessionId: 'w', userId: white.id, name: white.name }, black: { sessionId: 'b', userId: black.id, name: black.name } },
+    });
+    for (let i = 0; i < 2; i++) {
+      const move = legalMoves(room.game.position)[0]!;
+      expect(room.move(room.game.position.turn, moveToString(move), room.plies)).toBeNull();
+    }
+    room.resign('black');
+    const [whiteDiff, blackDiff] = [room.seats.white.ratingDiff!, room.seats.black.ratingDiff!];
+    expect(whiteDiff).toBeGreaterThan(0);
+    expect(games.ratingTrends('intro', [white.id, black.id], now - 1000)).toEqual(new Map([[white.id, whiteDiff], [black.id, blackDiff]]));
+    // Outside the period, and in another mode, nothing moved.
+    expect(games.ratingTrends('intro', [white.id], now + 1000).get(white.id)).toBe(0);
+    expect(games.ratingTrends('advanced', [white.id], 0).get(white.id)).toBe(0);
+    const playedAt = (db.prepare("select played_at from ratings where user_id = ? and mode = 'intro'").get(white.id) as { played_at: number }).played_at;
+    expect(playedAt).toBe(now);
+    // A voided game gives the points back but does not count as playing.
+    now += 5000;
+    games.voidGame(room.id);
+    expect((db.prepare("select played_at from ratings where user_id = ? and mode = 'intro'").get(white.id) as { played_at: number }).played_at).toBe(playedAt);
+    db.close();
+  });
+});
+
 describe('byo-yomi games', () => {
   it('keep their clock when the server restarts, and offer no extra time', () => {
     const db = openDatabase(':memory:');

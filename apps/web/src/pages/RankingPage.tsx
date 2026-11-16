@@ -2,6 +2,7 @@ import { MODES, type Mode } from '@ligungi/engine';
 import { RANKING_QUERY_MAX, type ModeStanding, type RankingRow, type RankingView } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { RatingTrend } from '../components/RatingTrend.tsx';
 import { Flag } from '../components/Flag.tsx';
 import { Checkbox } from '../components/ui.tsx';
 import { useT } from '../i18n/index.ts';
@@ -59,7 +60,10 @@ const Row = ({ row, me }: { row: RankingRow; me: boolean }) => {
         {me && <span class="ligungi-tag">{t.players.you}</span>}
         {row.followed && <span class="ligungi-tag">{t.players.followed}</span>}
       </span>
-      <strong class="ligungi-ranking-row__rating">{row.rating}</strong>
+      <span class="ligungi-ranking-row__rating">
+        <strong>{row.rating}</strong>
+        <RatingTrend value={row.trend} />
+      </span>
       <span class="ligungi-ranking-row__games">{row.games}</span>
       <span class="ligungi-ranking-row__record">
         <span class="ligungi-ranking-row__win">{wins}</span> · {draws} · <span class="ligungi-ranking-row__loss">{losses}</span>

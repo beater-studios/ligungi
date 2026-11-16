@@ -239,6 +239,14 @@ const MIGRATIONS = [
   alter table games add column clock_byoyomi integer;
   alter table games add column clock_periods integer;
   `,
+  `
+  alter table ratings add column played_at integer;
+  update ratings set played_at = (
+    select max(coalesce(ended_at, updated_at)) from games
+    where games.rated = 1 and games.status = 'ended' and games.mode = ratings.mode
+      and (games.white_user = ratings.user_id or games.black_user = ratings.user_id)
+  );
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

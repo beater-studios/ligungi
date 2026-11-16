@@ -347,7 +347,14 @@ export interface LeaderEntry {
   readonly rating: number;
   readonly games: number;
   readonly online: boolean;
+  /** Rating points won or lost in the mode over the last `RATING_TREND_DAYS`. */
+  readonly trend: number;
 }
+
+/** Players leave the leaderboard after this many days without a rated game in the mode, and come back with the next one. */
+export const LEADERBOARD_ACTIVE_DAYS = 30;
+/** The period of the rating trend shown on the leaderboards. */
+export const RATING_TREND_DAYS = 7;
 
 export type Leaderboard = Readonly<Record<Mode, readonly LeaderEntry[]>>;
 
@@ -418,6 +425,8 @@ export interface RankingRow {
   readonly online: boolean;
   /** Whether the viewer follows this player. */
   readonly followed: boolean;
+  /** Rating points won or lost in the mode over the last `RATING_TREND_DAYS`. */
+  readonly trend: number;
 }
 
 export interface RankingView {

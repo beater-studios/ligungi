@@ -629,6 +629,13 @@ export const DesignPage = () => {
               </span>
             </a>
           </Example>
+          <Example label="Puzzle rating change (.ligungi-puzzle__change) and a share bar of the puzzle dashboard (.ligungi-puzzle-dashboard__bar)">
+            <p class="ligungi-puzzle__change is-up">Puzzle rating: 1557 (+57)</p>
+            <p class="ligungi-puzzle__change is-down">Puzzle rating: 1490 (-12)</p>
+            <span class="ligungi-puzzle-dashboard__bar" style={{ '--rate': '64%', maxWidth: '16rem' }}>
+              64%
+            </span>
+          </Example>
           <Example label="Goal stars on the board (the board's targets option), on empty squares and above a piece">
             <div class="ligungi-ds__board">
               <BoardView position={lessonPosition} orientation="white" targets={[parseSquare('e5')!, parseSquare('e3')!]} />

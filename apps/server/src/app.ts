@@ -15,7 +15,8 @@ import {
   LESSON_EXERCISES,
   LESSON_PROGRESS_BATCH,
   LESSON_STARS_MAX,
-  MATES_SOLVED_BATCH,
+  PUZZLE_BATCH,
+  PUZZLE_THEMES,
   parseProfileDetails,
   parseSettings,
   type ClientMessage,
@@ -43,7 +44,6 @@ import {
   type UserRef,
   type UserSearchResult,
 } from '@ligungi/protocol';
-import { MATE_PROBLEMS } from '@ligungi/protocol/mates';
 import { WebSocketServer, type WebSocket } from 'ws';
 import {
   SESSION_COOKIE,
@@ -78,6 +78,7 @@ import {
 import { Hub, type Client } from './hub.ts';
 import { Lobby } from './lobby.ts';
 import { Moderation } from './moderation.ts';
+import { PuzzleStore, isPuzzle } from './puzzles.ts';
 import type { GameRoom } from './room.ts';
 import { SeekStore } from './seeks.ts';
 import { otpauthUri } from './totp.ts';
@@ -94,7 +95,6 @@ const PLAYERS_CACHE_MS = 60_000;
 /** Expired challenges are canceled within this delay even if nobody opens them (the receiver's list updates). */
 const CHALLENGE_SWEEP_MS = 60_000;
 const MAX_TOPICS_PER_CLIENT = 32;
-const MATE_IDS: ReadonlySet<string> = new Set(MATE_PROBLEMS.map((problem) => problem.id));
 const LESSON_IDS: ReadonlySet<string> = new Set(LESSON_EXERCISES.map((exercise) => exercise.id));
 /** Live games listed for the TV and the home page. */
 const TV_GAMES = 24;
@@ -179,6 +179,7 @@ export const createApp = (config: ServerConfig): App => {
   });
 
   const tv = new Tv(games, config.now);
+  const puzzles = new PuzzleStore(db, config.now);
   const tvGames = () => tv.live().slice(0, TV_GAMES).map((room) => room.summary());
   // Every move of every live game changes the list, so changes are gathered and sent at most every TV_PUBLISH_MS.
   let tvTimer: ReturnType<typeof setTimeout> | null = null;
@@ -735,7 +736,10 @@ export const createApp = (config: ServerConfig): App => {
         account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
         settings: { challengePolicy: users.challengePolicy(userId) },
         profile: users.details(userId),
-        matesSolved: users.solvedMates(userId),
+        puzzles: (() => {
+          const { rating, history } = puzzles.dashboard(userId);
+          return { rating, tries: history, solved: puzzles.solved(userId) };
+        })(),
         lessons: users.lessonProgress(userId),
         // What moderation holds about the account: the suspension in force, the reports it made and the actions taken on
         // it (without naming the moderator).
@@ -975,15 +979,40 @@ export const createApp = (config: ServerConfig): App => {
       users.saveLessonProgress(userId, Object.fromEntries(entries) as Record<string, number>);
       sendJson(ctx.res, 200, users.lessonProgress(userId));
     })
-    .add('GET', '/api/mates/solved', (ctx) => sendJson(ctx.res, 200, users.solvedMates(requireUser(ctx))))
-    .add('POST', '/api/mates/solved', async (ctx) => {
+    .add('GET', '/api/puzzles/next', (ctx) => {
+      const params = ctx.url.searchParams;
+      const theme = PUZZLE_THEMES.find((value) => value === params.get('theme')) ?? null;
+      const mode = MODES.find((value) => value === params.get('mode')) ?? null;
+      // Without an account, the browser says what it already solved (ids that are not puzzles are ignored).
+      const exclude = (params.get('exclude') ?? '').split(',').filter(isPuzzle).slice(0, PUZZLE_BATCH);
+      const id = puzzles.next(ctx.session.userId, { theme, mode }, exclude);
+      if (!id) throw new HttpError(404, 'noPuzzleLeft');
+      sendJson(ctx.res, 200, { id });
+    })
+    .add('GET', '/api/puzzles/daily', (ctx) => {
+      sendJson(ctx.res, 200, puzzles.daily(new Date(config.now()).toISOString().slice(0, 10)));
+    })
+    .add('GET', '/api/puzzles/dashboard', (ctx) => sendJson(ctx.res, 200, puzzles.dashboard(requireUser(ctx))))
+    .add('GET', '/api/puzzles/solved', (ctx) => sendJson(ctx.res, 200, puzzles.solved(requireUser(ctx))))
+    .add('POST', '/api/puzzles/solved', async (ctx) => {
       const userId = requireUser(ctx);
       const { ids } = (await ctx.body()) as { ids?: unknown };
-      if (!Array.isArray(ids) || ids.length > MATES_SOLVED_BATCH || !ids.every((id) => typeof id === 'string' && MATE_IDS.has(id))) {
-        throw new HttpError(400, 'invalidMateProblem');
+      if (!Array.isArray(ids) || ids.length > PUZZLE_BATCH || !ids.every((id) => typeof id === 'string' && isPuzzle(id))) {
+        throw new HttpError(400, 'invalidPuzzle');
       }
-      users.markMatesSolved(userId, ids as string[]);
-      sendJson(ctx.res, 200, users.solvedMates(userId));
+      puzzles.importSolved(userId, ids as string[]);
+      sendJson(ctx.res, 200, puzzles.solved(userId));
+    })
+    .add('GET', '/api/puzzles/:id', (ctx) => {
+      if (!isPuzzle(ctx.params.id!)) throw new HttpError(404, 'puzzleNotFound');
+      sendJson(ctx.res, 200, puzzles.view(ctx.params.id!, ctx.session.userId));
+    })
+    .add('POST', '/api/puzzles/:id/attempt', async (ctx) => {
+      const userId = requireUser(ctx);
+      if (!isPuzzle(ctx.params.id!)) throw new HttpError(404, 'puzzleNotFound');
+      const { win } = (await ctx.body()) as { win?: unknown };
+      if (typeof win !== 'boolean') throw new HttpError(400, 'invalidPuzzle');
+      sendJson(ctx.res, 200, puzzles.attempt(userId, ctx.params.id!, win));
     })
     .add('GET', '/api/challenges/:id', (ctx) => {
       const challenge = lobby.challenge(ctx.params.id!);

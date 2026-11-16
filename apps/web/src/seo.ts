@@ -18,7 +18,7 @@ export const PAGES: readonly Page[] = (
     ['/', 'home'],
     ['/lessons', 'lessons'],
     ['/learn', 'learn'],
-    ['/problems', 'mates'],
+    ['/puzzles', 'puzzles'],
     ['/computer', 'computer'],
     ['/analysis', 'analysis'],
     ['/editor', 'editor'],
@@ -34,7 +34,7 @@ export const PAGES: readonly Page[] = (
 ).map(([path, key]) => ({ path, key, slug: path === '/' ? 'home' : path.slice(1) }));
 
 /** Pages that are personal or empty without an account: kept out of search results. */
-const PRIVATE = /^\/(account|friends|settings|design|login|signup|mod)$/;
+const PRIVATE = /^\/(account|friends|settings|design|login|signup|mod|puzzles\/dashboard)$/;
 
 export const OG_LOCALES: Readonly<Record<Lang, string>> = { pt: 'pt_BR', en: 'en_US', es: 'es_ES' };
 export const HTML_LANGS: Readonly<Record<Lang, string>> = { pt: 'pt-BR', en: 'en', es: 'es' };
@@ -55,7 +55,7 @@ export interface HeadInfo {
 /** Routes under a public page (a TV channel, a mate problem, a mode's ranking) take that page's title and description. */
 const SECTIONS: ReadonlyArray<readonly [RegExp, Page['key']]> = [
   [/^\/tv\//, 'tv'],
-  [/^\/problems\//, 'mates'],
+  [/^\/puzzles\//, 'puzzles'],
   [/^\/lessons\//, 'lessons'],
   [/^\/ranking\//, 'ranking'],
 ];

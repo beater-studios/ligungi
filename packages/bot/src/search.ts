@@ -191,6 +191,19 @@ export class Searcher {
     return best;
   }
 
+  /**
+   * Exact score of every legal move at a fixed depth, best first, for tools that need more than the best move (the
+   * puzzle generator checks that one move stands out). Each move gets a full window, so it is slower than `choose`.
+   */
+  analyse(position: Position, depth: number): Array<{ readonly move: Move; readonly score: number }> {
+    this.#deadline = Infinity;
+    this.#nodes = 0;
+    this.#seen = new Set([repetitionKey(position)]);
+    return legalMoves(position)
+      .map((move) => ({ move, score: -this.#visit(position, move, (child) => this.#negamax(child, depth - 1, -Infinity, Infinity, 1)) }))
+      .sort((a, b) => b.score - a.score);
+  }
+
   #tick(): void {
     if (++this.#nodes % TIME_CHECK_EVERY === 0 && this.#now() > this.#deadline) throw new OutOfTime();
   }

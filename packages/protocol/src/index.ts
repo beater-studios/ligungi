@@ -5,6 +5,7 @@ import type { Country, ProfileDetails } from './profile.ts';
 export * from './errors.ts';
 export * from './profile.ts';
 export * from './lessons.ts';
+export * from './puzzles.ts';
 
 /** Seconds. */
 export interface TimeControl {
@@ -144,19 +145,6 @@ export interface TvChannelView {
   readonly channel: TvChannel;
   readonly game: GameSummary | null;
 }
-
-/** A mate problem: the attacking side to move mates in `moves` of its own moves, every one attacking the Marshal. */
-export interface MateProblem {
-  readonly id: string;
-  /** A play phase position, the attacking side to move. */
-  readonly fen: string;
-  readonly moves: number;
-  /** The solution in machine notation: the attacker's moves, with the longest defense in between. */
-  readonly line: readonly string[];
-}
-
-/** Mate problems a player marks as solved in one request. */
-export const MATES_SOLVED_BATCH = 200;
 
 export interface Opponent {
   readonly name: string;

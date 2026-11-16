@@ -1,5 +1,5 @@
 import { MODES, type Mode } from '@ligungi/engine';
-import { TIME_PRESETS, type GameSettings, type GameSummary, type LobbyView, type Me, type SeekView, type TimeControl } from '@ligungi/protocol';
+import { TIME_PRESETS, type DailyPuzzle, type GameSettings, type GameSummary, type LobbyView, type Me, type SeekView, type TimeControl } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { turns } from '../challenges.ts';
@@ -175,6 +175,31 @@ const Live = () => {
       ) : (
         <p class="ligungi-notice">{games === null ? (failed ? t.genericError : t.common.loading) : t.home.noTv}</p>
       )}
+    </section>
+  );
+};
+
+/** The puzzle of the day, the same for everyone: a small board and a link to solve it. */
+const DailyPuzzleCard = () => {
+  const t = useT();
+  const [daily, setDaily] = useState<DailyPuzzle | null>(null);
+  useEffect(() => {
+    api.get<DailyPuzzle>('/api/puzzles/daily').then(setDaily).catch(() => {});
+  }, []);
+  if (!daily) return null;
+  const task = daily.kind === 'mate' ? t.puzzles.taskMate(t.colors[daily.color], daily.moves) : t.puzzles.taskMaterial(t.colors[daily.color]);
+  return (
+    <section class="ligungi-card ligungi-home__daily">
+      <div class="ligungi-home__card-head">
+        <h2>{t.home.dailyPuzzle}</h2>
+      </div>
+      <a class="ligungi-home__daily-board" href="/puzzles/daily" aria-label={`${t.home.dailyPuzzle}: ${task}`}>
+        <MiniBoard fen={daily.fen} orientation={daily.color} />
+      </a>
+      <p>{task}</p>
+      <a class="button" href="/puzzles/daily">
+        {t.home.solveDaily}
+      </a>
     </section>
   );
 };
@@ -381,6 +406,7 @@ export const HomePage = () => {
           </section>
 
           <OnlineFriends />
+          <DailyPuzzleCard />
           <Live />
         </div>
       </div>

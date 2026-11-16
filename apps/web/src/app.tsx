@@ -17,7 +17,8 @@ import { GamePage } from './pages/GamePage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LearnPage } from './pages/LearnPage.tsx';
 import { LessonsPage } from './pages/LessonsPage.tsx';
-import { MatesPage } from './pages/MatesPage.tsx';
+import { PuzzleDashboardPage } from './pages/PuzzleDashboardPage.tsx';
+import { PuzzlesPage } from './pages/PuzzlesPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { PlayersPage } from './pages/PlayersPage.tsx';
 import { RankingPage } from './pages/RankingPage.tsx';
@@ -50,8 +51,13 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/lessons$/, render: () => <LessonsPage /> },
   { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})$`), render: ([stage]) => <LessonsPage stage={stage!} /> },
   { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})/(\\d{1,2})$`), render: ([stage, n]) => <LessonsPage stage={stage!} exercise={Number(n)} /> },
-  { pattern: /^\/problems$/, render: () => <MatesPage /> },
-  { pattern: /^\/problems\/([0-9a-f]{8})$/, render: ([id]) => <MatesPage id={id!} /> },
+  { pattern: /^\/puzzles$/, render: () => <PuzzlesPage /> },
+  { pattern: /^\/puzzles\/daily$/, render: () => <PuzzlesPage daily /> },
+  { pattern: /^\/puzzles\/dashboard$/, render: () => <PuzzleDashboardPage /> },
+  { pattern: /^\/puzzles\/([0-9a-f]{8})$/, render: ([id]) => <PuzzlesPage id={id!} /> },
+  // The mate problems became puzzles: old links keep working.
+  { pattern: /^\/problems$/, render: () => <Redirect to="/puzzles" /> },
+  { pattern: /^\/problems\/([0-9a-f]{8})$/, render: ([id]) => <Redirect to={`/puzzles/${id!}`} /> },
   { pattern: /^\/tv$/, render: () => <TvPage /> },
   { pattern: new RegExp(`^/tv/(${TV_CHANNELS.join('|')})$`), render: ([channel]) => <TvChannelPage channel={channel as TvChannel} /> },
   { pattern: /^\/settings$/, render: () => <SettingsPage /> },
@@ -69,6 +75,12 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/challenge\/([A-Za-z0-9]+)$/, render: ([id]) => <ChallengePage id={id!} /> },
   { pattern: /^\/([A-Za-z0-9]{8})$/, render: ([id]) => <GamePage id={id!} /> },
 ];
+
+/** Sends an old address to its new place, replacing it in the history. */
+const Redirect = ({ to }: { to: string }) => {
+  useEffect(() => navigate(to, true), [to]);
+  return null;
+};
 
 const NotFound = () => {
   const t = useT();
@@ -267,7 +279,7 @@ const Header = () => {
             <div role="group">
               <a href="/lessons">{t.nav.lessons}</a>
               <a href="/learn">{t.nav.rules}</a>
-              <a href="/problems">{t.nav.mates}</a>
+              <a href="/puzzles">{t.nav.puzzles}</a>
             </div>
           </section>
           <section>
@@ -344,7 +356,7 @@ export const SiteFooter = () => {
       links: [
         ['/lessons', t.nav.lessons],
         ['/learn', t.nav.rules],
-        ['/problems', t.nav.mates],
+        ['/puzzles', t.nav.puzzles],
         ['/computer', t.nav.playComputer],
         ['/analysis', t.nav.analysis],
         ['/editor', t.nav.editor],

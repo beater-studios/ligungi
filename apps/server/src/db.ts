@@ -187,6 +187,36 @@ const MIGRATIONS = [
     primary key (user_id, exercise_id)
   );
   `,
+  `
+  create table puzzle_ratings (
+    user_id text primary key references users(id),
+    rating real not null,
+    deviation real not null,
+    volatility real not null,
+    games integer not null
+  );
+  create table puzzle_stats (
+    puzzle_id text primary key,
+    rating real not null,
+    deviation real not null,
+    volatility real not null,
+    plays integer not null,
+    wins integer not null
+  );
+  create table puzzle_attempts (
+    user_id text not null references users(id),
+    puzzle_id text not null,
+    win integer not null,
+    rating integer,
+    change integer,
+    created_at integer not null,
+    primary key (user_id, puzzle_id)
+  );
+  create index puzzle_attempts_user on puzzle_attempts(user_id, created_at);
+  insert into puzzle_attempts (user_id, puzzle_id, win, rating, change, created_at)
+    select user_id, problem_id, 1, null, null, solved_at from mates_solved;
+  drop table mates_solved;
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

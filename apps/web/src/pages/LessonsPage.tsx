@@ -85,7 +85,7 @@ const LessonMap = ({ progress }: { progress: LessonProgress | null }) => {
 
 /**
  * One exercise: the goal, a hint, the moves made against the par, and the board. Outside mates the opponent stays
- * still; in mates the computer answers with the longest defense, checked in the mate worker like the mate problems.
+ * still; in mates the computer answers with the longest defense, checked in the mate worker like the mate puzzles.
  */
 const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; index: number; progress: LessonProgress | null; record: (id: string, stars: number) => void }) => {
   const t = useT();
@@ -252,7 +252,7 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
                 </a>
               ) : (
                 <p class="ligungi-lesson__all-done">
-                  <a href="/problems">{t.lessons.allDone}</a>
+                  <a href="/puzzles">{t.lessons.allDone}</a>
                 </p>
               ))}
             <button type="button" class="button button-empty" onClick={restart}>

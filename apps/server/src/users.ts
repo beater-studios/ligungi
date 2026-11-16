@@ -132,7 +132,8 @@ export class Users {
       // Reports go with the account, made or received; the moderation log keeps its entries as the record of what was done.
       this.#db.prepare('delete from reports where reporter_id = ? or target_id = ?').run(userId, userId);
       this.#db.prepare('delete from two_factor where user_id = ?').run(userId);
-      this.#db.prepare('delete from mates_solved where user_id = ?').run(userId);
+      this.#db.prepare('delete from puzzle_attempts where user_id = ?').run(userId);
+      this.#db.prepare('delete from puzzle_ratings where user_id = ?').run(userId);
       this.#db.prepare('delete from lesson_progress where user_id = ?').run(userId);
       this.#db.prepare('delete from users where id = ?').run(userId);
       this.#db.exec('commit');
@@ -149,20 +150,6 @@ export class Users {
 
   setChallengePolicy(userId: string, policy: ChallengePolicy): void {
     this.#db.prepare('update users set challenge_policy = ? where id = ?').run(policy, userId);
-  }
-
-  /** The mate problems the player solved, oldest first. */
-  solvedMates(userId: string): string[] {
-    const rows = this.#db.prepare('select problem_id from mates_solved where user_id = ? order by solved_at, problem_id').all(userId) as Array<{
-      problem_id: string;
-    }>;
-    return rows.map((row) => row.problem_id);
-  }
-
-  markMatesSolved(userId: string, problemIds: readonly string[]): void {
-    const insert = this.#db.prepare('insert or ignore into mates_solved (user_id, problem_id, solved_at) values (?, ?, ?)');
-    const now = this.#now();
-    for (const id of problemIds) insert.run(userId, id, now);
   }
 
   /** The best stars the player earned in each lesson exercise they finished. */

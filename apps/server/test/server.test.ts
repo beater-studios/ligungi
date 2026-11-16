@@ -2,8 +2,8 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EXTRA_TIME_SECONDS, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ModUserView, type ProfileDetails, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
-import { MATE_PROBLEMS } from '@ligungi/protocol/mates';
+import { EXTRA_TIME_SECONDS, puzzleInfo, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ModUserView, type ProfileDetails, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { PUZZLES } from '@ligungi/protocol/puzzles';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { base32Decode, hotp, TOTP_STEP_MS } from '../src/totp.ts';
 import { Moderation, moderatorCommand } from '../src/moderation.ts';
@@ -1127,21 +1127,49 @@ describe('rating history', () => {
   });
 });
 
-describe('mate problems', () => {
-  it('keeps the problems a player solved, only known ones and only with an account', async () => {
+describe('puzzles', () => {
+  it('rates the first try of each puzzle, picks the next one and the daily one, and keeps a dashboard', async () => {
     server = await startServer();
     const a = client();
-    const [first, second] = MATE_PROBLEMS;
-    expect((await a.request('POST', '/api/mates/solved', { ids: [first!.id] })).status).toBe(401);
-    await signup(a, 'Gotoh');
-    expect((await a.request<string[]>('GET', '/api/mates/solved')).data).toEqual([]);
-    expect((await a.request('POST', '/api/mates/solved', { ids: ['ffffffff'] })).data).toMatchObject({ code: 'invalidMateProblem' });
-    expect((await a.request('POST', '/api/mates/solved', { ids: 'x' })).data).toMatchObject({ code: 'invalidMateProblem' });
-    const ids = second ? [first!.id, second.id] : [first!.id];
-    expect((await a.request<string[]>('POST', '/api/mates/solved', { ids })).data.sort()).toEqual([...ids].sort());
-    // Marking one again changes nothing.
-    expect((await a.request<string[]>('POST', '/api/mates/solved', { ids: [first!.id] })).data).toHaveLength(ids.length);
-    expect((await a.request<{ matesSolved: string[] }>('GET', '/api/account/export')).data.matesSolved.sort()).toEqual([...ids].sort());
+    const [first, second] = PUZZLES;
+    expect((await a.request('POST', `/api/puzzles/${first!.id}/attempt`, { win: true })).status).toBe(401);
+    expect((await a.request('GET', '/api/puzzles/ffffffff')).status).toBe(404);
+    // Without an account the next puzzle skips the ones the browser solved.
+    const guestNext = (await a.request<{ id: string }>('GET', `/api/puzzles/next?exclude=${first!.id}`)).data.id;
+    expect(guestNext).not.toBe(first!.id);
+    await signup(a, 'Knuckle');
+    expect((await a.request<PuzzleView>('GET', `/api/puzzles/${first!.id}`)).data).toMatchObject({ id: first!.id, plays: 0, attempt: null });
+
+    const won = (await a.request<PuzzleAttemptResult>('POST', `/api/puzzles/${first!.id}/attempt`, { win: true })).data;
+    expect(won).toMatchObject({ win: true, counted: true, rating: { games: 1 } });
+    expect(won.change).toBeGreaterThan(0);
+    // Only the first try counts.
+    expect((await a.request<PuzzleAttemptResult>('POST', `/api/puzzles/${first!.id}/attempt`, { win: false })).data).toMatchObject({ counted: false, change: 0 });
+    const lost = (await a.request<PuzzleAttemptResult>('POST', `/api/puzzles/${second!.id}/attempt`, { win: false })).data;
+    expect(lost.change).toBeLessThan(0);
+    expect((await a.request<PuzzleView>('GET', `/api/puzzles/${first!.id}`)).data).toMatchObject({ plays: 1, attempt: { win: true } });
+    expect((await a.request('POST', `/api/puzzles/${first!.id}/attempt`, { win: 'yes' })).data).toMatchObject({ code: 'invalidPuzzle' });
+
+    const next = (await a.request<{ id: string }>('GET', '/api/puzzles/next?theme=mateIn1')).data.id;
+    expect([first!.id, second!.id]).not.toContain(next);
+    expect(puzzleInfo(PUZZLES.find((puzzle) => puzzle.id === next)!).themes).toContain('mateIn1');
+
+    const daily = (await a.request<{ id: string; day: string }>('GET', '/api/puzzles/daily')).data;
+    expect((await client().request<{ id: string }>('GET', '/api/puzzles/daily')).data.id).toBe(daily.id);
+
+    const dashboard = (await a.request<PuzzleDashboard>('GET', '/api/puzzles/dashboard')).data;
+    expect(dashboard.rating.games).toBe(2);
+    expect(dashboard.history.map((entry) => [entry.id, entry.win])).toEqual([
+      [first!.id, true],
+      [second!.id, false],
+    ]);
+
+    // Puzzles solved before signing in are kept as solved, without touching the rating.
+    const third = PUZZLES[2]!.id;
+    expect((await a.request('POST', '/api/puzzles/solved', { ids: ['ffffffff'] })).data).toMatchObject({ code: 'invalidPuzzle' });
+    expect((await a.request<string[]>('POST', '/api/puzzles/solved', { ids: [third] })).data.sort()).toEqual([first!.id, third].sort());
+    expect((await a.request<PuzzleDashboard>('GET', '/api/puzzles/dashboard')).data.rating.games).toBe(2);
+    expect((await a.request<{ puzzles: { solved: string[] } }>('GET', '/api/account/export')).data.puzzles.solved.sort()).toEqual([first!.id, third].sort());
   });
 });
 

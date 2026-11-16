@@ -48,10 +48,10 @@ export const LESSON_STARS_MAX = 3;
 export const LESSON_PROGRESS_BATCH = 100;
 
 /**
- * A position for an exercise: pieces by square in machine notation, a tower written bottom to top (`{ e3: 'Ps' }` is
- * a White Soldier under a Black Samurai), White to move and the full game's rules unless said otherwise.
+ * A position written by hand: pieces by square in machine notation, a tower written bottom to top (`{ e3: 'Ps' }` is a
+ * White Soldier under a Black Samurai), White to move and the full game's rules unless said otherwise.
  */
-const fen = (
+export const fen = (
   pieces: Readonly<Record<string, string>>,
   { hands = '-', mode = 'advanced', phase = 'p', first = 'w' }: { hands?: string; mode?: Mode; phase?: string; first?: 'w' | 'b' } = {},
 ): string => {

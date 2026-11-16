@@ -136,6 +136,7 @@ export const en: Messages = {
     bioTooLong: 'The bio can be up to 400 characters.',
     invalidCountry: 'Invalid country.',
     invalidLessonProgress: 'Invalid lesson progress.',
+    invalidPracticeProgress: 'Invalid practice progress.',
     invalidPuzzle: 'Invalid puzzle.',
     puzzleNotFound: 'Puzzle not found.',
     noPuzzleLeft: 'No puzzles left with these filters.',
@@ -167,6 +168,7 @@ export const en: Messages = {
     rules: 'Gungi rules',
     lessons: 'Lessons',
     puzzles: 'Puzzles',
+    practice: 'Practice',
     watch: 'Watch',
     liveGames: 'Live games',
     tools: 'Tools',
@@ -310,6 +312,7 @@ export const en: Messages = {
   },
 
   common: {
+    playComputer: 'Play the computer',
     online: 'Online',
     offline: 'Offline',
     close: 'Close',
@@ -487,6 +490,8 @@ export const en: Messages = {
   },
 
   computer: {
+    fromPosition: (mode, turn) => `The game starts from the position below (${mode}, ${turn} to move).`,
+    normalGame: 'Game from the start',
     title: 'Play against the computer',
     level: 'Level',
     intro: 'No account and no queue: the computer plays in your browser.',
@@ -750,6 +755,41 @@ export const en: Messages = {
       'draft-marshal': { instruction: 'The first piece of the draft is always the Marshal. Place it in your territory, the first three ranks.', hint: 'Pick the Marshal in your hand.' },
       'draft-place': { instruction: 'Place pieces from your hand on both stars.', hint: 'Any piece will do, inside your territory.' },
       'draft-done': { instruction: 'When you do not want to place more pieces, declare done. As you play second, the draft ends right away.', hint: 'Use the Done (済み) button.' },
+    },
+  },
+
+  practice: {
+    title: 'Practice',
+    intro: 'Positions to train against the computer at its strongest: mate, convert your advantage or hold on, within a move limit.',
+    goalMate: (n) => `Mate within ${n} moves`,
+    goalWin: (n) => `Win within ${n} moves`,
+    goalSurvive: (n) => `Hold on for ${n} moves without losing`,
+    movesUsed: (used, limit) => `Move ${used} of ${limit}`,
+    doneIn: (n) => (n === 1 ? 'Done in 1 move' : `Done in ${n} moves`),
+    yourMove: 'Your move.',
+    thinking: 'The computer is thinking...',
+    won: (n) => (n === 1 ? 'Goal reached in 1 move!' : `Goal reached in ${n} moves!`),
+    failed: 'Not this time. Start over and try another way.',
+    retry: 'Start over',
+    next: 'Next position',
+    all: 'All positions',
+    loginToSave: 'Sign in to keep your progress on your account.',
+    notFound: 'Position not found.',
+    sections: {
+      endgames: { title: 'Endgames', intro: 'Mate the lone Marshal. Use your own Marshal to take away its escape squares.' },
+      advantage: { title: 'Converting an advantage', intro: 'You have extra pieces: turn them into a win before the move limit runs out.' },
+      defense: { title: 'Defense', intro: 'You are behind and under attack. Hold on for the moves asked without losing.' },
+    },
+    positions: {
+      'endgame-lancers': 'General and two Lancers',
+      'endgame-general-samurais': 'General and two Samurai',
+      'endgame-general-majors': 'General and two Major Generals',
+      'endgame-hand': 'Pieces in hand only',
+      'advantage-two': 'General and two Majors',
+      'advantage-endgame': 'An endgame ahead',
+      'defense-down-general': 'Without the General',
+      'defense-attack': 'Marshal surrounded',
+      'defense-hand': 'Defending with the hand',
     },
   },
 
@@ -1127,6 +1167,10 @@ export const en: Messages = {
       lessons: {
         title: 'Interactive Gungi lessons · ligungi',
         description: 'Learn Gungi by playing: the pieces, towers, pieces in hand, betrayal, mate and the draft, in short exercises on the board.',
+      },
+      practice: {
+        title: 'Practice against the computer · ligungi',
+        description: 'Train Gungi endgames, convert advantages and defend hard positions against the computer at its strongest.',
       },
       puzzles: {
         title: 'Gungi puzzles · ligungi',

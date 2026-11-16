@@ -217,6 +217,15 @@ const MIGRATIONS = [
     select user_id, problem_id, 1, null, null, solved_at from mates_solved;
   drop table mates_solved;
   `,
+  `
+  create table practice_progress (
+    user_id text not null references users(id),
+    position_id text not null,
+    moves integer not null,
+    updated_at integer not null,
+    primary key (user_id, position_id)
+  );
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

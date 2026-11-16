@@ -629,6 +629,16 @@ export const DesignPage = () => {
               </span>
             </a>
           </Example>
+          <Example label="Practice position card, with the done mark (.ligungi-practice__position)">
+            <a class="ligungi-card ligungi-practice__position" href="#game" style={{ maxWidth: '14rem' }}>
+              <MiniBoard position={lessonPosition} />
+              <strong>General and two Samurai</strong>
+              <span>Mate within 20 moves</span>
+              <span class="ligungi-tag ligungi-practice__done" data-icon={icons.Checkmark}>
+                Done in 12 moves
+              </span>
+            </a>
+          </Example>
           <Example label="Puzzle rating change (.ligungi-puzzle__change) and a share bar of the puzzle dashboard (.ligungi-puzzle-dashboard__bar)">
             <p class="ligungi-puzzle__change is-up">Puzzle rating: 1557 (+57)</p>
             <p class="ligungi-puzzle__change is-down">Puzzle rating: 1490 (-12)</p>

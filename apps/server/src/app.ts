@@ -15,6 +15,8 @@ import {
   LESSON_EXERCISES,
   LESSON_PROGRESS_BATCH,
   LESSON_STARS_MAX,
+  PRACTICE_BATCH,
+  PRACTICE_POSITIONS,
   PUZZLE_BATCH,
   PUZZLE_THEMES,
   parseProfileDetails,
@@ -96,6 +98,7 @@ const PLAYERS_CACHE_MS = 60_000;
 const CHALLENGE_SWEEP_MS = 60_000;
 const MAX_TOPICS_PER_CLIENT = 32;
 const LESSON_IDS: ReadonlySet<string> = new Set(LESSON_EXERCISES.map((exercise) => exercise.id));
+const PRACTICE_IDS: ReadonlySet<string> = new Set(PRACTICE_POSITIONS.map((position) => position.id));
 /** Live games listed for the TV and the home page. */
 const TV_GAMES = 24;
 const TV_PUBLISH_MS = 500;
@@ -741,6 +744,7 @@ export const createApp = (config: ServerConfig): App => {
           return { rating, tries: history, solved: puzzles.solved(userId) };
         })(),
         lessons: users.lessonProgress(userId),
+        practice: users.practiceProgress(userId),
         // What moderation holds about the account: the suspension in force, the reports it made and the actions taken on
         // it (without naming the moderator).
         moderation: {
@@ -978,6 +982,19 @@ export const createApp = (config: ServerConfig): App => {
       if (!valid) throw new HttpError(400, 'invalidLessonProgress');
       users.saveLessonProgress(userId, Object.fromEntries(entries) as Record<string, number>);
       sendJson(ctx.res, 200, users.lessonProgress(userId));
+    })
+    .add('GET', '/api/practice/progress', (ctx) => sendJson(ctx.res, 200, users.practiceProgress(requireUser(ctx))))
+    .add('POST', '/api/practice/progress', async (ctx) => {
+      const userId = requireUser(ctx);
+      const { results } = (await ctx.body()) as { results?: unknown };
+      const entries = typeof results === 'object' && results !== null && !Array.isArray(results) ? Object.entries(results) : null;
+      const valid =
+        entries !== null &&
+        entries.length <= PRACTICE_BATCH &&
+        entries.every(([id, moves]) => PRACTICE_IDS.has(id) && Number.isInteger(moves) && (moves as number) >= 1 && (moves as number) <= 1000);
+      if (!valid) throw new HttpError(400, 'invalidPracticeProgress');
+      users.savePracticeProgress(userId, Object.fromEntries(entries) as Record<string, number>);
+      sendJson(ctx.res, 200, users.practiceProgress(userId));
     })
     .add('GET', '/api/puzzles/next', (ctx) => {
       const params = ctx.url.searchParams;

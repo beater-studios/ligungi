@@ -3524,6 +3524,24 @@ body:has(main.ligungi-auth) #clinput {
   }
 }
 
+.ligungi-computer__custom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+
+  p {
+    flex: 1 1 14rem;
+    margin: 0;
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-computer__custom-board {
+  flex: 0 0 auto;
+  width: min(100%, 13rem);
+}
+
 .ligungi-computer__head {
   h1 {
     margin: 0;
@@ -4000,6 +4018,71 @@ $lesson-star: #e8a800;
 
   &__hand:empty {
     display: none;
+  }
+}
+
+/* ===== Practice (pages/PracticePage.tsx): positions by section, each a small board with its goal ===== */
+.ligungi-practice {
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    h2 {
+      margin: 0;
+      color: $c-font-clear;
+      font-size: 1.35rem;
+      font-weight: 500;
+    }
+
+    > p {
+      margin: 0;
+      color: $c-font-dim;
+    }
+  }
+
+  &__positions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__position {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    height: 100%;
+    padding: 0.9rem;
+    color: $c-font;
+
+    &:hover {
+      color: $c-font;
+      box-shadow:
+        0 0 0 1px $c-primary,
+        0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    strong {
+      color: $c-font-clear;
+      font-weight: 500;
+    }
+
+    span {
+      color: $c-font-dim;
+      font-size: 0.9em;
+    }
+  }
+
+  &__done {
+    align-self: flex-start;
+
+    &::before {
+      margin-inline-end: 0.3em;
+      color: $c-good;
+    }
   }
 }
 

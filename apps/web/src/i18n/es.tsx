@@ -136,6 +136,7 @@ export const es: Messages = {
     bioTooLong: 'La bio puede tener hasta 400 caracteres.',
     invalidCountry: 'País no válido.',
     invalidLessonProgress: 'Progreso de lección no válido.',
+    invalidPracticeProgress: 'Progreso de práctica no válido.',
     invalidPuzzle: 'Puzzle no válido.',
     puzzleNotFound: 'Puzzle no encontrado.',
     noPuzzleLeft: 'No quedan puzzles con estos filtros.',
@@ -167,6 +168,7 @@ export const es: Messages = {
     rules: 'Reglas del Gungi',
     lessons: 'Lecciones',
     puzzles: 'Puzzles',
+    practice: 'Práctica',
     watch: 'Ver',
     liveGames: 'Partidas en vivo',
     tools: 'Herramientas',
@@ -310,6 +312,7 @@ export const es: Messages = {
   },
 
   common: {
+    playComputer: 'Jugar contra la computadora',
     online: 'Conectado',
     offline: 'Desconectado',
     close: 'Cerrar',
@@ -487,6 +490,8 @@ export const es: Messages = {
   },
 
   computer: {
+    fromPosition: (mode, turn) => `La partida empieza desde la posición de abajo (${mode}, juegan las ${turn.toLowerCase()}).`,
+    normalGame: 'Partida desde el principio',
     title: 'Jugar contra la computadora',
     level: 'Nivel',
     intro: 'Sin cuenta y sin cola: la computadora juega en tu navegador.',
@@ -751,6 +756,41 @@ export const es: Messages = {
       'draft-marshal': { instruction: 'La primera pieza del draft siempre es el Mariscal. Colócalo en tu territorio, las tres primeras filas.', hint: 'Elige el Mariscal en tu mano.' },
       'draft-place': { instruction: 'Coloca piezas de tu mano en las dos estrellas.', hint: 'Cualquier pieza sirve, dentro de tu territorio.' },
       'draft-done': { instruction: 'Cuando no quieras colocar más piezas, declara listo. Como juegas segundo, el draft termina en el acto.', hint: 'Usa el botón Listo (済み).' },
+    },
+  },
+
+  practice: {
+    title: 'Práctica',
+    intro: 'Posiciones para entrenar contra la computadora en su nivel más fuerte: da mate, convierte la ventaja o resiste, dentro de un límite de jugadas.',
+    goalMate: (n) => `Da mate en hasta ${n} jugadas`,
+    goalWin: (n) => `Gana en hasta ${n} jugadas`,
+    goalSurvive: (n) => `Resiste ${n} jugadas sin perder`,
+    movesUsed: (used, limit) => `Jugada ${used} de ${limit}`,
+    doneIn: (n) => (n === 1 ? 'Hecho en 1 jugada' : `Hecho en ${n} jugadas`),
+    yourMove: 'Tu turno.',
+    thinking: 'La computadora está pensando...',
+    won: (n) => (n === 1 ? '¡Objetivo cumplido en 1 jugada!' : `¡Objetivo cumplido en ${n} jugadas!`),
+    failed: 'No fue esta vez. Empieza de nuevo y prueba otro camino.',
+    retry: 'Empezar de nuevo',
+    next: 'Siguiente posición',
+    all: 'Todas las posiciones',
+    loginToSave: 'Entra para guardar el progreso en tu cuenta.',
+    notFound: 'Posición no encontrada.',
+    sections: {
+      endgames: { title: 'Finales', intro: 'Da mate al Mariscal solo. Usa tu Mariscal para quitarle las casillas de escape.' },
+      advantage: { title: 'Convertir la ventaja', intro: 'Tienes piezas de más: conviértelas en victoria antes de que se acabe el límite de jugadas.' },
+      defense: { title: 'Defensa', intro: 'Vas por detrás y bajo ataque. Aguanta las jugadas pedidas sin perder.' },
+    },
+    positions: {
+      'endgame-lancers': 'General y dos Lanceros',
+      'endgame-general-samurais': 'General y dos Samuráis',
+      'endgame-general-majors': 'General y dos Mayores Generales',
+      'endgame-hand': 'Solo con piezas en mano',
+      'advantage-two': 'General y dos Mayores',
+      'advantage-endgame': 'Un final con ventaja',
+      'defense-down-general': 'Sin el General',
+      'defense-attack': 'Mariscal rodeado',
+      'defense-hand': 'Defensa con la mano',
     },
   },
 
@@ -1128,6 +1168,10 @@ export const es: Messages = {
       lessons: {
         title: 'Lecciones interactivas de Gungi · ligungi',
         description: 'Aprende Gungi jugando: las piezas, las torres, las piezas en mano, la traición, el mate y el draft, en ejercicios cortos en el tablero.',
+      },
+      practice: {
+        title: 'Práctica contra la computadora · ligungi',
+        description: 'Entrena finales de Gungi, convierte ventajas y defiende posiciones difíciles contra la computadora en su nivel más fuerte.',
       },
       puzzles: {
         title: 'Puzzles de Gungi · ligungi',

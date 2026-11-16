@@ -1194,6 +1194,24 @@ describe('lessons', () => {
   });
 });
 
+describe('practice', () => {
+  it('keeps the fewest moves of each finished position, only for known ones and with an account', async () => {
+    server = await startServer();
+    const a = client();
+    const id = 'endgame-hand';
+    expect((await a.request('POST', '/api/practice/progress', { results: { [id]: 9 } })).status).toBe(401);
+    await signup(a, 'Shoot');
+    for (const results of [{ nope: 9 }, { [id]: 0 }, { [id]: 1.5 }, [id]]) {
+      expect((await a.request('POST', '/api/practice/progress', { results })).data).toMatchObject({ code: 'invalidPracticeProgress' });
+    }
+    expect((await a.request('POST', '/api/practice/progress', { results: { [id]: 12 } })).data).toEqual({ [id]: 12 });
+    // A longer win never replaces a shorter one.
+    await a.request('POST', '/api/practice/progress', { results: { [id]: 15 } });
+    expect((await a.request('POST', '/api/practice/progress', { results: { [id]: 9 } })).data).toEqual({ [id]: 9 });
+    expect((await a.request<{ practice: Record<string, number> }>('GET', '/api/account/export')).data.practice).toEqual({ [id]: 9 });
+  });
+});
+
 describe('profile details', () => {
   it('saves the bio, country and linked profiles, shows them on the profile and the ranking, and lets moderators clear them', async () => {
     server = await startServer();

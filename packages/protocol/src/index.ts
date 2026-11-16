@@ -6,6 +6,7 @@ export * from './errors.ts';
 export * from './profile.ts';
 export * from './lessons.ts';
 export * from './puzzles.ts';
+export * from './practice.ts';
 
 /** Seconds. */
 export interface TimeControl {

@@ -1,20 +1,36 @@
 import { BOT_LEVELS, type BotLevel } from '@ligungi/bot';
-import { MODES, MODE_RULES, initialPosition, legalMoves, moveToString, opposite, parseMove, repetitionKey, toFen, type Color, type Mode } from '@ligungi/engine';
+import { MODES, MODE_RULES, initialPosition, legalMoves, moveToString, opposite, parseFen, parseMove, positionProblems, repetitionKey, toFen, type Color, type Mode, type Position } from '@ligungi/engine';
 import type { ColorChoice } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { MiniBoard } from '../components/MiniBoard.tsx';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
 import { Checkbox, OptionCards, SubmitButton } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
 import { colorChoiceOptions, outcomeText, useT } from '../i18n/index.ts';
 import { useLocalGame } from '../localGame.ts';
+import { useLocation } from '../router.ts';
 import { playSound } from '../sound.ts';
 
 const MIN_THINK_MS = 450;
 
 const pick = (choice: ColorChoice): Color => (choice === 'random' ? (Math.random() < 0.5 ? 'white' : 'black') : choice);
 
+/** A start position from the address (`?fen=`, from the board editor or the analysis), when it is one a game can reach. */
+const startFrom = (search: string): Position | null => {
+  const fen = new URLSearchParams(search).get('fen');
+  if (!fen) return null;
+  try {
+    const position = parseFen(fen);
+    return positionProblems(position).length === 0 && legalMoves(position).length > 0 ? position : null;
+  } catch {
+    return null;
+  }
+};
+
 export const ComputerPage = () => {
   const t = useT();
+  const { search } = useLocation();
+  const custom = useMemo(() => startFrom(search), [search]);
   const [mode, setMode] = useState<Mode>('beginner');
   const [level, setLevel] = useState<BotLevel>(2);
   const [colorChoice, setColorChoice] = useState<ColorChoice>('white');
@@ -77,7 +93,7 @@ export const ComputerPage = () => {
     const color = pick(colorChoice);
     setMe(color);
     setFlipped(false);
-    local.reset(initialPosition(mode, 'white', { freeDraft }));
+    local.reset(custom ?? initialPosition(mode, 'white', { freeDraft }));
     playSound('notify');
   };
 
@@ -99,17 +115,30 @@ export const ComputerPage = () => {
             options={BOT_LEVELS.map((l) => ({ value: l, badge: l, label: t.computer.levelNames[l], hint: t.computer.levelHints[l] }))}
             onChange={setLevel}
           />
-          <OptionCards
-            name="ai-mode"
-            legend={t.common.mode}
-            layout="segmented"
-            value={mode}
-            options={MODES.map((m) => ({ value: m, label: t.modes[m] }))}
-            onChange={setMode}
-            help={t.modeDescriptions[mode]}
-          />
-          {MODE_RULES[mode].draft && (
-            <Checkbox id="ai-free" checked={freeDraft} onChange={setFreeDraft} label={t.freeDraftLabel} help={t.freeDraftHint} />
+          {custom ? (
+            <div class="ligungi-computer__custom">
+              <div class="ligungi-computer__custom-board">
+                <MiniBoard position={custom} />
+              </div>
+              <p>
+                {t.computer.fromPosition(t.modes[custom.mode], t.colors[custom.turn])} <a href="/computer">{t.computer.normalGame}</a>
+              </p>
+            </div>
+          ) : (
+            <>
+              <OptionCards
+                name="ai-mode"
+                legend={t.common.mode}
+                layout="segmented"
+                value={mode}
+                options={MODES.map((m) => ({ value: m, label: t.modes[m] }))}
+                onChange={setMode}
+                help={t.modeDescriptions[mode]}
+              />
+              {MODE_RULES[mode].draft && (
+                <Checkbox id="ai-free" checked={freeDraft} onChange={setFreeDraft} label={t.freeDraftLabel} help={t.freeDraftHint} />
+              )}
+            </>
           )}
           <OptionCards
             name="ai-color"
@@ -118,7 +147,7 @@ export const ComputerPage = () => {
             value={colorChoice}
             options={colorOptions.map((option) => ({ ...option, icon: disc(option.value) }))}
             onChange={setColorChoice}
-            help={t.common.whiteStarts}
+            help={custom ? undefined : t.common.whiteStarts}
           />
           <SubmitButton>{t.computer.start}</SubmitButton>
         </form>
@@ -132,7 +161,10 @@ export const ComputerPage = () => {
     ? outcomeText(t, outcome)
     : t.turnStatus(position.phase === 'draft', position.turn, myTurn ? 'you' : thinking ? 'thinking' : null);
   const doneAvailable = myTurn && position.phase === 'draft' && moves.some((m) => m.kind === 'done');
-  const analysisLink = `/analysis?mode=${local.start.mode}&first=${local.start.firstPlayer}${local.start.freeDraft ? '&free=1' : ''}&moves=${encodeURIComponent(replay.moves.map(moveToString).join(','))}`;
+  // A game from a set-up position cannot be replayed from the mode's start: the analysis opens on where it stands.
+  const analysisLink = custom
+    ? `/analysis?fen=${encodeURIComponent(toFen(position))}`
+    : `/analysis?mode=${local.start.mode}&first=${local.start.firstPlayer}${local.start.freeDraft ? '&free=1' : ''}&moves=${encodeURIComponent(replay.moves.map(moveToString).join(','))}`;
   const players = {
     [me]: { name: t.common.you, first: local.start.firstPlayer === me },
     [bot]: { name: t.computer.bot(level), first: local.start.firstPlayer === bot },

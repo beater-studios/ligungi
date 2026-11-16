@@ -80,6 +80,7 @@ export const pt = {
     rules: 'Regras do Gungi',
     lessons: 'Lições',
     puzzles: 'Puzzles',
+    practice: 'Prática',
     watch: 'Assistir',
     liveGames: 'Partidas ao vivo',
     tools: 'Ferramentas',
@@ -223,6 +224,7 @@ export const pt = {
   },
 
   common: {
+    playComputer: 'Jogar contra o computador',
     online: 'Conectado',
     offline: 'Desconectado',
     close: 'Fechar',
@@ -400,6 +402,8 @@ export const pt = {
   },
 
   computer: {
+    fromPosition: (mode: string, turn: string) => `A partida começa da posição abaixo (${mode}, vez do ${turn}).`,
+    normalGame: 'Partida desde o início',
     title: 'Jogar contra o computador',
     level: 'Nível',
     intro: 'Sem conta e sem fila: o computador joga no seu navegador.',
@@ -666,6 +670,41 @@ export const pt = {
       'draft-marshal': { instruction: 'A primeira peça do draft é sempre o Marechal. Coloque-o no seu território, as três primeiras fileiras.', hint: 'Escolha o Marechal na mão.' },
       'draft-place': { instruction: 'Coloque peças da mão nas duas estrelas.', hint: 'Qualquer peça vale, dentro do seu território.' },
       'draft-done': { instruction: 'Quando não quiser colocar mais peças, declare pronto. Como você joga em segundo, o draft termina na hora.', hint: 'Use o botão Pronto (済み).' },
+    },
+  },
+
+  practice: {
+    title: 'Prática',
+    intro: 'Posições para treinar contra o computador no nível mais forte: dê mate, converta a vantagem ou resista, dentro de um limite de lances.',
+    goalMate: (n: number) => `Dê mate em até ${n} lances`,
+    goalWin: (n: number) => `Vença em até ${n} lances`,
+    goalSurvive: (n: number) => `Resista por ${n} lances sem perder`,
+    movesUsed: (used: number, limit: number) => `Lance ${used} de ${limit}`,
+    doneIn: (n: number) => (n === 1 ? 'Feito em 1 lance' : `Feito em ${n} lances`),
+    yourMove: 'Sua vez.',
+    thinking: 'O computador está pensando...',
+    won: (n: number) => (n === 1 ? 'Objetivo cumprido em 1 lance!' : `Objetivo cumprido em ${n} lances!`),
+    failed: 'Não foi desta vez. Recomece e tente outro caminho.',
+    retry: 'Recomeçar',
+    next: 'Próxima posição',
+    all: 'Todas as posições',
+    loginToSave: 'Entre para guardar o progresso na sua conta.',
+    notFound: 'Posição não encontrada.',
+    sections: {
+      endgames: { title: 'Finais', intro: 'Dê mate no Marechal sozinho. Use o seu Marechal para fechar as casas de fuga.' },
+      advantage: { title: 'Converter a vantagem', intro: 'Você tem peças a mais: transforme isso em vitória antes que o tempo de lances acabe.' },
+      defense: { title: 'Defesa', intro: 'Você está em desvantagem e sob ataque. Aguente os lances pedidos sem perder.' },
+    },
+    positions: {
+      'endgame-lancers': 'General e dois Lanceiros',
+      'endgame-general-samurais': 'General e dois Samurais',
+      'endgame-general-majors': 'General e dois Major-Generais',
+      'endgame-hand': 'Só com peças da mão',
+      'advantage-two': 'General e dois Majors',
+      'advantage-endgame': 'Final com vantagem',
+      'defense-down-general': 'Sem o General',
+      'defense-attack': 'Marechal cercado',
+      'defense-hand': 'Defesa com a mão',
     },
   },
 
@@ -1042,6 +1081,10 @@ export const pt = {
       lessons: {
         title: 'Lições interativas de Gungi · ligungi',
         description: 'Aprenda Gungi jogando: as peças, as torres, as peças da mão, a traição, o mate e o draft, em exercícios curtos no tabuleiro.',
+      },
+      practice: {
+        title: 'Prática contra o computador · ligungi',
+        description: 'Treine finais, converta vantagens e defenda posições difíceis de Gungi contra o computador no nível mais forte.',
       },
       puzzles: {
         title: 'Puzzles de Gungi · ligungi',

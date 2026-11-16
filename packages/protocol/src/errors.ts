@@ -35,6 +35,7 @@ export const ERROR_MESSAGES = {
   bioTooLong: 'A bio pode ter até 400 caracteres.',
   invalidCountry: 'País inválido.',
   invalidLessonProgress: 'Progresso de lição inválido.',
+  invalidPracticeProgress: 'Progresso de prática inválido.',
   invalidPuzzle: 'Puzzle inválido.',
   puzzleNotFound: 'Puzzle não encontrado.',
   noPuzzleLeft: 'Não sobrou nenhum puzzle com esses filtros.',

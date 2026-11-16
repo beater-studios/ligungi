@@ -17,6 +17,7 @@ import { GamePage } from './pages/GamePage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LearnPage } from './pages/LearnPage.tsx';
 import { LessonsPage } from './pages/LessonsPage.tsx';
+import { PracticePage } from './pages/PracticePage.tsx';
 import { PuzzleDashboardPage } from './pages/PuzzleDashboardPage.tsx';
 import { PuzzlesPage } from './pages/PuzzlesPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
@@ -51,6 +52,8 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/lessons$/, render: () => <LessonsPage /> },
   { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})$`), render: ([stage]) => <LessonsPage stage={stage!} /> },
   { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})/(\\d{1,2})$`), render: ([stage, n]) => <LessonsPage stage={stage!} exercise={Number(n)} /> },
+  { pattern: /^\/practice$/, render: () => <PracticePage /> },
+  { pattern: /^\/practice\/([a-z-]{1,40})$/, render: ([id]) => <PracticePage id={id!} /> },
   { pattern: /^\/puzzles$/, render: () => <PuzzlesPage /> },
   { pattern: /^\/puzzles\/daily$/, render: () => <PuzzlesPage daily /> },
   { pattern: /^\/puzzles\/dashboard$/, render: () => <PuzzleDashboardPage /> },
@@ -280,6 +283,7 @@ const Header = () => {
               <a href="/lessons">{t.nav.lessons}</a>
               <a href="/learn">{t.nav.rules}</a>
               <a href="/puzzles">{t.nav.puzzles}</a>
+              <a href="/practice">{t.nav.practice}</a>
             </div>
           </section>
           <section>
@@ -357,6 +361,7 @@ export const SiteFooter = () => {
         ['/lessons', t.nav.lessons],
         ['/learn', t.nav.rules],
         ['/puzzles', t.nav.puzzles],
+        ['/practice', t.nav.practice],
         ['/computer', t.nav.playComputer],
         ['/analysis', t.nav.analysis],
         ['/editor', t.nav.editor],

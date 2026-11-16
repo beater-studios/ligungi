@@ -5,6 +5,7 @@ import {
   opposite,
   parseFen,
   parseMove,
+  positionProblems,
   toFen,
   type Color,
   type Mode,
@@ -225,6 +226,11 @@ export const AnalysisPage = () => {
           <button type="button" class="button button-empty text ligungi-import-open" data-icon={icons.Download} onClick={() => setImporting(true)}>
             {t.analysis.importTitle}
           </button>
+          {positionProblems(position).length === 0 && !local.replay.game.outcome && (
+            <a class="button button-empty text ligungi-import-open" data-icon={icons.Swords} href={`/computer?fen=${encodeURIComponent(toFen(position))}`}>
+              {t.common.playComputer}
+            </a>
+          )}
         </div>
       </div>
       {importing && (

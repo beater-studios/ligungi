@@ -296,6 +296,9 @@ export const EditorPage = () => {
               <button type="button" class="button" disabled={problems.length > 0} onClick={() => navigate(`/analysis?fen=${encodeURIComponent(fen)}`)}>
                 {t.editor.openAnalysis}
               </button>
+              <button type="button" class="button button-empty" disabled={problems.length > 0} onClick={() => navigate(`/computer?fen=${encodeURIComponent(fen)}`)}>
+                {t.common.playComputer}
+              </button>
               <button type="button" class="button button-empty" onClick={() => void copyLink()}>
                 {t.editor.copyLink}
               </button>

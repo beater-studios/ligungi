@@ -135,6 +135,7 @@ export class Users {
       this.#db.prepare('delete from puzzle_attempts where user_id = ?').run(userId);
       this.#db.prepare('delete from puzzle_ratings where user_id = ?').run(userId);
       this.#db.prepare('delete from lesson_progress where user_id = ?').run(userId);
+      this.#db.prepare('delete from practice_progress where user_id = ?').run(userId);
       this.#db.prepare('delete from users where id = ?').run(userId);
       this.#db.exec('commit');
     } catch (error) {
@@ -166,6 +167,22 @@ export class Users {
     );
     const now = this.#now();
     for (const [id, stars] of Object.entries(results)) upsert.run(userId, id, stars, now);
+  }
+
+  /** The practice positions the player finished, with the fewest moves they needed for each. */
+  practiceProgress(userId: string): Record<string, number> {
+    const rows = this.#db.prepare('select position_id, moves from practice_progress where user_id = ?').all(userId) as Array<{ position_id: string; moves: number }>;
+    return Object.fromEntries(rows.map((row) => [row.position_id, row.moves]));
+  }
+
+  /** Records finished practice positions, keeping the fewest moves of each. */
+  savePracticeProgress(userId: string, results: Readonly<Record<string, number>>): void {
+    const upsert = this.#db.prepare(
+      `insert into practice_progress (user_id, position_id, moves, updated_at) values (?, ?, ?, ?)
+       on conflict (user_id, position_id) do update set moves = min(moves, excluded.moves), updated_at = excluded.updated_at`,
+    );
+    const now = this.#now();
+    for (const [id, moves] of Object.entries(results)) upsert.run(userId, id, moves, now);
   }
 
   /** Bio, country and linked profiles; read back through the same validation, so a bad stored value shows as empty. */

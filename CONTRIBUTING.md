@@ -10,7 +10,7 @@ Thanks for wanting to help. Bug reports, rule corrections, translations and code
 
 ## Setup
 
-Requires Node 24.22.1 or newer and npm 11.19 or newer (the exact version is in [.nvmrc](.nvmrc); with nvm, run `nvm use`).
+Requires Node 24.22.3 or newer and npm 11.19 or newer (the exact version is in [.nvmrc](.nvmrc); with nvm, run `nvm use`).
 
 ```sh
 npm install

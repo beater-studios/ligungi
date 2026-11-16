@@ -33,7 +33,7 @@ A free platform to play Gungi (軍儀), the board game from HUNTER×HUNTER, onli
 
 ## Development
 
-Requires Node 24.22.1 or newer and npm 11.19 or newer (the exact version is in [.nvmrc](.nvmrc); with nvm, run `nvm use`).
+Requires Node 24.22.3 or newer and npm 11.19 or newer (the exact version is in [.nvmrc](.nvmrc); with nvm, run `nvm use`).
 
 ```sh
 npm install

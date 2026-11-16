@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-16
+
 ### Added
 
 - Lessons (Learn > Lessons): learn Gungi by playing, in eight stages of short exercises on the board: the pieces, towers, pieces in hand, the jumping pieces, betrayal, the Marshal in danger, mate and the draft. Each exercise has a goal and a hint, and earns up to three stars by the number of moves (in mates, by the wrong tries). The map shows the stars of every stage and returns to the first exercise not yet mastered. Progress is kept on your account, or in the browser without one, and moves to the account when you sign in. The rules page links to them.
@@ -16,6 +18,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 ### Fixed
 
 - TV channels and a mode's ranking showed the site's generic title in the browser tab; they now carry the TV and ranking titles.
+
+### Security
+
+- Node 24.22.3, a security release, in the server image and as the minimum version to develop the project.
 
 ## [0.4.0] - 2026-11-14
 
@@ -183,6 +189,7 @@ First public version.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
 [Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.4.0...HEAD
+[0.5.0]: https://github.com/beater-studios/ligungi/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/beater-studios/ligungi/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/beater-studios/ligungi/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/beater-studios/ligungi/compare/v0.1.4...v0.2.0

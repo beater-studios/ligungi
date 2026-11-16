@@ -629,6 +629,11 @@ export const DesignPage = () => {
               </span>
             </a>
           </Example>
+          <Example label="Round timer of the coordinate trainer (.ligungi-coords__time)">
+            <div class="ligungi-coords__time" style={{ maxWidth: '16rem' }}>
+              <span style={{ width: '60%' }} />
+            </div>
+          </Example>
           <Example label="Practice position card, with the done mark (.ligungi-practice__position)">
             <a class="ligungi-card ligungi-practice__position" href="#game" style={{ maxWidth: '14rem' }}>
               <MiniBoard position={lessonPosition} />

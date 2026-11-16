@@ -81,6 +81,7 @@ export const pt = {
     lessons: 'Lições',
     puzzles: 'Puzzles',
     practice: 'Prática',
+    coordinates: 'Treino de coordenadas',
     watch: 'Assistir',
     liveGames: 'Partidas ao vivo',
     tools: 'Ferramentas',
@@ -673,6 +674,31 @@ export const pt = {
     },
   },
 
+  coordinates: {
+    title: 'Treino de coordenadas',
+    intro: 'Aprenda o nome das casas: acerte o máximo que conseguir em 30 segundos.',
+    mode: 'Modalidade',
+    find: 'Encontre a casa',
+    name: 'Nomeie a casa',
+    findHelp: 'Aparece o nome de uma casa: clique nela.',
+    nameHelp: 'Uma casa acende: escolha a coluna e a fileira dela.',
+    notation: 'Notação',
+    rulebook: 'Do livro (5-3)',
+    machine: 'De máquina (e3)',
+    side: 'Lado de baixo',
+    showLabels: 'Mostrar as coordenadas na borda',
+    best: (n: number) => `Recorde: ${n}`,
+    start: 'Começar',
+    again: 'Jogar de novo',
+    score: (n: number) => `Acertos: ${n}`,
+    result: (n: number) => (n === 1 ? '1 acerto.' : `${n} acertos.`),
+    newBest: 'Novo recorde!',
+    namePrompt: 'Que casa é esta?',
+    column: 'Coluna',
+    row: 'Fileira',
+    squareButton: 'Casa',
+  },
+
   practice: {
     title: 'Prática',
     intro: 'Posições para treinar contra o computador no nível mais forte: dê mate, converta a vantagem ou resista, dentro de um limite de lances.',
@@ -1081,6 +1107,10 @@ export const pt = {
       lessons: {
         title: 'Lições interativas de Gungi · ligungi',
         description: 'Aprenda Gungi jogando: as peças, as torres, as peças da mão, a traição, o mate e o draft, em exercícios curtos no tabuleiro.',
+      },
+      coordinates: {
+        title: 'Treino de coordenadas de Gungi · ligungi',
+        description: 'Aprenda as coordenadas do tabuleiro de Gungi, na notação do livro ou na de máquina, em rodadas de 30 segundos.',
       },
       practice: {
         title: 'Prática contra o computador · ligungi',

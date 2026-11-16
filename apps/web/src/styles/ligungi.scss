@@ -4021,6 +4021,170 @@ $lesson-star: #e8a800;
   }
 }
 
+/* ===== Coordinate trainer (pages/CoordinatesPage.tsx): the round panel beside a board of buttons ===== */
+.ligungi-coords {
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+
+    @media (max-width: at-most($small)) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.2rem 1.3rem;
+
+    h1 {
+      margin: 0;
+      color: $c-font-clear;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__intro,
+  &__best {
+    color: $c-font-dim;
+  }
+
+  &__prompt {
+    color: $c-font-clear;
+    font-size: 3rem;
+    font-weight: 500;
+    line-height: 1.1;
+    text-align: center;
+
+    &.is-question {
+      font-size: 1.4rem;
+    }
+  }
+
+  &__score,
+  &__result {
+    color: $c-font-clear;
+    font-size: 1.15em;
+    font-weight: 500;
+  }
+
+  &__time {
+    height: 0.45rem;
+    overflow: hidden;
+    border-radius: 3px;
+    background: $c-bg-zebra;
+
+    span {
+      display: block;
+      height: 100%;
+      background: $c-primary;
+      transition: width 0.1s linear;
+    }
+  }
+
+  &__pick {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    > span {
+      color: $c-font-dim;
+      font-size: 0.9em;
+    }
+
+    div {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+      gap: 0.25rem;
+    }
+
+    // Letters as the board writes them: lowercase, not lila's uppercase buttons.
+    .button {
+      min-width: 0;
+      padding: 0.45rem 0;
+      text-transform: none;
+
+      &.active {
+        background: $c-primary;
+        color: #fff;
+      }
+    }
+  }
+
+  // The board, with the labels (when shown) above it and on its right, as on the game board.
+  &__board {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: min(100%, calc(100svh - 12rem));
+    min-width: min(100%, 18rem);
+
+    &.has-labels {
+      grid-template-columns: minmax(0, 1fr) 1.4rem;
+    }
+  }
+
+  &__columns {
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    grid-column: 1;
+    color: $c-font-dim;
+    font-size: 0.85em;
+    text-align: center;
+  }
+
+  &__rows {
+    display: grid;
+    grid-template-rows: repeat(9, minmax(0, 1fr));
+    grid-column: 2;
+    grid-row: 2;
+    align-items: center;
+    color: $c-font-dim;
+    font-size: 0.85em;
+    text-align: center;
+  }
+
+  &__grid {
+    grid-column: 1;
+    border-radius: 4px;
+  }
+
+  &__sq {
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+
+    &:hover {
+      background: color-mix(in srgb, #{$c-primary} 18%, transparent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $c-primary;
+      outline-offset: -2px;
+    }
+
+    &.is-target {
+      background: color-mix(in srgb, #{$c-primary} 45%, transparent);
+    }
+
+    &.is-ok {
+      background: color-mix(in srgb, #{$c-good} 60%, transparent);
+    }
+
+    &.is-bad {
+      background: color-mix(in srgb, #{$c-bad} 60%, transparent);
+    }
+  }
+}
+
 /* ===== Practice (pages/PracticePage.tsx): positions by section, each a small board with its goal ===== */
 .ligungi-practice {
   &__section {

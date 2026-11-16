@@ -169,6 +169,7 @@ export const es: Messages = {
     lessons: 'Lecciones',
     puzzles: 'Puzzles',
     practice: 'Práctica',
+    coordinates: 'Entrenamiento de coordenadas',
     watch: 'Ver',
     liveGames: 'Partidas en vivo',
     tools: 'Herramientas',
@@ -759,6 +760,31 @@ export const es: Messages = {
     },
   },
 
+  coordinates: {
+    title: 'Entrenamiento de coordenadas',
+    intro: 'Aprende el nombre de las casillas: acierta todas las que puedas en 30 segundos.',
+    mode: 'Modalidad',
+    find: 'Encuentra la casilla',
+    name: 'Nombra la casilla',
+    findHelp: 'Aparece el nombre de una casilla: haz clic en ella.',
+    nameHelp: 'Una casilla se ilumina: elige su columna y su fila.',
+    notation: 'Notación',
+    rulebook: 'Del reglamento (5-3)',
+    machine: 'De máquina (e3)',
+    side: 'Lado de abajo',
+    showLabels: 'Mostrar las coordenadas en el borde',
+    best: (n) => `Récord: ${n}`,
+    start: 'Empezar',
+    again: 'Jugar de nuevo',
+    score: (n) => `Aciertos: ${n}`,
+    result: (n) => (n === 1 ? '1 acierto.' : `${n} aciertos.`),
+    newBest: '¡Nuevo récord!',
+    namePrompt: '¿Qué casilla es esta?',
+    column: 'Columna',
+    row: 'Fila',
+    squareButton: 'Casilla',
+  },
+
   practice: {
     title: 'Práctica',
     intro: 'Posiciones para entrenar contra la computadora en su nivel más fuerte: da mate, convierte la ventaja o resiste, dentro de un límite de jugadas.',
@@ -1168,6 +1194,10 @@ export const es: Messages = {
       lessons: {
         title: 'Lecciones interactivas de Gungi · ligungi',
         description: 'Aprende Gungi jugando: las piezas, las torres, las piezas en mano, la traición, el mate y el draft, en ejercicios cortos en el tablero.',
+      },
+      coordinates: {
+        title: 'Entrenamiento de coordenadas de Gungi · ligungi',
+        description: 'Aprende las coordenadas del tablero de Gungi, en la notación del reglamento o en la de máquina, en rondas de 30 segundos.',
       },
       practice: {
         title: 'Práctica contra la computadora · ligungi',

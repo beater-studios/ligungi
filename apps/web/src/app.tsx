@@ -9,6 +9,7 @@ import { AnalysisPage } from './pages/AnalysisPage.tsx';
 import { AuthPage } from './pages/AuthPage.tsx';
 import { ChallengePage } from './pages/ChallengePage.tsx';
 import { ComputerPage } from './pages/ComputerPage.tsx';
+import { CoordinatesPage } from './pages/CoordinatesPage.tsx';
 import { CookieBanner } from './components/Consent.tsx';
 import { DesignPage } from './pages/DesignPage.tsx';
 import { FriendsPage } from './pages/FriendsPage.tsx';
@@ -52,6 +53,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/lessons$/, render: () => <LessonsPage /> },
   { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})$`), render: ([stage]) => <LessonsPage stage={stage!} /> },
   { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})/(\\d{1,2})$`), render: ([stage, n]) => <LessonsPage stage={stage!} exercise={Number(n)} /> },
+  { pattern: /^\/coordinates$/, render: () => <CoordinatesPage /> },
   { pattern: /^\/practice$/, render: () => <PracticePage /> },
   { pattern: /^\/practice\/([a-z-]{1,40})$/, render: ([id]) => <PracticePage id={id!} /> },
   { pattern: /^\/puzzles$/, render: () => <PuzzlesPage /> },
@@ -284,6 +286,7 @@ const Header = () => {
               <a href="/learn">{t.nav.rules}</a>
               <a href="/puzzles">{t.nav.puzzles}</a>
               <a href="/practice">{t.nav.practice}</a>
+              <a href="/coordinates">{t.nav.coordinates}</a>
             </div>
           </section>
           <section>
@@ -362,6 +365,7 @@ export const SiteFooter = () => {
         ['/learn', t.nav.rules],
         ['/puzzles', t.nav.puzzles],
         ['/practice', t.nav.practice],
+        ['/coordinates', t.nav.coordinates],
         ['/computer', t.nav.playComputer],
         ['/analysis', t.nav.analysis],
         ['/editor', t.nav.editor],

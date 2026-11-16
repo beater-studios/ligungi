@@ -169,6 +169,7 @@ export const en: Messages = {
     lessons: 'Lessons',
     puzzles: 'Puzzles',
     practice: 'Practice',
+    coordinates: 'Coordinate trainer',
     watch: 'Watch',
     liveGames: 'Live games',
     tools: 'Tools',
@@ -758,6 +759,31 @@ export const en: Messages = {
     },
   },
 
+  coordinates: {
+    title: 'Coordinate trainer',
+    intro: 'Learn the names of the squares: get as many right as you can in 30 seconds.',
+    mode: 'Mode',
+    find: 'Find the square',
+    name: 'Name the square',
+    findHelp: 'A square name shows up: click that square.',
+    nameHelp: 'A square lights up: pick its column and row.',
+    notation: 'Notation',
+    rulebook: 'Rulebook (5-3)',
+    machine: 'Machine (e3)',
+    side: 'Side at the bottom',
+    showLabels: 'Show the coordinates on the edge',
+    best: (n) => `Best: ${n}`,
+    start: 'Start',
+    again: 'Play again',
+    score: (n) => `Score: ${n}`,
+    result: (n) => (n === 1 ? '1 right.' : `${n} right.`),
+    newBest: 'New best!',
+    namePrompt: 'Which square is this?',
+    column: 'Column',
+    row: 'Row',
+    squareButton: 'Square',
+  },
+
   practice: {
     title: 'Practice',
     intro: 'Positions to train against the computer at its strongest: mate, convert your advantage or hold on, within a move limit.',
@@ -1167,6 +1193,10 @@ export const en: Messages = {
       lessons: {
         title: 'Interactive Gungi lessons · ligungi',
         description: 'Learn Gungi by playing: the pieces, towers, pieces in hand, betrayal, mate and the draft, in short exercises on the board.',
+      },
+      coordinates: {
+        title: 'Gungi coordinate trainer · ligungi',
+        description: 'Learn the coordinates of the Gungi board, in the rulebook or the machine notation, in 30 second rounds.',
       },
       practice: {
         title: 'Practice against the computer · ligungi',

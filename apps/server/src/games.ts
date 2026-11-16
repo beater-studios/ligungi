@@ -380,7 +380,18 @@ export class Games {
     });
   }
 
-  counts(userId: string): GameCounts {
+  /** How many finished games a user has, rated, won, lost and drawn; with filters, among the games they match (as the history list). */
+  counts(userId: string, filters: Pick<HistoryFilters, 'mode' | 'color' | 'vsId'> = {}): GameCounts {
+    const where = [filters.color ? `${filters.color}_user = ?1` : '(white_user = ?1 or black_user = ?1)', `status = 'ended'`, 'voided = 0'];
+    const params: Array<string | number> = [userId];
+    if (filters.mode) {
+      where.push('mode = ?2');
+      params.push(filters.mode);
+    }
+    if (filters.vsId) {
+      where.push(`((white_user = ?1 and black_user = ?${params.length + 1}) or (black_user = ?1 and white_user = ?${params.length + 1}))`);
+      params.push(filters.vsId);
+    }
     const row = this.#db
       .prepare(
         `select count(*) as games,
@@ -388,9 +399,9 @@ export class Games {
           sum(case when (winner = 'white' and white_user = ?1) or (winner = 'black' and black_user = ?1) then 1 else 0 end) as wins,
           sum(case when winner is not null and not ((winner = 'white' and white_user = ?1) or (winner = 'black' and black_user = ?1)) then 1 else 0 end) as losses,
           sum(case when status = 'ended' and winner is null then 1 else 0 end) as draws
-         from games where (white_user = ?1 or black_user = ?1) and status = 'ended' and voided = 0`,
+         from games where ${where.join(' and ')}`,
       )
-      .get(userId) as { games: number; rated: number | null; wins: number | null; losses: number | null; draws: number | null };
+      .get(...params) as { games: number; rated: number | null; wins: number | null; losses: number | null; draws: number | null };
     return { games: row.games, rated: row.rated ?? 0, wins: row.wins ?? 0, losses: row.losses ?? 0, draws: row.draws ?? 0 };
   }
 

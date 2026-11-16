@@ -45,7 +45,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Custom background image | Personal taste | S | Low | lichess, lishogi |
 | Language shortcut in the header | Faster than opening the settings menu | S | Low | lishogi |
 | 3D board and board adjustments (brightness, contrast, hue) | Personal taste and accessibility | M | Low | lichess |
-| Blind mode for screen readers | Accessibility: lichess is fully playable without seeing the board | L | Medium | lichess |
 | More languages through a community translation platform | lichess has over 100 languages translated by volunteers | M | Medium | lichess |
 
 ## Community
@@ -54,11 +53,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 |---|---|---|---|---|
 | Official social media: a Discord server first (community and support), then X, YouTube, Twitch and Instagram, each linked from the footer with its icon (icons from Simple Icons, CC0) | Gives players a place to meet, ask questions and follow news; Discord needs moderators before it opens | S | Medium | lichess, lishogi |
 | Community links in the menu and footer (GitHub issues, community group, social media) | The issue tracker is only linked from the FAQ and contact page | S | Medium | lichess, libaduk, lishogi |
-| Recent activity feed (finished games, new players) | Same | S | Low | libaduk |
-| Leaderboard: drop inactive players, show rating trend | lichess convention | S | Low | lichess, lidraughts, lishogi |
-| Profile tab counts follow the mode filter | Counts are global today while the list is filtered | S | Low | internal |
-| Head-to-head record between two players (crosstable) | Rivalries; shown on game pages and profiles | S | Low | lichess |
-| Activity timeline on profiles and a feed of followed players | Social glue for the follow feature that already exists | M | Low | lichess |
 | Private messages, and notices for follows and moderation in the bell | The bell already lists challenges and correspondence games; moderation tools now exist | M | Medium | lichess |
 | User blogs | Community content | M | Low | lichess |
 | Chat in games, on TV and a site chat room | Social core of lichess. Moderation tools and reports now exist | M | Medium | lichess, lidraughts, libaduk, lishogi |
@@ -72,9 +66,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Record a game played on a physical board (kifu), move by move with players and result | Gungi has an official physical board; owners could record home games and analyse them here. Import already opens a written game in the analysis board; what is missing is a screen to enter it move by move with names, date and result, saved to the account | S | High | libaduk |
 | Computer analysis in the browser (evaluation, best line, mistakes in a finished game) | Core study tool on lichess-style sites. Needs a stronger engine | L | Medium | lichess, lishogi |
 | Learn from your mistakes: replay the critical moments of your own games | The most loved study feature on lichess. Needs the computer analysis | M | Medium | lichess |
-| Personal insights (where you win and lose, by mode, color, phase) | Self-improvement | L | Low | lichess |
-| Bookmarks and private notes on games | Keep track of interesting games | S | Low | lichess |
-| Advanced game search | Find games by player, mode, rating, result and date across the site | M | Low | lichess, lidraughts, lishogi |
 | Record a physical board with the camera | Computer vision; a strong differentiator | XL | Low | libaduk |
 
 ## Platform

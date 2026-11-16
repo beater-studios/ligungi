@@ -856,6 +856,22 @@ export const createApp = (config: ServerConfig): App => {
       const before = Number(ctx.url.searchParams.get('before')) || undefined;
       sendJson(ctx.res, 200, games.recentFor(user.id, 20, before, { ...rest, ...(vsId ? { vsId } : {}) }));
     })
+    .add('GET', '/api/users/:name/counts', (ctx) => {
+      const user = findUser(ctx.params.name!);
+      const filters = parseGameFilters(ctx.url.searchParams);
+      if (isErrorCode(filters)) throw new HttpError(400, filters);
+      let vsId: string | undefined;
+      if (filters.vs) {
+        const opponent = users.findByName(filters.vs);
+        if (!opponent) return sendJson(ctx.res, 200, { games: 0, rated: 0, wins: 0, losses: 0, draws: 0 });
+        vsId = opponent.id;
+      }
+      sendJson(
+        ctx.res,
+        200,
+        games.counts(user.id, { ...(filters.mode ? { mode: filters.mode } : {}), ...(filters.color ? { color: filters.color } : {}), ...(vsId ? { vsId } : {}) }),
+      );
+    })
     .add('POST', '/api/users/:name/follow', (ctx) => {
       const userId = requireUser(ctx);
       const target = findUser(ctx.params.name!);

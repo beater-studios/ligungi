@@ -4,6 +4,7 @@ import {
   isErrorCode,
   parseGameFilters,
   type GameFilters,
+  type GameCounts,
   type GameSummary,
   type ResultFilter,
   type UserProfile,
@@ -184,6 +185,7 @@ export const ProfilePage = ({ name }: { name: string }) => {
   const filterKey = gameFiltersQuery(filters).toString();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loaded, setLoaded] = useState<{ key: string; games: GameSummary[] } | null>(null);
+  const [filteredCounts, setFilteredCounts] = useState<{ key: string; counts: GameCounts } | null>(null);
   const games = loaded?.key === `${name}?${filterKey}` ? loaded.games : null;
   const [error, setError] = useState<string | null>(null);
   const [more, setMore] = useState(false);
@@ -205,6 +207,22 @@ export const ProfilePage = ({ name }: { name: string }) => {
     const query = params.toString();
     return `/api/users/${encodeURIComponent(name)}/games${query ? `?${query}` : ''}`;
   };
+
+  // The tabs count the games the other filters (mode, color, opponent) leave; without them, the profile's own counts.
+  const { result: _result, rated: _rated, ...countFilters } = filters;
+  const countsKey = gameFiltersQuery(countFilters).toString();
+  useEffect(() => {
+    if (!countsKey) return;
+    let alive = true;
+    const key = `${name}?${countsKey}`;
+    api
+      .get<GameCounts>(`/api/users/${encodeURIComponent(name)}/counts?${countsKey}`)
+      .then((counts) => alive && setFilteredCounts({ key, counts }))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [name, countsKey]);
 
   useEffect(() => {
     let alive = true;
@@ -255,14 +273,15 @@ export const ProfilePage = ({ name }: { name: string }) => {
     }
   };
 
-  const { counts } = profile;
+  // While the filtered counts load (a slow connection), the tabs show a dash rather than the unfiltered numbers.
+  const counts: GameCounts | null = !countsKey ? profile.counts : filteredCounts?.key === `${name}?${countsKey}` ? filteredCounts.counts : null;
   const isMe = me?.id === profile.user.id;
   const { result, rated, ...rest } = filters;
-  const tab = (label: string, count: number, patch: { result?: ResultFilter; rated?: boolean }) => {
+  const tab = (label: string, count: number | undefined, patch: { result?: ResultFilter; rated?: boolean }) => {
     const activeTab = result === patch.result && rated === patch.rated;
     return (
       <a class={activeTab ? 'active' : ''} href={hrefFor(profile.user.name, { ...rest, ...patch })}>
-        {label} <strong>{count}</strong>
+        {label} <strong>{count ?? '-'}</strong>
       </a>
     );
   };
@@ -362,11 +381,11 @@ export const ProfilePage = ({ name }: { name: string }) => {
         <div class="ligungi-profile__games-head">
           <h2>{t.profile.gamesTitle}</h2>
           <nav class="ligungi-segmented" aria-label={t.profile.result}>
-            {tab(t.profile.tabAll, counts.games, {})}
-            {tab(t.profile.tabRated, counts.rated, { rated: true })}
-            {tab(t.profile.tabWins, counts.wins, { result: 'win' })}
-            {tab(t.profile.tabLosses, counts.losses, { result: 'loss' })}
-            {tab(t.profile.tabDraws, counts.draws, { result: 'draw' })}
+            {tab(t.profile.tabAll, counts?.games, {})}
+            {tab(t.profile.tabRated, counts?.rated, { rated: true })}
+            {tab(t.profile.tabWins, counts?.wins, { result: 'win' })}
+            {tab(t.profile.tabLosses, counts?.losses, { result: 'loss' })}
+            {tab(t.profile.tabDraws, counts?.draws, { result: 'draw' })}
           </nav>
         </div>
         <FilterForm name={profile.user.name} filters={filters} />

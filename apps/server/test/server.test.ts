@@ -611,6 +611,15 @@ describe('community', () => {
     expect(await history(`?before=${before}&result=win`)).toEqual([winVsWing]);
     expect((await a.request('GET', '/api/users/biscuit/games?result=maybe')).data).toMatchObject({ code: 'invalidFilter' });
     expect((await a.request<UserProfile>('GET', '/api/users/biscuit')).data.counts).toEqual({ games: 3, rated: 1, wins: 2, losses: 1, draws: 0 });
+
+    // The profile tabs count what the mode, color and opponent filters leave.
+    const counts = async (query: string) => (await a.request('GET', `/api/users/biscuit/counts${query}`)).data;
+    expect(await counts('')).toEqual({ games: 3, rated: 1, wins: 2, losses: 1, draws: 0 });
+    expect(await counts('?mode=intro')).toEqual({ games: 2, rated: 1, wins: 2, losses: 0, draws: 0 });
+    expect(await counts('?color=black')).toEqual({ games: 1, rated: 0, wins: 0, losses: 1, draws: 0 });
+    expect(await counts('?vs=wing&mode=intro')).toEqual({ games: 2, rated: 1, wins: 2, losses: 0, draws: 0 });
+    expect(await counts('?vs=ghost')).toEqual({ games: 0, rated: 0, wins: 0, losses: 0, draws: 0 });
+    expect(await counts('?mode=chess')).toMatchObject({ code: 'invalidFilter' });
   });
 });
 

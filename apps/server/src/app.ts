@@ -4,6 +4,8 @@ import {
   ERROR_MESSAGES,
   LEADERBOARD_MAX,
   LEADERBOARD_TOP,
+  RECENT_GAMES,
+  RECENT_PLAYERS,
   BOOKMARK_NOTE_MAX,
   RATING_TREND_DAYS,
   DAY_MS,
@@ -320,6 +322,7 @@ export const createApp = (config: ServerConfig): App => {
     stats: Pick<PlayersView['counts'], 'gamesLastDay' | 'gamesTotal' | 'players'>;
     distribution: PlayersView['distribution'];
     ranks: Record<Mode, Map<string, number>>;
+    recent: PlayersView['recent'];
   } | null = null;
 
   const RANKING_PAGE_LIMIT = 100_000;
@@ -378,6 +381,7 @@ export const createApp = (config: ServerConfig): App => {
         stats: { gamesLastDay: recent, gamesTotal: finished, players: users.count() },
         distribution: { intro: bands('intro'), beginner: bands('beginner'), intermediate: bands('intermediate'), advanced: bands('advanced') },
         ranks: { intro: users.ranks('intro'), beginner: users.ranks('beginner'), intermediate: users.ranks('intermediate'), advanced: users.ranks('advanced') },
+        recent: { games: games.recentlyFinished(RECENT_GAMES), players: users.newest(RECENT_PLAYERS) },
       };
     }
     const cache = playersCache;
@@ -419,6 +423,7 @@ export const createApp = (config: ServerConfig): App => {
       },
       distribution: cache.distribution,
       you,
+      recent: cache.recent,
     };
   };
 

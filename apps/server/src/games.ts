@@ -411,6 +411,14 @@ export class Games {
     return { games: row.games, rated: row.rated ?? 0, wins: row.wins ?? 0, losses: row.losses ?? 0, draws: row.draws ?? 0 };
   }
 
+  /** The latest finished games on the site, newest first, voided ones aside. */
+  recentlyFinished(limit: number): GameSummary[] {
+    const rows = this.#db
+      .prepare(`select * from games where status = 'ended' and voided = 0 order by ended_at desc limit ?`)
+      .all(limit) as unknown as GameRow[];
+    return rows.map((row) => this.#summaryOf(row));
+  }
+
   exists(id: string): boolean {
     return this.#rooms.has(id) || Boolean(this.#db.prepare('select 1 from games where id = ?').get(id));
   }

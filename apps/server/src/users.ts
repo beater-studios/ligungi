@@ -1,5 +1,5 @@
 import { MODES, type Mode } from '@ligungi/engine';
-import { CHALLENGE_POLICIES, COUNTRIES, DAY_MS, EMPTY_PROFILE, LEADERBOARD_ACTIVE_DAYS, parseProfileDetails, type ChallengePolicy, type Country, type ProfileDetails, type RatingView, type UserRef } from '@ligungi/protocol';
+import { CHALLENGE_POLICIES, COUNTRIES, DAY_MS, EMPTY_PROFILE, LEADERBOARD_ACTIVE_DAYS, parseProfileDetails, type ChallengePolicy, type Country, type NewPlayer, type ProfileDetails, type RatingView, type UserRef } from '@ligungi/protocol';
 import type { Db } from './db.ts';
 import { DEFAULT_RATING, PROVISIONAL_DEVIATION, type Rating } from './glicko.ts';
 import { randomId } from './ids.ts';
@@ -215,6 +215,18 @@ export class Users {
 
   count(): number {
     return (this.#db.prepare('select count(*) as n from users').get() as { n: number }).n;
+  }
+
+  /** The newest accounts, newest first; banned ones (suspended for good) are left out. */
+  newest(limit: number): NewPlayer[] {
+    const rows = this.#db
+      .prepare(
+        `select id, username, country, created_at from users
+         where suspended_until is null or suspended_until < ${PERMANENT_SUSPENSION}
+         order by created_at desc, rowid desc limit ?`,
+      )
+      .all(limit) as Array<{ id: string; username: string; country: string | null; created_at: number }>;
+    return rows.map((row) => ({ user: { id: row.id, name: row.username }, country: toCountry(row.country), joinedAt: row.created_at }));
   }
 
   /** Players with rated games in `mode`, per band of `width` rating points, lowest band first. */

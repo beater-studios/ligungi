@@ -5106,6 +5106,59 @@ $lesson-star: #e8a800;
   }
 }
 
+/* ===== Players page recent activity (pages/PlayersPage.tsx): latest finished games and new accounts ===== */
+.ligungi-players__recent {
+  padding: 1.25rem;
+
+  h3 {
+    margin: 0.9rem 0 0.35rem;
+    color: $c-font-dim;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    > a,
+    > span:first-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  > .ligungi-notice {
+    margin: 0;
+  }
+
+  // New players: the name and how long ago they joined on one line.
+  .ligungi-players__recent-people li {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+}
+
+.ligungi-players__recent-meta {
+  color: $c-font-dim;
+  font-size: 0.82em;
+}
+
 /* ===== Bookmarks (components/BookmarkPanel.tsx): the star on a game page, the private note, the note in the bookmarks list ===== */
 .ligungi-bookmark {
   display: flex;

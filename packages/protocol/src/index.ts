@@ -429,7 +429,23 @@ export interface PlayersView {
   readonly distribution: Readonly<Record<Mode, readonly RatingBand[]>>;
   /** The viewer's rating in each mode they have rated games in, for "you are here". */
   readonly you: Readonly<Partial<Record<Mode, number>>> | null;
+  /** What happened lately: the latest finished games (voided ones aside) and the newest accounts, newest first. */
+  readonly recent: {
+    readonly games: readonly GameSummary[];
+    readonly players: readonly NewPlayer[];
+  };
 }
+
+/** An account in the players page's recent activity. */
+export interface NewPlayer {
+  readonly user: UserRef;
+  readonly country: Country | null;
+  readonly joinedAt: number;
+}
+
+/** How many finished games and new accounts the players page's recent activity lists. */
+export const RECENT_GAMES = 8;
+export const RECENT_PLAYERS = 6;
 
 /** One row of a mode's full ranking. */
 export interface RankingRow {

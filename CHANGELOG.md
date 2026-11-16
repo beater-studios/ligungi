@@ -6,6 +6,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Recent activity on the players page: the latest finished games, with who won, and the newest players, each with how long ago.
 - Bookmarks: a star on any game page keeps it in your bookmarks, with a private note only you see. Your bookmarked games, with their notes, are a tab of your profile's games.
 - Head to head: on a game between two accounts and on another player's profile, the score between the two players, the draws and their latest results, each opening its game.
 - Byo-yomi clock, as in shogi and go: in Create a game (and challenges), pick Byo-yomi under Clock, then the main time (zero for byo-yomi from the first move), the seconds per move (10 to 60) and 1 to 3 periods. Once the main time runs out, every move must be made within the period; moving in time gives the whole period back, overrunning it uses one up, and the flag falls when none is left. The clock shows the period and the periods left, the time control reads `10|30s` (or `10|3×30s`), a beep warns in the last seconds of each period, and a spoken countdown in your language can be turned on in Settings. Byo-yomi games can be rated.

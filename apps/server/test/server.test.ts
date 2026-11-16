@@ -398,6 +398,10 @@ describe('community', () => {
     ]);
     expect(players.counts).toMatchObject({ playing: 1, players: 2, gamesTotal: 0, signedIn: 2, free: 0 });
     expect(players.you).toEqual({});
+    // Recent activity: the newest accounts first, and no finished game yet (the one being played does not count).
+    expect(players.recent.players.map((p) => p.user.name)).toEqual(['Pariston', 'Ging']);
+    expect(Object.keys(players.recent.players[0]!.user).sort()).toEqual(['id', 'name']);
+    expect(players.recent.games).toEqual([]);
 
     a.send({ t: 'resign', game: id });
     await b.waitGame(id, (g) => g.status === 'ended');
@@ -406,6 +410,7 @@ describe('community', () => {
     now += 61_000;
     players = (await a.request<PlayersView>('GET', '/api/players')).data;
     expect(players.counts).toMatchObject({ playing: 0, gamesLastDay: 1, gamesTotal: 1 });
+    expect(players.recent.games.map((game) => [game.id, game.outcome?.winner])).toEqual([[id, 'black']]);
     expect(players.online.find((p) => p.user.name === 'Pariston')).toMatchObject({
       playing: null,
       followed: false,

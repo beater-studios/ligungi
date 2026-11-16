@@ -6,7 +6,7 @@ import { CreateGame } from '../components/CreateGame.tsx';
 import { Flag } from '../components/Flag.tsx';
 import { RatingChart } from '../components/RatingChart.tsx';
 import { Checkbox, Select } from '../components/ui.tsx';
-import { useT } from '../i18n/index.ts';
+import { playerName, timeAgo, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
@@ -82,6 +82,52 @@ const OnlineRow = ({ player, mode, me, onChallenge }: { player: OnlinePlayer; mo
 };
 
 /** Players page: who is online to play with, the site's numbers and where the viewer's rating stands. */
+/** The latest finished games and the newest accounts, so the site shows life even with few players online. */
+const RecentActivity = ({ recent }: { recent: PlayersView['recent'] }) => {
+  const t = useT();
+  return (
+    <section class="ligungi-card ligungi-players__recent">
+      <h2>{t.players.recentTitle}</h2>
+      <h3>{t.players.recentGames}</h3>
+      {recent.games.length === 0 ? (
+        <p class="ligungi-notice">{t.players.noRecentGames}</p>
+      ) : (
+        <ul>
+          {recent.games.map((game) => {
+            const winner = game.outcome?.winner;
+            return (
+              <li key={game.id}>
+                <a href={`/${game.id}`}>
+                  {playerName(t, game.players.white)} × {playerName(t, game.players.black)}
+                </a>
+                <span class="ligungi-players__recent-meta">
+                  {winner ? t.players.recentWinner(playerName(t, game.players[winner])) : t.players.recentDraw} · {t.modes[game.mode]} ·{' '}
+                  {timeAgo(t, game.endedAt ?? game.createdAt)}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {recent.players.length > 0 && (
+        <>
+          <h3>{t.players.recentPlayers}</h3>
+          <ul class="ligungi-players__recent-people">
+            {recent.players.map((player) => (
+              <li key={player.user.id}>
+                <span>
+                  <a href={`/@/${player.user.name}`}>{player.user.name}</a> <Flag country={player.country} />
+                </span>
+                <span class="ligungi-players__recent-meta">{timeAgo(t, player.joinedAt)}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  );
+};
+
 export const PlayersPage = () => {
   const t = useT();
   const { user } = useStore(session);
@@ -209,6 +255,7 @@ export const PlayersPage = () => {
                   <dd>{view.counts.players}</dd>
                 </dl>
               </section>
+              <RecentActivity recent={view.recent} />
               <section class="ligungi-card ligungi-players__position">
                 <h2>{yours !== undefined ? t.players.positionTitle(t.modes[shown]) : t.players.distributionTitle(t.modes[shown])}</h2>
                 {total(view, shown) === 0 ? (

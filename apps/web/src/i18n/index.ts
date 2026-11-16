@@ -86,3 +86,22 @@ export const countryName = (t: Messages, code: string): string => {
 
 export const formatDate = (t: Messages, ms: number): string =>
   new Date(ms).toLocaleDateString(t.locale, { day: '2-digit', month: 'short', year: 'numeric' });
+
+/** How long ago `ms` was, in the language's words ("3 min ago", "yesterday"); past a week, the date. */
+export const timeAgo = (t: Messages, ms: number, now = Date.now()): string => {
+  // A server clock slightly ahead of the browser's must not turn the past into the future ("in 2 min").
+  const seconds = Math.min(0, Math.round((ms - now) / 1000));
+  const format = new Intl.RelativeTimeFormat(t.locale, { numeric: 'auto', style: 'short' });
+  const steps: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+    ['second', 60],
+    ['minute', 60],
+    ['hour', 24],
+    ['day', 7],
+  ];
+  let value = seconds;
+  for (const [unit, size] of steps) {
+    if (Math.abs(value) < size) return format.format(value, unit);
+    value = Math.round(value / size);
+  }
+  return formatDate(t, ms);
+};

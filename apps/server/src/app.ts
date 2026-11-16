@@ -20,12 +20,15 @@ import {
   PRACTICE_BATCH,
   PRACTICE_POSITIONS,
   PUZZLE_BATCH,
+  PUZZLE_RUN_BATCH,
+  PUZZLE_RUN_KINDS,
   PUZZLE_THEMES,
   parseProfileDetails,
   parseSettings,
   type ClientMessage,
   type LobbyView,
   type Me,
+  type PuzzleRun,
   type Topic,
   type UserProfile,
   CHALLENGE_POLICIES,
@@ -83,7 +86,7 @@ import {
 import { Hub, type Client } from './hub.ts';
 import { Lobby } from './lobby.ts';
 import { Moderation } from './moderation.ts';
-import { PuzzleStore, isPuzzle } from './puzzles.ts';
+import { PUZZLE_COUNT, PuzzleStore, isPuzzle } from './puzzles.ts';
 import type { GameRoom } from './room.ts';
 import { SeekStore } from './seeks.ts';
 import { otpauthUri } from './totp.ts';
@@ -745,7 +748,8 @@ export const createApp = (config: ServerConfig): App => {
         profile: users.details(userId),
         puzzles: (() => {
           const { rating, history } = puzzles.dashboard(userId);
-          return { rating, tries: history, solved: puzzles.solved(userId) };
+          const { best } = puzzles.runs(userId);
+          return { rating, tries: history, solved: puzzles.solved(userId), runs: puzzles.allRuns(userId), best };
         })(),
         lessons: users.lessonProgress(userId),
         practice: users.practiceProgress(userId),
@@ -1041,6 +1045,36 @@ export const createApp = (config: ServerConfig): App => {
       }
       puzzles.importSolved(userId, ids as string[]);
       sendJson(ctx.res, 200, puzzles.solved(userId));
+    })
+    .add('GET', '/api/puzzles/sequence', (ctx) => {
+      const kind = PUZZLE_RUN_KINDS.find((value) => value === ctx.url.searchParams.get('kind'));
+      if (!kind) throw new HttpError(400, 'invalidPuzzleRun');
+      sendJson(ctx.res, 200, { ids: puzzles.sequence(kind) });
+    })
+    .add('GET', '/api/puzzles/runs', (ctx) => sendJson(ctx.res, 200, puzzles.runs(requireUser(ctx))))
+    .add('POST', '/api/puzzles/runs', async (ctx) => {
+      const userId = requireUser(ctx);
+      const { runs } = (await ctx.body()) as { runs?: unknown };
+      const latest = config.now() + 60_000;
+      const valid =
+        Array.isArray(runs) &&
+        runs.length <= PUZZLE_RUN_BATCH &&
+        runs.every((run: unknown) => {
+          if (typeof run !== 'object' || run === null) return false;
+          const { kind, score, at } = run as Record<string, unknown>;
+          return (
+            PUZZLE_RUN_KINDS.some((value) => value === kind) &&
+            Number.isInteger(score) &&
+            (score as number) >= 0 &&
+            (score as number) <= PUZZLE_COUNT &&
+            Number.isInteger(at) &&
+            (at as number) >= 0 &&
+            (at as number) <= latest
+          );
+        });
+      if (!valid) throw new HttpError(400, 'invalidPuzzleRun');
+      puzzles.saveRuns(userId, runs as PuzzleRun[]);
+      sendJson(ctx.res, 200, puzzles.runs(userId));
     })
     .add('GET', '/api/puzzles/:id', (ctx) => {
       if (!isPuzzle(ctx.params.id!)) throw new HttpError(404, 'puzzleNotFound');

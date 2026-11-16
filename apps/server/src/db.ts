@@ -226,6 +226,15 @@ const MIGRATIONS = [
     primary key (user_id, position_id)
   );
   `,
+  `
+  create table puzzle_runs (
+    user_id text not null references users(id),
+    kind text not null,
+    score integer not null,
+    created_at integer not null
+  );
+  create index puzzle_runs_user on puzzle_runs(user_id, kind, created_at);
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

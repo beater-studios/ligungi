@@ -14,6 +14,7 @@ import { icons } from '../icons.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
 import { ResultBar } from './ExplorerPage.tsx';
+import { Records } from './PuzzleRunPage.tsx';
 
 /**
  * Living reference of ligungi's UI: real components rendered with the real styles. Developer-facing, so it is in
@@ -651,6 +652,32 @@ export const DesignPage = () => {
             <span class="ligungi-puzzle-dashboard__bar" style={{ '--rate': '64%', maxWidth: '16rem' }}>
               64%
             </span>
+          </Example>
+          <Example label="Puzzle Storm card: clock with a time bonus, score, combo toward the next bonus and records (.ligungi-run)">
+            <section class="ligungi-card ligungi-game-info ligungi-run" style={{ maxWidth: '18rem' }}>
+              <div class="ligungi-run__clock">
+                <span class="ligungi-run__time">2:41</span>
+                <span class="ligungi-run__flash is-good" style={{ animation: 'none' }}>
+                  +5s
+                </span>
+                <span class="ligungi-run__bar">
+                  <span style={{ width: '89%' }} />
+                </span>
+              </div>
+              <p class="ligungi-run__score">
+                <strong>9</strong>
+                <span>Solved</span>
+              </p>
+              <div class="ligungi-run__combo">
+                <span>
+                  Combo <strong>14</strong>
+                </span>
+                <span class="ligungi-run__bar is-combo">
+                  <span style={{ width: '25%' }} />
+                </span>
+              </div>
+              <Records records={{ today: 9, week: 14, ever: 21 }} />
+            </section>
           </Example>
           <Example label="Results of the draft explorer: White wins, draws and Black wins (.ligungi-explorer__bar)">
             <div style={{ maxWidth: '16rem' }}>

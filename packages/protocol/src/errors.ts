@@ -38,6 +38,7 @@ export const ERROR_MESSAGES = {
   invalidExplorerQuery: 'Consulta inválida no explorador de draft.',
   invalidPracticeProgress: 'Progresso de prática inválido.',
   invalidPuzzle: 'Puzzle inválido.',
+  invalidPuzzleRun: 'Resultado de corrida de puzzles inválido.',
   puzzleNotFound: 'Puzzle não encontrado.',
   noPuzzleLeft: 'Não sobrou nenhum puzzle com esses filtros.',
   invalidProfileLink: 'Algum dos nomes de usuário não é válido nesse site.',

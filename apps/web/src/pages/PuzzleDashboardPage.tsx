@@ -1,8 +1,10 @@
-import { PUZZLE_THEMES, type PuzzleDashboard, type RatingPoint } from '@ligungi/protocol';
+import { PUZZLE_RUN_KINDS, PUZZLE_THEMES, type PuzzleDashboard, type RatingPoint } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { RatingHistoryChart } from '../components/RatingHistoryChart.tsx';
 import { formatDate, useT } from '../i18n/index.ts';
+import { runRecords, usePuzzleRuns } from '../puzzleRuns.ts';
+import { Records } from './PuzzleRunPage.tsx';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
 
@@ -15,6 +17,7 @@ export const PuzzleDashboardPage = () => {
   const t = useT();
   const { user, loaded } = useStore(session);
   const [dashboard, setDashboard] = useState<PuzzleDashboard | null>(null);
+  const runs = usePuzzleRuns().view;
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,6 +66,18 @@ export const PuzzleDashboardPage = () => {
         </strong>
         <span>{t.puzzles.ratingSummary(dashboard.rating.games, dashboard.history.length ? Math.round((wins / dashboard.history.length) * 100) : 0)}</span>
       </section>
+      {runs && (
+        <div class="ligungi-puzzle-dashboard__runs">
+          {PUZZLE_RUN_KINDS.map((kind) => (
+            <section key={kind} class="ligungi-card ligungi-game-info ligungi-run">
+              <h2>
+                <a href={`/${kind}`}>{t.puzzleRuns[kind]}</a>
+              </h2>
+              <Records records={runRecords(runs, kind)} />
+            </section>
+          ))}
+        </div>
+      )}
       {points.length > 0 ? (
         <section class="ligungi-card ligungi-puzzle-dashboard__chart">
           <h2>{t.puzzles.ratingOverTime}</h2>

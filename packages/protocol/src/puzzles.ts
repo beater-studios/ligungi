@@ -129,3 +129,38 @@ export interface PuzzleDashboard {
   /** Tries and wins by theme, over every counted try. */
   readonly themes: Readonly<Partial<Record<PuzzleTheme, { readonly tries: number; readonly wins: number }>>>;
 }
+
+/** Timed puzzle runs. Streak: harder and harder puzzles until the first mistake. Storm: as many as possible in 3 minutes. */
+export const PUZZLE_RUN_KINDS = ['streak', 'storm'] as const;
+export type PuzzleRunKind = (typeof PUZZLE_RUN_KINDS)[number];
+
+/** Storm's clock, as on lichess: 3 minutes, 10 seconds off for a wrong move, and time back for long combos. */
+export const STORM_TIME_MS = 180_000;
+export const STORM_PENALTY_MS = 10_000;
+const STORM_BONUSES: ReadonlyMap<number, number> = new Map([
+  [5, 3],
+  [12, 5],
+  [20, 7],
+  [30, 10],
+]);
+
+/** Seconds a Storm combo of correct moves adds when it reaches `combo`: at 5, 12, 20 and 30, then every 10 more. */
+export const stormBonus = (combo: number): number => STORM_BONUSES.get(combo) ?? (combo > 30 && combo % 10 === 0 ? 10 : 0);
+
+/** A finished run: how many puzzles it solved, and when (ms). */
+export interface PuzzleRun {
+  readonly kind: PuzzleRunKind;
+  readonly score: number;
+  readonly at: number;
+}
+
+/** Runs saved in one request (runs played without an account, sent when signing in). */
+export const PUZZLE_RUN_BATCH = 100;
+/** How far back the recent runs go: a week, with a day to spare for time zones. */
+export const PUZZLE_RUN_RECENT_MS = 8 * 86_400_000;
+
+/** The player's recent runs (for the best of today and of the week) and the best score ever of each kind. */
+export interface PuzzleRunsView {
+  readonly runs: readonly PuzzleRun[];
+  readonly best: Readonly<Record<PuzzleRunKind, number>>;
+}

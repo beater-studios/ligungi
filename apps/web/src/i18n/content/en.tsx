@@ -296,7 +296,7 @@ export const en: Content = {
         </li>
         <li>
           <b>Lessons, puzzles and practice:</b> the stars of each lesson exercise, your puzzle rating and your tries, with the
-          date and the result, and the practice positions you finished, kept on the account so your progress shows on any device.
+          date and the result, your Puzzle Streak and Puzzle Storm results, and the practice positions you finished, kept on the account so your progress shows on any device.
           Without an account they stay in your browser only. They are part of your data copy and are deleted with the account.
         </li>
         <li>

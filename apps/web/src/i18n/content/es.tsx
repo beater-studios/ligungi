@@ -298,7 +298,7 @@ export const es: Content = {
         </li>
         <li>
           <b>Lecciones, puzzles y práctica:</b> las estrellas de cada ejercicio de las lecciones, tu puntuación de puzzles y
-          tus intentos, con la fecha y el resultado, y las posiciones de práctica que terminaste, guardados en la cuenta para que el progreso aparezca en cualquier dispositivo. Sin cuenta, quedan solo en tu navegador. Forman parte de la copia de tus datos y se borran con
+          tus intentos, con la fecha y el resultado, tus resultados de Puzzle Streak y Puzzle Storm y las posiciones de práctica que terminaste, guardados en la cuenta para que el progreso aparezca en cualquier dispositivo. Sin cuenta, quedan solo en tu navegador. Forman parte de la copia de tus datos y se borran con
           la cuenta.
         </li>
         <li>

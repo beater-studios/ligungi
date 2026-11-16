@@ -4402,6 +4402,18 @@ $lesson-star: #e8a800;
 }
 
 .ligungi-puzzle-dashboard {
+  &__runs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: $block-gap;
+
+    h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+  }
+
   &__head {
     display: flex;
     flex-wrap: wrap;
@@ -4569,6 +4581,233 @@ $lesson-star: #e8a800;
     @include mq-is-col1 {
       display: block;
     }
+  }
+}
+
+/* ===== Puzzle Streak and Storm (pages/PuzzleRunPage.tsx): the clock, score and combo beside the board, the played puzzles under it ===== */
+.ligungi-run {
+  &__clock {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3rem 0.75rem;
+    width: 100%;
+  }
+
+  &__time {
+    color: $c-font-clear;
+    font-size: 2.4rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+
+    &.is-low {
+      color: $c-bad;
+    }
+  }
+
+  &__flash {
+    font-size: 1.2rem;
+    font-weight: 600;
+    animation: ligungi-run-flash 0.9s ease-out forwards;
+
+    &.is-good {
+      color: $c-good;
+    }
+
+    &.is-bad {
+      color: $c-bad;
+    }
+  }
+
+  &__bar {
+    flex: 1 0 100%;
+    height: 0.45rem;
+    overflow: hidden;
+    border-radius: 3px;
+    background: $c-bg-zebra;
+
+    span {
+      display: block;
+      height: 100%;
+      background: $c-primary;
+      transition: width 0.1s linear;
+    }
+
+    &.is-combo span {
+      background: $c-brag;
+    }
+  }
+
+  &__score {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0;
+
+    strong {
+      color: $c-font-clear;
+      font-size: 2rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    span {
+      color: $c-font-dim;
+    }
+  }
+
+  &__combo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem;
+    width: 100%;
+    color: $c-font-dim;
+
+    strong {
+      color: $c-font-clear;
+    }
+  }
+
+  &__compact {
+    display: none;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.3rem 1rem;
+    padding: 0.5rem 0.75rem;
+    color: $c-font-dim;
+
+    strong {
+      color: $c-font-clear;
+    }
+
+    @include mq-is-col1 {
+      display: flex;
+    }
+  }
+
+  &__compact-time {
+    color: $c-font-clear;
+    font-size: 1.5rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+
+    &.is-low {
+      color: $c-bad;
+    }
+  }
+
+  &__summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__over {
+    color: $c-font-clear;
+    font-size: 1.1em;
+    font-weight: 500;
+  }
+
+  &__heading {
+    margin: 0.4rem 0 0;
+    color: $c-font-dim;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  &__records,
+  &__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    margin: 0;
+
+    div {
+      display: flex;
+      flex-direction: column;
+    }
+
+    dt {
+      color: $c-font-dim;
+      font-size: 0.85em;
+    }
+
+    dd {
+      margin: 0;
+      color: $c-font-clear;
+      font-size: 1.15em;
+      font-weight: 500;
+    }
+  }
+
+  &__played {
+    padding: 1rem 1.1rem;
+
+    h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    ul {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+      gap: 0.75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    a {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      color: $c-font;
+      font-size: 0.85em;
+    }
+
+    span::before {
+      margin-inline-end: 0.3em;
+    }
+
+    .is-won span::before {
+      color: $c-good;
+    }
+
+    .is-lost span::before {
+      color: $c-bad;
+    }
+
+    .is-skipped span {
+      color: $c-font-dim;
+    }
+  }
+}
+
+@keyframes ligungi-run-flash {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-0.6rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ligungi-run__flash {
+    animation: none;
   }
 }
 

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { applyMove, initialPosition, parseMove, toFen } from '@ligungi/engine';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EXTRA_TIME_SECONDS, puzzleInfo, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ExplorerView, type ModUserView, type ProfileDetails, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, puzzleInfo, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ExplorerView, type ModUserView, type ProfileDetails, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleRunsView, type PuzzleView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
 import { PUZZLES } from '@ligungi/protocol/puzzles';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { base32Decode, hotp, TOTP_STEP_MS } from '../src/totp.ts';
@@ -1233,6 +1233,54 @@ describe('draft explorer', () => {
     expect((await a.request('GET', '/api/explorer?mode=advanced&band=nope')).data).toMatchObject({ code: 'invalidExplorerQuery' });
     const playFen = toFen(initialPosition('intro'));
     expect((await a.request('GET', `/api/explorer?mode=advanced&fen=${encodeURIComponent(playFen)}`)).data).toMatchObject({ code: 'invalidExplorerQuery' });
+  });
+});
+
+describe('puzzle runs', () => {
+  it('draws harder and harder puzzles for a run, mixing every mode', async () => {
+    server = await startServer();
+    const a = client();
+    const ratingOf = new Map(PUZZLES.map((puzzle) => [puzzle.id, puzzleInfo(puzzle).startRating]));
+    const streak = (await a.request<{ ids: string[] }>('GET', '/api/puzzles/sequence?kind=streak')).data.ids;
+    expect(streak).toHaveLength(PUZZLES.length);
+    expect(new Set(streak).size).toBe(PUZZLES.length);
+    const storm = (await a.request<{ ids: string[] }>('GET', '/api/puzzles/sequence?kind=storm')).data.ids;
+    expect(storm).toHaveLength(150);
+    const average = (ids: string[]) => ids.reduce((sum, id) => sum + ratingOf.get(id)!, 0) / ids.length;
+    expect(average(storm.slice(0, 10))).toBeLessThan(1150);
+    expect(average(storm.slice(60, 70))).toBeGreaterThan(1400);
+    expect(new Set(storm.slice(0, 40).map((id) => puzzleInfo(PUZZLES.find((puzzle) => puzzle.id === id)!).mode)).size).toBeGreaterThan(1);
+    expect((await a.request('GET', '/api/puzzles/sequence?kind=racer')).data).toMatchObject({ code: 'invalidPuzzleRun' });
+  });
+
+  it('keeps the runs of an account: the recent ones and the best of each kind', async () => {
+    server = await startServer();
+    const a = client();
+    const now = Date.now();
+    expect((await a.request('POST', '/api/puzzles/runs', { runs: [{ kind: 'storm', score: 3, at: now }] })).status).toBe(401);
+    await signup(a, 'Komugi');
+    for (const runs of [[{ kind: 'racer', score: 3, at: now }], [{ kind: 'storm', score: -1, at: now }], [{ kind: 'storm', score: 2.5, at: now }], [{ kind: 'storm', score: 3, at: now + 3_600_000 }], [{ kind: 'storm', score: PUZZLES.length + 1, at: now }], { kind: 'storm' }]) {
+      expect((await a.request('POST', '/api/puzzles/runs', { runs })).data).toMatchObject({ code: 'invalidPuzzleRun' });
+    }
+    const old = now - 30 * 86_400_000;
+    const saved = await a.request<PuzzleRunsView>('POST', '/api/puzzles/runs', {
+      runs: [
+        { kind: 'storm', score: 31, at: old },
+        { kind: 'storm', score: 12, at: now - 1000 },
+        { kind: 'streak', score: 7, at: now },
+      ],
+    });
+    expect(saved.data).toEqual({
+      runs: [
+        { kind: 'storm', score: 12, at: now - 1000 },
+        { kind: 'streak', score: 7, at: now },
+      ],
+      best: { streak: 7, storm: 31 },
+    });
+    expect((await a.request<PuzzleRunsView>('GET', '/api/puzzles/runs')).data).toEqual(saved.data);
+    const exported = (await a.request<{ puzzles: { runs: unknown[]; best: unknown } }>('GET', '/api/account/export')).data.puzzles;
+    expect(exported.runs).toHaveLength(3);
+    expect(exported.best).toEqual({ streak: 7, storm: 31 });
   });
 });
 

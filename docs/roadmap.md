@@ -7,7 +7,7 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more).
 | Item | Why | Size | Notes |
 |---|---|---|---|
 | Byo-yomi time control (for example 10 min + 30 s), with an optional spoken countdown | The traditional clock of Japanese games: once the main time runs out, every move has a fixed period | M | New time control type in game creation, the server clock and the clock display; optionally several periods (3 x 30 s). The draft keeps its own clock rule. |
-| Timed puzzle modes (Streak, Storm, Racer against other players) | Short, competitive sessions that bring players back | M | Built on the puzzle set, so after puzzles. |
+| Puzzle Racer (puzzle races against other players) | Short, competitive sessions that bring players back | M | Streak and Storm shipped; Racer races several players live on the same puzzles, so it waits for more players online. |
 | Game library (curated collections of notable games) | Study material once there are good games to show | M | Collections of games from the site or imported, opened in the analysis board. |
 | Studies (shared annotated analysis with chapters) | Teaching and community content | L | Builds on the analysis board, the import and the board editor. |
 | Coaches directory | Connects learners with teachers | S | Profiles that opt in, with languages and contact links. |

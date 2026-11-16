@@ -4,6 +4,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Puzzle Streak and Puzzle Storm (Learn menu, and links on the puzzle pages). Streak: harder and harder puzzles with no clock, until your first wrong move, with one skip. Storm: as many puzzles as you can in 3 minutes from your first move; a wrong move costs 10 seconds, and combos of correct moves add time. Both show your best of today, of the last 7 days and ever, also on the puzzle dashboard, kept on your account or in the browser. At the end, every puzzle of the run is listed and opens on the puzzle page. Runs do not change your puzzle rating.
+
 ## [0.5.0] - 2026-11-16
 
 ### Added

@@ -1,7 +1,12 @@
 import type { Mode } from '@ligungi/engine';
 import {
+  PUZZLE_RUN_KINDS,
+  PUZZLE_RUN_RECENT_MS,
   puzzleInfo,
   type Puzzle,
+  type PuzzleRun,
+  type PuzzleRunKind,
+  type PuzzleRunsView,
   type DailyPuzzle,
   type PuzzleAttemptResult,
   type PuzzleDashboard,
@@ -20,12 +25,24 @@ const PUZZLE_DEVIATION = 200;
 const NEXT_POOL = 12;
 /** Puzzles of the day are taken among the ones starting in this range: neither trivial nor discouraging. */
 const DAILY_RANGE = [1000, 1700] as const;
+/**
+ * The difficulty curve of a timed run: the target rating of its first puzzle, how much it rises per puzzle, and how
+ * many puzzles the run holds. Each puzzle is drawn among the `RUN_POOL` closest to the target that the run has not used.
+ */
+const RUN_CURVES: Readonly<Record<PuzzleRunKind, { readonly start: number; readonly step: number; readonly count: number }>> = {
+  streak: { start: 1000, step: 20, count: PUZZLES.length },
+  storm: { start: 1000, step: 10, count: 150 },
+};
+const RUN_POOL = 6;
 
 const PUZZLE_BY_ID: ReadonlyMap<string, { readonly puzzle: Puzzle; readonly info: PuzzleInfo }> = new Map(
   PUZZLES.map((puzzle) => [puzzle.id, { puzzle, info: puzzleInfo(puzzle) }]),
 );
 
 export const isPuzzle = (id: string): boolean => PUZZLE_BY_ID.has(id);
+
+/** No run can solve more puzzles than there are. */
+export const PUZZLE_COUNT = PUZZLES.length;
 
 interface StoredRating extends Rating {
   readonly games: number;
@@ -142,16 +159,67 @@ export class PuzzleStore {
       for (const row of rows) tried.add(row.puzzle_id);
     }
     const target = userId ? this.rating(userId).rating : DEFAULT_RATING.rating - 300;
-    const rated = new Map(
-      (this.#db.prepare('select puzzle_id, rating from puzzle_stats').all() as Array<{ puzzle_id: string; rating: number }>).map((row) => [row.puzzle_id, row.rating]),
-    );
+    const ratings = this.#liveRatings();
     const candidates = [...PUZZLE_BY_ID.values()]
       .filter(({ puzzle, info }) => !tried.has(puzzle.id) && (!filter.theme || info.themes.includes(filter.theme)) && (!filter.mode || info.mode === filter.mode))
-      .map(({ puzzle, info }) => ({ id: puzzle.id, distance: Math.abs((rated.get(puzzle.id) ?? info.startRating) - target) }))
+      .map(({ puzzle }) => ({ id: puzzle.id, distance: Math.abs(ratings.get(puzzle.id)! - target) }))
       .sort((a, b) => a.distance - b.distance)
       .slice(0, NEXT_POOL);
     if (candidates.length === 0) return null;
     return candidates[Math.floor(this.#random() * candidates.length)]!.id;
+  }
+
+  /** The live rating of every puzzle: its own once tried, its start rating before that. */
+  #liveRatings(): Map<string, number> {
+    const rated = new Map(
+      (this.#db.prepare('select puzzle_id, rating from puzzle_stats').all() as Array<{ puzzle_id: string; rating: number }>).map((row) => [row.puzzle_id, row.rating]),
+    );
+    return new Map([...PUZZLE_BY_ID.values()].map(({ puzzle, info }) => [puzzle.id, rated.get(puzzle.id) ?? info.startRating]));
+  }
+
+  /** The puzzles of a new timed run, in order, getting harder along its curve; every mode is mixed. */
+  sequence(kind: PuzzleRunKind): string[] {
+    const { start, step, count } = RUN_CURVES[kind];
+    const pool = [...this.#liveRatings()].map(([id, rating]) => ({ id, rating, tie: this.#random() }));
+    const ids: string[] = [];
+    while (ids.length < count && pool.length > 0) {
+      const target = start + ids.length * step;
+      pool.sort((a, b) => Math.abs(a.rating - target) - Math.abs(b.rating - target) || a.tie - b.tie);
+      const [picked] = pool.splice(Math.floor(this.#random() * Math.min(RUN_POOL, pool.length)), 1);
+      ids.push(picked!.id);
+    }
+    return ids;
+  }
+
+  runs(userId: string): PuzzleRunsView {
+    const runs = this.#db
+      .prepare('select kind, score, created_at as at from puzzle_runs where user_id = ? and created_at >= ? order by created_at')
+      .all(userId, this.#now() - PUZZLE_RUN_RECENT_MS) as unknown as PuzzleRun[];
+    const bests = this.#db.prepare('select kind, max(score) as score from puzzle_runs where user_id = ? group by kind').all(userId) as Array<{
+      kind: PuzzleRunKind;
+      score: number;
+    }>;
+    const best = Object.fromEntries(PUZZLE_RUN_KINDS.map((kind) => [kind, bests.find((row) => row.kind === kind)?.score ?? 0])) as Record<PuzzleRunKind, number>;
+    return { runs: runs.map(({ kind, score, at }) => ({ kind, score, at })), best };
+  }
+
+  /** Every run of the player, oldest first, for the data export. */
+  allRuns(userId: string): PuzzleRun[] {
+    return (this.#db.prepare('select kind, score, created_at as at from puzzle_runs where user_id = ? order by created_at').all(userId) as unknown as PuzzleRun[]).map(
+      ({ kind, score, at }) => ({ kind, score, at }),
+    );
+  }
+
+  saveRuns(userId: string, runs: readonly PuzzleRun[]): void {
+    const insert = this.#db.prepare('insert into puzzle_runs (user_id, kind, score, created_at) values (?, ?, ?, ?)');
+    this.#db.exec('begin');
+    try {
+      for (const run of runs) insert.run(userId, run.kind, run.score, run.at);
+      this.#db.exec('commit');
+    } catch (error) {
+      this.#db.exec('rollback');
+      throw error;
+    }
   }
 
   /** The puzzle of a day (`YYYY-MM-DD`, in UTC), the same for everyone. */

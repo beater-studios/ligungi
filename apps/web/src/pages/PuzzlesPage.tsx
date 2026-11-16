@@ -1,11 +1,9 @@
-import { MODES, initialPosition, legalMoves, moveToString, opposite, parseFen, parseMove, toFen, type Color, type Mode, type Move, type Position } from '@ligungi/engine';
+import { MODES, opposite, parseFen, parseMove, type Color, type Mode } from '@ligungi/engine';
 import {
   PUZZLE_THEMES,
   puzzleInfo,
   type DailyPuzzle,
-  type Puzzle,
   type PuzzleAttemptResult,
-  type PuzzleInfo,
   type PuzzleTheme,
   type PuzzleView,
 } from '@ligungi/protocol';
@@ -15,25 +13,14 @@ import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
 import { Field, Select } from '../components/ui.tsx';
 import { errorText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { useLocalGame } from '../localGame.ts';
 import { readLocalSolved, useSolvedPuzzles } from '../puzzleProgress.ts';
+import { usePuzzleSolver, type PuzzleEntry } from '../puzzleSolver.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
 
-/** Solving: the player's turn. Checking: a mating move off the stored line is being checked in the worker. */
-type Stage = 'solving' | 'checking' | 'answering' | 'wrong' | 'solved' | 'revealed';
-
-interface Entry {
-  readonly puzzle: Puzzle;
-  readonly info: PuzzleInfo;
-  readonly start: Position;
-}
-
-const ANSWER_DELAY_MS = 450;
 const WRONG_DELAY_MS = 900;
-const PLACEHOLDER = initialPosition('intro');
 
 const signed = (n: number) => (n > 0 ? `+${n}` : String(n));
 
@@ -64,29 +51,39 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
   const { user, loaded } = useStore(session);
   const { search } = useLocation();
   const filter = readFilter(search);
-  const [entries, setEntries] = useState<readonly Entry[] | null>(null);
+  const [entries, setEntries] = useState<readonly PuzzleEntry[] | null>(null);
   const [dailyPuzzle, setDailyPuzzle] = useState<DailyPuzzle | null>(null);
   const [view, setView] = useState<PuzzleView | null>(null);
   const [none, setNone] = useState(false);
-  const [stage, setStage] = useState<Stage>('solving');
   const [message, setMessage] = useState<string | null>(null);
-  const [onLine, setOnLine] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const [result, setResult] = useState<PuzzleAttemptResult | null>(null);
   const [flipped, setFlipped] = useState(false);
-  const local = useLocalGame(PLACEHOLDER);
-  const worker = useRef<Worker | null>(null);
-  const request = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reported = useRef(false);
+  const solver = usePuzzleSolver({
+    onCorrect: (finished) => {
+      if (!finished) return setMessage(t.puzzles.correct);
+      setMessage(failed ? t.puzzles.solvedAfterFail : t.puzzles.solved);
+      playSound('victory');
+      report(true);
+    },
+    onWrong: (notCheck) => {
+      setMessage(notCheck ? t.puzzles.notCheck : t.puzzles.wrong);
+      setFailed(true);
+      playSound('error');
+      report(false);
+      timer.current = setTimeout(solver.retry, WRONG_DELAY_MS);
+    },
+  });
+  const local = solver.local;
 
   useEffect(() => {
     void import('@ligungi/protocol/puzzles').then(({ PUZZLES }) =>
       setEntries(PUZZLES.map((puzzle) => ({ puzzle, info: puzzleInfo(puzzle), start: parseFen(puzzle.fen) }))),
     );
-    worker.current = new Worker(new URL('../mate.worker.ts', import.meta.url), { type: 'module' });
     return () => {
-      worker.current?.terminate();
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
@@ -116,14 +113,12 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
       .catch(() => setNone(true));
   }, [daily, id, loaded, user?.id, entries !== null, search]);
 
-  const begin = (entry: Entry) => {
+  const begin = (entry: PuzzleEntry) => {
     if (timer.current) clearTimeout(timer.current);
-    request.current++;
     reported.current = false;
-    local.reset(entry.start);
-    setStage('solving');
+    solver.begin(entry);
     setMessage(null);
-    setOnLine(true);
+    setRevealed(false);
     setFailed(false);
     setResult(null);
     setView(null);
@@ -171,92 +166,36 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
   }
 
   const { puzzle, info, start } = current;
-  const solver: Color = info.color;
+  const solverColor: Color = info.color;
   const { replay } = local;
   const position = local.position;
-  const yourTurn = stage === 'solving' && local.ply === null && position.turn === solver && !replay.game.outcome;
-  const moves = yourTurn ? legalMoves(position) : [];
-
-  const answer = (reply: string | null, last: boolean) => {
-    if (last || reply === null) {
-      setStage('solved');
-      setMessage(failed ? t.puzzles.solvedAfterFail : t.puzzles.solved);
-      playSound('victory');
-      report(true);
-      return;
-    }
-    setStage('answering');
-    setMessage(t.puzzles.correct);
-    timer.current = setTimeout(() => {
-      const move = parseMove(reply);
-      if (move) {
-        playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
-        local.play(move);
-      }
-      setStage('solving');
-    }, ANSWER_DELAY_MS);
-  };
-
-  const wrong = (text: string) => {
-    setStage('wrong');
-    setMessage(text);
-    setFailed(true);
-    playSound('error');
-    report(false);
-    timer.current = setTimeout(() => {
-      local.undo();
-      setStage('solving');
-    }, WRONG_DELAY_MS);
-  };
-
-  const onMove = (move: Move) => {
-    const before = position;
-    const played = replay.moves.length;
-    const left = info.moves - Math.floor(played / 2);
-    const text = moveToString(move);
-    playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
-    local.play(move);
-    if (onLine && puzzle.line[played] === text) return answer(puzzle.line[played + 1] ?? null, left === 1);
-    if (info.kind === 'material') return wrong(t.puzzles.wrong);
-    setStage('checking');
-    const ticket = ++request.current;
-    const listener = (event: MessageEvent<{ id: number; check: boolean; ok: boolean; defense: string | null }>) => {
-      if (event.data.id !== ticket) return;
-      worker.current?.removeEventListener('message', listener);
-      if (request.current !== ticket) return;
-      if (!event.data.ok) return wrong(event.data.check ? t.puzzles.wrong : t.puzzles.notCheck);
-      setOnLine(false);
-      answer(event.data.defense, left === 1);
-    };
-    worker.current?.addEventListener('message', listener);
-    worker.current?.postMessage({ id: ticket, fen: toFen(before), move: text, moves: left });
-  };
+  const { stage, yourTurn, moves } = solver;
 
   const reveal = () => {
     if (timer.current) clearTimeout(timer.current);
-    request.current++;
+    solver.stop();
     report(false);
     setFailed(true);
     local.reset(start, puzzle.line.map((text) => parseMove(text)!));
     local.setPly(0);
-    setStage('revealed');
+    setRevealed(true);
     setMessage(t.puzzles.revealed);
   };
 
   const changeFilter = (next: { theme: PuzzleTheme | null; mode: Mode | null }) => navigate(`/puzzles${filterQuery(next)}`);
-  const finished = stage === 'solved' || stage === 'revealed';
+  const finished = stage === 'done';
   const solvedHere = filtered.filter((entry) => solved?.has(entry.puzzle.id)).length;
-  const task = info.kind === 'mate' ? t.puzzles.taskMate(t.colors[solver], info.moves) : t.puzzles.taskMaterial(t.colors[solver]);
+  const task = info.kind === 'mate' ? t.puzzles.taskMate(t.colors[solverColor], info.moves) : t.puzzles.taskMaterial(t.colors[solverColor]);
   const players = {
-    [solver]: { name: t.common.you },
-    [opposite(solver)]: { name: t.puzzles.opponent },
+    [solverColor]: { name: t.common.you },
+    [opposite(solverColor)]: { name: t.puzzles.opponent },
   } as Record<Color, RoundPlayer>;
 
   return (
     <RoundLayout
       training
-      board={{ position, movableColor: yourTurn ? solver : null, moves, lastMove: local.lastMove, onMove }}
-      orientation={flipped ? opposite(solver) : solver}
+      board={{ position, movableColor: yourTurn ? solverColor : null, moves, lastMove: local.lastMove, onMove: solver.onMove }}
+      orientation={flipped ? opposite(solverColor) : solverColor}
       players={players}
       turn={replay.game.outcome ? null : position.turn}
       positions={replay.positions}
@@ -291,7 +230,7 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
             {solved?.has(puzzle.id) && <span class="ligungi-tag">{t.puzzles.solvedTag}</span>}
           </p>
           {message && (
-            <p class={`ligungi-mates__feedback${stage === 'wrong' ? ' error' : stage === 'solved' ? ' ligungi-success' : ''}`} role="status">
+            <p class={`ligungi-mates__feedback${stage === 'wrong' ? ' error' : stage === 'done' && !revealed ? ' ligungi-success' : ''}`} role="status">
               {message}
             </p>
           )}
@@ -332,6 +271,8 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
           <p class="ligungi-puzzle__links">
             {daily ? <a href="/puzzles">{t.puzzles.title}</a> : <a href="/puzzles/daily">{t.puzzles.daily}</a>}
             {user && <a href="/puzzles/dashboard">{t.puzzles.dashboard}</a>}
+            <a href="/streak">{t.puzzleRuns.streak}</a>
+            <a href="/storm">{t.puzzleRuns.storm}</a>
           </p>
           {loaded && !user && (
             <p class="ligungi-mates__login">

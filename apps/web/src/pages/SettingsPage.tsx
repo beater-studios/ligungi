@@ -143,6 +143,7 @@ export const SettingsPage = () => {
                 <Toggle id="pref-sound" checked={current.sound} label={s.sound} onChange={(sound) => updatePrefs({ sound })} />
               </div>
             </SettingRow>
+            {toggle('byoyomiVoice', s.byoyomiVoice, s.byoyomiVoiceHelp)}
           </Group>
 
           <Group title={s.groupPieces} help={s.groupPiecesHelp} preview={<PiecePreview />}>

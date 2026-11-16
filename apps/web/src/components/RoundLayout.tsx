@@ -1,10 +1,12 @@
 import type { Color, Move, Position } from '@ligungi/engine';
+import { byoyomiState, type TimeControl } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { formatClock, useT } from '../i18n/index.ts';
 import { useMoveText } from '../notation.ts';
 import { icons } from '../icons.ts';
-import { playSound } from '../sound.ts';
+import { prefs } from '../prefs.ts';
+import { playSound, speak } from '../sound.ts';
 import { BeginnerHint } from './BeginnerHint.tsx';
 import { BoardView, type BoardProps } from './BoardView.tsx';
 import { DraftPanel, TowerPanel } from './Panels.tsx';
@@ -25,6 +27,8 @@ export interface RoundClock {
   readonly since: number;
   readonly running: boolean;
   readonly mine: boolean;
+  /** A byo-yomi clock: `ms` is then the time until the flag falls, shown as main time, then the current period. */
+  readonly byoyomi?: (TimeControl & { readonly byoyomi: number; readonly periods: number }) | null;
   /** Shown on the opponent's clock when the viewer may give them extra time, as lila's "+" button. */
   readonly giveTime?: { readonly label: string; readonly onClick: () => void } | null;
 }
@@ -52,28 +56,68 @@ interface RoundLayoutProps {
 }
 
 const LOW_TIME = 20_000;
+/**
+ * In byo-yomi the warning comes in the last seconds of every period: ten, or half of a shorter period, so a 10 second
+ * period does not warn as soon as it starts.
+ */
+const periodWarning = (byoyomi: number): number => Math.min(10_000, (byoyomi * 1000) / 2);
+
+/**
+ * The last seconds of the player's own byo-yomi period: a beep when the warning starts or, with the spoken countdown,
+ * the browser's voice then and from five down. `spoken` remembers the last second announced, so each is said once.
+ */
+const announcePeriod = (period: number, warning: number, spoken: { current: number | null }, locale: string): void => {
+  const second = Math.ceil(period / 1000);
+  if (period > warning + 1000) {
+    spoken.current = null;
+    return;
+  }
+  if (period > warning || second <= 0 || second === spoken.current) return;
+  spoken.current = second;
+  const first = second === Math.ceil(warning / 1000);
+  if (prefs.get().byoyomiVoice) {
+    if (first || second <= 5) speak(String(second), locale);
+  } else if (first) playSound('lowtime');
+};
 
 const ClockBox = ({ color, position, clock }: { color: Color; position: 'top' | 'bottom'; clock: RoundClock }) => {
+  const t = useT();
   const [, setTick] = useState(0);
   const warned = useRef(false);
+  const spoken = useRef<number | null>(null);
   useEffect(() => {
     if (!clock.running) return;
     const id = setInterval(() => setTick((n) => n + 1), 100);
     return () => clearInterval(id);
   }, [clock.running, clock.since]);
   const left = clock.running ? Math.max(0, clock.ms - (performance.now() - clock.since)) : clock.ms;
-  if (clock.mine && clock.running && left < LOW_TIME && !warned.current) {
-    warned.current = true;
-    playSound('lowtime');
+  const byoyomi = clock.byoyomi ? byoyomiState(left, clock.byoyomi) : null;
+  const inPeriod = byoyomi !== null && byoyomi.main === 0;
+  const shown = byoyomi ? (inPeriod ? byoyomi.period : byoyomi.main) : left;
+  const warning = clock.byoyomi ? periodWarning(clock.byoyomi.byoyomi) : 0;
+  const low = inPeriod ? byoyomi.period <= warning : !byoyomi && left < LOW_TIME;
+  if (inPeriod) {
+    if (clock.mine && clock.running) announcePeriod(byoyomi.period, warning, spoken, t.locale);
+  } else if (!byoyomi) {
+    if (clock.mine && clock.running && left < LOW_TIME && !warned.current) {
+      warned.current = true;
+      playSound('lowtime');
+    }
+    if (left >= LOW_TIME) warned.current = false;
   }
-  if (left >= LOW_TIME) warned.current = false;
   const classes = ['rclock', `rclock-${position}`, `rclock-${color}`];
   if (clock.running) classes.push('running');
-  if (left < LOW_TIME) classes.push('emerg');
+  if (low) classes.push('emerg');
   if (left <= 0) classes.push('outoftime');
+  if (byoyomi) classes.push('ligungi-byoyomi');
   return (
     <div class={classes.join(' ')}>
-      <div class={`time${left >= 3_600_000 ? ' hour' : ''}`}>{formatClock(left)}</div>
+      <div class={`time${shown >= 3_600_000 ? ' hour' : ''}`}>{formatClock(shown)}</div>
+      {byoyomi && clock.byoyomi && byoyomi.periods > 0 && (
+        <span class="ligungi-byoyomi__periods" title={t.game.periodsLeft(byoyomi.periods)}>
+          {inPeriod ? `×${byoyomi.periods}` : `+${clock.byoyomi.periods > 1 ? `${clock.byoyomi.periods}×` : ''}${clock.byoyomi.byoyomi}s`}
+        </span>
+      )}
       {clock.giveTime && (
         <button
           type="button"

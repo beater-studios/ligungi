@@ -1,5 +1,5 @@
 import { legalMoves, moveToString, opposite, type Color, type Move } from '@ligungi/engine';
-import { DAY_MS, EXTRA_TIME_SECONDS, type GameView } from '@ligungi/protocol';
+import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type GameView } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
@@ -201,10 +201,11 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
     const ms = running && view.deadlineIn !== null ? view.deadlineIn : (view.daysPerMove ?? 0) * DAY_MS;
     return { ms, since: receivedAt, running, mine: you === color, giveTime: null };
   };
+  const byoyomi = isByoyomi(view.timeControl) ? view.timeControl : null;
   const clocks = view.clock
     ? {
-        white: { ms: view.clock.white, since: receivedAt, running: started && view.clock.running === 'white', mine: you === 'white', giveTime: opponent === 'white' ? giveTime : null },
-        black: { ms: view.clock.black, since: receivedAt, running: started && view.clock.running === 'black', mine: you === 'black', giveTime: opponent === 'black' ? giveTime : null },
+        white: { ms: view.clock.white, since: receivedAt, running: started && view.clock.running === 'white', mine: you === 'white', giveTime: opponent === 'white' ? giveTime : null, byoyomi },
+        black: { ms: view.clock.black, since: receivedAt, running: started && view.clock.running === 'black', mine: you === 'black', giveTime: opponent === 'black' ? giveTime : null, byoyomi },
       }
     : view.daysPerMove && started
       ? { white: correspondenceClock('white'), black: correspondenceClock('black') }

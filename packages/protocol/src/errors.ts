@@ -8,6 +8,7 @@ export const ERROR_MESSAGES = {
   invalidRated: 'Informe se a partida vale rating.',
   invalidColor: 'Cor inválida.',
   invalidInitialTime: 'Tempo inicial deve ficar entre 1 e 180 minutos.',
+  invalidByoyomi: 'Byo-yomi inválido: escolha os segundos por lance e de 1 a 3 períodos, sem incremento.',
   invalidIncrement: 'Incremento deve ficar entre 0 e 180 segundos.',
   invalidDaysPerMove: 'Na correspondência, o prazo por lance é de 1, 3 ou 7 dias, sem relógio.',
   correspondenceNeedsAccount: 'Entre na sua conta para jogar por correspondência.',

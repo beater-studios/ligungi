@@ -9,7 +9,7 @@ import {
   type Mode,
   type Outcome,
 } from '@ligungi/engine';
-import { DAY_MS, EXTRA_TIME_SECONDS, type ErrorCode, type GameStatus, type GameSummary, type GameView, type PlayerView, type TimeControl } from '@ligungi/protocol';
+import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type ErrorCode, type GameStatus, type GameSummary, type GameView, type PlayerView, type TimeControl } from '@ligungi/protocol';
 import { Clock } from './clock.ts';
 
 export interface Seat {
@@ -270,8 +270,9 @@ export class GameRoom {
     return null;
   }
 
+  /** Not with byo-yomi, where extra seconds would turn into periods. */
   canGiveTime(_color: Color): boolean {
-    return this.status === 'started' && this.clock !== null;
+    return this.status === 'started' && this.clock !== null && !isByoyomi(this.timeControl);
   }
 
   /** Adds a few seconds to the opponent's clock, as lichess's "give more time". Allowed in rated games too: it only helps the opponent. */

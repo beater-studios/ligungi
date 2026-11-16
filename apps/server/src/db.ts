@@ -235,6 +235,10 @@ const MIGRATIONS = [
   );
   create index puzzle_runs_user on puzzle_runs(user_id, kind, created_at);
   `,
+  `
+  alter table games add column clock_byoyomi integer;
+  alter table games add column clock_periods integer;
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

@@ -29,6 +29,21 @@ const extension = (() => {
 
 const cache = new Map<SoundName, HTMLAudioElement>();
 
+/** Says a short text with the browser's own voice (Web Speech API), in `locale`, when sounds are on; silent where unsupported. */
+export const speak = (text: string, locale: string): void => {
+  if (!prefs.get().sound) return;
+  try {
+    if (typeof speechSynthesis === 'undefined') return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = locale;
+    utterance.rate = 1.2;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+  } catch {
+    /* Speech unavailable: ignore. */
+  }
+};
+
 export const playSound = (name: SoundName): void => {
   if (!prefs.get().sound) return;
   try {

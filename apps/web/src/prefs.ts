@@ -52,6 +52,8 @@ export interface Prefs {
   /** Move list notation: the rulebook's (kanji), the same with piece names, or the machine notation. */
   readonly notation: 'rulebook' | 'named' | 'machine';
   readonly sound: boolean;
+  /** Byo-yomi: the browser's voice counts down the last seconds of each period (a beep otherwise). */
+  readonly byoyomiVoice: boolean;
   readonly theme: 'auto' | 'light' | 'dark';
   readonly boardTheme: BoardTheme;
   /** Colors of the `custom` board theme, kept when another theme is picked. */
@@ -86,6 +88,7 @@ const DEFAULTS: Prefs = {
   animation: true,
   zoom: 80,
   hoverReach: true,
+  byoyomiVoice: false,
 };
 
 const validCustomBoard = (value: unknown): CustomBoard => {
@@ -126,6 +129,7 @@ const load = (): Prefs => {
       customPieces: validCustomPieces(stored.customPieces),
       hidePieces: stored.hidePieces === true,
       peekPieces: stored.peekPieces === true,
+      byoyomiVoice: stored.byoyomiVoice === true,
       notation:
         stored.notation === 'rulebook' || stored.notation === 'named' || stored.notation === 'machine'
           ? stored.notation

@@ -2,6 +2,7 @@ import { MODES, type Mode } from '@ligungi/engine';
 import {
   LESSON_STAGES,
   TIME_PRESETS,
+  sameTimeControl,
   type DailyPuzzle,
   type GameSettings,
   type GameSummary,
@@ -43,9 +44,6 @@ const storedQuickMode = (): Mode => {
     return 'advanced';
   }
 };
-
-const sameTimeControl = (a: TimeControl | null, b: TimeControl | null): boolean =>
-  a === b || (a !== null && b !== null && a.initial === b.initial && a.increment === b.increment);
 
 /** Open seeks that a quick pairing seek with these settings would be paired with, as the server pairs them. */
 const waitingFor = (seeks: readonly SeekView[], settings: Pick<GameSettings, 'mode' | 'rated' | 'timeControl'>): number =>

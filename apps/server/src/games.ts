@@ -49,6 +49,8 @@ interface GameRow {
   rated: number;
   clock_initial: number | null;
   clock_increment: number | null;
+  clock_byoyomi: number | null;
+  clock_periods: number | null;
   first_player: Color;
   free_draft: number;
   white_session: string;
@@ -113,6 +115,13 @@ const seatFrom = (row: GameRow, color: Color): Seat => ({
 
 /** Finished games kept in memory after being loaded, for quick access (views, rematch offers). */
 const FINISHED_CACHE = 500;
+
+/** The clock a stored game was created with: Fischer, byo-yomi, or none. */
+const timeControlOf = (row: GameRow): TimeControl | null => {
+  if (row.clock_initial === null) return null;
+  if (row.clock_byoyomi && row.clock_periods) return { initial: row.clock_initial, increment: 0, byoyomi: row.clock_byoyomi, periods: row.clock_periods };
+  return { initial: row.clock_initial, increment: row.clock_increment ?? 0 };
+};
 
 export class Games {
   readonly #db: Db;
@@ -359,7 +368,7 @@ export class Games {
         endedAt: row.ended_at === null ? null : new Date(row.ended_at).toISOString(),
         mode: row.mode,
         rated: Boolean(row.rated),
-        timeControl: row.clock_initial === null ? null : { initial: row.clock_initial, increment: row.clock_increment ?? 0 },
+        timeControl: timeControlOf(row),
         color,
         opponent: row[`${opponent}_name`],
         result,
@@ -547,8 +556,7 @@ export class Games {
       id: row.id,
       mode: row.mode,
       rated: row.rated === 1,
-      timeControl:
-        row.clock_initial === null ? null : { initial: row.clock_initial, increment: row.clock_increment ?? 0 },
+      timeControl: timeControlOf(row),
       firstPlayer: row.first_player,
       freeDraft: row.free_draft === 1,
       seats: { white: seatFrom(row, 'white'), black: seatFrom(row, 'black') },
@@ -576,12 +584,12 @@ export class Games {
     const moves = room.game.moves.map(moveToString).join(' ');
     this.#db
       .prepare(
-        `insert into games (id, mode, rated, clock_initial, clock_increment, first_player, free_draft,
+        `insert into games (id, mode, rated, clock_initial, clock_increment, clock_byoyomi, clock_periods, first_player, free_draft,
           white_session, white_user, white_name, white_rating, white_provisional, white_diff,
           black_session, black_user, black_name, black_rating, black_provisional, black_diff,
           moves, status, winner, reason, clock_white, clock_black, clock_running, days_per_move, deadline, rematch_id,
           created_at, ended_at, updated_at, board_moves)
-         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          on conflict (id) do update set white_session = excluded.white_session, black_session = excluded.black_session,
           white_diff = excluded.white_diff, black_diff = excluded.black_diff,
           moves = excluded.moves, status = excluded.status, winner = excluded.winner, reason = excluded.reason,
@@ -595,6 +603,8 @@ export class Games {
         room.rated ? 1 : 0,
         room.timeControl?.initial ?? null,
         room.timeControl?.increment ?? null,
+        room.timeControl?.byoyomi ?? null,
+        room.timeControl?.periods ?? null,
         room.firstPlayer,
         room.freeDraft ? 1 : 0,
         white.sessionId,

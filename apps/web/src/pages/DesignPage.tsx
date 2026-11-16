@@ -9,7 +9,7 @@ import { ProfileAbout, SiteIcon } from '../components/ProfileAbout.tsx';
 import { QrCode } from '../components/QrCode.tsx';
 import { RatingHistoryChart } from '../components/RatingHistoryChart.tsx';
 import { Stars } from '../components/Stars.tsx';
-import { Checkbox, ColorField, Field, FieldRow, OptionCards, RadioGroup, Select, SettingRow, SubmitButton, Toggle } from '../components/ui.tsx';
+import { Checkbox, ColorField, Field, FieldRow, OptionCards, RadioGroup, Select, SettingRow, Slider, SubmitButton, Toggle } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
@@ -61,6 +61,7 @@ export const DesignPage = () => {
   const [mode, setMode] = useState('advanced');
   const [color, setColor] = useState('#e3c389');
   const [minutes, setMinutes] = useState(10);
+  const [sliderSeconds, setSliderSeconds] = useState(30);
   const [switched, setSwitched] = useState(true);
   const [checked, setChecked] = useState(true);
   const [choice, setChoice] = useState<'white' | 'random' | 'black'>('random');
@@ -243,6 +244,12 @@ export const DesignPage = () => {
                   help="A choice among a few options is a segmented OptionCards in a .ligungi-setting row."
                 />
               </div>
+            </div>
+          </Example>
+          <Example label="Slider: a value from a list (not a numeric range), label and value on one row; arrow keys step through the list">
+            <div class="form3" style={{ display: 'grid', gap: '0.75rem', width: '100%', maxWidth: '30rem' }}>
+              <Slider id="ds-slider-minutes" label="Minutes" values={[1, 2, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120, 180]} value={minutes} onChange={setMinutes} />
+              <Slider id="ds-slider-seconds" label="Seconds per move" values={[10, 20, 30, 60]} value={sliderSeconds} format={(s) => `${s} s`} onChange={setSliderSeconds} />
             </div>
           </Example>
           <Example label="OptionCards: one choice among a few, as cards (layout cards, row or segmented); cards stack on phones">

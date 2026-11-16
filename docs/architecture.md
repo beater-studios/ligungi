@@ -38,7 +38,7 @@ Colors live in CSS variables (`--gg-board`, `--gg-line`, the piece faces and eve
 | `games.ts` | Keeps the rooms, persists to SQLite on every change, updates ratings at the end, reloads ongoing games on restart, and serves the filtered game history. |
 | `lobby.ts` | Seeks (with automatic pairing of compatible seeks) and challenge links. |
 | `hub.ts` | WebSocket pub/sub by topic (`lobby`, `game:<id>`, `challenge:<id>`). |
-| `clock.ts` | Fischer clock. During the draft the same player may move several times in a row, so the clock goes to "whoever is to move" instead of simply alternating. |
+| `clock.ts` | Fischer or byo-yomi clock. During the draft the same player may move several times in a row, so the clock goes to "whoever is to move" instead of simply alternating. A byo-yomi clock keeps one number per side, the time until the flag falls (main time plus the periods left), resets the current period after each move, and `byoyomiState` (protocol) splits it back for display. |
 | `glicko.ts` | Glicko-2, one rating per game mode. |
 | `auth.ts`, `users.ts` | Passwords with scrypt, session cookie `HttpOnly; SameSite=Lax`, session rotation on login. Follows and leaderboard queries. |
 | `moderation.ts`, `cli.ts` | Moderators, suspensions, reports and the moderation log; the server command that grants the role (see [moderation.md](moderation.md)). |

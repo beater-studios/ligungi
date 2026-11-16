@@ -1,14 +1,25 @@
 import type { Color } from '@ligungi/engine';
-import type { ClockView, TimeControl } from '@ligungi/protocol';
+import { isByoyomi, type ClockView, type TimeControl } from '@ligungi/protocol';
 
+/**
+ * A game clock. `remaining` is each side's time until the flag falls. With a Fischer clock that is the time left, and
+ * every move adds the increment. With byo-yomi it is the main time plus every period still available: a move made
+ * after the main time resets the current period, and a period overrun is gone for good (`byoyomiState` splits it back).
+ */
 export class Clock {
   readonly remaining: Record<Color, number>;
   readonly increment: number;
+  /** Byo-yomi period in ms, and the periods each side starts with; 0 for a Fischer clock. */
+  readonly #period: number;
+  readonly #periods: number;
   running: Color | null = null;
   #since = 0;
 
   constructor(timeControl: TimeControl, remaining?: Record<Color, number>) {
-    this.remaining = remaining ? { ...remaining } : { white: timeControl.initial * 1000, black: timeControl.initial * 1000 };
+    this.#period = isByoyomi(timeControl) ? timeControl.byoyomi * 1000 : 0;
+    this.#periods = isByoyomi(timeControl) ? timeControl.periods : 0;
+    const start = timeControl.initial * 1000 + this.#period * this.#periods;
+    this.remaining = remaining ? { ...remaining } : { white: start, black: start };
     this.increment = timeControl.increment * 1000;
   }
 
@@ -22,18 +33,21 @@ export class Clock {
   }
 
   /**
-   * Ends `color`'s move: charges the elapsed time, adds the increment and starts `next`. During the
-   * draft `next` can be the same player, when the opponent has already declared done.
+   * Ends `color`'s move: charges the elapsed time, adds the increment (or resets the byo-yomi period) and starts
+   * `next`. During the draft `next` can be the same player, when the opponent has already declared done.
    */
   press(color: Color, next: Color, now: number): void {
     if (this.running !== color) return;
-    this.remaining[color] = this.timeLeft(color, now) + this.increment;
+    const left = this.timeLeft(color, now);
+    if (this.#period === 0) this.remaining[color] = left + this.increment;
+    else if (left <= this.#period * this.#periods) this.remaining[color] = Math.ceil(left / this.#period) * this.#period;
+    else this.remaining[color] = left;
     this.start(next, now);
   }
 
-  /** Extra time for `color`, also while their clock runs. */
+  /** Extra time for `color`, also while their clock runs. Only for Fischer clocks: in byo-yomi it would count as periods. */
   add(color: Color, ms: number): void {
-    this.remaining[color] += ms;
+    if (this.#period === 0) this.remaining[color] += ms;
   }
 
   stop(now: number): void {

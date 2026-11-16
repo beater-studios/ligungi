@@ -1,5 +1,14 @@
 import { MODES, MODE_RULES, type Mode } from '@ligungi/engine';
-import { CORRESPONDENCE_DAYS, type ChallengeView, type ColorChoice, type GameSettings } from '@ligungi/protocol';
+import {
+  BYOYOMI_PERIODS_MAX,
+  BYOYOMI_SECONDS,
+  CORRESPONDENCE_DAYS,
+  formatTimeControl,
+  type ChallengeView,
+  type ColorChoice,
+  type GameSettings,
+  type TimeControl,
+} from '@ligungi/protocol';
 import { useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { colorChoiceOptions, useT } from '../i18n/index.ts';
@@ -7,17 +16,27 @@ import { navigate } from '../router.ts';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
 import { Modal } from './Modal.tsx';
-import { Checkbox, Field, FieldRow, OptionCards, RadioGroup, Select, SubmitButton } from './ui.tsx';
+import { Checkbox, OptionCards, Slider, SubmitButton } from './ui.tsx';
 
 const MINUTES = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120, 180];
 const INCREMENTS = [0, 1, 2, 3, 5, 10, 15, 20, 30, 45, 60];
+/** Byo-yomi may start right away, with no main time. */
+const BYOYOMI_MINUTES = [0, ...MINUTES];
+const PERIODS = Array.from({ length: BYOYOMI_PERIODS_MAX }, (_, i) => i + 1);
 
 export type CreateTarget = 'lobby' | 'friend';
 
 /** Live with a clock, correspondence (days per move) or no clock at all. */
 type Speed = 'live' | 'correspondence' | 'unlimited';
 
-/** `to` turns the friend form into a challenge sent to that player from their profile. */
+/** A Fischer clock (time plus increment) or byo-yomi (time, then a fixed period per move). */
+type ClockKind = 'increment' | 'byoyomi';
+
+/**
+ * Creating a game: in the lobby, as a link for a friend, or as a challenge to a player (`to`). One window for all three,
+ * short enough to need no scrolling: the mode and every choice are buttons side by side, the clock values sliders under a
+ * summary of the time control and a sentence that says what it means.
+ */
 export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?: string; onClose: () => void }) => {
   const t = useT();
   const { user } = useStore(session);
@@ -26,6 +45,9 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
   const [days, setDays] = useState(3);
   const [minutes, setMinutes] = useState(10);
   const [increment, setIncrement] = useState(5);
+  const [clockKind, setClockKind] = useState<ClockKind>('increment');
+  const [byoyomi, setByoyomi] = useState(30);
+  const [periods, setPeriods] = useState(1);
   const [rated, setRated] = useState(Boolean(user));
   const [color, setColor] = useState<ColorChoice>('random');
   const [freeDraft, setFreeDraft] = useState(false);
@@ -34,6 +56,10 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
   const canRate = Boolean(user) && speed !== 'unlimited';
   const draftMode = MODE_RULES[mode].draft;
   const free = draftMode && freeDraft && !(canRate && rated);
+  const byo = clockKind === 'byoyomi';
+
+  const timeControl: TimeControl | null =
+    speed !== 'live' ? null : byo ? { initial: minutes * 60, increment: 0, byoyomi, periods } : { initial: Math.max(1, minutes) * 60, increment };
 
   const submit = async (event: Event) => {
     event.preventDefault();
@@ -42,7 +68,7 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
     const settings: GameSettings = {
       mode,
       rated: canRate && rated,
-      timeControl: speed === 'live' ? { initial: minutes * 60, increment } : null,
+      timeControl,
       daysPerMove: speed === 'correspondence' ? days : null,
       color,
       freeDraft: free,
@@ -64,50 +90,96 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
     }
   };
 
-  const colorOptions = colorChoiceOptions(t);
+  const pickClock = (kind: ClockKind) => {
+    setClockKind(kind);
+    // A Fischer clock needs some main time.
+    if (kind === 'increment' && minutes === 0) setMinutes(1);
+  };
 
   return (
     <Modal title={to ? t.create.challengeTitle(to) : target === 'friend' ? t.create.friendTitle : t.create.lobbyTitle} onClose={onClose}>
-      <form class="form3 create-game" onSubmit={submit}>
-        <Field label={t.common.mode} htmlFor="cg-mode" help={t.modeDescriptions[mode]}>
-          <Select id="cg-mode" value={mode} options={MODES.map((m) => ({ value: m, label: t.modes[m] }))} onChange={setMode} />
-        </Field>
+      <form class="form3 create-game ligungi-create" onSubmit={submit}>
         <OptionCards
-          name="cg-speed"
-          legend={t.create.speed}
+          name="cg-mode"
+          legend={t.common.mode}
           layout="segmented"
-          value={speed}
-          options={[
-            { value: 'live' as const, label: t.create.speedLive },
-            { value: 'correspondence' as const, label: t.create.speedCorrespondence, disabled: !user, title: user ? '' : t.create.correspondenceLogin },
-            { value: 'unlimited' as const, label: t.noClock },
-          ]}
-          onChange={setSpeed}
-          {...(speed === 'correspondence' ? { help: t.create.correspondenceHelp } : {})}
+          value={mode}
+          options={MODES.map((m) => ({ value: m, label: t.modes[m] }))}
+          onChange={setMode}
+          help={t.modeDescriptions[mode]}
         />
-        {speed === 'correspondence' && (
+
+        <div class="ligungi-create__speed">
           <OptionCards
-            name="cg-days"
-            legend={t.create.daysPerMove}
+            name="cg-speed"
+            legend={t.create.speed}
             layout="segmented"
-            value={days}
-            options={CORRESPONDENCE_DAYS.map((n) => ({ value: n, label: t.daysPerMove(n) }))}
-            onChange={setDays}
+            value={speed}
+            options={[
+              { value: 'live' as const, label: t.create.speedLive },
+              { value: 'correspondence' as const, label: t.create.speedCorrespondence, disabled: !user, title: user ? '' : t.create.correspondenceLogin },
+              { value: 'unlimited' as const, label: t.noClock },
+            ]}
+            onChange={setSpeed}
           />
-        )}
-        {speed === 'live' && (
-          <FieldRow>
-            <Field label={t.create.minutes} htmlFor="cg-minutes">
-              <Select id="cg-minutes" value={minutes} options={MINUTES.map((m) => ({ value: m, label: m }))} onChange={setMinutes} />
-            </Field>
-            <Field label={t.create.increment} htmlFor="cg-increment">
-              <Select id="cg-increment" value={increment} options={INCREMENTS.map((sec) => ({ value: sec, label: sec }))} onChange={setIncrement} />
-            </Field>
-          </FieldRow>
-        )}
-        <Field label={t.create.type}>
-          <RadioGroup
+          {speed === 'live' && (
+            <div class="ligungi-create__box">
+              <div class="ligungi-create__clock">
+                <OptionCards
+                  name="cg-clock"
+                  legend={t.create.clock}
+                  hideLegend
+                  layout="segmented"
+                  value={clockKind}
+                  options={[
+                    { value: 'increment' as const, label: t.create.clockIncrement },
+                    { value: 'byoyomi' as const, label: t.create.clockByoyomi },
+                  ]}
+                  onChange={pickClock}
+                />
+                <strong class="ligungi-create__summary">{formatTimeControl(timeControl)}</strong>
+              </div>
+              <Slider id="cg-minutes" label={t.create.minutes} values={byo ? BYOYOMI_MINUTES : MINUTES} value={minutes} onChange={setMinutes} />
+              {byo ? (
+                <>
+                  <Slider id="cg-byoyomi" label={t.create.byoyomiSeconds} values={BYOYOMI_SECONDS} value={byoyomi} format={(s) => `${s} s`} onChange={setByoyomi} />
+                  <OptionCards
+                    name="cg-periods"
+                    legend={t.create.periods}
+                    layout="segmented"
+                    value={periods}
+                    options={PERIODS.map((n) => ({ value: n, label: String(n) }))}
+                    onChange={setPeriods}
+                  />
+                </>
+              ) : (
+                <Slider id="cg-increment" label={t.create.increment} values={INCREMENTS} value={increment} format={(s) => `${s} s`} onChange={setIncrement} />
+              )}
+              <p class="ligungi-create__note">{byo ? t.create.byoyomiText(minutes, byoyomi, periods) : t.create.incrementText(Math.max(1, minutes), increment)}</p>
+            </div>
+          )}
+          {speed === 'correspondence' && (
+            <div class="ligungi-create__box">
+              <OptionCards
+                name="cg-days"
+                legend={t.create.daysPerMove}
+                hideLegend
+                layout="segmented"
+                value={days}
+                options={CORRESPONDENCE_DAYS.map((n) => ({ value: n, label: t.daysPerMove(n) }))}
+                onChange={setDays}
+              />
+              <p class="ligungi-create__note">{t.create.correspondenceHelp}</p>
+            </div>
+          )}
+          {speed === 'unlimited' && <p class="ligungi-create__box ligungi-create__note">{t.create.unlimitedNote}</p>}
+        </div>
+
+        <div class="ligungi-create__type">
+          <OptionCards
             name="cg-rated"
+            legend={t.create.type}
+            layout="segmented"
             value={rated && canRate}
             options={[
               { value: false, label: t.casual },
@@ -115,24 +187,34 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
             ]}
             onChange={setRated}
           />
-        </Field>
-        {draftMode && (
-          <Checkbox
-            id="cg-free"
-            checked={free}
-            disabled={canRate && rated}
-            title={t.freeDraftHint}
-            label={t.freeDraftLabel}
-            help={canRate && rated ? t.freeDraftRatedHint : t.freeDraftHint}
-            onChange={(checked) => {
-              setFreeDraft(checked);
-              if (checked) setRated(false);
-            }}
-          />
-        )}
-        <Field label={t.common.yourColor} help={t.common.whiteStarts}>
-          <RadioGroup name="cg-color" value={color} options={colorOptions} onChange={setColor} />
-        </Field>
+          {draftMode && (
+            <Checkbox
+              id="cg-free"
+              checked={free}
+              disabled={canRate && rated}
+              title={canRate && rated ? t.freeDraftRatedHint : t.freeDraftHint}
+              label={t.freeDraftLabel}
+              onChange={(checked) => {
+                setFreeDraft(checked);
+                if (checked) setRated(false);
+              }}
+            />
+          )}
+        </div>
+
+        <OptionCards
+          name="cg-color"
+          legend={t.common.yourColor}
+          layout="segmented"
+          value={color}
+          options={colorChoiceOptions(t).map((option) => ({
+            ...option,
+            icon: <span class={`ligungi-choice__disc ligungi-choice__disc--${option.value}`} aria-hidden="true" />,
+          }))}
+          onChange={setColor}
+          help={t.common.whiteStarts}
+        />
+
         {error && <p class="error">{error}</p>}
         <SubmitButton disabled={busy}>{to ? t.create.sendChallenge : target === 'friend' ? t.create.createLink : t.create.create}</SubmitButton>
       </form>

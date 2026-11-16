@@ -177,6 +177,46 @@ export const OptionCards = <T,>({ name, legend, value, options, onChange, help, 
   </fieldset>
 );
 
+interface SliderProps<T> {
+  readonly id: string;
+  readonly label: ComponentChildren;
+  /** The values it steps through, in order; they need not be evenly spaced. */
+  readonly values: readonly T[];
+  readonly value: T;
+  readonly format?: (value: T) => string;
+  readonly onChange: (value: T) => void;
+}
+
+/**
+ * A range input over a list of values (1, 2, 3, 5, 10... minutes), labelled, with the chosen value written beside it.
+ * The arrow keys step through the list; a value missing from it shows as the first one.
+ */
+export const Slider = <T,>({ id, label, values, value, format = String, onChange }: SliderProps<T>) => {
+  const index = Math.max(0, values.indexOf(value));
+  const text = format(values[index]!);
+  return (
+    <div class="ligungi-slider">
+      <label class="ligungi-slider__label" for={id}>
+        {label}
+      </label>
+      <input
+        id={id}
+        class="ligungi-slider__input"
+        type="range"
+        min={0}
+        max={values.length - 1}
+        step={1}
+        value={index}
+        aria-valuetext={text}
+        onInput={(event) => onChange(values[Number((event.target as HTMLInputElement).value)]!)}
+      />
+      <output class="ligungi-slider__value" for={id}>
+        {text}
+      </output>
+    </div>
+  );
+};
+
 export const SubmitButton = ({ children, disabled = false }: { children: ComponentChildren; disabled?: boolean }) => (
   <div class="ligungi-actions">
     <button type="submit" class="button ligungi-submit" disabled={disabled}>

@@ -4,14 +4,16 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
-### Changed
-
-- The home page fits on one screen: the puzzle of the day and the strongest live game (with how many players are online and playing) moved to a column on the left of quick pairing, and the page is wider on large screens. Below the open games, a new card shows the best players of each mode. Signed in, the account and learning cards give way to your online friends and a new Train card with your puzzle rating, your Puzzle Storm and Streak records and how far you are in the lessons.
-- The menu under your name (or the gear without an account) changes the board and the pieces right there, as on lichess: Board picks the board theme and Pieces the shape, what each piece shows and its colors, each with a color sample, plus a link to the other options in Settings. Its first link now reads Profile instead of repeating your name.
-
 ### Added
 
+- Byo-yomi clock, as in shogi and go: in Create a game (and challenges), pick Byo-yomi under Clock, then the main time (zero for byo-yomi from the first move), the seconds per move (10 to 60) and 1 to 3 periods. Once the main time runs out, every move must be made within the period; moving in time gives the whole period back, overrunning it uses one up, and the flag falls when none is left. The clock shows the period and the periods left, the time control reads `10|30s` (or `10|3×30s`), a beep warns in the last seconds of each period, and a spoken countdown in your language can be turned on in Settings. Byo-yomi games can be rated.
 - Puzzle Streak and Puzzle Storm (Learn menu, and links on the puzzle pages). Streak: harder and harder puzzles with no clock, until your first wrong move, with one skip. Storm: as many puzzles as you can in 3 minutes from your first move; a wrong move costs 10 seconds, and combos of correct moves add time. Both show your best of today, of the last 7 days and ever, also on the puzzle dashboard, kept on your account or in the browser. At the end, every puzzle of the run is listed and opens on the puzzle page. Runs do not change your puzzle rating.
+
+### Changed
+
+- The window to create a game (also to play a friend or challenge a player) fits without scrolling: the mode, pace, clock, type and color are buttons side by side, the clock values are sliders under a summary of the time control (10+5, 10|3×30s) and a sentence that says what it means, and on phones every choice fills the width.
+- The home page fits on one screen: the puzzle of the day and the strongest live game (with how many players are online and playing) moved to a column on the left of quick pairing, and the page is wider on large screens. Below the open games, a new card shows the best players of each mode. Signed in, the account and learning cards give way to your online friends and a new Train card with your puzzle rating, your Puzzle Storm and Streak records and how far you are in the lessons.
+- The menu under your name (or the gear without an account) changes the board and the pieces right there, as on lichess: Board picks the board theme and Pieces the shape, what each piece shows and its colors, each with a color sample, plus a link to the other options in Settings. Its first link now reads Profile instead of repeating your name.
 
 ## [0.5.0] - 2026-11-16
 

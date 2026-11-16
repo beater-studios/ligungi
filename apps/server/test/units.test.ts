@@ -22,6 +22,29 @@ describe('clock', () => {
     expect(clock.timeLeft('black', 99_000)).toBe(52_000);
   });
 
+  it('runs byo-yomi: the main time first, then a period that resets after each move and is lost when overrun', () => {
+    const clock = new Clock({ initial: 60, increment: 0, byoyomi: 10, periods: 2 });
+    expect(clock.view(0)).toEqual({ white: 80_000, black: 80_000, running: null });
+    clock.start('white', 0);
+    // Within the main time: no increment, nothing else changes.
+    clock.press('white', 'black', 20_000);
+    expect(clock.timeLeft('white', 20_000)).toBe(60_000);
+    clock.press('black', 'white', 20_000);
+    // 45 s used: the 40 s of main time and 5 s of the first period. The move resets the period.
+    clock.press('white', 'black', 65_000);
+    expect(clock.timeLeft('white', 65_000)).toBe(20_000);
+    clock.press('black', 'white', 65_000);
+    // 13 s: the first period is overrun and gone; the second one starts full again.
+    clock.press('white', 'black', 78_000);
+    expect(clock.timeLeft('white', 78_000)).toBe(10_000);
+    clock.press('black', 'white', 78_000);
+    // The last period overrun: the flag falls.
+    expect(clock.timeLeft('white', 88_000)).toBe(0);
+    // Extra time would count as periods, so it is not given.
+    clock.add('black', 15_000);
+    expect(clock.timeLeft('black', 88_000)).toBe(80_000);
+  });
+
   it('never reports negative time', () => {
     const clock = new Clock({ initial: 60, increment: 0 });
     clock.start('white', 0);
@@ -145,6 +168,33 @@ describe('board moves', () => {
     db.prepare('update games set board_moves = null where id = ?').run(room.id);
     new Games(db, users, options);
     expect(stored()).toBe(boardMoves);
+    db.close();
+  });
+});
+
+describe('byo-yomi games', () => {
+  it('keep their clock when the server restarts, and offer no extra time', () => {
+    const db = openDatabase(':memory:');
+    const users = new Users(db, Date.now);
+    const options = { now: Date.now, abortAfterMs: 60_000, claimAfterMs: 30_000, broadcast: () => {} };
+    const games = new Games(db, users, options);
+    const timeControl = { initial: 0, increment: 0, byoyomi: 30, periods: 3 };
+    const room = games.create({
+      mode: 'advanced',
+      rated: true,
+      timeControl,
+      daysPerMove: null,
+      freeDraft: false,
+      players: { white: { sessionId: 'w', userId: null, name: 'White' }, black: { sessionId: 'b', userId: null, name: 'Black' } },
+    });
+    for (let i = 0; i < 2; i++) {
+      const move = legalMoves(room.game.position).find((m) => m.kind === 'drop')!;
+      expect(room.move(room.game.position.turn, moveToString(move), room.plies)).toBeNull();
+    }
+    expect(room.view('w', null)).toMatchObject({ timeControl, canGiveTime: false });
+    const restored = new Games(db, users, options).get(room.id)!;
+    expect(restored.timeControl).toEqual(timeControl);
+    expect(restored.view('w', null).clock?.white).toBeLessThanOrEqual(90_000);
     db.close();
   });
 });

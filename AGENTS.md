@@ -52,6 +52,7 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 - `.npmrc` enforces exact versions (`save-exact`), a 7-day release age (`min-release-age`), no install scripts (`ignore-scripts`) and registry-only packages. Never override these settings.
 - Ask before adding any dependency. Prefer Node built-ins and the existing stack. Each workspace declares the tools it uses (`typescript`, `vitest`), with exact versions.
 - The Node version is pinned in `.nvmrc` and the Dockerfile image, and the `engines` floor is the latest patched release. When a Node security release comes out, bump all three together.
+- The Dockerfile image is pinned by tag and digest (`node:<version>-alpine@sha256:...`) and workflow actions by commit SHA with the version in a comment (`actions/checkout@<sha> # v7.0.1`). Keep both parts when changing them, so Dependabot still sees the version; never pin by digest or SHA alone.
 
 ### Server
 

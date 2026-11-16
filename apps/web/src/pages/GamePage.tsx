@@ -3,6 +3,7 @@ import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type GameView } from '@ligungi/p
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { Crosstable } from '../components/Crosstable.tsx';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
 import { errorText, getT, outcomeText, playerName, speedText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
@@ -369,13 +370,22 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
       })()}
     </section>
   );
-  const side = tv ? (
+  // Between two accounts, their record so far, from the viewer's side when they play; reloaded when the game ends.
+  const [whiteUser, blackUser] = [view.players.white.user, view.players.black.user];
+  const crosstable =
+    whiteUser && blackUser ? (
+      <Crosstable
+        a={(you === 'black' ? blackUser : whiteUser).name}
+        b={(you === 'black' ? whiteUser : blackUser).name}
+        version={view.status}
+      />
+    ) : null;
+  const side = (
     <>
       {tv}
       {info}
+      {crosstable}
     </>
-  ) : (
-    info
   );
 
   return (

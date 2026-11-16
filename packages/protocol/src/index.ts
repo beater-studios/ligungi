@@ -237,6 +237,19 @@ export interface GameCounts {
   readonly draws: number;
 }
 
+/** The record between two players (lichess's crosstable): every finished game they played against each other. */
+export interface Crosstable {
+  readonly users: readonly [UserRef, UserRef];
+  /** Wins of each user, in the order of `users`. */
+  readonly wins: readonly [number, number];
+  readonly draws: number;
+  /** The latest games between them, oldest first: who won, as an index into `users`, or `null` for a draw. */
+  readonly recent: readonly { readonly id: string; readonly winner: 0 | 1 | null }[];
+}
+
+/** How many of the latest games between two players a crosstable lists. */
+export const CROSSTABLE_RECENT = 10;
+
 /** Results of a player's rated games in one mode. */
 export interface ModeRecord {
   readonly wins: number;

@@ -2,6 +2,7 @@ import { initialPosition, parseFen, parseSquare } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { BoardView } from '../components/BoardView.tsx';
+import { CrosstableView } from '../components/Crosstable.tsx';
 import { Flag } from '../components/Flag.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PlayerTag } from '../components/PlayerTag.tsx';
@@ -742,6 +743,28 @@ export const DesignPage = () => {
                 ))}
               </ul>
             </section>
+          </Example>
+          <Example label="Head to head between two players (components/Crosstable.tsx): score, draws and the latest results from the first player's side">
+            <div style={{ maxWidth: '20rem', width: '100%' }}>
+              <CrosstableView
+                data={{
+                  users: [
+                    { id: 'a', name: 'shogun42' },
+                    { id: 'b', name: 'torre_alta' },
+                  ],
+                  wins: [5, 3],
+                  draws: 1,
+                  recent: [
+                    { id: 'g1', winner: 0 },
+                    { id: 'g2', winner: 1 },
+                    { id: 'g3', winner: null },
+                    { id: 'g4', winner: 0 },
+                    { id: 'g5', winner: 0 },
+                  ],
+                }}
+                allHref="#game"
+              />
+            </div>
           </Example>
           <Example label="TV channel list, beside the watched game (.ligungi-tv-channels)">
             <nav class="ligungi-card ligungi-tv-channels" aria-label="Channels" style={{ maxWidth: '16rem' }}>

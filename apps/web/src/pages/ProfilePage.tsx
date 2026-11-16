@@ -14,6 +14,7 @@ import { api } from '../api.ts';
 import { CreateGame } from '../components/CreateGame.tsx';
 import { Flag } from '../components/Flag.tsx';
 import { ModPanel } from '../components/ModPanel.tsx';
+import { Crosstable } from '../components/Crosstable.tsx';
 import { ProfileAbout } from '../components/ProfileAbout.tsx';
 import { RatingHistory } from '../components/RatingHistory.tsx';
 import { ReportButton } from '../components/ReportButton.tsx';
@@ -351,6 +352,8 @@ export const ProfilePage = ({ name }: { name: string }) => {
       </section>
 
       <ProfileAbout details={profile.details} />
+
+      {!isMe && me && <Crosstable a={me.name} b={profile.user.name} allHref={hrefFor(me.name, { vs: profile.user.name })} />}
 
       {moderator && !isMe && (
         <ModPanel name={profile.user.name} onProfileCleared={() => setProfile({ ...profile, details: { ...profile.details, bio: '', links: {} } })} />

@@ -471,6 +471,14 @@ export const pt = {
     load: 'Carregar',
   },
 
+  crosstable: {
+    title: 'Confrontos',
+    draws: (n: number) => (n === 1 ? '1 empate' : `${n} empates`),
+    recent: 'Últimas partidas entre os dois',
+    win: (name: string) => `Vitória de ${name}`,
+    draw: 'Empate',
+    all: 'Ver todas as partidas entre os dois',
+  },
   profile: {
     edit: 'Editar perfil',
     aboutLabel: 'Sobre o jogador',

@@ -856,6 +856,12 @@ export const createApp = (config: ServerConfig): App => {
       const before = Number(ctx.url.searchParams.get('before')) || undefined;
       sendJson(ctx.res, 200, games.recentFor(user.id, 20, before, { ...rest, ...(vsId ? { vsId } : {}) }));
     })
+    .add('GET', '/api/crosstable/:a/:b', (ctx) => {
+      // Only id and name leave the server: the stored user also holds the password hash.
+      const [a, b] = [findUser(ctx.params.a!), findUser(ctx.params.b!)].map((user) => ({ id: user.id, name: user.name })) as [UserRef, UserRef];
+      if (a.id === b.id) throw new HttpError(400, 'invalidFilter');
+      sendJson(ctx.res, 200, games.crosstable(a, b));
+    })
     .add('GET', '/api/users/:name/counts', (ctx) => {
       const user = findUser(ctx.params.name!);
       const filters = parseGameFilters(ctx.url.searchParams);

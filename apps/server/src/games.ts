@@ -1,7 +1,9 @@
 import { moveToString, opposite, type Color, type Mode, type Outcome } from '@ligungi/engine';
 import {
+  CROSSTABLE_RECENT,
   GAME_LENGTHS,
   RATING_HISTORY_MAX,
+  type Crosstable,
   type GameCounts,
   type GameFilters,
   type GameStatus,
@@ -10,6 +12,7 @@ import {
   type ModeStats,
   type RatingPoint,
   type TimeControl,
+  type UserRef,
 } from '@ligungi/protocol';
 import type { Db } from './db.ts';
 import { updateRating, PROVISIONAL_DEVIATION } from './glicko.ts';
@@ -403,6 +406,30 @@ export class Games {
       )
       .get(...params) as { games: number; rated: number | null; wins: number | null; losses: number | null; draws: number | null };
     return { games: row.games, rated: row.rated ?? 0, wins: row.wins ?? 0, losses: row.losses ?? 0, draws: row.draws ?? 0 };
+  }
+
+  /** Every finished game between two users (voided ones aside): the wins of each, the draws and the latest results. */
+  crosstable(a: UserRef, b: UserRef): Crosstable {
+    const rows = this.#db
+      .prepare(
+        `select id, winner, white_user from games
+         where status = 'ended' and voided = 0 and ((white_user = ?1 and black_user = ?2) or (white_user = ?2 and black_user = ?1))
+         order by created_at desc`,
+      )
+      .all(a.id, b.id) as Array<{ id: string; winner: Color | null; white_user: string }>;
+    const wins: [number, number] = [0, 0];
+    let draws = 0;
+    const results = rows.map((row) => {
+      if (row.winner === null) {
+        draws++;
+        return { id: row.id, winner: null };
+      }
+      const winnerId = row.winner === 'white' ? row.white_user : row.white_user === a.id ? b.id : a.id;
+      const index: 0 | 1 = winnerId === a.id ? 0 : 1;
+      wins[index]++;
+      return { id: row.id, winner: index };
+    });
+    return { users: [{ id: a.id, name: a.name }, { id: b.id, name: b.name }], wins, draws, recent: results.slice(0, CROSSTABLE_RECENT).reverse() };
   }
 
   /** Wins, draws and losses of a user's finished rated games, per mode. */

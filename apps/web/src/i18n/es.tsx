@@ -562,6 +562,14 @@ export const es: Messages = {
     load: 'Cargar',
   },
 
+  crosstable: {
+    title: 'Enfrentamientos',
+    draws: (n) => (n === 1 ? '1 partida en tablas' : `${n} partidas en tablas`),
+    recent: 'Últimas partidas entre los dos',
+    win: (name) => `Victoria de ${name}`,
+    draw: 'Tablas',
+    all: 'Ver todas las partidas entre los dos',
+  },
   profile: {
     edit: 'Editar perfil',
     aboutLabel: 'Sobre el jugador',

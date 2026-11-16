@@ -5106,6 +5106,82 @@ $lesson-star: #e8a800;
   }
 }
 
+/* ===== Head to head (components/Crosstable.tsx): the score between two players and their latest results ===== */
+.ligungi-crosstable {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem;
+
+  .round__side & {
+    margin-bottom: $block-gap;
+  }
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
+
+  &__score {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.6rem;
+    margin: 0;
+
+    strong {
+      color: $c-font-clear;
+      font-size: 1.3rem;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__draws {
+    color: $c-font-dim;
+    font-size: 0.85em;
+  }
+
+  // One cell per game, oldest first, from the first player's side.
+  &__recent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    a {
+      display: grid;
+      place-items: center;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 3px;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .is-win {
+      background: $c-good;
+    }
+
+    .is-loss {
+      background: $c-bad;
+    }
+
+    .is-draw {
+      background: $c-font-dimmer;
+    }
+  }
+
+  &__all {
+    font-size: 0.9em;
+  }
+}
+
 /* ===== Home ===== */
 // Three columns: the puzzle of the day and the strongest live game, quick pairing with open games and the leaders, the
 // actions and the account cards. Narrower, the first column goes under the middle one, its two cards side by side.

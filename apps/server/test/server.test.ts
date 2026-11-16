@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { applyMove, initialPosition, parseMove, toFen } from '@ligungi/engine';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EXTRA_TIME_SECONDS, puzzleInfo, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ExplorerView, type ModUserView, type ProfileDetails, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleRunsView, type PuzzleView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, puzzleInfo, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type Crosstable, type ExplorerView, type ModUserView, type ProfileDetails, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleRunsView, type PuzzleView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
 import { PUZZLES } from '@ligungi/protocol/puzzles';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { base32Decode, hotp, TOTP_STEP_MS } from '../src/totp.ts';
@@ -620,6 +620,15 @@ describe('community', () => {
     expect(await counts('?vs=wing&mode=intro')).toEqual({ games: 2, rated: 1, wins: 2, losses: 0, draws: 0 });
     expect(await counts('?vs=ghost')).toEqual({ games: 0, rated: 0, wins: 0, losses: 0, draws: 0 });
     expect(await counts('?mode=chess')).toMatchObject({ code: 'invalidFilter' });
+
+    // The record between two players, from either side; only their id and name leave the server.
+    const crosstable = (await a.request<Crosstable>('GET', '/api/crosstable/biscuit/wing')).data;
+    expect(crosstable).toMatchObject({ wins: [2, 0], draws: 0, recent: [{ id: winVsWing, winner: 0 }, { id: ratedWin, winner: 0 }] });
+    expect(crosstable.users.map((user) => Object.keys(user).sort())).toEqual([['id', 'name'], ['id', 'name']]);
+    expect((await a.request<Crosstable>('GET', '/api/crosstable/wing/biscuit')).data).toMatchObject({ wins: [0, 2], recent: [{ winner: 1 }, { winner: 1 }] });
+    expect((await a.request<Crosstable>('GET', '/api/crosstable/wing/zushi')).data).toMatchObject({ wins: [0, 0], draws: 0, recent: [] });
+    expect((await a.request('GET', '/api/crosstable/biscuit/ghost')).status).toBe(404);
+    expect((await a.request('GET', '/api/crosstable/biscuit/Biscuit')).status).toBe(400);
   });
 });
 

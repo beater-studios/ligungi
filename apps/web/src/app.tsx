@@ -28,6 +28,7 @@ import { SettingsPage } from './pages/SettingsPage.tsx';
 import { AccountPage } from './pages/AccountPage.tsx';
 import { ModPage } from './pages/ModPage.tsx';
 import { EditorPage } from './pages/EditorPage.tsx';
+import { ExplorerPage } from './pages/ExplorerPage.tsx';
 import { ChallengeBell } from './components/ChallengeBell.tsx';
 import { HeaderSearch } from './components/HeaderSearch.tsx';
 import { useDropdown } from './components/useDropdown.ts';
@@ -54,6 +55,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})$`), render: ([stage]) => <LessonsPage stage={stage!} /> },
   { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})/(\\d{1,2})$`), render: ([stage, n]) => <LessonsPage stage={stage!} exercise={Number(n)} /> },
   { pattern: /^\/coordinates$/, render: () => <CoordinatesPage /> },
+  { pattern: /^\/explorer$/, render: () => <ExplorerPage /> },
   { pattern: /^\/practice$/, render: () => <PracticePage /> },
   { pattern: /^\/practice\/([a-z-]{1,40})$/, render: ([id]) => <PracticePage id={id!} /> },
   { pattern: /^\/puzzles$/, render: () => <PuzzlesPage /> },
@@ -309,6 +311,7 @@ const Header = () => {
               <a href="/analysis">{t.nav.analysis}</a>
               <a href="/editor">{t.nav.editor}</a>
               <a href="/analysis?import">{t.nav.importGame}</a>
+              <a href="/explorer">{t.nav.explorer}</a>
             </div>
           </section>
         </nav>
@@ -369,6 +372,7 @@ export const SiteFooter = () => {
         ['/computer', t.nav.playComputer],
         ['/analysis', t.nav.analysis],
         ['/editor', t.nav.editor],
+        ['/explorer', t.nav.explorer],
         ['/players', t.nav.playerList],
         ['/ranking', t.nav.players],
         ['/tv', t.nav.liveGames],

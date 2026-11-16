@@ -4021,6 +4021,136 @@ $lesson-star: #e8a800;
   }
 }
 
+/* ===== Draft explorer (pages/ExplorerPage.tsx): the board with its path, beside the filters and the placements ===== */
+.ligungi-explorer {
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 28rem);
+    gap: 1.5rem;
+    align-items: start;
+
+    @media (max-width: at-most($small)) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  &__board {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: min(100%, calc(100svh - 14rem));
+    min-width: min(100%, 18rem);
+  }
+
+  &__path {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  &__step {
+    padding: 0.2rem 0.5rem;
+    border: 1px solid $c-border;
+    border-radius: 3px;
+    background: none;
+    color: $c-font;
+    font-size: 0.85em;
+    cursor: pointer;
+
+    &.is-current {
+      border-color: $c-primary;
+      color: $c-font-clear;
+    }
+  }
+
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.1rem 1.2rem;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__total {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    color: $c-font-clear;
+  }
+
+  &__table {
+    width: 100%;
+
+    tbody tr {
+      cursor: pointer;
+
+      &:hover,
+      &:focus-visible {
+        background: $c-bg-zebra2;
+      }
+    }
+
+    th,
+    td {
+      padding: 0.55rem 0.45rem;
+    }
+
+    td:first-child {
+      white-space: nowrap;
+    }
+
+    td:nth-child(3) {
+      width: 45%;
+    }
+
+    small {
+      color: $c-font-dim;
+    }
+  }
+
+  // White wins, draws and Black wins, in the colors of the pieces.
+  &__bar {
+    display: flex;
+    min-width: 6rem;
+    height: 1.25rem;
+    overflow: hidden;
+    border: 1px solid $c-border;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    line-height: calc(1.25rem - 2px);
+    text-align: center;
+
+    span {
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .is-white {
+      background: #f2efe8;
+      color: #333;
+    }
+
+    .is-draws {
+      background: #9a9a9a;
+      color: #fff;
+    }
+
+    .is-black {
+      background: #2b2b2b;
+      color: #eee;
+    }
+  }
+
+  &__updated {
+    color: $c-font-dim;
+    font-size: 0.85em;
+  }
+}
+
 /* ===== Coordinate trainer (pages/CoordinatesPage.tsx): the round panel beside a board of buttons ===== */
 .ligungi-coords {
   &__layout {

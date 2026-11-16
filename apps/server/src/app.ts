@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
-import { MODES, type Color, type Mode } from '@ligungi/engine';
+import { MODES, parseFen, type Color, type Mode } from '@ligungi/engine';
 import {
   ERROR_MESSAGES,
   LEADERBOARD_MAX,
@@ -15,6 +15,8 @@ import {
   LESSON_EXERCISES,
   LESSON_PROGRESS_BATCH,
   LESSON_STARS_MAX,
+  EXPLORER_BANDS,
+  EXPLORER_MODES,
   PRACTICE_BATCH,
   PRACTICE_POSITIONS,
   PUZZLE_BATCH,
@@ -63,6 +65,7 @@ import { ChallengeStore } from './challenges.ts';
 import type { ServerConfig } from './config.ts';
 import { openDatabase, type Db } from './db.ts';
 import { exportGame } from './export.ts';
+import { DraftExplorer } from './explorer.ts';
 import { Games, type Player } from './games.ts';
 import { randomId } from './ids.ts';
 import {
@@ -183,6 +186,7 @@ export const createApp = (config: ServerConfig): App => {
 
   const tv = new Tv(games, config.now);
   const puzzles = new PuzzleStore(db, config.now);
+  const explorer = new DraftExplorer(db, config.now);
   const tvGames = () => tv.live().slice(0, TV_GAMES).map((room) => room.summary());
   // Every move of every live game changes the list, so changes are gathered and sent at most every TV_PUBLISH_MS.
   let tvTimer: ReturnType<typeof setTimeout> | null = null;
@@ -982,6 +986,24 @@ export const createApp = (config: ServerConfig): App => {
       if (!valid) throw new HttpError(400, 'invalidLessonProgress');
       users.saveLessonProgress(userId, Object.fromEntries(entries) as Record<string, number>);
       sendJson(ctx.res, 200, users.lessonProgress(userId));
+    })
+    .add('GET', '/api/explorer', (ctx) => {
+      const params = ctx.url.searchParams;
+      const mode = EXPLORER_MODES.find((value) => value === params.get('mode'));
+      if (!mode) throw new HttpError(400, 'invalidMode');
+      const band = EXPLORER_BANDS.find((value) => value === (params.get('band') ?? 'all'));
+      if (!band) throw new HttpError(400, 'invalidExplorerQuery');
+      const fen = params.get('fen');
+      if (fen !== null) {
+        let position;
+        try {
+          position = parseFen(fen);
+        } catch {
+          throw new HttpError(400, 'invalidExplorerQuery');
+        }
+        if (position.phase !== 'draft' || position.mode !== mode) throw new HttpError(400, 'invalidExplorerQuery');
+      }
+      sendJson(ctx.res, 200, explorer.query(mode, band, params.get('rated') === '1', fen));
     })
     .add('GET', '/api/practice/progress', (ctx) => sendJson(ctx.res, 200, users.practiceProgress(requireUser(ctx))))
     .add('POST', '/api/practice/progress', async (ctx) => {

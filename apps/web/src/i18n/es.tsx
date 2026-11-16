@@ -136,6 +136,7 @@ export const es: Messages = {
     bioTooLong: 'La bio puede tener hasta 400 caracteres.',
     invalidCountry: 'País no válido.',
     invalidLessonProgress: 'Progreso de lección no válido.',
+    invalidExplorerQuery: 'Consulta no válida en el explorador de draft.',
     invalidPracticeProgress: 'Progreso de práctica no válido.',
     invalidPuzzle: 'Puzzle no válido.',
     puzzleNotFound: 'Puzzle no encontrado.',
@@ -175,6 +176,7 @@ export const es: Messages = {
     tools: 'Herramientas',
     analysis: 'Tablero de análisis',
     editor: 'Editor de tablero',
+    explorer: 'Explorador de draft',
     importGame: 'Importar partida',
     reconnecting: 'Reconectando',
     challenges: 'Desafíos',
@@ -760,6 +762,32 @@ export const es: Messages = {
     },
   },
 
+  explorer: {
+    title: 'Explorador de draft',
+    intro: 'Lo que los jugadores colocan en el draft, en qué orden y con qué resultado, a partir de las partidas terminadas en el sitio. Elige una colocación en la tabla o hazla en el tablero.',
+    path: 'Colocaciones elegidas',
+    start: 'Inicio',
+    back: 'Volver una colocación',
+    band: 'Rango de puntuación',
+    ratedOnly: 'Solo partidas puntuadas',
+    games: (n) => (n === 1 ? '1 partida llegó aquí' : `${n} partidas llegaron aquí`),
+    gamesHeader: 'Partidas',
+    move: 'Colocación',
+    results: 'Blancas / tablas / Negras',
+    rating: 'Puntuación media',
+    resultsLabel: (white, draws, black) => `Blancas ${white}%, tablas ${draws}%, Negras ${black}%`,
+    noGames: 'Ninguna partida siguió desde aquí todavía.',
+    draftOver: 'El draft terminó en esta posición.',
+    analyse: 'Abrir en el análisis',
+    updated: (date) => `Estadísticas del ${date}, actualizadas cada 10 minutos.`,
+    bands: {
+      'all': 'Todas',
+      'below1400': 'Menos de 1400',
+      '1400to1700': '1400 a 1700',
+      'from1700': '1700 o más',
+    },
+  },
+
   coordinates: {
     title: 'Entrenamiento de coordenadas',
     intro: 'Aprende el nombre de las casillas: acierta todas las que puedas en 30 segundos.',
@@ -1194,6 +1222,10 @@ export const es: Messages = {
       lessons: {
         title: 'Lecciones interactivas de Gungi · ligungi',
         description: 'Aprende Gungi jugando: las piezas, las torres, las piezas en mano, la traición, el mate y el draft, en ejercicios cortos en el tablero.',
+      },
+      explorer: {
+        title: 'Explorador de draft de Gungi · ligungi',
+        description: 'Mira lo que los jugadores de Gungi colocan en el draft, en qué orden y con qué resultado, en los modos Intermedio y Avanzado.',
       },
       coordinates: {
         title: 'Entrenamiento de coordenadas de Gungi · ligungi',

@@ -87,6 +87,7 @@ export const pt = {
     tools: 'Ferramentas',
     analysis: 'Tabuleiro de análise',
     editor: 'Editor de tabuleiro',
+    explorer: 'Explorador de draft',
     importGame: 'Importar partida',
     reconnecting: 'Reconectando',
     challenges: 'Desafios',
@@ -674,6 +675,32 @@ export const pt = {
     },
   },
 
+  explorer: {
+    title: 'Explorador de draft',
+    intro: 'O que os jogadores colocam no draft, em que ordem e com que resultado, a partir das partidas terminadas no site. Escolha uma colocação na tabela ou faça a jogada no tabuleiro.',
+    path: 'Colocações escolhidas',
+    start: 'Início',
+    back: 'Voltar uma colocação',
+    band: 'Faixa de rating',
+    ratedOnly: 'Só partidas ranqueadas',
+    games: (n: number) => (n === 1 ? '1 partida chegou aqui' : `${n} partidas chegaram aqui`),
+    gamesHeader: 'Partidas',
+    move: 'Colocação',
+    results: 'Brancas / empate / Pretas',
+    rating: 'Rating médio',
+    resultsLabel: (white: number, draws: number, black: number) => `Brancas ${white}%, empates ${draws}%, Pretas ${black}%`,
+    noGames: 'Nenhuma partida seguiu daqui ainda.',
+    draftOver: 'O draft terminou nesta posição.',
+    analyse: 'Abrir na análise',
+    updated: (date: string) => `Estatísticas de ${date}, atualizadas a cada 10 minutos.`,
+    bands: {
+      'all': 'Todas',
+      'below1400': 'Abaixo de 1400',
+      '1400to1700': '1400 a 1700',
+      'from1700': '1700 ou mais',
+    },
+  },
+
   coordinates: {
     title: 'Treino de coordenadas',
     intro: 'Aprenda o nome das casas: acerte o máximo que conseguir em 30 segundos.',
@@ -1107,6 +1134,10 @@ export const pt = {
       lessons: {
         title: 'Lições interativas de Gungi · ligungi',
         description: 'Aprenda Gungi jogando: as peças, as torres, as peças da mão, a traição, o mate e o draft, em exercícios curtos no tabuleiro.',
+      },
+      explorer: {
+        title: 'Explorador de draft de Gungi · ligungi',
+        description: 'Veja o que os jogadores de Gungi colocam no draft, em que ordem e com que resultado, nos modos Intermediário e Avançado.',
       },
       coordinates: {
         title: 'Treino de coordenadas de Gungi · ligungi',

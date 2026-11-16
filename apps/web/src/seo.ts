@@ -21,6 +21,7 @@ export const PAGES: readonly Page[] = (
     ['/puzzles', 'puzzles'],
     ['/practice', 'practice'],
     ['/coordinates', 'coordinates'],
+    ['/explorer', 'explorer'],
     ['/computer', 'computer'],
     ['/analysis', 'analysis'],
     ['/editor', 'editor'],

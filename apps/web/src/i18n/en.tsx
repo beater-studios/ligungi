@@ -136,6 +136,7 @@ export const en: Messages = {
     bioTooLong: 'The bio can be up to 400 characters.',
     invalidCountry: 'Invalid country.',
     invalidLessonProgress: 'Invalid lesson progress.',
+    invalidExplorerQuery: 'Invalid draft explorer query.',
     invalidPracticeProgress: 'Invalid practice progress.',
     invalidPuzzle: 'Invalid puzzle.',
     puzzleNotFound: 'Puzzle not found.',
@@ -175,6 +176,7 @@ export const en: Messages = {
     tools: 'Tools',
     analysis: 'Analysis board',
     editor: 'Board editor',
+    explorer: 'Draft explorer',
     importGame: 'Import a game',
     reconnecting: 'Reconnecting',
     challenges: 'Challenges',
@@ -759,6 +761,32 @@ export const en: Messages = {
     },
   },
 
+  explorer: {
+    title: 'Draft explorer',
+    intro: 'What players place in the draft, in which order and with what results, from the games finished on the site. Pick a placement in the table or play it on the board.',
+    path: 'Chosen placements',
+    start: 'Start',
+    back: 'Back one placement',
+    band: 'Rating range',
+    ratedOnly: 'Rated games only',
+    games: (n) => (n === 1 ? '1 game reached this' : `${n} games reached this`),
+    gamesHeader: 'Games',
+    move: 'Placement',
+    results: 'White / draw / Black',
+    rating: 'Average rating',
+    resultsLabel: (white, draws, black) => `White ${white}%, draws ${draws}%, Black ${black}%`,
+    noGames: 'No game went on from here yet.',
+    draftOver: 'The draft ended in this position.',
+    analyse: 'Open in the analysis',
+    updated: (date) => `Statistics from ${date}, updated every 10 minutes.`,
+    bands: {
+      'all': 'All',
+      'below1400': 'Below 1400',
+      '1400to1700': '1400 to 1700',
+      'from1700': '1700 and above',
+    },
+  },
+
   coordinates: {
     title: 'Coordinate trainer',
     intro: 'Learn the names of the squares: get as many right as you can in 30 seconds.',
@@ -1193,6 +1221,10 @@ export const en: Messages = {
       lessons: {
         title: 'Interactive Gungi lessons · ligungi',
         description: 'Learn Gungi by playing: the pieces, towers, pieces in hand, betrayal, mate and the draft, in short exercises on the board.',
+      },
+      explorer: {
+        title: 'Gungi draft explorer · ligungi',
+        description: 'See what Gungi players place in the draft, in which order and with what results, in the Intermediate and Advanced modes.',
       },
       coordinates: {
         title: 'Gungi coordinate trainer · ligungi',

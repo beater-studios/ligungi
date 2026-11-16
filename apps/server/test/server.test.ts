@@ -1,8 +1,9 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { applyMove, initialPosition, parseMove, toFen } from '@ligungi/engine';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EXTRA_TIME_SECONDS, puzzleInfo, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ModUserView, type ProfileDetails, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
+import { EXTRA_TIME_SECONDS, puzzleInfo, type ChallengeView, type FriendView, type GameSummary, type GameView, type LeaderEntry, type Leaderboard, type LobbyView, type Me, type PlayersView, type RankingView, type ModeStats, type ExplorerView, type ModUserView, type ProfileDetails, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleView, type ReportView, type SessionView, type TwoFactorSetup, type TwoFactorView, type UserProfile, type UserSearchResult } from '@ligungi/protocol';
 import { PUZZLES } from '@ligungi/protocol/puzzles';
 import { CHALLENGE_TTL } from '../src/lobby.ts';
 import { base32Decode, hotp, TOTP_STEP_MS } from '../src/totp.ts';
@@ -1191,6 +1192,47 @@ describe('lessons', () => {
     await a.request('POST', '/api/lessons/progress', { results: { 'mate-general': 1, 'pieces-marshal': 3 } });
     expect((await a.request('GET', '/api/lessons/progress')).data).toEqual({ 'pieces-marshal': 3, 'mate-general': 3 });
     expect((await a.request<{ lessons: Record<string, number> }>('GET', '/api/account/export')).data.lessons).toEqual({ 'pieces-marshal': 3, 'mate-general': 3 });
+  });
+});
+
+describe('draft explorer', () => {
+  it('counts the drafts of finished games by position, with results, filters and the games it leaves out', async () => {
+    server = await startServer();
+    const insert = server.app.db.prepare(
+      `insert into games (id, mode, rated, first_player, white_session, white_name, black_session, black_name, moves, status, winner, reason,
+         white_rating, black_rating, voided, free_draft, created_at, updated_at)
+       values (?, 'advanced', ?, ?, 'w', 'White', 'b', 'Black', ?, 'ended', ?, 'resign', ?, ?, ?, ?, 0, 0)`,
+    );
+    insert.run('g1', 1, 'white', 'M*e1 M*e9 P*d1 done', 'white', 1300, 1300, 0, 0);
+    insert.run('g2', 1, 'white', 'M*e1 M*e9 P*f1 done', 'black', 1800, 1800, 0, 0);
+    insert.run('g3', 0, 'white', 'M*e2 M*e9 done', null, null, null, 0, 0);
+    insert.run('voided', 1, 'white', 'M*e1 M*e9 P*d1 done', 'white', 1300, 1300, 1, 0);
+    insert.run('free', 0, 'white', 'M*e1 M*e9 P*d1 done', 'white', null, null, 0, 1);
+    insert.run('blackFirst', 1, 'black', 'M*e9 M*e1 P*d9 done', 'black', 1300, 1300, 0, 0);
+    const a = client();
+
+    const start = (await a.request<ExplorerView>('GET', '/api/explorer?mode=advanced')).data;
+    expect(start.total).toMatchObject({ games: 3, white: 1, black: 1, draws: 1 });
+    expect(start.moves.map((move) => [move.move, move.games, move.white, move.black, move.draws])).toEqual([
+      ['M*e1', 2, 1, 1, 0],
+      ['M*e2', 1, 0, 0, 1],
+    ]);
+    expect(start.moves[0]!.rating).toBe(1550);
+
+    const fen = toFen(['M*e1', 'M*e9'].reduce((position, text) => applyMove(position, parseMove(text)!), initialPosition('advanced')));
+    const after = (await a.request<ExplorerView>('GET', `/api/explorer?mode=advanced&fen=${encodeURIComponent(fen)}`)).data;
+    expect(after.moves.map((move) => [move.move, move.white, move.black])).toEqual([
+      ['P*d1', 1, 0],
+      ['P*f1', 0, 1],
+    ]);
+
+    expect((await a.request<ExplorerView>('GET', '/api/explorer?mode=advanced&band=below1400')).data.total.games).toBe(1);
+    expect((await a.request<ExplorerView>('GET', '/api/explorer?mode=advanced&rated=1')).data.total.games).toBe(2);
+    expect((await a.request<ExplorerView>('GET', '/api/explorer?mode=intermediate')).data.total.games).toBe(0);
+    expect((await a.request('GET', '/api/explorer?mode=intro')).data).toMatchObject({ code: 'invalidMode' });
+    expect((await a.request('GET', '/api/explorer?mode=advanced&band=nope')).data).toMatchObject({ code: 'invalidExplorerQuery' });
+    const playFen = toFen(initialPosition('intro'));
+    expect((await a.request('GET', `/api/explorer?mode=advanced&fen=${encodeURIComponent(playFen)}`)).data).toMatchObject({ code: 'invalidExplorerQuery' });
   });
 });
 

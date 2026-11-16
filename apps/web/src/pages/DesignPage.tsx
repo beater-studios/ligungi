@@ -13,6 +13,7 @@ import { Checkbox, ColorField, Field, FieldRow, OptionCards, RadioGroup, Select,
 import { icons } from '../icons.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
+import { ResultBar } from './ExplorerPage.tsx';
 
 /**
  * Living reference of ligungi's UI: real components rendered with the real styles. Developer-facing, so it is in
@@ -650,6 +651,11 @@ export const DesignPage = () => {
             <span class="ligungi-puzzle-dashboard__bar" style={{ '--rate': '64%', maxWidth: '16rem' }}>
               64%
             </span>
+          </Example>
+          <Example label="Results of the draft explorer: White wins, draws and Black wins (.ligungi-explorer__bar)">
+            <div style={{ maxWidth: '16rem' }}>
+              <ResultBar stats={{ games: 20, white: 9, draws: 3, black: 8, rating: 1600 }} />
+            </div>
           </Example>
           <Example label="Goal stars on the board (the board's targets option), on empty squares and above a piece">
             <div class="ligungi-ds__board">

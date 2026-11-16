@@ -82,6 +82,11 @@ export class PuzzleStore {
     return row ?? { ...DEFAULT_RATING, games: 0 };
   }
 
+  /** The player's puzzle rating as shown: rounded, with whether it is still provisional. */
+  ratingView(userId: string): PuzzleRatingView {
+    return ratingView(this.rating(userId));
+  }
+
   #puzzleRating(id: string): StoredRating & { readonly wins: number } {
     const row = this.#db.prepare('select rating, deviation, volatility, plays as games, wins from puzzle_stats where puzzle_id = ?').get(id) as
       | (StoredRating & { wins: number })

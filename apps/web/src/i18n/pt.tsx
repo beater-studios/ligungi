@@ -296,6 +296,15 @@ export const pt = {
     yourGame: 'Sua partida',
     theirTurn: 'vez do adversário',
     resume: 'Voltar à partida',
+    leadersTitle: 'Melhores jogadores',
+    rankingLink: 'Ranking',
+    noLeaders: 'Ninguém no ranking ainda. Jogue partidas ranqueadas para aparecer aqui.',
+    trainTitle: 'Treinar',
+    puzzleRating: 'Rating de puzzle',
+    stormBest: 'Puzzle Storm, recorde',
+    streakBest: 'Puzzle Streak, recorde',
+    lessons: 'Lições',
+    lessonsDone: (done: number, total: number) => `${done} de ${total} etapas`,
   },
 
   create: {

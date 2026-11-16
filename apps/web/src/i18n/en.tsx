@@ -386,6 +386,15 @@ export const en: Messages = {
     yourGame: 'Your game',
     theirTurn: "opponent's turn",
     resume: 'Back to the game',
+    leadersTitle: 'Top players',
+    rankingLink: 'Leaderboard',
+    noLeaders: 'Nobody on the leaderboard yet. Play rated games to show up here.',
+    trainTitle: 'Train',
+    puzzleRating: 'Puzzle rating',
+    stormBest: 'Puzzle Storm, best',
+    streakBest: 'Puzzle Streak, best',
+    lessons: 'Lessons',
+    lessonsDone: (done, total) => `${done} of ${total} stages`,
   },
 
   create: {

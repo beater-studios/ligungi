@@ -1,6 +1,7 @@
 import { MODES, MODE_RULES, type Color, type Mode, type Outcome } from '@ligungi/engine';
 import type { ErrorCode } from './errors.ts';
 import type { Country, ProfileDetails } from './profile.ts';
+import type { PuzzleRatingView } from './puzzles.ts';
 
 export * from './errors.ts';
 export * from './profile.ts';
@@ -450,6 +451,8 @@ export interface Me {
   readonly playing: readonly GameSummary[];
   /** The signed-in user moderates the site (see the moderation routes). */
   readonly moderator: boolean;
+  /** The signed-in user's puzzle rating, for the home page's training card; `null` without an account. */
+  readonly puzzleRating: PuzzleRatingView | null;
 }
 
 /** Why a player reports another. */

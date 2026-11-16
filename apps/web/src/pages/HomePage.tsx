@@ -1,5 +1,17 @@
 import { MODES, type Mode } from '@ligungi/engine';
-import { TIME_PRESETS, type DailyPuzzle, type GameSettings, type GameSummary, type LobbyView, type Me, type SeekView, type TimeControl } from '@ligungi/protocol';
+import {
+  LESSON_STAGES,
+  TIME_PRESETS,
+  type DailyPuzzle,
+  type GameSettings,
+  type GameSummary,
+  type Leaderboard,
+  type LobbyView,
+  type Me,
+  type PuzzleRatingView,
+  type SeekView,
+  type TimeControl,
+} from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { turns } from '../challenges.ts';
@@ -9,7 +21,9 @@ import { MiniBoard } from '../components/MiniBoard.tsx';
 import { Modal } from '../components/Modal.tsx';
 import { formatClock, playerName, settingsText, speedText, timeControlText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
+import { useLessonProgress } from '../lessonProgress.ts';
 import { useLiveGames } from '../liveGames.ts';
+import { usePuzzleRuns } from '../puzzleRuns.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
 import { socket } from '../socket.ts';
@@ -17,7 +31,8 @@ import { useStore } from '../store.ts';
 import { useFriends } from './FriendsPage.tsx';
 
 const QUICK_MODE_KEY = 'ligungi.quickMode';
-const LIVE_GAMES = 2;
+/** Leaders shown per mode in the home's leaders card. */
+const LEADERS_PER_MODE = 2;
 
 /** The mode last picked for quick pairing; storage may be missing (prerender) or blocked. */
 const storedQuickMode = (): Mode => {
@@ -146,11 +161,11 @@ const SeekRow = ({ seek, onAccept, onCancel }: { seek: SeekView; onAccept: (s: S
   );
 };
 
-/** The strongest live games, following every move with their clocks, as on the TV. */
-const Live = () => {
+/** The strongest live game, following every move with its clocks, as on the TV, and how many are online and playing. */
+const Live = ({ lobby }: { lobby: LobbyView | null }) => {
   const t = useT();
   const { games, since, failed } = useLiveGames();
-  const shown = games?.slice(0, LIVE_GAMES) ?? [];
+  const game = games?.[0];
   return (
     <section class="ligungi-card ligungi-home__live">
       <div class="ligungi-home__card-head">
@@ -159,22 +174,93 @@ const Live = () => {
           {t.home.tvLink}
         </a>
       </div>
-      {shown.length > 0 ? (
-        <div class="ligungi-home__live-games">
-          {shown.map((game) => (
-            <a key={game.id} class="ligungi-home__live-game" href={`/${game.id}`}>
-              <LivePlayer game={game} color="black" since={since} />
-              <MiniBoard fen={game.fen} />
-              <LivePlayer game={game} color="white" since={since} />
-              <span class="ligungi-home__live-mode">
-                {t.modes[game.mode]} · {speedText(t, game)}
-              </span>
-            </a>
-          ))}
-        </div>
+      {game ? (
+        <a class="ligungi-home__live-game" href={`/${game.id}`}>
+          <LivePlayer game={game} color="black" since={since} />
+          <MiniBoard fen={game.fen} />
+          <LivePlayer game={game} color="white" since={since} />
+          <span class="ligungi-home__live-mode">
+            {t.modes[game.mode]} · {speedText(t, game)}
+          </span>
+        </a>
       ) : (
         <p class="ligungi-notice">{games === null ? (failed ? t.genericError : t.common.loading) : t.home.noTv}</p>
       )}
+      <p class="ligungi-home__counters">
+        <span>
+          <strong class="ligungi-home__online">{lobby?.online ?? 0}</strong> {t.home.online(lobby?.online ?? 0)} ·{' '}
+          <strong>{lobby?.playing ?? 0}</strong> {t.home.live}
+        </span>
+        <a href="/players">{t.home.playersLink}</a>
+      </p>
+    </section>
+  );
+};
+
+/** The best players of each mode, from the leaderboard; it invites rated play while nobody is on it. */
+const Leaders = () => {
+  const t = useT();
+  const [board, setBoard] = useState<Leaderboard | null>(null);
+  useEffect(() => {
+    api.get<Leaderboard>('/api/leaderboard').then(setBoard).catch(() => {});
+  }, []);
+  if (!board) return null;
+  const rows = MODES.flatMap((mode) => board[mode].slice(0, LEADERS_PER_MODE).map((entry) => ({ mode, entry })));
+  return (
+    <section class="ligungi-card ligungi-home__leaders">
+      <div class="ligungi-home__card-head">
+        <h2>{t.home.leadersTitle}</h2>
+        <a href="/ranking">{t.home.rankingLink}</a>
+      </div>
+      {rows.length === 0 ? (
+        <p class="ligungi-notice">{t.home.noLeaders}</p>
+      ) : (
+        <ul>
+          {rows.map(({ mode, entry }) => (
+            <li key={`${mode}-${entry.user.id}`}>
+              <span class="ligungi-home__leader">
+                <a class="ligungi-home__leader-mode" href={`/ranking/${mode}`}>
+                  {t.modes[mode]}
+                </a>
+                <a class={`user-link${entry.online ? ' online' : ''}`} href={`/@/${entry.user.name}`}>
+                  <i class="line" />
+                  {entry.user.name}
+                </a>
+              </span>
+              <strong>{entry.rating}</strong>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+};
+
+/** For a signed-in player: their puzzle rating, Storm and Streak records and how far the lessons go, each a link. */
+const Training = ({ puzzleRating }: { puzzleRating: PuzzleRatingView | null }) => {
+  const t = useT();
+  const runs = usePuzzleRuns().view;
+  const { progress } = useLessonProgress();
+  const stagesDone = progress ? LESSON_STAGES.filter((stage) => stage.exercises.every((exercise) => (progress[exercise.id] ?? 0) > 0)).length : null;
+  const rows: Array<{ href: string; label: string; value: string | null }> = [
+    { href: '/puzzles/dashboard', label: t.home.puzzleRating, value: puzzleRating ? `${puzzleRating.rating}${puzzleRating.provisional ? '?' : ''}` : null },
+    { href: '/storm', label: t.home.stormBest, value: runs ? String(runs.best.storm) : null },
+    { href: '/streak', label: t.home.streakBest, value: runs ? String(runs.best.streak) : null },
+    { href: '/lessons', label: t.home.lessons, value: stagesDone === null ? null : t.home.lessonsDone(stagesDone, LESSON_STAGES.length) },
+  ];
+  return (
+    <section class="ligungi-card ligungi-home__training">
+      <h2>{t.home.trainTitle}</h2>
+      <ul>
+        {rows.map((row) => (
+          <li key={row.href}>
+            <a href={row.href}>
+              <span>{row.label}</span>
+              <strong>{row.value ?? '-'}</strong>
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 };
@@ -192,14 +278,19 @@ const DailyPuzzleCard = () => {
     <section class="ligungi-card ligungi-home__daily">
       <div class="ligungi-home__card-head">
         <h2>{t.home.dailyPuzzle}</h2>
+        <a href="/puzzles">{t.nav.puzzles}</a>
       </div>
       <a class="ligungi-home__daily-board" href="/puzzles/daily" aria-label={`${t.home.dailyPuzzle}: ${task}`}>
         <MiniBoard fen={daily.fen} orientation={daily.color} />
       </a>
       <p>{task}</p>
-      <a class="button" href="/puzzles/daily">
+      <a class="button ligungi-home__solve" href="/puzzles/daily">
         {t.home.solveDaily}
       </a>
+      <p class="ligungi-home__daily-links">
+        <a href="/streak">{t.puzzleRuns.streak}</a>
+        <a href="/storm">{t.puzzleRuns.storm}</a>
+      </p>
     </section>
   );
 };
@@ -330,6 +421,11 @@ export const HomePage = () => {
       ))}
 
       <div class="ligungi-home__layout">
+        <div class="ligungi-home__aside">
+          <DailyPuzzleCard />
+          <Live lobby={lobby} />
+        </div>
+
         <div class="ligungi-home__main">
           <QuickGame mode={mode} rated={rated} lobby={lobby} mine={mine} onMode={pickMode} onPool={quick} onCancel={setCancelling} />
           {error && <p class="error ligungi-home__error">{error}</p>}
@@ -362,6 +458,7 @@ export const HomePage = () => {
               </ul>
             )}
           </section>
+          <Leaders />
         </div>
 
         <div class="ligungi-home__side">
@@ -377,37 +474,34 @@ export const HomePage = () => {
             </a>
           </div>
 
-          {!user && (
-            <section class="ligungi-card ligungi-home__account">
-              <p>{t.home.accountPitch}</p>
-              <div class="ligungi-home__account-actions">
-                <a href="/signup" class="button">
-                  {t.nav.signUp}
-                </a>
-                <a href="/login" class="button button-empty">
-                  {t.nav.signIn}
-                </a>
-              </div>
-            </section>
+          {user ? (
+            <>
+              <OnlineFriends />
+              <Training puzzleRating={me?.puzzleRating ?? null} />
+            </>
+          ) : (
+            <>
+              <section class="ligungi-card ligungi-home__account">
+                <p>{t.home.accountPitch}</p>
+                <div class="ligungi-home__account-actions">
+                  <a href="/signup" class="button">
+                    {t.nav.signUp}
+                  </a>
+                  <a href="/login" class="button button-empty">
+                    {t.nav.signIn}
+                  </a>
+                </div>
+              </section>
+              <section class="ligungi-card ligungi-home__learn">
+                <h2>{t.home.newTitle}</h2>
+                <p>{t.home.intro}</p>
+                <div class="ligungi-home__learn-links">
+                  <a href="/lessons">{t.home.lessons}</a>
+                  <a href="/learn">{t.home.learnRules}</a>
+                </div>
+              </section>
+            </>
           )}
-
-          <section class="ligungi-card ligungi-home__learn">
-            <h2>{t.home.newTitle}</h2>
-            <p>{t.home.intro}</p>
-            <a href="/learn">{t.home.learnRules}</a>
-          </section>
-
-          <section class="ligungi-card ligungi-home__counters">
-            <span>
-              <strong class="ligungi-home__online">{lobby?.online ?? 0}</strong> {t.home.online(lobby?.online ?? 0)} ·{' '}
-              <strong>{lobby?.playing ?? 0}</strong> {t.home.live}
-            </span>
-            <a href="/players">{t.home.playersLink}</a>
-          </section>
-
-          <OnlineFriends />
-          <DailyPuzzleCard />
-          <Live />
         </div>
       </div>
 

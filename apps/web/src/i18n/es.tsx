@@ -386,6 +386,15 @@ export const es: Messages = {
     yourGame: 'Tu partida',
     theirTurn: 'turno del rival',
     resume: 'Volver a la partida',
+    leadersTitle: 'Mejores jugadores',
+    rankingLink: 'Clasificación',
+    noLeaders: 'Nadie en la clasificación todavía. Juega partidas puntuadas para aparecer aquí.',
+    trainTitle: 'Entrenar',
+    puzzleRating: 'Puntuación de puzzles',
+    stormBest: 'Puzzle Storm, récord',
+    streakBest: 'Puzzle Streak, récord',
+    lessons: 'Lecciones',
+    lessonsDone: (done, total) => `${done} de ${total} etapas`,
   },
 
   create: {

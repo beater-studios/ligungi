@@ -4508,15 +4508,22 @@ $lesson-star: #e8a800;
     margin: 0;
     color: $c-font;
   }
-
-  .button {
-    align-self: flex-start;
-  }
 }
 
 .ligungi-home__daily-board {
   display: block;
-  max-width: 16rem;
+  max-width: 20rem;
+}
+
+.ligungi-home__solve {
+  align-self: flex-start;
+}
+
+.ligungi-home__daily-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  font-size: 0.9em;
 }
 
 /* ===== Mate problems, now puzzles: the side card of the trainer ===== */
@@ -4893,16 +4900,39 @@ $lesson-star: #e8a800;
 }
 
 /* ===== Home ===== */
-// Two columns: quick pairing and open games on the left, the actions and the side cards on the right.
+// Three columns: the puzzle of the day and the strongest live game, quick pairing with open games and the leaders, the
+// actions and the account cards. Narrower, the first column goes under the middle one, its two cards side by side.
 .ligungi-home__layout {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 20rem minmax(0, 1fr) 19rem;
+  grid-template-areas: 'aside main side';
+  align-items: start;
   gap: 1.25rem;
+
+  @media (max-width: at-most($x-large)) {
+    grid-template-columns: minmax(0, 1fr) 19rem;
+    grid-template-areas:
+      'main side'
+      'aside side';
+  }
+}
+
+.ligungi-home__aside {
+  grid-area: aside;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+
+  @media (max-width: at-most($x-large)) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
 }
 
 .ligungi-home__main {
-  flex: 999 1 34rem;
+  grid-area: main;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -4994,7 +5024,8 @@ $lesson-star: #e8a800;
 }
 
 .ligungi-home__side {
-  flex: 1 1 18rem;
+  grid-area: side;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
@@ -5065,7 +5096,9 @@ $lesson-star: #e8a800;
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem 1.1rem;
+  margin: 0;
+  color: $c-font-dim;
+  font-size: 0.9em;
 
   strong {
     color: $c-font-clear;
@@ -5074,6 +5107,101 @@ $lesson-star: #e8a800;
 
   .ligungi-home__online {
     color: $c-good;
+  }
+}
+
+.ligungi-home__learn-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.ligungi-home__leaders,
+.ligungi-home__training {
+  padding: 1rem 1.1rem;
+
+  ul {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    border-bottom: $border;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  strong {
+    color: $c-font-clear;
+    font-weight: 500;
+  }
+}
+
+// One row per mode, its first and second players side by side; one column on phones.
+.ligungi-home__leaders {
+  ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.75rem;
+
+    @media (max-width: at-most($small)) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+
+    &:last-child {
+      border-bottom: $border;
+    }
+  }
+}
+
+.ligungi-home__leader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+
+  .user-link {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.ligungi-home__leader-mode {
+  flex: none;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-home__training {
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+
+  a {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem 0;
+    color: $c-font;
+
+    &:hover {
+      color: $c-link;
+    }
   }
 }
 
@@ -5223,17 +5351,12 @@ $lesson-star: #e8a800;
   }
 }
 
-.ligungi-home__live-games {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
 .ligungi-home__live-game {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   min-width: 0;
+  max-width: 20rem;
   color: $c-font;
   font-size: 0.85em;
 
@@ -5250,6 +5373,7 @@ $lesson-star: #e8a800;
 // Phones: one column in the mockup's order, quick pairing first and the learning card last.
 @media (max-width: at-most($small)) {
   .ligungi-home__layout,
+  .ligungi-home__aside,
   .ligungi-home__main,
   .ligungi-home__side {
     display: contents;
@@ -5289,20 +5413,28 @@ $lesson-star: #e8a800;
     order: 5;
   }
 
-  .ligungi-home__live {
+  .ligungi-home__daily {
     order: 6;
   }
 
-  .ligungi-home__counters {
+  .ligungi-home__live {
     order: 7;
   }
 
-  .ligungi-home__friends {
+  .ligungi-home__leaders {
     order: 8;
   }
 
-  .ligungi-home__learn {
+  .ligungi-home__friends {
     order: 9;
+  }
+
+  .ligungi-home__training {
+    order: 10;
+  }
+
+  .ligungi-home__learn {
+    order: 11;
   }
 
   .ligungi-segmented.ligungi-home__modes {
@@ -5349,34 +5481,9 @@ $lesson-star: #e8a800;
     }
   }
 
-  // Boards are too small to read here: the live games become rows.
-  .ligungi-home__live-games {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  // Without the board, each game reads as a scoreboard: both sides stacked with their clocks, the mode beside them.
+  .ligungi-home__daily-board,
   .ligungi-home__live-game {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.2rem 1rem;
-    padding: 0.75rem;
-    border-radius: 4px;
-    background: $c-bg-zebra;
-
-    .gg-mini {
-      display: none;
-    }
-
-    .ligungi-live-player {
-      grid-column: 1;
-    }
-
-    .ligungi-home__live-mode {
-      grid-column: 2;
-      grid-row: 1 / span 2;
-    }
+    max-width: none;
   }
 }
 
@@ -5832,6 +5939,11 @@ $lesson-star: #e8a800;
 /* ===== Shared pieces of the redesigned pages (profile, players, ranking and the rest) ===== */
 #main-wrap:has(> main.ligungi-page) {
   ---main-max-width: 1180px;
+}
+
+// The home takes lila's lobby width, so its three columns fit.
+#main-wrap:has(> main.ligungi-home) {
+  ---main-max-width: 1400px;
 }
 
 .ligungi-page {

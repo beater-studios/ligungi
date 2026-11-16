@@ -63,10 +63,12 @@ describe('accounts', () => {
     server = await startServer();
     const c = client();
     await signup(c, 'Komugi');
-    expect((await c.request<Me>('GET', '/api/me')).data.user?.name).toBe('Komugi');
+    const me = (await c.request<Me>('GET', '/api/me')).data;
+    expect(me.user?.name).toBe('Komugi');
+    expect(me.puzzleRating).toEqual({ rating: 1500, provisional: true, games: 0 });
     expect((await c.request('POST', '/api/signup', { username: 'komugi', password: 'outrasenha' })).status).toBe(409);
     await c.request('POST', '/api/logout', {});
-    expect((await c.request<Me>('GET', '/api/me')).data.user).toBeNull();
+    expect((await c.request<Me>('GET', '/api/me')).data).toMatchObject({ user: null, puzzleRating: null });
     expect((await c.request('POST', '/api/login', { username: 'komugi', password: 'errada123' })).status).toBe(401);
     expect((await c.request('POST', '/api/login', { username: 'KOMUGI', password: 'segredo123' })).status).toBe(200);
   });

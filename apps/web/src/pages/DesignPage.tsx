@@ -689,6 +689,53 @@ export const DesignPage = () => {
               <BoardView position={lessonPosition} orientation="white" targets={[parseSquare('e5')!, parseSquare('e3')!]} />
             </div>
           </Example>
+          <Example label="Home cards: the leaders, one row per mode (.ligungi-home__leaders), and a signed-in player's training links (.ligungi-home__training)">
+            <section class="ligungi-card ligungi-home__leaders" style={{ maxWidth: '34rem' }}>
+              <div class="ligungi-home__card-head">
+                <h2>Top players</h2>
+                <a href="#game">Leaderboard</a>
+              </div>
+              <ul>
+                {[
+                  ['Advanced', 'shogun42', 1712, true],
+                  ['Advanced', 'torre_alta', 1688, false],
+                  ['Beginner', 'kanji_fan', 1602, true],
+                  ['Beginner', 'ronin7', 1580, false],
+                ].map(([mode, name, rating, online]) => (
+                  <li key={String(name)}>
+                    <span class="ligungi-home__leader">
+                      <a class="ligungi-home__leader-mode" href="#game">
+                        {mode}
+                      </a>
+                      <a class={`user-link${online ? ' online' : ''}`} href="#game">
+                        <i class="line" />
+                        {name}
+                      </a>
+                    </span>
+                    <strong>{rating}</strong>
+                  </li>
+                ))}
+              </ul>
+            </section>
+            <section class="ligungi-card ligungi-home__training" style={{ maxWidth: '18rem' }}>
+              <h2>Train</h2>
+              <ul>
+                {[
+                  ['Puzzle rating', '1532'],
+                  ['Puzzle Storm, best', '18'],
+                  ['Puzzle Streak, best', '9'],
+                  ['Lessons', '6 of 8 stages'],
+                ].map(([label, value]) => (
+                  <li key={label}>
+                    <a href="#game">
+                      <span>{label}</span>
+                      <strong>{value}</strong>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </Example>
           <Example label="TV channel list, beside the watched game (.ligungi-tv-channels)">
             <nav class="ligungi-card ligungi-tv-channels" aria-label="Channels" style={{ maxWidth: '16rem' }}>
               <a class="ligungi-tv-channel active" href="#game" aria-current="page">

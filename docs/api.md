@@ -16,7 +16,7 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 |---|---|
 | `GET /api/version` | `{ version, commit }`: the project version and the git commit of the running build. |
 | `GET /api/health` | `{ ok: true, version, commit }` after a database query succeeds, `503` otherwise. Meant for uptime monitors. |
-| `GET /api/me` | The session's user and their ongoing games. |
+| `GET /api/me` | The session's user, their ongoing games, whether they moderate the site and their puzzle rating (`null` without an account). |
 | `POST /api/signup` `{ username, password }` | Creates an account and signs in. |
 | `POST /api/login` `{ username, password, code? }` | Signs in. A suspended account gets `403 accountSuspended` with `until` (epoch ms, `null` for a permanent suspension) and `reason`. For an account with two-step verification on, a request without `code` answers `401 twoFactorRequired` after checking the password; the client sends the password again with `code`, a 6-digit code from the authenticator app or a recovery code (`401 wrongTwoFactorCode` when wrong or already used). Wrong codes count as failed logins of the account. |
 | `POST /api/logout` | Signs out. |

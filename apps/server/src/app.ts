@@ -470,6 +470,7 @@ export const createApp = (config: ServerConfig): App => {
         user: userPayload(ctx.session),
         playing: games.playingFor(ctx.session.id, ctx.session.userId),
         moderator: moderation.isModerator(ctx.session.userId),
+        puzzleRating: ctx.session.userId ? puzzles.ratingView(ctx.session.userId) : null,
       };
       sendJson(ctx.res, 200, me);
     })

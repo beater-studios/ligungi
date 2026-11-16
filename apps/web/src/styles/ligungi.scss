@@ -1168,6 +1168,41 @@ body:has(main.ligungi-auth) #clinput {
     color: $c-header-dropdown;
     cursor: pointer;
   }
+
+  // The pieces panel holds three groups: give the list room and keep each swatch beside its label (over lila's
+  // `#dasher_app` rules, hence the id).
+  &#dasher_app .langs form {
+    max-height: min(70vh, 36rem);
+
+    button {
+      justify-content: flex-start;
+      align-items: center;
+      gap: 0.6em;
+      padding-block: 0.55rem;
+    }
+  }
+
+  // Board and pieces show a swatch of their colors where the other submenus show an icon.
+  &__look .ligungi-swatch {
+    flex: none;
+    margin-inline-end: 0.2em;
+  }
+
+  &__group {
+    margin: 0.7em 1rem 0.2em;
+    color: $c-font-dim;
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__more {
+    display: block;
+    padding: 0.6em 1rem;
+    border-top: $border;
+    font-size: 0.9em;
+  }
 }
 
 // Player search: lila's #clinput (the input grows while body.clinput is set) plus our own results list. Like the

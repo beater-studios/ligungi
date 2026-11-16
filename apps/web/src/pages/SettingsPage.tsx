@@ -6,6 +6,7 @@ import { customBoardStyle, DEFAULT_CUSTOM_BOARD, type BoardWarning } from '../bo
 import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../pieceColors.ts';
 import { ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
 import { MESSAGES, themeLabel, useT } from '../i18n/index.ts';
+import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../looks.tsx';
 import { BOARD_SIZES, BOARD_THEMES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, prefs, updatePrefs, type Prefs } from '../prefs.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
@@ -24,24 +25,6 @@ const Group = ({ title, help, preview, children }: { title: string; help?: strin
 );
 
 type BooleanPref = { [K in keyof Prefs]: Prefs[K] extends boolean ? K : never }[keyof Prefs];
-
-/** Face colors of the two sides in each palette, for its swatch. */
-const PALETTE_FACES: Record<string, readonly [string, string]> = {
-  ivory: ['#f6f1e7', '#232323'],
-  lacquer: ['#b3261e', '#191919'],
-  indigo: ['#eef1f6', '#1f3a68'],
-  jade: ['#cfe6d6', '#6b4528'],
-  wood: ['#e0c088', '#563720'],
-  cherry: ['#d9a27c', '#2b211c'],
-  bamboo: ['#e6d49a', '#6b4a33'],
-};
-
-const Swatch = ({ faces }: { faces: readonly [string, string] }) => (
-  <span class="ligungi-swatch" aria-hidden="true">
-    <i style={{ background: faces[0] }} />
-    <i style={{ background: faces[1] }} />
-  </span>
-);
 
 /** The custom piece palette: face and symbol colors of each side, with what would make the pieces hard to read. */
 const CustomPieceColors = () => {
@@ -166,26 +149,20 @@ export const SettingsPage = () => {
             {choice(
               'boardTheme',
               s.boardTheme,
-              BOARD_THEMES.map((name) => [
-                name,
-                { wood: s.boardThemeWood, walnut: s.boardThemeWalnut, slate: s.boardThemeSlate, contrast: s.boardThemeContrast, custom: s.boardThemeCustom }[name],
-              ]),
+              BOARD_THEMES.map((name) => [name, boardThemeLabel(s, name)]),
               { help: s.boardThemeHelp, layout: 'row' },
             )}
             {current.boardTheme === 'custom' && <CustomBoardColors />}
             {choice(
               'pieceShape',
               s.pieceShape,
-              PIECE_SHAPES.map((shape) => [shape, { disc: s.shapeDisc, koma: s.shapeKoma }[shape]]),
+              PIECE_SHAPES.map((shape) => [shape, shapeLabel(s, shape)]),
               { help: s.pieceShapeHelp },
             )}
             {choice(
               'pieceStyle',
               s.pieceStyle,
-              PIECE_STYLES.map((style) => [
-                style,
-                { illustrated: s.pieceStyleIllustrated, trace: s.pieceStyleTrace, kanji: s.pieceStyleKanji, letters: s.pieceStyleLetters }[style],
-              ]),
+              PIECE_STYLES.map((style) => [style, styleLabel(s, style)]),
               { help: s.pieceStyleHelp },
             )}
             {current.pieceStyle === 'kanji' && (
@@ -218,8 +195,8 @@ export const SettingsPage = () => {
                   value={current.komaPalette}
                   options={PIECE_PALETTES.koma.map((palette) => ({
                     value: palette,
-                    label: { wood: s.paletteWood, cherry: s.paletteCherry, bamboo: s.paletteBamboo, lacquer: s.paletteLacquer, custom: s.paletteCustom }[palette],
-                    icon: <Swatch faces={PALETTE_FACES[palette] ?? [current.customPieces.whiteFace, current.customPieces.blackFace]} />,
+                    label: paletteLabel(s, palette),
+                    icon: <Swatch faces={paletteFaces(palette, current.customPieces)} />,
                   }))}
                   onChange={(komaPalette) => updatePrefs({ komaPalette })}
                 />
@@ -231,8 +208,8 @@ export const SettingsPage = () => {
                   value={current.discPalette}
                   options={PIECE_PALETTES.disc.map((palette) => ({
                     value: palette,
-                    label: { ivory: s.paletteIvory, lacquer: s.paletteLacquer, indigo: s.paletteIndigo, jade: s.paletteJade, custom: s.paletteCustom }[palette],
-                    icon: <Swatch faces={PALETTE_FACES[palette] ?? [current.customPieces.whiteFace, current.customPieces.blackFace]} />,
+                    label: paletteLabel(s, palette),
+                    icon: <Swatch faces={paletteFaces(palette, current.customPieces)} />,
                   }))}
                   onChange={(discPalette) => updatePrefs({ discPalette })}
                 />

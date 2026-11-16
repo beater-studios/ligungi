@@ -83,3 +83,5 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 |---|---|---|---|---|
 | Public API with personal tokens (and OAuth for third-party apps) | Lets the community build tools, bots and integrations | L | Medium | lichess |
 | Donations or patrons | Funding, if wanted | S | Low | lichess, lidraughts, lishogi |
+| Browser notifications while the site is open in the background (your turn, game found, challenge) | Players leave the tab while waiting for an opponent or a move; no server change and no dependency, only the permission prompt | S | Medium | lichess |
+| Web push notifications with the site closed (correspondence turns, challenges) | Correspondence games last days, and today the turn notice only shows inside the site. Needs a service worker, VAPID keys, a table of subscriptions and the server sending the messages (with `node:crypto`, or the `web-push` package, which would be a new dependency) | M | Medium | lichess |

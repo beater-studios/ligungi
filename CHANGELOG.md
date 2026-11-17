@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-17
+
 ### Added
 
 - Game search (Tools menu, `/games`): every finished game, newest first, filtered by player, their color and opponent, mode, rated or casual, result, how it ended, average rating, dates and number of moves. The filters stay in the address, so a search can be shared, and a profile links to its player's games.
@@ -222,7 +224,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/beater-studios/ligungi/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/beater-studios/ligungi/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/beater-studios/ligungi/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/beater-studios/ligungi/compare/v0.3.0...v0.4.0

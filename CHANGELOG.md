@@ -6,6 +6,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Studies (Learn menu, `/study`): write chapters of moves with variations, a comment on each move and drawings on the board, and share them. A chapter starts from a mode, a position, a game of the site or an imported game. Drawings are arrows and painted squares in four colors, up to 2 arrows and 4 squares per move: right-drag or right-click on a computer, or turn on Draw with taps on a phone. The editor saves on its own. A study is public, unlisted (only with its link) or private; new accounts can publish only unlisted or private studies for their first 7 days. Studies can be reported, and moderators can hide or delete them, but never open a private one. The terms of use and the privacy policy describe it.
 - Recent activity on the players page: the latest finished games, with who won, and the newest players, each with how long ago.
 - Bookmarks: a star on any game page keeps it in your bookmarks, with a private note only you see. Your bookmarked games, with their notes, are a tab of your profile's games.
 - Head to head: on a game between two accounts and on another player's profile, the score between the two players, the draws and their latest results, each opening its game.

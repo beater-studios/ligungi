@@ -31,7 +31,7 @@ const sources = (
 );
 
 export const es: Content = {
-  updated: 'Última actualización: 14 de noviembre de 2026.',
+  updated: 'Última actualización: 17 de noviembre de 2026.',
 
   about: (
     <>
@@ -210,17 +210,19 @@ export const es: Content = {
         <li>atacar, sobrecargar o intentar saltarse las protecciones del sitio.</li>
       </ul>
       <p>
-        Cualquier jugador con cuenta puede denunciar a otro desde su perfil o desde una partida. La moderación revisa las
-        denuncias y puede cambiar un nombre de usuario ofensivo, anular partidas ganadas con trampa (devolviendo los puntos
+        Cualquier jugador con cuenta puede denunciar a otro desde su perfil, desde una partida o desde un estudio. La
+        moderación revisa las denuncias y puede cambiar un nombre de usuario ofensivo, ocultar o borrar un estudio ofensivo, anular partidas ganadas con trampa (devolviendo los puntos
         de rating al rival) y suspender cuentas por un tiempo o de forma permanente; las partidas en curso de una cuenta
         suspendida cuentan como derrota. Quien es suspendido ve, al intentar entrar, hasta cuándo y el motivo, y puede
         impugnarlo desde la página de contacto.
       </p>
-      <h2>Partidas y perfil</h2>
+      <h2>Partidas, perfil y estudios</h2>
       <p>
         Las partidas, resultados, puntuaciones y nombres de usuario son públicos: cualquiera puede ver y exportar las partidas
         jugadas en el sitio. Lo que escribes en tu perfil (bio y enlaces a otros sitios) también es público y no puede ofender,
-        engañar ni difundir contenido inapropiado; la moderación puede borrar lo que incumpla esta regla.
+        engañar ni difundir contenido inapropiado; la moderación puede borrar lo que incumpla esta regla. La misma regla vale
+        para los estudios públicos y no listados (título, descripción, comentarios y dibujos), que cualquiera con el enlace
+        puede ver; la moderación puede ocultarlos o borrarlos.
       </p>
       <h2>Código y marcas</h2>
       <p>
@@ -277,9 +279,9 @@ export const es: Content = {
           fechas de entrada y de último uso, para que veas en la página Cuenta dónde está abierta tu cuenta.
         </li>
         <li>
-          <b>Moderación:</b> las denuncias (quién denunció, a quién, el motivo, el texto y la partida) se guardan para que la
+          <b>Moderación:</b> las denuncias (quién denunció, a quién, el motivo, el texto y la partida o el estudio) se guardan para que la
           moderación las revise, y se borran si se elimina la cuenta de cualquiera de las dos personas. Las acciones de
-          moderación (suspensiones, cambios de nombre y partidas anuladas) quedan en un registro con el moderador, la fecha
+          moderación (suspensiones, cambios de nombre, partidas anuladas y estudios ocultados o borrados) quedan en un registro con el moderador, la fecha
           y el motivo. La copia de tus datos incluye las denuncias que hiciste y las acciones sobre tu cuenta.
         </li>
         <li>
@@ -300,6 +302,12 @@ export const es: Content = {
           <b>Lecciones, puzzles y práctica:</b> las estrellas de cada ejercicio de las lecciones, tu puntuación de puzzles y
           tus intentos, con la fecha y el resultado, tus resultados de Puzzle Streak y Puzzle Storm, las posiciones de práctica que terminaste y las partidas que marcaste como favoritas, con tus notas privadas, guardados en la cuenta para que el progreso aparezca en cualquier dispositivo. Sin cuenta, quedan solo en tu navegador. Forman parte de la copia de tus datos y se borran con
           la cuenta.
+        </li>
+        <li>
+          <b>Estudios:</b> los estudios que creas, con el título, la descripción, la visibilidad, los capítulos, las jugadas,
+          los comentarios y los dibujos. Un estudio público aparece en la lista de estudios y uno no listado se abre para
+          quien tenga el enlace; uno privado solo se abre para ti, ni la moderación lo ve. Forman parte de la copia de tus
+          datos y se borran con la cuenta.
         </li>
         <li>
           <b>Preferencias:</b> idioma, tema, sonido y tamaño del tablero quedan solo en tu navegador (almacenamiento local) y

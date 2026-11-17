@@ -793,6 +793,47 @@ export const DesignPage = () => {
               </a>
             </nav>
           </Example>
+          <Example label="Study card in the list (.ligungi-studies__card): text only, never a board">
+            <ul class="ligungi-studies__list" style={{ maxWidth: '20rem', width: '100%' }}>
+              <li>
+                <a class="ligungi-studies__card" href="#game">
+                  <strong class="ligungi-studies__name">Draft: protecting the Marshal</strong>
+                  <span class="ligungi-studies__description">Four ways to build the Marshal's defense in the draft.</span>
+                  <span class="ligungi-studies__meta">
+                    <span>4 chapters</span>
+                    <span>by marechal_br</span>
+                    <span>2 h ago</span>
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </Example>
+          <Example label="Drawings on the board (board shapes), the limit message over the board (.ligungi-study__toast) and the study's drawing tools (.ligungi-study__draw): up to 2 arrows and 4 painted squares per move">
+            <div class="ligungi-study" style={{ display: 'grid', gap: '0.75rem', width: '100%', maxWidth: '22rem' }}>
+              <div style={{ width: '100%', position: 'relative' }}>
+                <BoardView
+                  position={initialPosition('intro')}
+                  orientation="white"
+                  shapes={[
+                    { kind: 'arrow', from: parseSquare('e3')!, to: parseSquare('e5')!, color: 'green' },
+                    { kind: 'square', square: parseSquare('e5')!, color: 'red' },
+                    { kind: 'square', square: parseSquare('d5')!, color: 'blue' },
+                  ]}
+                />
+                <p class="ligungi-study__toast" role="status">
+                  Each move has up to 2 arrows and 4 painted squares. Erase one to draw another.
+                </p>
+              </div>
+              <div class="ligungi-study__draw" role="group" aria-label="Draw">
+                <span class="ligungi-study__draw-label">Draw</span>
+                {(['green', 'red', 'blue', 'orange'] as const).map((brush, i) => (
+                  <button key={brush} type="button" class={`ligungi-study__swatch gg-brush-${brush}`} aria-pressed={i === 0} aria-label={brush} title={brush} />
+                ))}
+                <span class="ligungi-study__count">Arrows 1 of 2 · Squares 2 of 4</span>
+              </div>
+              <p class="ligungi-study__comment">A comment on the current move, as readers see it under the board.</p>
+            </div>
+          </Example>
         </Section>
       </div>
     </main>

@@ -27,6 +27,8 @@ import { ProfilePage } from './pages/ProfilePage.tsx';
 import { PlayersPage } from './pages/PlayersPage.tsx';
 import { RankingPage } from './pages/RankingPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
+import { StudiesPage } from './pages/StudiesPage.tsx';
+import { StudyPage } from './pages/StudyPage.tsx';
 import { AccountPage } from './pages/AccountPage.tsx';
 import { ModPage } from './pages/ModPage.tsx';
 import { EditorPage } from './pages/EditorPage.tsx';
@@ -58,6 +60,8 @@ const ROUTES: Route<VNode>[] = [
   { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})$`), render: ([stage]) => <LessonsPage stage={stage!} /> },
   { pattern: new RegExp(`^/lessons/(${LESSON_STAGE_IDS.join('|')})/(\\d{1,2})$`), render: ([stage, n]) => <LessonsPage stage={stage!} exercise={Number(n)} /> },
   { pattern: /^\/coordinates$/, render: () => <CoordinatesPage /> },
+  { pattern: /^\/study$/, render: () => <StudiesPage /> },
+  { pattern: /^\/study\/([A-Za-z0-9]{8})$/, render: ([id]) => <StudyPage key={id} id={id!} /> },
   { pattern: /^\/explorer$/, render: () => <ExplorerPage /> },
   { pattern: /^\/practice$/, render: () => <PracticePage /> },
   { pattern: /^\/practice\/([a-z-]{1,40})$/, render: ([id]) => <PracticePage id={id!} /> },
@@ -387,6 +391,7 @@ const Header = () => {
               <a href="/streak">{t.nav.streak}</a>
               <a href="/storm">{t.nav.storm}</a>
               <a href="/practice">{t.nav.practice}</a>
+              <a href="/study">{t.nav.studies}</a>
               <a href="/coordinates">{t.nav.coordinates}</a>
             </div>
           </section>
@@ -467,6 +472,7 @@ export const SiteFooter = () => {
         ['/learn', t.nav.rules],
         ['/puzzles', t.nav.puzzles],
         ['/practice', t.nav.practice],
+        ['/study', t.nav.studies],
         ['/coordinates', t.nav.coordinates],
         ['/computer', t.nav.playComputer],
         ['/analysis', t.nav.analysis],

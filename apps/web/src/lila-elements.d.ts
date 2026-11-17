@@ -19,6 +19,12 @@ declare module 'preact' {
       move: HTMLAttributes<HTMLElement>;
       index: HTMLAttributes<HTMLElement>;
       group: HTMLAttributes<HTMLElement>;
+      interrupt: HTMLAttributes<HTMLElement>;
+      lines: HTMLAttributes<HTMLElement>;
+      branch: HTMLAttributes<HTMLElement>;
+      comment: HTMLAttributes<HTMLElement>;
+      inline: HTMLAttributes<HTMLElement>;
+      shapes: HTMLAttributes<HTMLElement>;
     }
   }
 }

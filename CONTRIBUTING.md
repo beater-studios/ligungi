@@ -25,7 +25,7 @@ npm test
 npm run build
 ```
 
-[docs/architecture.md](docs/architecture.md) explains how the packages fit together and [docs/api.md](docs/api.md) documents the API.
+[docs/architecture.md](docs/architecture.md) explains how the packages fit together and [docs/api.md](docs/api.md) documents the API. [docs/accessibility.md](docs/accessibility.md) maps what each screen will need for screen readers: update it when you add a screen or change how one is played or read.
 
 ## Rules
 

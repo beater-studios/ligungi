@@ -7,6 +7,11 @@ export type Selection =
   | { readonly kind: 'square'; readonly square: Square }
   | { readonly kind: 'hand'; readonly color: Color; readonly role: Role };
 
+/** A drawing over the board. `color` names a brush of the stylesheet (`green`, `red`, `blue` or `orange`). */
+export type Shape =
+  | { readonly kind: 'arrow'; readonly from: Square; readonly to: Square; readonly color: string }
+  | { readonly kind: 'square'; readonly square: Square; readonly color: string };
+
 export interface Config {
   /** Position to display. */
   position: Position;
@@ -55,6 +60,20 @@ export interface Config {
   hoverReach: boolean;
   /** Squares marked with a star, such as the goals of a lesson. */
   targets: readonly Square[];
+  /** Arrows and painted squares to show. */
+  shapes: readonly Shape[];
+  /**
+   * Lets the user draw: dragging with the right button from one square to another makes an arrow, a right click
+   * paints the square. The board only reports the gesture; the page decides what it adds or erases.
+   */
+  onDraw: ((shape: Shape) => void) | null;
+  /** Brush of the shapes the user draws. */
+  drawColor: string;
+  /**
+   * Taps draw instead of moving pieces, for touch screens: a tap picks the start square, a tap on another square
+   * makes an arrow and a second tap on the same square paints it.
+   */
+  drawMode: boolean;
 }
 
 export interface Api {

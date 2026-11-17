@@ -9,6 +9,7 @@ export * from './lessons.ts';
 export * from './puzzles.ts';
 export * from './practice.ts';
 export * from './explorer.ts';
+export * from './studies.ts';
 
 /**
  * Seconds. A Fischer clock adds `increment` after every move. A byo-yomi clock has no increment: once the main time
@@ -549,8 +550,8 @@ export interface Me {
   readonly puzzleRating: PuzzleRatingView | null;
 }
 
-/** Why a player reports another. */
-export const REPORT_REASONS = ['cheating', 'name', 'behavior', 'other'] as const;
+/** Why a player reports another. `content` is for what they wrote or drew, such as a study. */
+export const REPORT_REASONS = ['cheating', 'name', 'behavior', 'content', 'other'] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number];
 export const REPORT_DETAILS_MAX = 500;
 
@@ -562,6 +563,8 @@ export interface ReportView {
   readonly reporter: UserRef;
   readonly target: UserRef;
   readonly gameId: string | null;
+  /** The study reported, when the report is about one. */
+  readonly studyId: string | null;
   readonly reason: ReportReason;
   readonly details: string;
   readonly createdAt: number;
@@ -571,7 +574,18 @@ export interface ReportView {
   readonly closedAt: number | null;
 }
 
-export type ModAction = 'grant' | 'revoke' | 'suspend' | 'unsuspend' | 'rename' | 'clearProfile' | 'void' | 'closeReport';
+export type ModAction =
+  | 'grant'
+  | 'revoke'
+  | 'suspend'
+  | 'unsuspend'
+  | 'rename'
+  | 'clearProfile'
+  | 'void'
+  | 'closeReport'
+  | 'hideStudy'
+  | 'unhideStudy'
+  | 'deleteStudy';
 
 /** One line of the moderation log. Names are kept as they were when the action was taken. */
 export interface ModLogEntry {

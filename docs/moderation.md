@@ -14,11 +14,11 @@ npm run cli -w @ligungi/server -- moderator list
 
 Set `DATABASE_PATH` as for the server. In the Docker image the command is `node apps/server/src/cli.ts moderator add <username>` inside the app container. Granting and removing the role go to the moderation log as actions by `server`.
 
-Moderators get a Moderation link in the account menu (the `/mod` page), a moderation card on other players' profiles and a button to void games. Moderators cannot act on other moderators, themselves included: only the server command changes them.
+Moderators get a Moderation link in the account menu (the `/mod` page), a moderation card on other players' profiles, a button to void games and a moderation box on other players' studies. Moderators cannot act on other moderators, themselves included: only the server command changes them.
 
 ## Reports
 
-Any signed-in player can report another from their profile or from a game against them, with a reason (cheating, offensive name or profile, behavior, other) and up to 500 characters. One open report per reporter and player at a time, and at most 10 reports per hour. Open reports are listed on `/mod`; a moderator closes one with a note on how it was resolved.
+Any signed-in player can report another from their profile or from a game against them, with a reason (cheating, offensive name or profile, behavior, other) and up to 500 characters. A study is reported from its page, for offensive content or another reason; the report names its author and links the study. One open report per reporter and player at a time (a report about a study counts apart), and at most 10 reports per hour. Open reports are listed on `/mod`; a moderator closes one with a note on how it was resolved.
 
 ## Actions
 
@@ -28,6 +28,8 @@ Every action asks for a reason and goes to the moderation log with the moderator
 - **Lift a suspension**, at any time.
 - **Rename** an offensive username. The new name replaces the old one everywhere it is stored, game histories included, so the old name does not stay visible.
 - **Clear a profile**: deletes the bio and the linked profiles that offend or point to inappropriate content. The country stays. Links can only name a player on a fixed list of sites, so a profile never points to an arbitrary address, but the page there can still be inappropriate.
+- **Hide a study** that offends: it leaves the list and opens only for its author, who sees that the moderation hid it, and for the moderators. It can be shown again.
+- **Delete a study**, with all its chapters.
 - **Void a game** won by cheating (finished and rated only). Each player's rating change from that game is undone on their current rating: the loser gets the points back and the winner loses those gained. The game stays in the history, marked as voided, and leaves the win, draw and loss counts.
 
 ## Privacy

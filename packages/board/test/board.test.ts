@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { ROLES, initialPosition, legalMoves, moveToString, type Move, type Position } from '@ligungi/engine';
-import { Gungiground, PIECE_ICONS, guidesSvg, type Api } from '../src/index.ts';
+import { Gungiground, PIECE_ICONS, guidesSvg, type Api, type Shape } from '../src/index.ts';
 import { build, sq } from '../../engine/test/helpers.ts';
 
 let api: Api | undefined;
@@ -239,5 +239,65 @@ describe('movement guides', () => {
     api!.set({ moveGuides: true });
     expect(root.querySelectorAll('.gg-piece.gg-guided .gg-guides').length).toBeGreaterThan(0);
     expect(root.querySelector('.gg-guided span')!.textContent).toMatch(/[一-鿿]/);
+  });
+
+  it('draws an arrow and paints squares with taps in draw mode instead of moving', () => {
+    const drawn: Shape[] = [];
+    const played = mount(build({ e5: 'S' }), { drawMode: true, drawColor: 'red', onDraw: (shape) => drawn.push(shape) });
+    click('e5');
+    expect(squareEl('e5').classList.contains('gg-draw-origin')).toBe(true);
+    expect(root.querySelector('.gg-dest')).toBeNull();
+    click('e7');
+    click('c3');
+    click('c3');
+    expect(drawn).toEqual([
+      { kind: 'arrow', from: sq('e5'), to: sq('e7'), color: 'red' },
+      { kind: 'square', square: sq('c3'), color: 'red' },
+    ]);
+    expect(played).toEqual([]);
+    expect(root.querySelector('.gg-draw-origin')).toBeNull();
+  });
+
+  it('draws with the right button: a drag makes an arrow, a click paints the square', () => {
+    const drawn: Shape[] = [];
+    mount(build({ e5: 'S' }), { onDraw: (shape) => drawn.push(shape) });
+    const rightDrag = (from: string, to: string) => {
+      squareEl(from).dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, button: 2 }));
+      const original = document.elementFromPoint;
+      document.elementFromPoint = () => squareEl(to);
+      window.dispatchEvent(new MouseEvent('pointermove', { bubbles: true, button: 2 }));
+      expect(root.querySelector('.gg-arrow.gg-preview') !== null).toBe(from !== to);
+      window.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, button: 2 }));
+      document.elementFromPoint = original;
+    };
+    rightDrag('e5', 'g7');
+    rightDrag('d4', 'd4');
+    expect(drawn).toEqual([
+      { kind: 'arrow', from: sq('e5'), to: sq('g7'), color: 'green' },
+      { kind: 'square', square: sq('d4'), color: 'green' },
+    ]);
+    expect(root.querySelector('.gg-arrow')).toBeNull();
+  });
+
+  it('shows the shapes it is given: arrows over the board, painted squares under the pieces', () => {
+    mount(build({ e5: 'S' }), {
+      shapes: [
+        { kind: 'arrow', from: sq('e5'), to: sq('e7'), color: 'blue' },
+        { kind: 'square', square: sq('e5'), color: 'orange' },
+        { kind: 'square', square: sq('a1'), color: 'bad name' },
+      ],
+    });
+    expect(root.querySelectorAll('.gg-shapes .gg-arrow.gg-brush-blue')).toHaveLength(1);
+    expect(squareEl('e5').firstElementChild?.className).toBe('gg-mark gg-brush-orange');
+    expect(squareEl('a1').querySelector('.gg-mark')?.className).toBe('gg-mark gg-brush-green');
+    api!.set({ shapes: [] });
+    expect(root.querySelector('.gg-arrow, .gg-mark')).toBeNull();
+  });
+
+  it('ignores the right button when drawing is off', () => {
+    mount(build({ e5: 'S' }));
+    squareEl('e5').dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, button: 2 }));
+    window.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, button: 2 }));
+    expect(root.querySelector('.gg-arrow, .gg-mark, .gg-draw-origin')).toBeNull();
   });
 });

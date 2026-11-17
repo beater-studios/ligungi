@@ -1,7 +1,7 @@
 import { Board } from './board.ts';
 import type { Api, Config } from './types.ts';
 
-export type { Api, Config, Selection } from './types.ts';
+export type { Api, Config, Selection, Shape } from './types.ts';
 export { guidesSvg } from './guides.ts';
 export { glyphClass, pieceGlyph, PIECE_STYLES, type PieceStyle } from './glyph.ts';
 export { PIECE_ICONS, TRACE_ICONS } from './icons.ts';

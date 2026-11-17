@@ -22,6 +22,7 @@ export const PAGES: readonly Page[] = (
     ['/streak', 'streak'],
     ['/storm', 'storm'],
     ['/practice', 'practice'],
+    ['/study', 'studies'],
     ['/coordinates', 'coordinates'],
     ['/explorer', 'explorer'],
     ['/computer', 'computer'],
@@ -38,8 +39,11 @@ export const PAGES: readonly Page[] = (
   ] as const
 ).map(([path, key]) => ({ path, key, slug: path === '/' ? 'home' : path.slice(1) }));
 
-/** Pages that are personal or empty without an account: kept out of search results. */
-const PRIVATE = /^\/(account|friends|settings|design|login|signup|mod|puzzles\/dashboard)$/;
+/**
+ * Pages that are personal or empty without an account, and single studies (an unlisted one must not show up in a search):
+ * kept out of search results.
+ */
+const PRIVATE = /^\/(account|friends|settings|design|login|signup|mod|puzzles\/dashboard|study\/[A-Za-z0-9]+)$/;
 
 export const OG_LOCALES: Readonly<Record<Lang, string>> = { pt: 'pt_BR', en: 'en_US', es: 'es_ES' };
 export const HTML_LANGS: Readonly<Record<Lang, string>> = { pt: 'pt-BR', en: 'en', es: 'es' };

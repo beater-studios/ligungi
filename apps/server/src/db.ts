@@ -258,6 +258,33 @@ const MIGRATIONS = [
   );
   create index game_bookmarks_user on game_bookmarks(user_id, created_at);
   `,
+  `
+  create table studies (
+    id text primary key,
+    owner_id text not null references users(id),
+    title text not null,
+    description text not null default '',
+    visibility text not null,
+    hidden integer not null default 0,
+    created_at integer not null,
+    updated_at integer not null
+  );
+  create index studies_owner on studies(owner_id, updated_at);
+  create index studies_listed on studies(visibility, hidden, updated_at);
+  create table study_chapters (
+    id text primary key,
+    study_id text not null references studies(id) on delete cascade,
+    position integer not null,
+    name text not null,
+    fen text not null,
+    orientation text not null,
+    tree text not null,
+    created_at integer not null,
+    updated_at integer not null
+  );
+  create index study_chapters_study on study_chapters(study_id, position);
+  alter table reports add column study_id text;
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

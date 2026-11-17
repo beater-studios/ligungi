@@ -6,11 +6,18 @@ import { icons } from '../icons.ts';
 import { Modal } from './Modal.tsx';
 import { Field, OptionCards, SubmitButton } from './ui.tsx';
 
-/** Reports a player to the moderators, from their profile or from a game against them. */
-export const ReportButton = ({ username, gameId }: { username: string; gameId?: string }) => {
+/** What a study can be reported for: what it shows, or anything else. */
+const STUDY_REASONS: readonly ReportReason[] = ['content', 'other'];
+const PLAYER_REASONS = REPORT_REASONS.filter((reason) => reason !== 'content');
+
+/**
+ * Reports a player to the moderators, from their profile or from a game against them, or one of their studies
+ * (`studyId`).
+ */
+export const ReportButton = ({ username, gameId, studyId }: { username: string; gameId?: string; studyId?: string }) => {
   const t = useT();
   const [open, setOpen] = useState(false);
-  const [reason, setReason] = useState<ReportReason>('cheating');
+  const [reason, setReason] = useState<ReportReason>(studyId ? 'content' : 'cheating');
   const [details, setDetails] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +35,7 @@ export const ReportButton = ({ username, gameId }: { username: string; gameId?: 
     setBusy(true);
     setError(null);
     try {
-      await api.post('/api/reports', { username, reason, details, ...(gameId ? { gameId } : {}) });
+      await api.post('/api/reports', { reason, details, ...(studyId ? { studyId } : { username }), ...(gameId ? { gameId } : {}) });
       setSent(true);
     } catch (err) {
       setError((err as Error).message);
@@ -43,7 +50,7 @@ export const ReportButton = ({ username, gameId }: { username: string; gameId?: 
         {t.report.button}
       </button>
       {open && (
-        <Modal title={t.report.title(username)} onClose={close}>
+        <Modal title={studyId ? t.report.studyTitle : t.report.title(username)} onClose={close}>
           {sent ? (
             <p class="ligungi-success">{t.report.sent}</p>
           ) : (
@@ -53,10 +60,10 @@ export const ReportButton = ({ username, gameId }: { username: string; gameId?: 
                 legend={t.report.reason}
                 layout="row"
                 value={reason}
-                options={REPORT_REASONS.map((value) => ({ value, label: t.report.reasons[value] }))}
+                options={(studyId ? STUDY_REASONS : PLAYER_REASONS).map((value) => ({ value, label: t.report.reasons[value] }))}
                 onChange={setReason}
               />
-              <Field label={t.report.details} htmlFor="report-details" help={t.report.detailsHelp}>
+              <Field label={t.report.details} htmlFor="report-details" help={studyId ? t.report.studyDetailsHelp : t.report.detailsHelp}>
                 <textarea
                   id="report-details"
                   class="form-control"

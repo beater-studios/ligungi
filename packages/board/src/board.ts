@@ -18,9 +18,13 @@ import {
 import { coordinateLabels, visualSquares } from './geometry.ts';
 import { glyphClass, pieceGlyph } from './glyph.ts';
 import { DEFAULT_LABELS, colorLabel, pieceName, type Labels } from './labels.ts';
-import type { Api, Config, Selection } from './types.ts';
+import type { Api, Config, Selection, Shape } from './types.ts';
 
 const DRAG_THRESHOLD = 4;
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/** Brush names end up in class names, so anything unexpected falls back to the first brush. */
+const brush = (color: string): string => (/^[a-z]+$/.test(color) ? color : 'green');
 
 interface Drag {
   readonly selection: Selection;
@@ -54,6 +58,10 @@ const DEFAULTS: Config = {
   onInspect: null,
   hoverReach: false,
   targets: [],
+  shapes: [],
+  onDraw: null,
+  drawColor: 'green',
+  drawMode: false,
 };
 
 const sameSelection = (a: Selection | null, b: Selection | null): boolean =>
@@ -72,6 +80,10 @@ export class Board implements Api {
   #lastMoveKey: string | null = null;
   #hover: Square | null = null;
   #reported: Square | null | undefined = undefined;
+  /** Where the arrow being drawn starts: by a right-button drag, or by a first tap in draw mode. */
+  #drawStart: Square | null = null;
+  #drawEnd: Square | null = null;
+  #rightDrawing = false;
   #squareEls = new Map<Square, HTMLElement>();
   readonly #root: HTMLElement;
   readonly #wrap: HTMLElement;
@@ -81,6 +93,7 @@ export class Board implements Api {
   readonly #hands: Record<'top' | 'bottom', HTMLElement>;
   readonly #chooserEl: HTMLElement;
   readonly #inspectorEl: HTMLElement;
+  readonly #shapesEl: SVGSVGElement;
   readonly #cleanup: Array<() => void> = [];
 
   constructor(root: HTMLElement, config: Partial<Config> = {}) {
@@ -114,6 +127,11 @@ export class Board implements Api {
       star.style.left = `${(x * 100) / 3}%`;
       star.style.top = `${(y * 100) / 3}%`;
     }
+    this.#shapesEl = doc.createElementNS(SVG_NS, 'svg');
+    this.#shapesEl.setAttribute('class', 'gg-shapes');
+    this.#shapesEl.setAttribute('viewBox', '0 0 9 9');
+    this.#shapesEl.setAttribute('aria-hidden', 'true');
+    this.#board.appendChild(this.#shapesEl);
     this.#chooserEl = el('gg-chooser', boardWrap);
     this.#inspectorEl = el('gg-inspector', boardWrap);
     this.#buildSquares();
@@ -133,6 +151,7 @@ export class Board implements Api {
       this.#selection = null;
       this.#chooser = null;
     }
+    if (!this.#config.drawMode && !this.#rightDrawing) this.#drawStart = null;
     if (orientationChanged) this.#buildSquares();
     this.#render();
     const lastMove = this.#config.lastMove;
@@ -150,6 +169,9 @@ export class Board implements Api {
   cancel(): void {
     this.#selection = null;
     this.#chooser = null;
+    this.#drawStart = null;
+    this.#drawEnd = null;
+    this.#rightDrawing = false;
     this.#endDrag();
     this.#render();
   }
@@ -257,10 +279,23 @@ export class Board implements Api {
   }
 
   #onBoardDown(event: PointerEvent): void {
-    if (event.button > 0) return;
     const square = this.#squareFromEvent(event);
+    if (event.button === 2) {
+      if (square === undefined || !this.#config.onDraw) return;
+      event.preventDefault();
+      this.#rightDrawing = true;
+      this.#drawStart = square;
+      this.#drawEnd = square;
+      this.#renderShapes();
+      return;
+    }
+    if (event.button > 0) return;
     if (square === undefined) return;
     event.preventDefault();
+    if (this.#config.drawMode && this.#config.onDraw) {
+      this.#tapDraw(square);
+      return;
+    }
     if (this.#chooser) {
       this.#chooser = null;
       this.#render();
@@ -307,7 +342,37 @@ export class Board implements Api {
     this.#render();
   }
 
+  #squareAt(x: number, y: number): Square | undefined {
+    const target = this.#root.ownerDocument.elementFromPoint(x, y)?.closest<HTMLElement>('.gg-sq');
+    return target && this.#board.contains(target) ? Number(target.dataset.square) : undefined;
+  }
+
+  #tapDraw(square: Square): void {
+    const start = this.#drawStart;
+    if (start === null) {
+      this.#drawStart = square;
+      this.#render();
+      return;
+    }
+    this.#drawStart = null;
+    this.#render();
+    this.#emitShape(start, square);
+  }
+
+  #emitShape(from: Square, to: Square): void {
+    const color = this.#config.drawColor;
+    this.#config.onDraw?.(from === to ? { kind: 'square', square: from, color } : { kind: 'arrow', from, to, color });
+  }
+
   #onDragMove(event: PointerEvent): void {
+    if (this.#rightDrawing) {
+      const square = this.#squareAt(event.clientX, event.clientY) ?? null;
+      if (square !== this.#drawEnd) {
+        this.#drawEnd = square;
+        this.#renderShapes();
+      }
+      return;
+    }
     const drag = this.#drag;
     if (!drag) return;
     if (!drag.ghost) {
@@ -329,6 +394,16 @@ export class Board implements Api {
   }
 
   #onDragEnd(event: PointerEvent): void {
+    if (this.#rightDrawing) {
+      const start = this.#drawStart;
+      const end = this.#squareAt(event.clientX, event.clientY);
+      this.#rightDrawing = false;
+      this.#drawStart = null;
+      this.#drawEnd = null;
+      this.#renderShapes();
+      if (start !== null && end !== undefined) this.#emitShape(start, end);
+      return;
+    }
     const drag = this.#drag;
     if (!drag) return;
     this.#drag = null;
@@ -527,6 +602,9 @@ export class Board implements Api {
     const dragging = this.#drag?.ghost && this.#selection?.kind === 'square' ? this.#selection.square : undefined;
     const premoving = this.#isPremoving();
     const targets = new Set(this.#config.targets);
+    const marks = new Map<Square, string>();
+    for (const shape of this.#config.shapes) if (shape.kind === 'square') marks.set(shape.square, brush(shape.color));
+    const drawOrigin = this.#rightDrawing ? null : this.#drawStart;
 
     this.#wrap.dataset.orientation = orientation;
     this.#wrap.classList.toggle('gg-has-coords', coordinates);
@@ -540,8 +618,13 @@ export class Board implements Api {
       if (marshal === square) classes.push('gg-check');
       if (dragging === square) classes.push('gg-drag-origin');
       if (targets.has(square)) classes.push('gg-target');
+      if (drawOrigin === square) classes.push('gg-draw-origin');
       node.className = classes.join(' ');
-      node.innerHTML = this.#towerHtml(square) + (targets.has(square) ? '<span class="gg-goal" aria-hidden="true"></span>' : '');
+      const mark = marks.get(square);
+      node.innerHTML =
+        (mark ? `<span class="gg-mark gg-brush-${mark}" aria-hidden="true"></span>` : '') +
+        this.#towerHtml(square) +
+        (targets.has(square) ? '<span class="gg-goal" aria-hidden="true"></span>' : '');
       node.title = this.#squareTitle(square);
     }
 
@@ -550,8 +633,46 @@ export class Board implements Api {
     this.#rows.innerHTML = coordinates ? rows.map((r) => `<span>${r}</span>`).join('') : '';
     this.#renderHand('bottom', orientation);
     this.#renderHand('top', opposite(orientation));
+    this.#renderShapes();
     this.#renderChooser();
     this.#renderInspector();
+  }
+
+  #arrowSvg(from: Square, to: Square, color: string, extra = ''): string {
+    const a = this.#anchor(from);
+    const b = this.#anchor(to);
+    const x1 = a.column + 0.5;
+    const y1 = a.row + 0.5;
+    const length = Math.hypot(b.column - a.column, b.row - a.row);
+    const dx = (b.column - a.column) / length;
+    const dy = (b.row - a.row) / length;
+    const tipX = b.column + 0.5 - dx * 0.12;
+    const tipY = b.row + 0.5 - dy * 0.12;
+    const head = 0.42;
+    const half = 0.27;
+    const baseX = tipX - dx * head;
+    const baseY = tipY - dy * head;
+    const n = (value: number) => value.toFixed(3);
+    const points = [
+      [tipX, tipY],
+      [baseX - dy * half, baseY + dx * half],
+      [baseX + dy * half, baseY - dx * half],
+    ]
+      .map(([x, y]) => `${n(x!)},${n(y!)}`)
+      .join(' ');
+    return `<g class="gg-arrow gg-brush-${brush(color)}${extra}"><line x1="${n(x1)}" y1="${n(y1)}" x2="${n(baseX + dx * 0.05)}" y2="${n(baseY + dy * 0.05)}"/><polygon points="${points}"/></g>`;
+  }
+
+  #renderShapes(): void {
+    const arrows = this.#config.shapes
+      .filter((shape): shape is Extract<Shape, { kind: 'arrow' }> => shape.kind === 'arrow' && shape.from !== shape.to)
+      .map((shape) => this.#arrowSvg(shape.from, shape.to, shape.color));
+    const start = this.#drawStart;
+    const end = this.#drawEnd;
+    if (this.#rightDrawing && start !== null && end !== null && end !== start) {
+      arrows.push(this.#arrowSvg(start, end, this.#config.drawColor, ' gg-preview'));
+    }
+    this.#shapesEl.innerHTML = arrows.join('');
   }
 
   #renderHand(slot: 'top' | 'bottom', color: Color): void {

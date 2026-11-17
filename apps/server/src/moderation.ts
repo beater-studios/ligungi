@@ -22,6 +22,7 @@ interface ReportRow {
   target_id: string;
   target_name: string;
   game_id: string | null;
+  study_id: string | null;
   reason: ReportReason;
   details: string;
   created_at: number;
@@ -46,6 +47,7 @@ const toReport = (row: ReportRow): ReportView => ({
   reporter: { id: row.reporter_id, name: row.reporter_name },
   target: { id: row.target_id, name: row.target_name },
   gameId: row.game_id,
+  studyId: row.study_id,
   reason: row.reason,
   details: row.details,
   createdAt: row.created_at,
@@ -116,16 +118,26 @@ export class Moderation {
     this.#db.prepare('update users set suspended_until = null, suspension_reason = null where id = ?').run(userId);
   }
 
-  /** A player reports another. One open report per reporter and target at a time. */
-  report(reporterId: string, targetId: string, reason: ReportReason, details: string, gameId: string | null): string | 'alreadyReported' {
+  /**
+   * A player reports another, or a study by another. One open report per reporter and target at a time, counting a
+   * report about a study apart, so a study can be reported while a report about its author is still open.
+   */
+  report(
+    reporterId: string,
+    targetId: string,
+    reason: ReportReason,
+    details: string,
+    gameId: string | null,
+    studyId: string | null = null,
+  ): string | 'alreadyReported' {
     const open = this.#db
-      .prepare(`select 1 from reports where reporter_id = ? and target_id = ? and status = 'open'`)
-      .get(reporterId, targetId);
+      .prepare(`select 1 from reports where reporter_id = ? and target_id = ? and study_id is ? and status = 'open'`)
+      .get(reporterId, targetId, studyId);
     if (open) return 'alreadyReported';
     const id = randomId(10);
     this.#db
-      .prepare('insert into reports (id, reporter_id, target_id, game_id, reason, details, created_at) values (?, ?, ?, ?, ?, ?, ?)')
-      .run(id, reporterId, targetId, gameId, reason, details, this.#now());
+      .prepare('insert into reports (id, reporter_id, target_id, game_id, study_id, reason, details, created_at) values (?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(id, reporterId, targetId, gameId, studyId, reason, details, this.#now());
     return id;
   }
 

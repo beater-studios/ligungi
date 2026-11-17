@@ -43,6 +43,12 @@ const ReportCard = ({ report, onClosed }: { report: ReportView; onClosed: () => 
             <a href={`/${report.gameId}`}>{t.mod.game}</a>
           </>
         )}
+        {report.studyId && (
+          <>
+            {' · '}
+            <a href={`/study/${report.studyId}`}>{t.mod.study}</a>
+          </>
+        )}
       </p>
       {report.status === 'closed' ? (
         <p class="ligungi-report__resolution">

@@ -30,7 +30,7 @@ const sources = (
 );
 
 export const pt: Content = {
-  updated: 'Última atualização: 14 de novembro de 2026.',
+  updated: 'Última atualização: 17 de novembro de 2026.',
 
   about: (
     <>
@@ -208,17 +208,19 @@ export const pt: Content = {
         <li>atacar, sobrecarregar ou tentar contornar as proteções do site.</li>
       </ul>
       <p>
-        Qualquer jogador com conta pode denunciar outro pelo perfil ou pela partida. A moderação analisa as denúncias e pode
-        trocar um nome de usuário ofensivo, anular partidas ganhas com trapaça (devolvendo os pontos de rating ao
+        Qualquer jogador com conta pode denunciar outro pelo perfil, pela partida ou por um estudo. A moderação analisa as
+        denúncias e pode trocar um nome de usuário ofensivo, esconder ou apagar um estudo ofensivo, anular partidas ganhas com trapaça (devolvendo os pontos de rating ao
         adversário) e suspender contas por um tempo ou de forma permanente; as partidas em andamento de uma conta suspensa
         contam como derrota. Quem é suspenso vê, ao tentar entrar, até quando e o motivo, e pode contestar pela página de
         contato.
       </p>
-      <h2>Partidas e perfil</h2>
+      <h2>Partidas, perfil e estudos</h2>
       <p>
         Partidas, resultados, ratings e o nome de usuário são públicos: qualquer pessoa pode ver e exportar as partidas
         jogadas no site. O que você escreve no perfil (bio e links para outros sites) também é público e não pode ofender,
-        enganar nem divulgar conteúdo impróprio; a moderação pode apagar o que violar essa regra.
+        enganar nem divulgar conteúdo impróprio; a moderação pode apagar o que violar essa regra. A mesma regra vale para os
+        estudos públicos e não listados (título, descrição, comentários e desenhos), que qualquer pessoa com o link pode ver;
+        a moderação pode escondê-los ou apagá-los.
       </p>
       <h2>Código e marcas</h2>
       <p>
@@ -274,9 +276,9 @@ export const pt: Content = {
           entrada e de último uso, para você ver na página Conta onde a sua conta está aberta.
         </li>
         <li>
-          <b>Moderação:</b> as denúncias (quem denunciou, quem foi denunciado, o motivo, o texto e a partida) ficam guardadas
+          <b>Moderação:</b> as denúncias (quem denunciou, quem foi denunciado, o motivo, o texto e a partida ou o estudo) ficam guardadas
           para a moderação analisar, e são apagadas se a conta de uma das duas pessoas for excluída. As ações de moderação
-          (suspensões, trocas de nome e partidas anuladas) ficam num registro com o moderador, a data e o motivo. A cópia
+          (suspensões, trocas de nome, partidas anuladas e estudos escondidos ou apagados) ficam num registro com o moderador, a data e o motivo. A cópia
           dos seus dados inclui as denúncias que você fez e as ações sobre a sua conta.
         </li>
         <li>
@@ -297,6 +299,11 @@ export const pt: Content = {
         <li>
           <b>Lições, puzzles e prática:</b> as estrelas de cada exercício das lições, o seu rating de puzzle e as suas
           tentativas, com a data e o resultado, os resultados do Puzzle Streak e do Puzzle Storm, as posições de prática concluídas e as partidas que você marcou como favoritas, com as suas notas privadas, guardados na conta para o progresso aparecer em qualquer aparelho. Sem conta, ficam só no seu navegador. Entram na cópia dos seus dados e são apagados com a conta.
+        </li>
+        <li>
+          <b>Estudos:</b> os estudos que você cria, com o título, a descrição, a visibilidade, os capítulos, os lances, os
+          comentários e os desenhos. Um estudo público aparece na lista de estudos e um não listado abre para quem tiver o
+          link; um privado só abre para você, nem a moderação o vê. Entram na cópia dos seus dados e são apagados com a conta.
         </li>
         <li>
           <b>Preferências:</b> idioma, tema, som e tamanho do tabuleiro ficam só no seu navegador (armazenamento local) e não

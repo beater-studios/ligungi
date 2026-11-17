@@ -3356,8 +3356,11 @@ body:has(main.ligungi-auth) #clinput {
   }
 }
 
-/* ===== Create game dialog (components/CreateGame.tsx): every choice side by side, so it needs no scrolling ===== */
-.ligungi-modal__box:has(.ligungi-create) {
+/*
+ * ===== Compact dialogs: create a game (components/CreateGame.tsx) and the study forms (components/StudyForms.tsx).
+ * Every choice side by side and short gaps, so they need no scrolling. =====
+ */
+.ligungi-modal__box:has(.ligungi-create, .ligungi-study-form) {
   width: min(36rem, 100%);
 
   .dialog-content {
@@ -3369,14 +3372,29 @@ body:has(main.ligungi-auth) #clinput {
   }
 }
 
-.ligungi-create {
+.ligungi-create,
+.ligungi-study-form {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
 
+  // Fields in a dialog keep a margin of their own elsewhere; here the gap spaces them.
+  .ligungi-field-row {
+    row-gap: 0.9rem;
+    align-items: start;
+  }
+
   .ligungi-choice__legend {
     margin-bottom: 0.35rem;
     font-size: 0.95rem;
+  }
+
+  // Field labels look like the legends of the choices beside them.
+  .form-label {
+    margin-bottom: 0.35rem;
+    color: $c-font-clear;
+    font-size: 0.95rem;
+    font-weight: 500;
   }
 
   .ligungi-choice--segmented .ligungi-choice__option {
@@ -7654,4 +7672,413 @@ $lesson-star: #e8a800;
 .ligungi-import textarea {
   font-family: monospace;
   font-size: 0.85em;
+}
+
+/* ===== Studies: the list (/study) and a study, read or edited ===== */
+.ligungi-studies__panel {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.ligungi-studies__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+
+  h1 {
+    margin: 0 0.5rem 0 0;
+    color: $c-font-clear;
+    font-size: 1.6rem;
+    font-weight: 500;
+  }
+}
+
+.ligungi-studies__search {
+  flex: 1 1 14rem;
+  max-width: 22rem;
+  margin-inline-start: auto;
+}
+
+.ligungi-studies__intro {
+  margin: 0.75rem 0 1rem;
+  color: $c-font-dim;
+}
+
+.ligungi-studies__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ligungi-studies__card {
+  @extend %box-radius;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  height: 100%;
+  padding: 0.9rem 1rem;
+  background: $c-bg-zebra;
+  color: $c-font;
+
+  &:hover,
+  &:focus-visible {
+    background: $c-bg-zebra2;
+    color: $c-font-clear;
+  }
+}
+
+.ligungi-studies__name {
+  color: $c-font-clear;
+  font-size: 1.1em;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.ligungi-studies__description {
+  font-size: 0.92em;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.ligungi-studies__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.8rem;
+  margin-top: auto;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-studies__hidden {
+  color: $c-bad;
+}
+
+.ligungi-study__title {
+  margin: 0;
+  color: $c-font-clear;
+  font-size: 1.15em;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.ligungi-study__by {
+  color: $c-font-dim;
+  font-size: 0.9em;
+}
+
+.ligungi-study__description {
+  color: $c-font;
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+}
+
+.ligungi-study__chapters {
+  margin-top: $block-gap;
+  padding: 0.6rem 0 0.4rem;
+
+  h2 {
+    margin: 0 1rem 0.4rem;
+    color: $c-font-dim;
+    font-size: 0.85em;
+    font-weight: normal;
+    text-transform: uppercase;
+  }
+
+  ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 16rem;
+    overflow-y: auto;
+  }
+
+  a {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.4rem 1rem;
+    color: $c-font;
+    overflow-wrap: anywhere;
+
+    &:hover {
+      background: $c-bg-zebra2;
+    }
+
+    &.active {
+      background: $c-primary;
+      color: #fff;
+
+      .ligungi-study__chapter-number {
+        color: #fff;
+      }
+    }
+  }
+
+  .ligungi-study__actions {
+    padding: 0.4rem 0.6rem 0;
+  }
+}
+
+.ligungi-study__chapter-number {
+  flex: 0 0 1.4em;
+  color: $c-font-dim;
+  text-align: end;
+}
+
+.ligungi-study__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ligungi-study__under {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+
+  .ligungi-field {
+    margin: 0;
+  }
+}
+
+// Beside the board, the tools column takes the board's height and never more: its content (the move list and the
+// editor) would otherwise make it taller and push the controls out of the screen, as the full hands of a draft mode do.
+@include mq-at-least-col2 {
+  .ligungi-study .analyse__tools {
+    contain: size;
+  }
+}
+
+// The controls stand beside the board, under the hands, instead of under the board as in lila: with a large board (the
+// size setting near its maximum) the board alone takes the screen's height and the controls would fall below it. The row
+// of the tools takes whatever the board leaves after the hands and the controls, so the move list scrolls inside, and never
+// less than room for a few moves and the editor, which only a small board on a small screen would leave.
+.ligungi-study.analyse.variant-crazyhouse {
+  @include mq-at-least-col2 {
+    grid-template-rows: min-content minmax(16rem, 1fr) min-content min-content;
+    grid-template-areas:
+      'board   gauge pocket-top'
+      'board   gauge tools'
+      'board   gauge pocket-bot'
+      'board   gauge controls'
+      'kb-move .     side'
+      'under   .     side';
+  }
+
+  @include mq-at-least-col3 {
+    grid-template-rows: min-content minmax(16rem, 1fr) min-content min-content;
+    grid-template-areas:
+      'side . board   gauge pocket-top'
+      'side . board   gauge tools'
+      'side . board   gauge pocket-bot'
+      'side . board   gauge controls'
+      '.    . kb-move .     .'
+      '.    . under   .     .';
+  }
+}
+
+// With three columns the side panel (the study, its chapters, the tower) stands beside the board too: a long one scrolls
+// inside instead of stretching the rows.
+@include mq-at-least-col3 {
+  .ligungi-study .analyse__side {
+    contain: size;
+    align-self: stretch;
+    overflow-y: auto;
+  }
+}
+
+.ligungi-study .analyse__moves {
+  min-height: 5rem;
+}
+
+// The editor (or the current comment, for readers) under the move list, so it stays beside the board without scrolling.
+// Where the column is short it scrolls inside, keeping a few lines of moves above it.
+.ligungi-study__editor {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem 0.8rem;
+  border-top: $border;
+
+  .ligungi-field {
+    margin: 0;
+  }
+
+  .form-label {
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  .ligungi-study__actions {
+    gap: 0.3rem;
+  }
+
+  .button {
+    padding: 0.35em 0.7em;
+    font-size: 0.85em;
+  }
+
+  .ligungi-study__clear {
+    margin-inline-start: auto;
+  }
+
+}
+
+.ligungi-study__mode {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  label:not(:empty) {
+    cursor: pointer;
+  }
+}
+
+.ligungi-study__comment {
+  @extend %box-radius;
+
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-inline-start: 3px solid $c-primary;
+  background: $c-bg-zebra;
+  color: $c-font-clear;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.ligungi-study__draw {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ligungi-study__draw-label {
+  color: $c-font-clear;
+}
+
+.ligungi-study__swatch {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: currentColor;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: $c-font-clear;
+    box-shadow: 0 0 0 2px $c-bg-box inset;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $c-primary;
+    outline-offset: 2px;
+  }
+}
+
+.ligungi-study__count {
+  color: $c-font-dim;
+  font-size: 0.9em;
+}
+
+.ligungi-study__editor .button.active {
+  background: $c-primary;
+  color: #fff;
+}
+
+.ligungi-study__hint {
+  margin: 0;
+  color: $c-font-dim;
+  font-size: 0.8em;
+}
+
+.ligungi-study__save {
+  margin-inline-start: auto;
+  color: $c-font-dim;
+  font-size: 0.88em;
+
+  &.error {
+    color: $c-error;
+  }
+}
+
+.ligungi-study__updated {
+  margin-inline-start: auto;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+// The drawing limit, over the bottom of the board where the drawing happened, for a few seconds.
+.analyse__board {
+  position: relative;
+}
+
+.ligungi-study__toast {
+  @extend %box-radius;
+
+  position: absolute;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  z-index: 30;
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  background: rgba(20, 18, 16, 0.92);
+  color: #f0f0f0;
+  pointer-events: none;
+}
+
+.ligungi-study__mod {
+  margin-top: $block-gap;
+
+  h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1.1em;
+  }
+}
+
+// The modal's own field margin is more specific than the compact dialog's reset.
+.ligungi-modal .form3.ligungi-study-form .ligungi-field {
+  margin: 0;
+}
+
+// Phones: the four starting points of a chapter take two rows.
+@media (max-width: at-most($small)) {
+  .ligungi-study-form .ligungi-choice:has([name='chapter-source']) .ligungi-choice__options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+  }
+}
+
+.ligungi-study-form__part {
+  margin: 0.2rem 0 0;
+  padding-top: 0.7rem;
+  border-top: $border;
+  color: $c-font-clear;
+  font-size: 1.05em;
+  font-weight: 500;
+}
+
+.ligungi-study-form__danger {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.6rem;
+  border-top: $border;
+}
+
+// Variations write the move number inside the move ("12." or "12..."), which needs a little room before the move.
+.ligungi-study .tview2 move index {
+  margin-inline-end: 0.25em;
 }

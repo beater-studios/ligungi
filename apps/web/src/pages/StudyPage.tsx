@@ -1,0 +1,504 @@
+import { legalMoves, moveToString, opposite, parseFen, parseMove, toFen, type Color, type Move } from '@ligungi/engine';
+import type { Shape } from '@ligungi/board';
+import {
+  REPORT_DETAILS_MAX,
+  SHAPE_COLORS,
+  STUDY_ARROWS_MAX,
+  STUDY_COMMENT_MAX,
+  STUDY_SQUARES_MAX,
+  chapterFits,
+  shapeCounts,
+  toggleShape,
+  type ShapeColor,
+  type StudyChapter,
+  type StudyNode,
+  type StudyRoot,
+  type StudyShape,
+  type StudyView,
+} from '@ligungi/protocol';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { api } from '../api.ts';
+import { BoardView } from '../components/BoardView.tsx';
+import { DraftPanel, TowerPanel } from '../components/Panels.tsx';
+import { ReportButton } from '../components/ReportButton.tsx';
+import { ChapterSettingsModal, NewChapterModal, StudySettingsModal } from '../components/StudyForms.tsx';
+import { StudyMoves } from '../components/StudyMoves.tsx';
+import { Field, Toggle } from '../components/ui.tsx';
+import { errorText, timeAgo, useT } from '../i18n/index.ts';
+import { icons } from '../icons.ts';
+import { navigate, useLocation } from '../router.ts';
+import { session } from '../session.ts';
+import { useStore } from '../store.ts';
+import { addMove, deleteAt, lineEnd, nodeAt, positionAt, promote, updateAt, type Path } from '../studyTree.ts';
+
+/** The editor saves on its own this long after the last change. */
+const SAVE_DELAY_MS = 800;
+const NOTICE_MS = 4000;
+
+const toStudyShape = (shape: Shape, color: ShapeColor): StudyShape =>
+  shape.kind === 'arrow' ? { kind: 'arrow', from: shape.from, to: shape.to, color } : { kind: 'square', square: shape.square, color };
+
+interface Pending {
+  readonly url: string;
+  readonly root: StudyRoot;
+}
+
+/** Hide, show again or delete a study, with the reason the log keeps. */
+const StudyModTools = ({ study, onChange }: { study: StudyView; onChange: (hidden: boolean | null) => void }) => {
+  const t = useT();
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const act = async (route: 'hide' | 'delete', hidden?: boolean) => {
+    setError(null);
+    try {
+      await api.post(`/api/mod/studies/${study.id}/${route}`, { reason, ...(hidden === undefined ? {} : { hidden }) });
+      setReason('');
+      onChange(route === 'delete' ? null : hidden ?? true);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+  return (
+    <section class="ligungi-study__mod box box-pad">
+      <h2>{t.mod.panel}</h2>
+      <Field label={t.mod.reason} htmlFor="study-mod-reason">
+        <textarea
+          id="study-mod-reason"
+          class="form-control"
+          rows={2}
+          maxLength={REPORT_DETAILS_MAX}
+          value={reason}
+          onInput={(e) => setReason((e.target as HTMLTextAreaElement).value)}
+        />
+      </Field>
+      {error && <p class="error">{error}</p>}
+      <div class="ligungi-study__actions">
+        <button type="button" class="button button-empty" disabled={!reason.trim()} onClick={() => void act('hide', !study.hidden)}>
+          {study.hidden ? t.study.unhide : t.study.hide}
+        </button>
+        <button type="button" class="button button-empty button-red" data-icon={icons.Trash} disabled={!reason.trim()} onClick={() => void act('delete')}>
+          {t.study.deleteStudy}
+        </button>
+      </div>
+    </section>
+  );
+};
+
+export const StudyPage = ({ id }: { id: string }) => {
+  const t = useT();
+  const { search } = useLocation();
+  const { user, moderator } = useStore(session);
+  const [study, setStudy] = useState<StudyView | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+  const [chapter, setChapter] = useState<StudyChapter | null>(null);
+  const [root, setRoot] = useState<StudyRoot | null>(null);
+  const [path, setPath] = useState<Path>([]);
+  const [orientation, setOrientation] = useState<Color>('white');
+  const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved');
+  const [notice, setNotice] = useState<string | null>(null);
+  const [color, setColor] = useState<ShapeColor>('green');
+  const [drawMode, setDrawMode] = useState(false);
+  const [modal, setModal] = useState<'settings' | 'chapter' | 'newChapter' | null>(null);
+  const [inspected, setInspected] = useState<number | null>(null);
+  const [hands, setHands] = useState<{ top: HTMLElement; bottom: HTMLElement } | null>(null);
+  const topHand = useRef<HTMLDivElement>(null);
+  const bottomHand = useRef<HTMLDivElement>(null);
+  const pending = useRef<Pending | null>(null);
+  const saving = useRef(false);
+  const timer = useRef<number | undefined>(undefined);
+
+  const wanted = new URLSearchParams(search).get('chapter');
+  const chapterId = study ? (study.chapters.find((c) => c.id === wanted) ?? study.chapters[0])?.id : undefined;
+  const editable = study?.mine === true;
+
+  // One save at a time: two in flight could reach the server out of order and leave the older tree saved.
+  const flush = (keepalive = false) => {
+    window.clearTimeout(timer.current);
+    const next = pending.current;
+    if (!next) return;
+    if (keepalive) {
+      pending.current = null;
+      void fetch(next.url, { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ root: next.root }) });
+      return;
+    }
+    if (saving.current) return;
+    pending.current = null;
+    saving.current = true;
+    api
+      .post(next.url, { root: next.root })
+      .then(() => {
+        saving.current = false;
+        if (pending.current) flush();
+        else setSaveState('saved');
+      })
+      .catch(() => {
+        saving.current = false;
+        pending.current ??= next;
+        setSaveState('error');
+      });
+  };
+
+  useEffect(() => {
+    if (topHand.current && bottomHand.current) setHands({ top: topHand.current, bottom: bottomHand.current });
+    const leave = () => flush(true);
+    window.addEventListener('pagehide', leave);
+    return () => {
+      window.removeEventListener('pagehide', leave);
+      flush();
+    };
+  }, []);
+
+  useEffect(() => {
+    setStudy(null);
+    setFailed(null);
+    api
+      .get<StudyView>(`/api/studies/${id}`)
+      .then(setStudy)
+      .catch((err: Error) => setFailed(err.message));
+  }, [id]);
+
+  useEffect(() => {
+    if (!chapterId) return;
+    flush();
+    let current = true;
+    api
+      .get<StudyChapter>(`/api/studies/${id}/chapters/${chapterId}`)
+      .then((loaded) => {
+        if (!current) return;
+        setChapter(loaded);
+        setRoot(loaded.root);
+        setPath([]);
+        setOrientation(loaded.orientation);
+        setSaveState('saved');
+      })
+      .catch((err: Error) => current && setFailed(err.message));
+    return () => {
+      current = false;
+    };
+  }, [id, chapterId]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const clear = window.setTimeout(() => setNotice(null), NOTICE_MS);
+    return () => window.clearTimeout(clear);
+  }, [notice]);
+
+  const start = useMemo(() => (chapter ? parseFen(chapter.fen) : null), [chapter]);
+  const tree = chapter?.id === chapterId ? root : null;
+  const position = useMemo(() => (start && tree ? positionAt(start, tree, path) : null), [start, tree, path]);
+  const node = tree ? (nodeAt(tree, path) ?? tree) : null;
+  const legal = useMemo(() => (editable && position ? legalMoves(position) : []), [editable, position]);
+  const lastMove = path.length && node ? (parseMove((node as StudyNode).move) ?? null) : null;
+
+  /** Applies an edit of the author and saves it shortly after, unless it would make the chapter too big. */
+  const edit = (next: StudyRoot, nextPath: Path = path) => {
+    if (!chapter || !study) return;
+    if (!chapterFits(next)) return setNotice(errorText(t, 'chapterTooLarge'));
+    setRoot(next);
+    setPath(nextPath);
+    pending.current = { url: `/api/studies/${study.id}/chapters/${chapter.id}`, root: next };
+    setSaveState('saving');
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => flush(), SAVE_DELAY_MS);
+  };
+
+  const editTo = (next: { root: StudyRoot; path: Path }) => edit(next.root, next.path);
+
+  const onMove = (move: Move) => {
+    if (!tree) return;
+    const next = addMove(tree, path, moveToString(move));
+    if (next.root === tree) setPath(next.path);
+    else edit(next.root, next.path);
+  };
+
+  const onDraw = (shape: Shape) => {
+    if (!tree || !node) return;
+    const shapes = toggleShape(node.shapes, toStudyShape(shape, color));
+    if (shapes === 'limit') return setNotice(t.study.limit(STUDY_ARROWS_MAX, STUDY_SQUARES_MAX));
+    edit(updateAt(tree, path, (n) => ({ ...n, shapes })));
+  };
+
+  useEffect(() => {
+    if (!tree) return;
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      const here = nodeAt(tree, path);
+      const keys: Record<string, Path> = {
+        ArrowLeft: path.slice(0, -1),
+        ArrowRight: here?.children.length ? [...path, 0] : path,
+        ArrowUp: [],
+        Home: [],
+        ArrowDown: lineEnd(tree, path),
+        End: lineEnd(tree, path),
+      };
+      const next = keys[event.key];
+      if (!next) return;
+      event.preventDefault();
+      setPath(next);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [tree, path]);
+
+  if (failed && !study) {
+    return (
+      <main class="page-small box box-pad page">
+        <h1 class="box__top">{t.study.title}</h1>
+        <p class="ligungi-error">{failed}</p>
+        <p>
+          <a href="/study">{t.study.backToList}</a>
+        </p>
+      </main>
+    );
+  }
+
+  const chapterIndex = study && chapter ? study.chapters.findIndex((c) => c.id === chapter.id) : -1;
+  const counts = node ? shapeCounts(node.shapes) : { arrows: 0, squares: 0 };
+  const moveChapter = async (index: number) => {
+    if (!study || !chapter) return;
+    try {
+      setStudy(await api.post<StudyView>(`/api/studies/${study.id}/chapters/${chapter.id}/move`, { index }));
+    } catch (err) {
+      setNotice((err as Error).message);
+    }
+  };
+
+  return (
+    <main class="analyse variant-crazyhouse ligungi-study">
+      <div class="analyse__side">
+        {study && (
+          <div class="game__meta ligungi-study__meta">
+            <section>
+              <div class="game__meta__infos" data-icon={icons.StudyBoard}>
+                <div>
+                  <h1 class="ligungi-study__title">{study.title}</h1>
+                  <div class="ligungi-study__by">
+                    {t.study.by(<a href={`/@/${study.owner.name}`}>{study.owner.name}</a>)} · {t.study.visibilities[study.visibility]}
+                  </div>
+                </div>
+              </div>
+            </section>
+            {study.hidden && <section class="ligungi-error">{t.study.hiddenNotice}</section>}
+            {study.description && <section class="ligungi-study__description">{study.description}</section>}
+            {editable && (
+              <section>
+                <button type="button" class="button button-empty text" data-icon={icons.Gear} onClick={() => setModal('settings')}>
+                  {t.study.settings}
+                </button>
+              </section>
+            )}
+          </div>
+        )}
+        {study && (
+          <nav class="ligungi-study__chapters box" aria-label={t.study.chapters}>
+            <h2>{t.study.chapters}</h2>
+            <ol>
+              {study.chapters.map((c, i) => (
+                <li key={c.id}>
+                  <a href={`/study/${study.id}?chapter=${c.id}`} aria-current={c.id === chapterId ? 'page' : undefined} class={c.id === chapterId ? 'active' : ''}>
+                    <span class="ligungi-study__chapter-number">{i + 1}</span>
+                    {c.name}
+                  </a>
+                </li>
+              ))}
+            </ol>
+            {editable && chapter && (
+              <div class="ligungi-study__actions">
+                <button type="button" class="button button-empty text" data-icon={icons.PlusButton} onClick={() => setModal('newChapter')}>
+                  {t.study.newChapter}
+                </button>
+                <button type="button" class="button button-empty text" data-icon={icons.Pencil} onClick={() => setModal('chapter')}>
+                  {t.study.editChapter}
+                </button>
+                <button type="button" class="button button-empty" title={t.study.moveUp} aria-label={t.study.moveUp} data-icon={icons.UpTriangle} disabled={chapterIndex <= 0} onClick={() => void moveChapter(chapterIndex - 1)} />
+                <button
+                  type="button"
+                  class="button button-empty"
+                  title={t.study.moveDown}
+                  aria-label={t.study.moveDown}
+                  data-icon={icons.DownTriangle}
+                  disabled={chapterIndex < 0 || chapterIndex >= study.chapters.length - 1}
+                  onClick={() => void moveChapter(chapterIndex + 1)}
+                />
+              </div>
+            )}
+          </nav>
+        )}
+        {position && (
+          <div class="ligungi-panels box">
+            <DraftPanel position={position} names={t.colors} />
+            <TowerPanel position={position} square={inspected} training />
+          </div>
+        )}
+      </div>
+      <div class="analyse__board main-board">
+        {notice && (
+          <p class="ligungi-study__toast" role="status">
+            {notice}
+          </p>
+        )}
+        {hands && position && (
+          <BoardView
+            training
+            position={position}
+            orientation={orientation}
+            movableColor={editable && !drawMode ? 'both' : null}
+            moves={legal}
+            lastMove={lastMove}
+            onMove={onMove}
+            handElements={hands}
+            inspector={false}
+            onInspect={setInspected}
+            shapes={node?.shapes ?? []}
+            onDraw={editable ? onDraw : null}
+            drawColor={color}
+            drawMode={editable && drawMode}
+          />
+        )}
+      </div>
+      <div class="pocket is2d pocket-top" ref={topHand} />
+      <div class="pocket is2d pocket-bottom" ref={bottomHand} />
+      <div class="analyse__tools">
+        <div class="analyse__moves areplay">
+          {start && tree && <StudyMoves start={start} root={tree} current={path} onSelect={setPath} empty={editable ? t.study.emptyAuthor : t.study.empty} />}
+        </div>
+        {node && tree && editable && (
+          <div class="ligungi-study__editor">
+            <Field label={path.length ? t.study.moveComment : t.study.chapterIntro} htmlFor="study-comment">
+              <textarea
+                id="study-comment"
+                class="form-control"
+                rows={2}
+                maxLength={STUDY_COMMENT_MAX}
+                value={node.comment}
+                onInput={(e) => edit(updateAt(tree, path, (n) => ({ ...n, comment: (e.target as HTMLTextAreaElement).value })))}
+              />
+            </Field>
+            <div class="ligungi-study__draw" role="group" aria-label={t.study.draw}>
+              <span class="ligungi-study__draw-label">{t.study.draw}</span>
+              {SHAPE_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  class={`ligungi-study__swatch gg-brush-${c}`}
+                  aria-pressed={c === color}
+                  aria-label={t.study.colors[c]}
+                  title={t.study.colors[c]}
+                  onClick={() => setColor(c)}
+                />
+              ))}
+            </div>
+            <div class="ligungi-study__actions">
+              <span class="ligungi-study__count">{t.study.counts(counts.arrows, STUDY_ARROWS_MAX, counts.squares, STUDY_SQUARES_MAX)}</span>
+              <button
+                type="button"
+                class="button button-empty ligungi-study__clear"
+                data-icon={icons.Trash}
+                title={t.study.clearShapes}
+                aria-label={t.study.clearShapes}
+                disabled={node.shapes.length === 0}
+                onClick={() => edit(updateAt(tree, path, (n) => ({ ...n, shapes: [] })))}
+              />
+            </div>
+            <div class="ligungi-study__mode">
+              <Toggle id="study-draw-mode" checked={drawMode} onChange={setDrawMode} label={t.study.drawMode} />
+              <label for="study-draw-mode">{t.study.drawMode}</label>
+            </div>
+            <p class="ligungi-study__hint">{drawMode ? t.study.drawModeHelp : t.study.drawHelp}</p>
+            <div class="ligungi-study__actions">
+              {path.some((step) => step > 0) && (
+                <button type="button" class="button button-empty text" onClick={() => editTo(promote(tree, path))}>
+                  {t.study.promote}
+                </button>
+              )}
+              {path.length > 0 && (
+                <button type="button" class="button button-empty text" data-icon={icons.Trash} onClick={() => editTo(deleteAt(tree, path))}>
+                  {t.study.deleteFromHere}
+                </button>
+              )}
+              <span class={`ligungi-study__save${saveState === 'error' ? ' error' : ''}`} role="status">
+                {t.study.saveStates[saveState]}
+              </span>
+            </div>
+          </div>
+        )}
+        {node && !editable && node.comment && (
+          <div class="ligungi-study__editor">
+            <p class="ligungi-study__comment">{node.comment}</p>
+          </div>
+        )}
+      </div>
+      <div class="analyse__controls analyse-controls">
+        <div class="features">
+          <button type="button" class="fbt" title={t.common.flip} data-icon={icons.ChasingArrows} onClick={() => setOrientation((o) => opposite(o))} />
+        </div>
+        <div class="jumps">
+          <button type="button" class="fbt" title={t.common.first} data-icon={icons.JumpFirst} onClick={() => setPath([])} />
+          <button type="button" class="fbt" title={t.common.prev} data-icon={icons.JumpPrev} onClick={() => setPath(path.slice(0, -1))} />
+          <button type="button" class="fbt" title={t.common.next} data-icon={icons.JumpNext} onClick={() => node?.children.length && setPath([...path, 0])} />
+          <button type="button" class="fbt" title={t.common.last} data-icon={icons.JumpLast} onClick={() => tree && setPath(lineEnd(tree, path))} />
+        </div>
+      </div>
+      <div class="analyse__underboard">
+        {study && position && (
+          <div class="ligungi-study__under box">
+            <div class="ligungi-study__actions">
+              <a class="button button-empty text" data-icon={icons.Microscope} href={`/analysis?fen=${encodeURIComponent(toFen(position))}`}>
+                {t.study.openInAnalysis}
+              </a>
+              {user && !editable && <ReportButton username={study.owner.name} studyId={study.id} />}
+              <span class="ligungi-study__updated">{t.study.updated(timeAgo(t, study.updatedAt))}</span>
+            </div>
+          </div>
+        )}
+        {study && moderator && !editable && (
+          <StudyModTools
+            study={study}
+            onChange={(hidden) => (hidden === null ? navigate('/study') : setStudy({ ...study, hidden }))}
+          />
+        )}
+      </div>
+      {study && modal === 'settings' && (
+        <StudySettingsModal
+          study={study}
+          onClose={() => setModal(null)}
+          onSaved={(saved) => {
+            setStudy(saved);
+            setModal(null);
+          }}
+        />
+      )}
+      {study && modal === 'newChapter' && (
+        <NewChapterModal
+          study={study}
+          onClose={() => setModal(null)}
+          onCreated={(created) => {
+            setStudy({ ...study, chapters: [...study.chapters, { id: created.id, name: created.name }] });
+            setModal(null);
+            navigate(`/study/${study.id}?chapter=${created.id}`);
+          }}
+        />
+      )}
+      {study && chapter && modal === 'chapter' && (
+        <ChapterSettingsModal
+          study={study}
+          chapter={chapter}
+          onClose={() => setModal(null)}
+          onSaved={(name, side) => {
+            setStudy({ ...study, chapters: study.chapters.map((c) => (c.id === chapter.id ? { ...c, name } : c)) });
+            setChapter({ ...chapter, name, orientation: side });
+            setOrientation(side);
+            setModal(null);
+          }}
+          onDeleted={(next) => {
+            pending.current = null;
+            setStudy(next);
+            setModal(null);
+            navigate(`/study/${study.id}`, true);
+          }}
+        />
+      )}
+    </main>
+  );
+};

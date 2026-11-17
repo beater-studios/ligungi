@@ -32,7 +32,7 @@ const sources = (
 );
 
 export const en: Content = {
-  updated: 'Last updated: November 14, 2026.',
+  updated: 'Last updated: November 17, 2026.',
 
   about: (
     <>
@@ -210,16 +210,17 @@ export const en: Content = {
         <li>attack, overload or try to bypass the site's protections.</li>
       </ul>
       <p>
-        Any player with an account can report another from their profile or from a game. The moderators look into reports
-        and may change an offensive username, void games won by cheating (giving the rating points back to the opponent)
+        Any player with an account can report another from their profile, from a game or from a study. The moderators look
+        into reports and may change an offensive username, hide or delete an offensive study, void games won by cheating (giving the rating points back to the opponent)
         and suspend accounts for a while or for good; games in progress of a suspended account count as losses. A
         suspended player sees, when trying to sign in, until when and why, and can contest it through the contact page.
       </p>
-      <h2>Games and profile</h2>
+      <h2>Games, profile and studies</h2>
       <p>
         Games, results, ratings and usernames are public: anyone can view and export games played on the site. What you write
         on your profile (bio and links to other sites) is public too and must not offend, mislead or spread inappropriate
-        content; moderators may delete what breaks this rule.
+        content; moderators may delete what breaks this rule. The same rule applies to public and unlisted studies (title,
+        description, comments and drawings), which anyone with the link can see; moderators may hide or delete them.
       </p>
       <h2>Code and trademarks</h2>
       <p>
@@ -275,9 +276,9 @@ export const en: Content = {
           and when it signed in and was last used, so you can see on the Account page where your account is open.
         </li>
         <li>
-          <b>Moderation:</b> reports (who reported whom, the reason, the text and the game) are kept for the moderators to
-          look into, and are deleted when either account is deleted. Moderator actions (suspensions, name changes and voided
-          games) go to a log with the moderator, the date and the reason. Your data download includes the reports you made
+          <b>Moderation:</b> reports (who reported whom, the reason, the text and the game or the study) are kept for the moderators to
+          look into, and are deleted when either account is deleted. Moderator actions (suspensions, name changes, voided
+          games and hidden or deleted studies) go to a log with the moderator, the date and the reason. Your data download includes the reports you made
           and the actions on your account.
         </li>
         <li>
@@ -298,6 +299,11 @@ export const en: Content = {
           <b>Lessons, puzzles and practice:</b> the stars of each lesson exercise, your puzzle rating and your tries, with the
           date and the result, your Puzzle Streak and Puzzle Storm results, the practice positions you finished, and the games you bookmarked with your private notes, kept on the account so your progress shows on any device.
           Without an account they stay in your browser only. They are part of your data copy and are deleted with the account.
+        </li>
+        <li>
+          <b>Studies:</b> the studies you create, with their title, description, visibility, chapters, moves, comments and
+          drawings. A public study shows in the study list and an unlisted one opens for anyone with the link; a private one
+          opens only for you, not even for the moderators. They are part of your data copy and are deleted with the account.
         </li>
         <li>
           <b>Preferences:</b> language, theme, sound and board size stay in your browser (local storage) and are not sent to

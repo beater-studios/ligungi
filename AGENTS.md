@@ -66,13 +66,14 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 ### Web
 
 - Styles: `apps/web/vendor/lila` is lila's SCSS copied unmodified (see its `NOTICE.md`). Never edit it. Our own styles go in `apps/web/src/styles/ligungi.scss`, using lila's theme variables so light and dark themes both work.
-- Screens reuse lila's markup and class names so the vendored CSS applies. lila's custom tags (`i5d`, `bo3`, `app`, `z7yx`, `qzm`, `move`, `index`, `group`, `rating`, `name`, `line`) must be written in lowercase and declared in `src/lila-elements.d.ts`.
+- Screens reuse lila's markup and class names so the vendored CSS applies. lila's custom tags (`i5d`, `bo3`, `app`, `z7yx`, `qzm`, `move`, `index`, `group`, `rating`, `name`, `line`, and the tree view's `interrupt`, `lines`, `branch`, `comment`, `inline`, `shapes`) must be written in lowercase and declared in `src/lila-elements.d.ts`.
 - Never hardcode user-facing text. Use `useT()` and the dictionaries in `src/i18n/`: `pt.tsx` is the source, and `en.tsx` and `es.tsx` share its type, so a missing key fails the typecheck. Always add all three languages.
 - Long-form page content (about, FAQ, contact, terms, privacy, rule sources) lives in `src/i18n/content/`, one file per language typed by `Content`, read through `useContent()`. Shared external links and the repository URL (`SOURCE_URL`, set by `VITE_SOURCE_URL`) live in `src/i18n/content/shared.tsx` and `src/source.ts`; never hardcode them elsewhere.
 - Piece names come from `usePieceNames()` and board labels from `t.board`, so they follow the chosen language.
 - Public pages are prerendered for crawlers (see "Search engines" in `docs/architecture.md`). A new public page goes in `PAGES` in `src/seo.ts` with its title and description in `t.seo`; code that runs while modules load or render must not assume a full browser (the prerender only shims a few globals).
 - Forms are built only with the components in `src/components/ui.tsx` (Field, FieldRow, Select, Checkbox, RadioGroup, OptionCards, SubmitButton). The `/design` page (not linked in the menus) shows every component, color token and pattern; check it before building a screen and add new patterns there.
 - For UI changes, check both themes and at least two languages.
+- A new screen, or a change to how one is played or read, updates the screen map in [docs/accessibility.md](docs/accessibility.md) (what the planned blind mode will need there) and follows its checklist.
 
 ## Assets and legal
 

@@ -797,3 +797,60 @@
   pointer-events: none;
   z-index: 5;
 }
+
+/* Drawings: painted squares under the pieces, arrows over them. */
+.gg-brush-green {
+  color: #15781b;
+}
+
+.gg-brush-red {
+  color: #882020;
+}
+
+.gg-brush-blue {
+  color: #003088;
+}
+
+.gg-brush-orange {
+  color: #e68f00;
+}
+
+.gg-mark {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.gg-shapes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 7;
+}
+
+.gg-arrow {
+  opacity: 0.8;
+}
+
+.gg-arrow line {
+  stroke: currentColor;
+  stroke-width: 0.16;
+  stroke-linecap: round;
+}
+
+.gg-arrow polygon {
+  fill: currentColor;
+}
+
+.gg-arrow.gg-preview {
+  opacity: 0.5;
+}
+
+.gg-sq.gg-draw-origin {
+  box-shadow: inset 0 0 0 0.2rem var(--gg-selected);
+}

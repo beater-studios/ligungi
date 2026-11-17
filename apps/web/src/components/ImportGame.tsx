@@ -8,7 +8,7 @@ import { Field, Select, SubmitButton } from './ui.tsx';
 /** Larger files are not games: the longest games take a few kilobytes. */
 const MAX_FILE_BYTES = 200_000;
 
-const errorText = (t: Messages, error: RecordError): string => {
+export const recordErrorText = (t: Messages, error: RecordError): string => {
   const e = t.analysis.importErrors;
   switch (error.kind) {
     case 'empty':
@@ -47,7 +47,7 @@ export const ImportGame = ({ onClose }: { onClose: () => void }) => {
   const submit = (event: Event) => {
     event.preventDefault();
     const record = parseGameRecord(text, mode);
-    if ('kind' in record) return setError(errorText(t, record));
+    if ('kind' in record) return setError(recordErrorText(t, record));
     const params = new URLSearchParams({ mode: record.mode, first: record.firstPlayer, moves: record.moves.map(moveToString).join(',') });
     if (record.freeDraft) params.set('free', '1');
     onClose();

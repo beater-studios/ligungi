@@ -1,5 +1,6 @@
 import type { Mode } from '@ligungi/engine';
 import {
+  type ActivityEvent,
   PUZZLE_RUN_KINDS,
   PUZZLE_RUN_RECENT_MS,
   puzzleInfo,
@@ -209,6 +210,20 @@ export class PuzzleStore {
   }
 
   /** Every run of the player, oldest first, for the data export. */
+  /** Puzzles tried and puzzle runs finished since a moment, for the player's own activity. */
+  activitySince(userId: string, since: number): ActivityEvent[] {
+    const tries = this.#db
+      .prepare('select win, change, created_at as at from puzzle_attempts where user_id = ? and created_at >= ?')
+      .all(userId, since) as Array<{ win: number; change: number | null; at: number }>;
+    const runs = this.#db
+      .prepare('select kind, score, created_at as at from puzzle_runs where user_id = ? and created_at >= ?')
+      .all(userId, since) as Array<{ kind: 'streak' | 'storm'; score: number; at: number }>;
+    return [
+      ...tries.map((row): ActivityEvent => ({ kind: 'puzzle', at: row.at, win: row.win === 1, change: row.change })),
+      ...runs.map((row): ActivityEvent => ({ kind: 'run', at: row.at, run: row.kind, score: row.score })),
+    ];
+  }
+
   allRuns(userId: string): PuzzleRun[] {
     return (this.#db.prepare('select kind, score, created_at as at from puzzle_runs where user_id = ? order by created_at').all(userId) as unknown as PuzzleRun[]).map(
       ({ kind, score, at }) => ({ kind, score, at }),

@@ -105,6 +105,7 @@ export const ERROR_MESSAGES = {
   cannotFollowSelf: 'Você não pode seguir a si mesmo.',
   tooManyFollows: 'Você já segue o máximo de jogadores.',
   invalidFilter: 'Filtro inválido.',
+  invalidSearch: 'Busca inválida: confira os campos.',
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

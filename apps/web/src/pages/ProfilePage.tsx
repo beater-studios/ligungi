@@ -18,6 +18,7 @@ import { Flag } from '../components/Flag.tsx';
 import { ModPanel } from '../components/ModPanel.tsx';
 import { Crosstable } from '../components/Crosstable.tsx';
 import { ProfileAbout } from '../components/ProfileAbout.tsx';
+import { ActivityTimeline } from '../components/Activity.tsx';
 import { RatingHistory } from '../components/RatingHistory.tsx';
 import { ReportButton } from '../components/ReportButton.tsx';
 import { Select } from '../components/ui.tsx';
@@ -388,6 +389,8 @@ export const ProfilePage = ({ name }: { name: string }) => {
 
       <RatingHistory profile={profile} />
 
+      <ActivityTimeline name={profile.user.name} />
+
       {profile.playing.map((game) => (
         <section key={game.id} class="ligungi-card ligungi-live-strip">
           <span class="ligungi-live-badge">{t.profile.live}</span>
@@ -404,6 +407,9 @@ export const ProfilePage = ({ name }: { name: string }) => {
       <section class="ligungi-card ligungi-profile__games">
         <div class="ligungi-profile__games-head">
           <h2>{t.profile.gamesTitle}</h2>
+          <a class="text ligungi-profile__search" href={`/games?player=${encodeURIComponent(profile.user.name)}`}>
+            {t.gameSearch.linkFromProfile}
+          </a>
           <nav class="ligungi-segmented" aria-label={t.profile.result}>
             {tab(t.profile.tabAll, counts?.games, {})}
             {tab(t.profile.tabRated, counts?.rated, { rated: true })}

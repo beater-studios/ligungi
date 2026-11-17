@@ -1,6 +1,7 @@
 import { initialPosition, parseFen, parseSquare } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
+import { FeedList } from '../components/Activity.tsx';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { CrosstableView } from '../components/Crosstable.tsx';
@@ -833,6 +834,49 @@ export const DesignPage = () => {
                 <span class="ligungi-study__count">Arrows 1 of 2 · Squares 2 of 4</span>
               </div>
               <p class="ligungi-study__comment">A comment on the current move, as readers see it under the board.</p>
+            </div>
+          </Example>
+          <Example label="Activity (.ligungi-activity, one day of the profile's last 30) and the feed of followed players (FeedList, home and friends page)">
+            <div style={{ display: 'grid', gap: '1rem', width: '100%', maxWidth: '34rem' }}>
+              <section class="ligungi-card ligungi-activity">
+                <header class="ligungi-activity__head">
+                  <h2>Activity</h2>
+                  <span class="ligungi-activity__intro">The last 30 days.</span>
+                </header>
+                <ol class="ligungi-activity__days">
+                  <li class="ligungi-activity__day">
+                    <h3>Nov 17, 2026</h3>
+                    <ul class="ligungi-activity__items">
+                      <li class="ligungi-activity__item is-games">
+                        3 Advanced games: 2 wins, 1 loss<span class="ligungi-activity__diff is-up"> +14</span>
+                      </li>
+                      <li class="ligungi-activity__item is-study">
+                        Created the study <a href="/study">Draft: protecting the Marshal</a>
+                      </li>
+                      <li class="ligungi-activity__item is-training">Solved 7 of 9 puzzles</li>
+                    </ul>
+                  </li>
+                </ol>
+              </section>
+              <section class="ligungi-card ligungi-home__feed">
+                <div class="ligungi-home__card-head">
+                  <h2>People you follow</h2>
+                  <a href="/friends">See all</a>
+                </div>
+                <FeedList
+                  items={[
+                    {
+                      user: { id: 'a', name: 'marechal_br' },
+                      event: {
+                        kind: 'game',
+                        at: Date.now() - 600_000,
+                        game: { id: 'abcd1234', mode: 'advanced', rated: true, color: 'white', result: 'win', reason: 'mate', ratingDiff: 9, opponent: { name: 'kanji_fan', user: null } },
+                      },
+                    },
+                    { user: { id: 'b', name: 'torre_alta' }, event: { kind: 'study', at: Date.now() - 7_200_000, study: { id: 'efgh5678', title: 'Endgames with the Fortress' } } },
+                  ]}
+                />
+              </section>
             </div>
           </Example>
           <Example label="Screen reader mode (BlindPanel, .ligungi-blind): the game as text under the board, with the command field and the live log of announcements (role=log). Type p, c 4-7 or 6-6 samurai here; this sample has no moves to play">

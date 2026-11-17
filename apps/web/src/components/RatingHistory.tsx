@@ -11,7 +11,7 @@ const TABLE_ROWS = 50;
 const signed = (n: number) => (n > 0 ? `+${n}` : String(n));
 
 /** Wins, draws and losses as a bar and in words, the way the rating cards show them. */
-const RecordRow = ({ label, record }: { label: string; record: ModeRecord }) => {
+export const RecordRow = ({ label, record }: { label: string; record: ModeRecord }) => {
   const t = useT();
   const total = record.wins + record.draws + record.losses;
   const share = (n: number) => `${(n / total) * 100}%`;
@@ -95,6 +95,9 @@ export const RatingHistory = ({ profile }: { profile: UserProfile }) => {
               stats.peak?.rating ?? 0,
             )}
           />
+          <p class="ligungi-history__more">
+            <a href={`/@/${profile.user.name}/insights?mode=${mode}`}>{t.insights.link}</a>
+          </p>
           <dl class="ligungi-history__figures">
             <div>
               <dt>{t.profile.current}</dt>

@@ -153,6 +153,18 @@ export class Studies {
     return rows.map((row) => toItem(toRecord(row)));
   }
 
+  /** Public studies, not hidden, created since a moment by some authors, newest first (activity and feed). */
+  createdBy(ownerIds: readonly string[], since: number, limit: number): Array<{ ownerId: string; ownerName: string; id: string; title: string; at: number }> {
+    if (ownerIds.length === 0) return [];
+    const rows = this.#db
+      .prepare(
+        `${STUDY_SELECT} where studies.owner_id in (${ownerIds.map(() => '?').join(', ')}) and studies.visibility = 'public' and studies.hidden = 0
+           and studies.created_at >= ? order by studies.created_at desc limit ?`,
+      )
+      .all(...ownerIds, since, limit) as unknown as StudyRow[];
+    return rows.map((row) => ({ ownerId: row.owner_id, ownerName: row.owner_name, id: row.id, title: row.title, at: row.created_at }));
+  }
+
   count(ownerId: string): number {
     return (this.#db.prepare('select count(*) as n from studies where owner_id = ?').get(ownerId) as { n: number }).n;
   }

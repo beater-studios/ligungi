@@ -1,5 +1,6 @@
 import { MODES, type Mode } from '@ligungi/engine';
-import { CHALLENGE_POLICIES, COUNTRIES, DAY_MS, EMPTY_PROFILE, LEADERBOARD_ACTIVE_DAYS, parseProfileDetails, type ChallengePolicy, type Country, type NewPlayer, type ProfileDetails, type RatingView, type UserRef } from '@ligungi/protocol';
+import {
+  type ActivityEvent, CHALLENGE_POLICIES, COUNTRIES, DAY_MS, EMPTY_PROFILE, LEADERBOARD_ACTIVE_DAYS, parseProfileDetails, type ChallengePolicy, type Country, type NewPlayer, type ProfileDetails, type RatingView, type UserRef } from '@ligungi/protocol';
 import type { Db } from './db.ts';
 import { DEFAULT_RATING, PROVISIONAL_DEVIATION, type Rating } from './glicko.ts';
 import { randomId } from './ids.ts';
@@ -166,6 +167,20 @@ export class Users {
   lessonProgress(userId: string): Record<string, number> {
     const rows = this.#db.prepare('select exercise_id, stars from lesson_progress where user_id = ?').all(userId) as Array<{ exercise_id: string; stars: number }>;
     return Object.fromEntries(rows.map((row) => [row.exercise_id, row.stars]));
+  }
+
+  /** Lessons and practice positions improved since a moment, for the player's own activity. */
+  trainingSince(userId: string, since: number): ActivityEvent[] {
+    const lessons = this.#db
+      .prepare('select stars, updated_at as at from lesson_progress where user_id = ? and updated_at >= ?')
+      .all(userId, since) as Array<{ stars: number; at: number }>;
+    const practice = this.#db
+      .prepare('select updated_at as at from practice_progress where user_id = ? and updated_at >= ?')
+      .all(userId, since) as Array<{ at: number }>;
+    return [
+      ...lessons.map((row): ActivityEvent => ({ kind: 'lesson', at: row.at, stars: row.stars })),
+      ...practice.map((row): ActivityEvent => ({ kind: 'practice', at: row.at })),
+    ];
   }
 
   /** Records lesson results, keeping the best stars of each exercise. */

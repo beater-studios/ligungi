@@ -1,19 +1,28 @@
-import { applyMove, initialPosition, moveToString, opposite, parseMove, toFen, type Color, type Mode, type Outcome } from '@ligungi/engine';
+import { MODE_RULES, ROLES, applyMove, initialPosition, moveToString, opposite, parseMove, toFen, type Color, type Mode, type Outcome, type Role } from '@ligungi/engine';
 import {
   BOOKMARKS_MAX,
   CROSSTABLE_RECENT,
   GAME_LENGTHS,
+  GAME_SEARCH_PAGE,
+  GAME_SEARCH_PAGES_MAX,
+  HELD_GROUPS,
+  INSIGHT_OPPONENTS,
+  OPPONENT_BANDS,
   RATING_HISTORY_MAX,
+  type ActivityGame,
   type BookmarkedGame,
   type BookmarkView,
   type Crosstable,
   type GameCounts,
   type GameFilters,
+  type GameSearchResult,
   type GameStatus,
+  type InsightsView,
   type GameSummary,
   type ModeRecord,
   type ModeStats,
   type RatingPoint,
+  type SearchResult,
   type TimeControl,
   type UserRef,
 } from '@ligungi/protocol';
@@ -84,6 +93,23 @@ interface GameRow {
   created_at: number;
   ended_at: number | null;
   voided: number;
+}
+
+/** A game search with its player names resolved to ids and its days to milliseconds. */
+export interface SearchCriteria {
+  readonly playerId?: string;
+  readonly color?: Color;
+  readonly vsId?: string;
+  readonly mode?: Mode;
+  readonly rated?: boolean;
+  readonly result?: SearchResult;
+  readonly reason?: Outcome['reason'];
+  readonly ratingMin?: number;
+  readonly ratingMax?: number;
+  readonly from?: number;
+  readonly to?: number;
+  readonly movesMin?: number;
+  readonly movesMax?: number;
 }
 
 /** One game in the account data export (`GET /api/account/export`). */
@@ -523,6 +549,197 @@ export class Games {
    * A player's rated games in one mode: the rating after each (stored as the rating before plus the change), the peak and
    * the lowest, and the results by color and by length (moves after the draft). Voided games are left out.
    */
+  /**
+   * Every finished game matching a search, newest first, a page at a time. Player names are resolved to ids by the
+   * caller; dates are milliseconds (start of `from`'s day, end of `to`'s).
+   */
+  search(criteria: SearchCriteria, page: number): GameSearchResult {
+    const where = [`status = 'ended'`];
+    const params: Array<string | number> = [];
+    const add = (clause: string, ...values: Array<string | number>) => {
+      where.push(clause);
+      params.push(...values);
+    };
+    const { playerId, color, vsId } = criteria;
+    if (playerId) {
+      if (color) add(`${color}_user = ?`, playerId);
+      else add('(white_user = ? or black_user = ?)', playerId, playerId);
+      if (vsId) add('((white_user = ? and black_user = ?) or (black_user = ? and white_user = ?))', playerId, vsId, playerId, vsId);
+    }
+    if (criteria.mode) add('mode = ?', criteria.mode);
+    if (criteria.rated !== undefined) add('rated = ?', criteria.rated ? 1 : 0);
+    if (criteria.reason) add('reason = ?', criteria.reason);
+    const { result } = criteria;
+    if (result === 'white' || result === 'black') add('winner = ?', result);
+    else if (result === 'draw') where.push('winner is null');
+    else if (result && playerId) {
+      const won = `((winner = 'white' and white_user = ?) or (winner = 'black' and black_user = ?))`;
+      add(result === 'win' ? won : `winner is not null and not ${won}`, playerId, playerId);
+    }
+    if (criteria.ratingMin !== undefined || criteria.ratingMax !== undefined) {
+      where.push('white_rating is not null and black_rating is not null');
+      if (criteria.ratingMin !== undefined) add('(white_rating + black_rating) / 2.0 >= ?', criteria.ratingMin);
+      if (criteria.ratingMax !== undefined) add('(white_rating + black_rating) / 2.0 <= ?', criteria.ratingMax);
+    }
+    if (criteria.from !== undefined) add('created_at >= ?', criteria.from);
+    if (criteria.to !== undefined) add('created_at < ?', criteria.to);
+    const plies = `(case when moves = '' then 0 else length(moves) - length(replace(moves, ' ', '')) + 1 end)`;
+    if (criteria.movesMin !== undefined) add(`${plies} >= ?`, criteria.movesMin);
+    if (criteria.movesMax !== undefined) add(`${plies} <= ?`, criteria.movesMax);
+    const rows = this.#db
+      .prepare(`select * from games where ${where.join(' and ')} order by created_at desc, id limit ? offset ?`)
+      .all(...params, GAME_SEARCH_PAGE + 1, (page - 1) * GAME_SEARCH_PAGE) as unknown as GameRow[];
+    return {
+      games: rows.slice(0, GAME_SEARCH_PAGE).map((row) => this.#summaryOf(row)),
+      more: rows.length > GAME_SEARCH_PAGE && page < GAME_SEARCH_PAGES_MAX,
+    };
+  }
+
+  /** Finished games of some players since a moment, newest first, each from its player's side (activity and feed). */
+  activityGames(userIds: readonly string[], since: number, limit: number): Array<{ userId: string; at: number; game: ActivityGame }> {
+    if (userIds.length === 0) return [];
+    const marks = userIds.map(() => '?').join(', ');
+    const rows = this.#db
+      .prepare(
+        `select id, mode, rated, white_user, white_name, white_diff, black_user, black_name, black_diff, winner, reason,
+           coalesce(ended_at, created_at) as at
+         from games
+         where status = 'ended' and voided = 0 and coalesce(ended_at, created_at) >= ? and (white_user in (${marks}) or black_user in (${marks}))
+         order by at desc limit ?`,
+      )
+      .all(since, ...userIds, ...userIds, limit) as Array<{
+      id: string;
+      mode: Mode;
+      rated: number;
+      white_user: string | null;
+      white_name: string;
+      white_diff: number | null;
+      black_user: string | null;
+      black_name: string;
+      black_diff: number | null;
+      winner: Color | null;
+      reason: Outcome['reason'];
+      at: number;
+    }>;
+    const wanted = new Set(userIds);
+    return rows.flatMap((row) =>
+      (['white', 'black'] as const)
+        .filter((color) => row[`${color}_user`] !== null && wanted.has(row[`${color}_user`]!))
+        .map((color) => {
+          const other = opposite(color);
+          const otherId = row[`${other}_user`];
+          return {
+            userId: row[`${color}_user`]!,
+            at: row.at,
+            game: {
+              id: row.id,
+              mode: row.mode,
+              rated: row.rated === 1,
+              color,
+              result: row.winner === null ? 'draw' : row.winner === color ? 'win' : 'loss',
+              reason: row.reason,
+              ratingDiff: row[`${color}_diff`],
+              opponent: { name: row[`${other}_name`], user: otherId ? { id: otherId, name: row[`${other}_name`] } : null },
+            } satisfies ActivityGame,
+          };
+        }),
+    );
+  }
+
+  /** The rated games of a player in one mode looked at from several sides; see `InsightsView`. */
+  insights(userId: string, mode: Mode): InsightsView {
+    const rows = this.#db
+      .prepare(
+        `select white_user, white_name, white_rating, black_user, black_name, black_rating, winner, reason, board_moves,
+           clock_initial, days_per_move, moves, first_player, free_draft
+         from games
+         where (white_user = ?1 or black_user = ?1) and mode = ?2 and rated = 1 and status = 'ended' and voided = 0
+         order by coalesce(ended_at, created_at) desc limit ?3`,
+      )
+      .all(userId, mode, RATING_HISTORY_MAX) as Array<{
+      white_user: string | null;
+      white_name: string;
+      white_rating: number | null;
+      black_user: string | null;
+      black_name: string;
+      black_rating: number | null;
+      winner: Color | null;
+      reason: Outcome['reason'];
+      board_moves: number | null;
+      clock_initial: number | null;
+      days_per_move: number | null;
+      moves: string;
+      first_player: Color;
+      free_draft: number;
+    }>;
+    const empty = (): { wins: number; draws: number; losses: number } => ({ wins: 0, draws: 0, losses: 0 });
+    const byOpponent = OPPONENT_BANDS.map(empty);
+    const byPace = { clock: empty(), none: empty(), correspondence: empty() };
+    const endings: InsightsView['endings'] = { win: {}, draw: {}, loss: {} };
+    const lengths = { win: { total: 0, count: 0 }, draw: { total: 0, count: 0 }, loss: { total: 0, count: 0 } };
+    const opponents = new Map<string, { user: UserRef; record: { wins: number; draws: number; losses: number }; games: number }>();
+    const drafting = MODE_RULES[mode].draft;
+    const placed = new Map<Role, number>();
+    const byHeld = HELD_GROUPS.map(empty);
+    for (const row of rows) {
+      const color: Color = row.white_user === userId ? 'white' : 'black';
+      const other = opposite(color);
+      const outcome = row.winner === null ? 'draw' : row.winner === color ? 'win' : 'loss';
+      const key = ({ win: 'wins', draw: 'draws', loss: 'losses' } as const)[outcome];
+      const mine = row[`${color}_rating`];
+      const theirs = row[`${other}_rating`];
+      if (mine !== null && theirs !== null) {
+        const gap = theirs - mine;
+        byOpponent[OPPONENT_BANDS.findIndex((upTo) => upTo === null || gap < upTo)]![key]++;
+      }
+      byPace[row.days_per_move ? 'correspondence' : row.clock_initial === null ? 'none' : 'clock'][key]++;
+      endings[outcome][row.reason] = (endings[outcome][row.reason] ?? 0) + 1;
+      if (row.board_moves !== null) {
+        lengths[outcome].total += row.board_moves;
+        lengths[outcome].count++;
+      }
+      const otherId = row[`${other}_user`];
+      if (otherId) {
+        const entry = opponents.get(otherId) ?? { user: { id: otherId, name: row[`${other}_name`] }, record: empty(), games: 0 };
+        entry.record[key]++;
+        entry.games++;
+        opponents.set(otherId, entry);
+      }
+      if (drafting) {
+        // The stored moves were checked when played, so they are applied as they are, up to the end of the draft.
+        let position = initialPosition(mode, row.first_player, { freeDraft: row.free_draft === 1 });
+        for (const text of row.moves ? row.moves.split(' ') : []) {
+          if (position.phase !== 'draft') break;
+          const move = parseMove(text);
+          if (!move) break;
+          if (move.kind === 'drop' && position.turn === color) placed.set(move.role, (placed.get(move.role) ?? 0) + 1);
+          position = applyMove(position, move);
+        }
+        if (position.phase === 'play') {
+          const held = ROLES.reduce((sum, role) => sum + position.hands[color][role], 0);
+          byHeld[HELD_GROUPS.findIndex((upTo) => upTo === null || held <= upTo)]![key]++;
+        }
+      }
+    }
+    const average = ({ total, count }: { total: number; count: number }) => (count ? Math.round(total / count) : null);
+    return {
+      mode,
+      games: rows.length,
+      byOpponent,
+      endings,
+      byPace,
+      length: { win: average(lengths.win), draw: average(lengths.draw), loss: average(lengths.loss) },
+      opponents: [...opponents.values()]
+        .sort((a, b) => b.games - a.games || a.user.name.localeCompare(b.user.name))
+        .slice(0, INSIGHT_OPPONENTS)
+        .map(({ user, record }) => ({ user, record })),
+      draft:
+        drafting && rows.length
+          ? { placed: Object.fromEntries([...placed].map(([role, count]) => [role, Math.round((count / rows.length) * 10) / 10])), byHeld }
+          : null,
+    };
+  }
+
   modeStats(userId: string, mode: Mode): ModeStats {
     const rows = this.#db
       .prepare(

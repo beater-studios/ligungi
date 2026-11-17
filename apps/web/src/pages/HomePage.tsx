@@ -15,6 +15,7 @@ import {
 } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { FeedList, useFeed } from '../components/Activity.tsx';
 import { turns } from '../challenges.ts';
 import { CreateGame, type CreateTarget } from '../components/CreateGame.tsx';
 import { LivePlayer } from '../components/LivePlayer.tsx';
@@ -323,6 +324,24 @@ const OnlineFriends = () => {
   );
 };
 
+/** The latest of the followed players, kept short on the home page; the whole feed is on the friends page. */
+const HOME_FEED = 5;
+
+const FollowFeed = () => {
+  const t = useT();
+  const items = useFeed(true);
+  if (!items || items.length === 0) return null;
+  return (
+    <section class="ligungi-card ligungi-home__feed">
+      <div class="ligungi-home__card-head">
+        <h2>{t.activity.feedTitle}</h2>
+        <a href="/friends#feed">{t.activity.seeAll}</a>
+      </div>
+      <FeedList items={items} limit={HOME_FEED} />
+    </section>
+  );
+};
+
 export const HomePage = () => {
   const t = useT();
   const { user } = useStore(session);
@@ -479,6 +498,7 @@ export const HomePage = () => {
           {user ? (
             <>
               <OnlineFriends />
+              <FollowFeed />
               <Training puzzleRating={me?.puzzleRating ?? null} />
             </>
           ) : (

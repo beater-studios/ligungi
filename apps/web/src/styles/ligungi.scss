@@ -8231,3 +8231,329 @@ $lesson-star: #e8a800;
     color: #fff;
   }
 }
+
+/* ===== Game search ===== */
+.ligungi-game-search__panel {
+  padding: 1.25rem 1.5rem;
+
+  h1 {
+    margin: 0 0 0.3rem;
+    color: $c-font-clear;
+    font-size: 1.6rem;
+    font-weight: 500;
+  }
+}
+
+.ligungi-game-search__intro {
+  margin: 0 0 1rem;
+  color: $c-font-dim;
+}
+
+.ligungi-game-search__form .ligungi-field-row {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.ligungi-game-search__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+
+  .ligungi-actions {
+    margin: 0;
+  }
+
+  .ligungi-submit {
+    width: auto;
+    min-width: 10rem;
+  }
+}
+
+.ligungi-game-search__results {
+  padding: 1rem 1.25rem;
+
+  > .ligungi-notice {
+    margin: 0;
+  }
+}
+
+.ligungi-game-search__row {
+  grid-template-columns: 9rem minmax(0, 1fr) auto;
+
+  .ligungi-game-row__result {
+    background: color-mix(in srgb, #{$c-font-dim} 20%, transparent);
+    color: $c-font;
+  }
+
+  @include mq-is-col1 {
+    grid-template-columns: minmax(0, 1fr) auto;
+
+    .ligungi-game-row__result {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.ligungi-profile__search {
+  margin-inline-end: auto;
+  font-size: 0.9rem;
+}
+
+/* ===== Activity and feed ===== */
+.ligungi-activity {
+  padding: 1.25rem 1.5rem;
+
+  > .ligungi-notice {
+    margin: 0.5rem 0 0;
+  }
+}
+
+.ligungi-activity__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+}
+
+.ligungi-activity__intro,
+.ligungi-activity__note {
+  color: $c-font-dim;
+  font-size: 0.85rem;
+}
+
+.ligungi-activity__note {
+  margin: 0.75rem 0 0;
+}
+
+.ligungi-activity__days {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 28rem;
+  overflow-y: auto;
+}
+
+.ligungi-activity__day {
+  padding: 0.6rem 0;
+  border-top: $border;
+
+  h3 {
+    margin: 0 0 0.35rem;
+    color: $c-font-dim;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
+
+.ligungi-activity__items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ligungi-activity__item {
+  padding: 0.15rem 0 0.15rem 1rem;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0.2rem;
+    top: 0.75em;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: $c-font-dim;
+  }
+
+  &.is-games::before {
+    background: $c-primary;
+  }
+
+  &.is-study::before {
+    background: $c-brag;
+  }
+
+  &.is-training::before {
+    background: $c-good;
+  }
+}
+
+.ligungi-activity__diff {
+  font-weight: 600;
+
+  &.is-up {
+    color: $c-good;
+  }
+
+  &.is-down {
+    color: $c-bad;
+  }
+}
+
+.ligungi-feed {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 0.3rem 0;
+    border-top: $border;
+    font-size: 0.9rem;
+
+    &:first-child {
+      border-top: 0;
+    }
+  }
+
+  small {
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-home__feed {
+  padding: 1rem 1.1rem;
+}
+
+.ligungi-friends-page__feed {
+  padding: 1.25rem 1.5rem;
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+}
+
+/* ===== Insights ===== */
+.ligungi-history__more {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.ligungi-insights__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 1.25rem 1.5rem;
+
+  h1 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.6rem;
+    font-weight: 500;
+  }
+}
+
+.ligungi-insights__intro {
+  margin: 0;
+  color: $c-font-dim;
+}
+
+.ligungi-insights__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  gap: 1.25rem;
+
+  @include mq-is-col1 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ligungi-insights__card {
+  padding: 1.25rem 1.5rem;
+
+  h2 {
+    margin: 0 0 0.6rem;
+    color: $c-font-clear;
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+
+  h2:not(:first-child) {
+    margin-top: 1.25rem;
+  }
+
+  h3 {
+    margin: 0.75rem 0 0.4rem;
+    color: $c-font-dim;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .ligungi-history__record {
+    grid-template-columns: 12rem minmax(0, 1fr);
+
+    @include mq-is-col1 {
+      grid-template-columns: 8rem minmax(0, 1fr);
+    }
+  }
+}
+
+.ligungi-insights__count {
+  margin: -0.3rem 0 0.4rem;
+  color: $c-font-dim;
+  font-size: 0.85rem;
+}
+
+.ligungi-insights__list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+
+  div {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  dt {
+    color: $c-font;
+  }
+
+  dd {
+    margin: 0;
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-insights__opponent {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+
+  .ligungi-history__record {
+    grid-template-columns: 0 minmax(0, 1fr);
+    column-gap: 0;
+  }
+}
+
+.ligungi-insights__pieces {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.3rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.2rem 0;
+    border-bottom: $border;
+  }
+}

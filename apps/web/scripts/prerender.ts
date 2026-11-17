@@ -159,6 +159,7 @@ The site works like lichess: rated and casual games with Glicko-2 ratings, games
 - [Analysis board](${en('/analysis')}): try moves and study positions
 - [Board editor](${en('/editor')}): set up any position and check that it follows the rules
 - [Draft explorer](${en('/explorer')}): what players place in the draft and how those games end
+- [Game search](${en('/games')}): every finished game, filtered by player, mode, rating, result, date and length
 - [Studies](${en('/study')}): chapters of moves with variations, comments and drawings, shared by players
 - [Players](${en('/players')}): who is online, site counts, the best of each mode and the rating distribution
 - [Leaderboard](${en('/ranking')}): best players of each mode

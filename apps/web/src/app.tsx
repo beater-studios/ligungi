@@ -14,6 +14,8 @@ import { CoordinatesPage } from './pages/CoordinatesPage.tsx';
 import { CookieBanner } from './components/Consent.tsx';
 import { DesignPage } from './pages/DesignPage.tsx';
 import { FriendsPage } from './pages/FriendsPage.tsx';
+import { GameSearchPage } from './pages/GameSearchPage.tsx';
+import { InsightsPage } from './pages/InsightsPage.tsx';
 import { INFO_KINDS, InfoPage, isInfoKind } from './pages/InfoPage.tsx';
 import { GamePage } from './pages/GamePage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
@@ -63,6 +65,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/study$/, render: () => <StudiesPage /> },
   { pattern: /^\/study\/([A-Za-z0-9]{8})$/, render: ([id]) => <StudyPage key={id} id={id!} /> },
   { pattern: /^\/explorer$/, render: () => <ExplorerPage /> },
+  { pattern: /^\/games$/, render: () => <GameSearchPage /> },
   { pattern: /^\/practice$/, render: () => <PracticePage /> },
   { pattern: /^\/practice\/([a-z-]{1,40})$/, render: ([id]) => <PracticePage id={id!} /> },
   { pattern: /^\/puzzles$/, render: () => <PuzzlesPage /> },
@@ -88,6 +91,7 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/login$/, render: () => <AuthPage signup={false} /> },
   { pattern: /^\/signup$/, render: () => <AuthPage signup /> },
   { pattern: /^\/@\/([A-Za-z0-9_-]+)$/, render: ([name]) => <ProfilePage name={name!} /> },
+  { pattern: /^\/@\/([A-Za-z0-9_-]+)\/insights$/, render: ([name]) => <InsightsPage name={name!} /> },
   { pattern: /^\/challenge\/([A-Za-z0-9]+)$/, render: ([id]) => <ChallengePage id={id!} /> },
   { pattern: /^\/([A-Za-z0-9]{8})$/, render: ([id]) => <GamePage id={id!} /> },
 ];
@@ -416,6 +420,7 @@ const Header = () => {
               <a href="/editor">{t.nav.editor}</a>
               <a href="/analysis?import">{t.nav.importGame}</a>
               <a href="/explorer">{t.nav.explorer}</a>
+              <a href="/games">{t.nav.gameSearch}</a>
             </div>
           </section>
         </nav>
@@ -478,6 +483,7 @@ export const SiteFooter = () => {
         ['/analysis', t.nav.analysis],
         ['/editor', t.nav.editor],
         ['/explorer', t.nav.explorer],
+        ['/games', t.nav.gameSearch],
         ['/players', t.nav.playerList],
         ['/ranking', t.nav.players],
         ['/tv', t.nav.liveGames],

@@ -70,6 +70,16 @@ import {
   studyText,
   type StudyList,
   type StudyRoot,
+  ACTIVITY_DAYS,
+  ACTIVITY_MAX,
+  FEED_DAYS,
+  FEED_MAX,
+  dayStart,
+  parseGameSearch,
+  type ActivityEvent,
+  type ActivityView,
+  type FeedItem,
+  type GameSearchResult,
 } from '@ligungi/protocol';
 import { WebSocketServer, type WebSocket } from 'ws';
 import {
@@ -110,6 +120,7 @@ import { PUZZLE_COUNT, PuzzleStore, isPuzzle } from './puzzles.ts';
 import type { GameRoom } from './room.ts';
 import { SeekStore } from './seeks.ts';
 import { Studies, type ChapterInput, type StudyRecord } from './studies.ts';
+import type { SearchCriteria } from './games.ts';
 import { otpauthUri } from './totp.ts';
 import { Tv } from './tv.ts';
 import { TwoFactor } from './two-factor.ts';
@@ -214,6 +225,8 @@ export const createApp = (config: ServerConfig): App => {
   const studies = new Studies(db, config.now);
   /** Study writes per author and minute: the editor saves on its own after each change, so this is generous. */
   const studyLimiter = new RateLimiter(120, 60_000, config.now);
+  /** Game searches and insights per session and minute: each one may read a large part of the games table. */
+  const searchLimiter = new RateLimiter(30, 60_000, config.now);
   const tvGames = () => tv.live().slice(0, TV_GAMES).map((room) => room.summary());
   // Every move of every live game changes the list, so changes are gathered and sent at most every TV_PUBLISH_MS.
   let tvTimer: ReturnType<typeof setTimeout> | null = null;
@@ -1046,6 +1059,42 @@ export const createApp = (config: ServerConfig): App => {
       if (a.id === b.id) throw new HttpError(400, 'invalidFilter');
       sendJson(ctx.res, 200, games.crosstable(a, b));
     })
+    .add('GET', '/api/users/:name/activity', (ctx) => {
+      const user = findUser(ctx.params.name!);
+      const mine = ctx.session.userId === user.id;
+      const since = config.now() - ACTIVITY_DAYS * DAY_MS;
+      const events: ActivityEvent[] = [
+        ...games.activityGames([user.id], since, ACTIVITY_MAX).map(({ at, game }): ActivityEvent => ({ kind: 'game', at, game })),
+        ...studies.createdBy([user.id], since, ACTIVITY_MAX).map(({ id, title, at }): ActivityEvent => ({ kind: 'study', at, study: { id, title } })),
+        ...(user.createdAt >= since ? [{ kind: 'joined', at: user.createdAt } as const] : []),
+        ...(mine ? [...puzzles.activitySince(user.id, since), ...users.trainingSince(user.id, since)] : []),
+      ];
+      const view: ActivityView = { events: events.sort((a, b) => b.at - a.at).slice(0, ACTIVITY_MAX), mine };
+      sendJson(ctx.res, 200, view);
+    })
+    .add('GET', '/api/users/:name/insights/:mode', (ctx) => {
+      if (!searchLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      const user = findUser(ctx.params.name!);
+      const mode = ctx.params.mode as Mode;
+      if (!(MODES as readonly string[]).includes(mode)) throw new HttpError(400, 'invalidMode');
+      sendJson(ctx.res, 200, games.insights(user.id, mode));
+    })
+    .add('GET', '/api/feed', (ctx) => {
+      const userId = requireUser(ctx);
+      const names = new Map(users.following(userId).map((user) => [user.id, user.name]));
+      const followed = [...names.keys()];
+      const since = config.now() - FEED_DAYS * DAY_MS;
+      // A game between two followed players is told once, from the side of the first one found.
+      const seen = new Set<string>();
+      const played = games.activityGames(followed, since, FEED_MAX * 2).filter(({ game }) => !seen.has(game.id) && Boolean(seen.add(game.id)));
+      const items: FeedItem[] = [
+        ...played.map(({ userId: id, at, game }): FeedItem => ({ user: { id, name: names.get(id) ?? '' }, event: { kind: 'game', at, game } })),
+        ...studies
+          .createdBy(followed, since, FEED_MAX)
+          .map(({ ownerId, ownerName, id, title, at }): FeedItem => ({ user: { id: ownerId, name: ownerName }, event: { kind: 'study', at, study: { id, title } } })),
+      ];
+      sendJson(ctx.res, 200, items.sort((a, b) => b.event.at - a.event.at).slice(0, FEED_MAX));
+    })
     .add('GET', '/api/users/:name/counts', (ctx) => {
       const user = findUser(ctx.params.name!);
       const filters = parseGameFilters(ctx.url.searchParams);
@@ -1126,6 +1175,25 @@ export const createApp = (config: ServerConfig): App => {
       const userId = requireUser(ctx);
       if (!games.exists(ctx.params.id!)) throw new HttpError(404, 'gameNotFound');
       sendJson(ctx.res, 200, games.removeBookmark(userId, ctx.params.id!));
+    })
+    .add('GET', '/api/games/search', (ctx) => {
+      if (!searchLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      const search = parseGameSearch(ctx.url.searchParams);
+      if (isErrorCode(search)) throw new HttpError(400, search);
+      const { player, vs, from, to, page, ...rest } = search;
+      const playerId = player ? users.findByName(player)?.id : undefined;
+      const vsId = vs ? users.findByName(vs)?.id : undefined;
+      const empty: GameSearchResult = { games: [], more: false };
+      // An unknown name matches no game, the same as a known one with no games.
+      if ((player && !playerId) || (vs && !vsId)) return sendJson(ctx.res, 200, empty);
+      const criteria: SearchCriteria = {
+        ...rest,
+        ...(playerId ? { playerId } : {}),
+        ...(vsId ? { vsId } : {}),
+        ...(from ? { from: dayStart(from)! } : {}),
+        ...(to ? { to: dayStart(to)! + DAY_MS } : {}),
+      };
+      sendJson(ctx.res, 200, games.search(criteria, page ?? 1));
     })
     .add('GET', '/api/games/:id', (ctx) => {
       const room = games.get(ctx.params.id!);

@@ -10,6 +10,8 @@ export * from './puzzles.ts';
 export * from './practice.ts';
 export * from './explorer.ts';
 export * from './studies.ts';
+export * from './search.ts';
+export * from './activity.ts';
 
 /**
  * Seconds. A Fischer clock adds `increment` after every move. A byo-yomi clock has no increment: once the main time

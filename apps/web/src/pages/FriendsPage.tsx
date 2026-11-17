@@ -2,6 +2,7 @@ import { MODES, type Mode } from '@ligungi/engine';
 import type { FriendView } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { FeedList, useFeed } from '../components/Activity.tsx';
 import { CreateGame } from '../components/CreateGame.tsx';
 import { Checkbox, Select } from '../components/ui.tsx';
 import { useT } from '../i18n/index.ts';
@@ -93,6 +94,7 @@ export const FriendsPage = () => {
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<Mode>('advanced');
   const [challenging, setChallenging] = useState<string | null>(null);
+  const feed = useFeed(Boolean(user));
 
   const needle = query.trim().toLowerCase();
   const list = (friends ?? []).filter((friend) => !needle || friend.user.name.toLowerCase().includes(needle));
@@ -153,6 +155,12 @@ export const FriendsPage = () => {
               ))}
             </ul>
           )}
+        </section>
+      )}
+      {user && feed && (
+        <section id="feed" class="ligungi-card ligungi-friends-page__feed">
+          <h2>{t.activity.feedTitle}</h2>
+          {feed.length > 0 ? <FeedList items={feed} /> : <p class="ligungi-notice">{friends?.length ? t.activity.feedEmpty : t.activity.feedNoFollows}</p>}
         </section>
       )}
       {user && <p class="ligungi-friends-page__hint">{t.friends.hint}</p>}

@@ -88,6 +88,9 @@ What each screen shows only visually, and what blind mode needs there. Status: *
 | Home | `/` | mini boards (puzzle of the day, live game), quick pairing | the boards described in text, the rest is buttons and links | built (the small boards are decoration) |
 | Create a game dialog | (dialog) | sliders, segmented choices | real radio inputs and range inputs already; check the labels read well | ok |
 | Profile, players, ranking, friends | `/@/<name>`, `/players`, `/ranking`, `/friends` | rating chart, rating distribution | the charts have a table or text alternative (check each) | built (the rating history has a table, the distribution a list) |
+| Game search | `/games` | none: a form from `ui.tsx` and a list of links | check the labels read well | ok |
+| Activity and feed | (profile, home, `/friends`) | none: days and lines of text with links | check the headings read well | ok |
+| Insights | `/@/<name>/insights` | the result bars | each bar has its wins, draws and losses in words beside it | ok |
 | Rules page | `/learn` | piece movement diagrams | each diagram described in text | built (diagrams and piece trainer) |
 | Settings, account, sign in, info pages | `/settings`, `/account`, `/login`, `/about`... | swatches, previews | forms from `ui.tsx` with labels; previews are decoration | ok |
 

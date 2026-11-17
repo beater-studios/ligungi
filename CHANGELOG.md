@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-17
+
 ### Added
 
 - Studies (Learn menu, `/study`): write chapters of moves with variations, a comment on each move and drawings on the board, and share them. A chapter starts from a mode, a position, a game of the site or an imported game. Drawings are arrows and painted squares in four colors, up to 2 arrows and 4 squares per move: right-drag or right-click on a computer, or turn on Draw with taps on a phone. The editor saves on its own. A study is public, unlisted (only with its link) or private; new accounts can publish only unlisted or private studies for their first 7 days. Studies can be reported, and moderators can hide or delete them, but never open a private one. The terms of use and the privacy policy describe it.
@@ -208,7 +210,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/beater-studios/ligungi/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/beater-studios/ligungi/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/beater-studios/ligungi/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/beater-studios/ligungi/compare/v0.2.0...v0.3.0

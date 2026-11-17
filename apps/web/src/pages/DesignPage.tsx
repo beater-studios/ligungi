@@ -1,6 +1,7 @@
 import { initialPosition, parseFen, parseSquare } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
+import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { CrosstableView } from '../components/Crosstable.tsx';
 import { RatingTrend } from '../components/RatingTrend.tsx';
@@ -832,6 +833,19 @@ export const DesignPage = () => {
                 <span class="ligungi-study__count">Arrows 1 of 2 · Squares 2 of 4</span>
               </div>
               <p class="ligungi-study__comment">A comment on the current move, as readers see it under the board.</p>
+            </div>
+          </Example>
+          <Example label="Screen reader mode (BlindPanel, .ligungi-blind): the game as text under the board, with the command field and the live log of announcements (role=log). Type p, c 4-7 or 6-6 samurai here; this sample has no moves to play">
+            <div style={{ width: '100%', maxWidth: '34rem' }}>
+              <BlindPanel
+                position={initialPosition('beginner')}
+                legal={[]}
+                positions={[initialPosition('beginner')]}
+                moves={[]}
+                live
+                names={{ white: 'marechal_br', black: 'kanji_fan' }}
+                autoFocus={false}
+              />
             </div>
           </Example>
         </Section>

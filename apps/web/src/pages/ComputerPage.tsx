@@ -194,6 +194,7 @@ export const ComputerPage = () => {
       analysisHref={analysisLink}
       myTurn={myTurn}
       status={status}
+      result={outcome ? outcomeText(t, outcome) : null}
       controls={
         <>
           <div class="ricons">

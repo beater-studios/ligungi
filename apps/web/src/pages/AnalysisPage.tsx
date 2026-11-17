@@ -14,6 +14,7 @@ import {
 import type { GameView } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { ImportGame } from '../components/ImportGame.tsx';
 import { DraftPanel, TowerPanel } from '../components/Panels.tsx';
@@ -22,7 +23,9 @@ import { outcomeText, useT } from '../i18n/index.ts';
 import { useMoveText } from '../notation.ts';
 import { icons } from '../icons.ts';
 import { useLocalGame } from '../localGame.ts';
+import { prefs } from '../prefs.ts';
 import { navigate, useLocation } from '../router.ts';
+import { useStore } from '../store.ts';
 
 export const AnalysisPage = () => {
   const t = useT();
@@ -39,6 +42,8 @@ export const AnalysisPage = () => {
   const tree = useRef<HTMLDivElement>(null);
   const [inspected, setInspected] = useState<number | null>(null);
   const [importing, setImporting] = useState(false);
+  const { screenReader } = useStore(prefs);
+  const hidden = screenReader ? 'true' : undefined;
 
   useEffect(() => {
     if (topHand.current && bottomHand.current) setHands({ top: topHand.current, bottom: bottomHand.current });
@@ -163,7 +168,7 @@ export const AnalysisPage = () => {
           <TowerPanel position={position} square={inspected} training />
         </div>
       </div>
-      <div class="analyse__board main-board">
+      <div class="analyse__board main-board" aria-hidden={hidden}>
         {hands && (
           <BoardView
             training
@@ -179,8 +184,8 @@ export const AnalysisPage = () => {
           />
         )}
       </div>
-      <div class="pocket is2d pocket-top" ref={topHand} />
-      <div class="pocket is2d pocket-bottom" ref={bottomHand} />
+      <div class="pocket is2d pocket-top" ref={topHand} aria-hidden={hidden} />
+      <div class="pocket is2d pocket-bottom" ref={bottomHand} aria-hidden={hidden} />
       <div class="analyse__tools">
         <div class="analyse__moves areplay">
           <div class="tview2 tview2-column" ref={tree}>
@@ -201,6 +206,21 @@ export const AnalysisPage = () => {
         </div>
       </div>
       <div class="analyse__underboard">
+        {screenReader && (
+          <BlindPanel
+            title={t.blind.boardTitle}
+            position={position}
+            legal={outcome ? [] : legal}
+            onMove={local.play}
+            positions={replay.positions}
+            moves={replay.moves}
+            ply={local.ply}
+            navigation={{ prev: () => go(current - 1), next: () => go(current + 1), first: () => go(0), end: () => go(replay.moves.length) }}
+            orientation={orientation}
+            result={outcome ? outcomeText(t, outcome) : null}
+            notice={error}
+          />
+        )}
         <div class="ligungi-tools box">
           {doneAvailable && (
             <button type="button" class="button ligungi-done" onClick={() => local.play({ kind: 'done' })}>

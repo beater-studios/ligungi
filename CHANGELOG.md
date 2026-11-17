@@ -4,6 +4,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Screen reader mode, for playing and learning without seeing the board: turn it on in Settings or at the top of the sign in page. On every screen with a board (games, TV, the computer, the analysis board, studies, the board editor, lessons, puzzles, Puzzle Streak and Storm, practice, the draft explorer and the rules page's piece trainer), every move is announced in words ("White: Samurai from 6-7 to 6-6", captures, stacks, drops, betrayals, the end of the draft, check, low time, draw offers and the result), and a field takes typed moves (`6-6 samurai`, `6-7 6-6`, `ninja 4-7`, or either notation) and questions: the whole position, one square, the hands, where a piece can go, the last move, the clocks and the goal of a puzzle, lesson or practice position. `<` and `>` step through the moves, each one read with its comment and drawings in studies, whose authors can also draw by typing (`arrow 5-7 5-5 red`); the board editor takes typed pieces (`4-7 white samurai`). A board of 81 buttons can be moved through with the arrow keys. The coordinate trainer reads each square by where it stands, the rules diagrams are described in words and the rating distribution has a list. The board stays on screen for anyone helping. The FAQ, the site's structured data and llms.txt say so.
+
 ## [0.6.0] - 2026-11-17
 
 ### Added

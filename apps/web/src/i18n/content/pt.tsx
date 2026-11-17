@@ -101,6 +101,18 @@ export const pt: Content = {
       ),
     },
     {
+      q: 'Dá para jogar com um leitor de tela?',
+      a: (
+        <p>
+          Sim. Ative o modo para leitores de tela em Preferências ou no topo da página de entrar. Nas partidas, cada lance é
+          anunciado em palavras, e um campo aceita lances digitados (por exemplo, 6-6 samurai) e perguntas sobre a posição, as
+          mãos, uma casa ou os relógios, e há um tabuleiro navegável pelas setas. O modo vale em todas as telas com tabuleiro:
+          partidas, TV, análise, estudos, editor, lições, puzzles, prática e treino de coordenadas. O tabuleiro continua na
+          tela para quem estiver ajudando.
+        </p>
+      ),
+    },
+    {
       q: 'Como funciona o rating?',
       a: (
         <p>

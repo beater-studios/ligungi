@@ -60,7 +60,7 @@ const randomSquare = (except: Square | null): Square => {
  */
 export const CoordinatesPage = () => {
   const t = useT();
-  const { notation } = useStore(prefs);
+  const { notation, screenReader } = useStore(prefs);
   const [mode, setMode] = useState<Mode>('find');
   const [style, setStyle] = useState<Style>(notation === 'machine' ? 'machine' : 'rulebook');
   const [colorChoice, setColorChoice] = useState<ColorChoice>('white');
@@ -74,6 +74,10 @@ export const CoordinatesPage = () => {
   const [column, setColumn] = useState<string | null>(null);
   const [best, setBest] = useState<Record<string, number>>({});
   const [newBest, setNewBest] = useState(false);
+  // One tab stop on the board, moved with the arrow keys; the answer is said for screen readers.
+  const [focus, setFocus] = useState(0);
+  const [said, setSaid] = useState({ text: '', count: 0 });
+  const grid = useRef<HTMLDivElement>(null);
   const end = useRef(0);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const key = `${mode}-${style}`;
@@ -118,6 +122,7 @@ export const CoordinatesPage = () => {
     if (flashTimer.current) clearTimeout(flashTimer.current);
     setFlash({ square, ok });
     flashTimer.current = setTimeout(() => setFlash(null), FLASH_MS);
+    setSaid((current) => ({ text: ok ? t.blind.right : t.blind.wrong, count: current.count + 1 }));
     if (ok) {
       setScore((n) => (n ?? 0) + 1);
       setTarget((current) => randomSquare(current));
@@ -137,7 +142,29 @@ export const CoordinatesPage = () => {
   };
 
   const { columns, rows } = coordinateLabels(orientation, style === 'machine' ? 'algebraic' : 'rulebook');
-  const prompt = !running ? null : mode === 'find' ? label(target!, style) : t.coordinates.namePrompt;
+  const order = visualSquares(orientation);
+  /** Where a square stands, counted from the top left, for screen readers: the skill is turning that into its name. */
+  const cell = (square: Square) => {
+    const index = order.indexOf(square);
+    return t.blind.coordsCell((index % 9) + 1, Math.floor(index / 9) + 1);
+  };
+  const prompt = !running
+    ? null
+    : mode === 'find'
+      ? label(target!, style)
+      : screenReader && target !== null
+        ? `${t.coordinates.namePrompt} ${t.blind.coordsMarked(cell(target))}`
+        : t.coordinates.namePrompt;
+  const onGridKey = (event: KeyboardEvent, index: number) => {
+    const steps: Record<string, number> = { ArrowUp: -9, ArrowDown: 9, ArrowLeft: -1, ArrowRight: 1 };
+    const step = steps[event.key];
+    if (step === undefined) return;
+    const next = index + step;
+    if (next < 0 || next > 80 || (Math.abs(step) === 1 && Math.floor(next / 9) !== Math.floor(index / 9))) return;
+    event.preventDefault();
+    setFocus(next);
+    grid.current?.querySelectorAll<HTMLButtonElement>('button')[next]?.focus();
+  };
   const finished = !running && score !== null;
 
   return (
@@ -223,8 +250,12 @@ export const CoordinatesPage = () => {
               ))}
             </div>
           )}
-          <div class="gg-mini gg-palette ligungi-coords__grid">
-            {visualSquares(orientation).map((square) => {
+          <p class="ligungi-sr-only" role="status">
+            {/* The same answer twice in a row must still change the text, or it is not read again. */}
+            {said.count % 2 ? `${said.text}\u00a0` : said.text}
+          </p>
+          <div class="gg-mini gg-palette ligungi-coords__grid" ref={grid}>
+            {order.map((square, index) => {
               const classes = ['gg-mini-sq', 'ligungi-coords__sq'];
               if (running && mode === 'name' && square === target) classes.push('is-target');
               if (flash?.square === square) classes.push(flash.ok ? 'is-ok' : 'is-bad');
@@ -233,8 +264,10 @@ export const CoordinatesPage = () => {
                   key={square}
                   type="button"
                   class={classes.join(' ')}
-                  aria-label={running && mode === 'find' ? t.coordinates.squareButton : label(square, style)}
-                  tabIndex={running && mode === 'find' ? 0 : -1}
+                  aria-label={running && mode === 'find' ? (screenReader ? cell(square) : t.coordinates.squareButton) : label(square, style)}
+                  tabIndex={running && mode === 'find' && index === focus ? 0 : -1}
+                  onFocus={() => setFocus(index)}
+                  onKeyDown={(event) => onGridKey(event, index)}
                   onClick={() => onSquare(square)}
                 />
               );

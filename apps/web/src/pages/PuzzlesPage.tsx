@@ -206,6 +206,9 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
       analysisHref={`/analysis?fen=${encodeURIComponent(puzzle.fen)}`}
       myTurn={yourTurn}
       status={message ?? task}
+      gameKey={puzzle.id}
+      goal={task}
+      notice={message}
       controls={
         <div class="follow-up">
           {finished ? (

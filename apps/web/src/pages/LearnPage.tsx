@@ -17,6 +17,7 @@ import { PieceGlyph } from '../components/PieceGlyph.tsx';
 import { icons } from '../icons.ts';
 import { PieceTrainer } from '../components/PieceTrainer.tsx';
 import { useContent } from '../i18n/content/index.ts';
+import { squareText } from '../blind.ts';
 import { usePieceNames, useT } from '../i18n/index.ts';
 
 const CENTER = squareAt(4, 4);
@@ -77,6 +78,15 @@ export const LearnPage = () => {
   const t = useT();
   const l = t.learn;
   const pieceNames = usePieceNames();
+  /** The diagram in words: the squares the piece reaches from the center, tier by tier. */
+  const diagramText = (role: Role): string => {
+    const { marks } = DIAGRAMS[role];
+    const parts = [1, 2, 3]
+      .map((tier) => [...marks].filter(([, mark]) => mark === `tier-${tier}`).map(([square]) => squareText(square)))
+      .map((squares, index) => (squares.length ? t.blind.diagramTier(index + 1, t.blind.list(squares)) : ''))
+      .filter(Boolean);
+    return t.blind.diagram(pieceName(role, pieceNames), squareText(CENTER), parts.join(' '));
+  };
   const content = useContent();
   const [role, setRole] = useState<Role>('lancer');
   const current = useCurrentSection();
@@ -166,7 +176,7 @@ export const LearnPage = () => {
           >
             <div class="ligungi-learn__detail">
               <figure class="ligungi-learn__diagram">
-                <MiniBoard position={DIAGRAMS[role].position} marks={DIAGRAMS[role].marks} />
+                <MiniBoard position={DIAGRAMS[role].position} marks={DIAGRAMS[role].marks} label={diagramText(role)} />
                 <figcaption class="ligungi-learn__legend">
                   <span class="tier-1">{l.tier(1)}</span> <span class="tier-2">{l.tier(2)}</span> <span class="tier-3">{l.tier(3)}</span>
                 </figcaption>

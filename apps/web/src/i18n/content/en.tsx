@@ -103,6 +103,18 @@ export const en: Content = {
       ),
     },
     {
+      q: 'Can I play with a screen reader?',
+      a: (
+        <p>
+          Yes. Turn on screen reader mode in Settings or at the top of the sign in page. In games, every move is announced in
+          words, and a field takes typed moves (for example, 6-6 samurai) and questions about the position, the hands, a
+          square or the clocks, and there is a board you can move through with the arrow keys. It works on every screen with a
+          board: games, TV, the analysis board, studies, the editor, lessons, puzzles, practice and the coordinate trainer.
+          The board stays on screen for anyone helping.
+        </p>
+      ),
+    },
+    {
       q: 'How does the rating work?',
       a: (
         <p>

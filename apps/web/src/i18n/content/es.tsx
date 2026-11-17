@@ -103,6 +103,18 @@ export const es: Content = {
       ),
     },
     {
+      q: '¿Se puede jugar con un lector de pantalla?',
+      a: (
+        <p>
+          Sí. Activa el modo para lectores de pantalla en Preferencias o arriba en la página de iniciar sesión. En las
+          partidas, cada jugada se anuncia con palabras, y un campo acepta jugadas escritas (por ejemplo, 6-6 samurai) y
+          preguntas sobre la posición, las manos, una casilla o los relojes, y hay un tablero que se recorre con las flechas.
+          Funciona en todas las pantallas con tablero: partidas, TV, análisis, estudios, editor, lecciones, puzzles, práctica
+          y entrenamiento de coordenadas. El tablero sigue en pantalla para quien esté ayudando.
+        </p>
+      ),
+    },
+    {
       q: '¿Cómo funciona la puntuación?',
       a: (
         <p>

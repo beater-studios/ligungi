@@ -413,8 +413,22 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
       onPly={setPly}
       onFlip={() => setFlipped((f) => !f)}
       analysisHref={`/analysis?game=${view.id}`}
+      gameKey={view.id}
       myTurn={myTurn}
       status={status}
+      result={started ? null : outcomeText(t, view.outcome, view.status === 'aborted')}
+      notice={
+        you && started && view.drawOffer === opponent
+          ? t.game.opponentOffersDraw
+          : you && started && view.takebackOffer === opponent
+            ? t.game.opponentProposesTakeback
+            : declined
+              ? { draw: t.game.drawDeclined, takeback: t.game.takebackDeclined, rematch: t.game.rematchDeclined }[declined]
+              : null
+      }
+      {...(you && started
+        ? { commands: { resign: () => action('resign'), draw: () => offer('draw', view.drawOffer === opponent ? 'accept' : 'offer') } }
+        : {})}
       controls={controls}
       side={side}
     />

@@ -144,14 +144,22 @@ writeFileSync(
 
 > ligungi is a free, open source website to play Gungi online with the official 2022 rules. Gungi (軍儀) is the two-player strategy board game from the HUNTER×HUNTER manga, released as a physical game in 2022. It is similar to shogi, but pieces stack into towers of up to three and a taller tower extends the reach of the piece on top. ligungi is a fan project by Beater Studios, not affiliated with the rights holders.
 
-The site works like lichess: rated and casual games with Glicko-2 ratings, games against the computer, a free analysis board, live games, leaderboards and a rules page with diagrams and an interactive piece trainer. It is available in Portuguese, English and Spanish; add \`?lang=pt\`, \`?lang=en\` or \`?lang=es\` to any page. Source priority for the rules: the official 2022 rulebook, then the official Universal Music FAQ.
+The site works like lichess: rated and casual games with Glicko-2 ratings, games against the computer, a free analysis board, studies, puzzles, interactive lessons, live games, leaderboards and a rules page with diagrams and an interactive piece trainer. It is available in Portuguese, English and Spanish; add \`?lang=pt\`, \`?lang=en\` or \`?lang=es\` to any page. The site can be used with a screen reader: a screen reader mode (Settings, or the top of the sign in page) announces every move in words, takes typed moves and questions about the position and offers a board moved through with the arrow keys, on every screen with a board. Source priority for the rules: the official 2022 rulebook, then the official Universal Music FAQ.
 
 ## Play and learn
 
 - [Home](${en('/')}): quick pairing, open games and live counters
 - [How to play](${en('/learn')}): pieces, movement, towers, the draft and checkmate, with an interactive piece trainer
-- [Play the computer](${en('/computer')}): five levels, no account needed
+- [Lessons](${en('/lessons')}): interactive lessons, from moving a piece to checkmate
+- [Puzzles](${en('/puzzles')}): mates and material wins, with a puzzle rating and a daily puzzle
+- [Puzzle Streak](${en('/streak')}) and [Puzzle Storm](${en('/storm')}): puzzles until the first mistake, and as many as possible in 3 minutes
+- [Practice](${en('/practice')}): endgame and defense positions against the computer
+- [Coordinate trainer](${en('/coordinates')}): learn the names of the squares
+- [Play the computer](${en('/computer')}): five levels, no account needed, also from any position
 - [Analysis board](${en('/analysis')}): try moves and study positions
+- [Board editor](${en('/editor')}): set up any position and check that it follows the rules
+- [Draft explorer](${en('/explorer')}): what players place in the draft and how those games end
+- [Studies](${en('/study')}): chapters of moves with variations, comments and drawings, shared by players
 - [Players](${en('/players')}): who is online, site counts, the best of each mode and the rating distribution
 - [Leaderboard](${en('/ranking')}): best players of each mode
 - [Gungi TV](${en('/tv')}): games being played now

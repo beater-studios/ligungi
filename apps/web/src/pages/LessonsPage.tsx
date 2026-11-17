@@ -1,4 +1,4 @@
-import { applyMove, legalMoves, moveToString, parseMove, parseSquare, toFen, type Move } from '@ligungi/engine';
+import { applyMove, legalMoves, moveToString, parseMove, parseSquare, toFen, type Move, type Position } from '@ligungi/engine';
 import {
   LESSON_STAGES,
   LESSON_STARS_MAX,
@@ -11,11 +11,14 @@ import {
   type LessonState,
 } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { Stars } from '../components/Stars.tsx';
 import { useT } from '../i18n/index.ts';
+import { squareText } from '../blind.ts';
 import { icons } from '../icons.ts';
 import { useLessonProgress, type LessonProgress } from '../lessonProgress.ts';
+import { prefs } from '../prefs.ts';
 import { navigate } from '../router.ts';
 import { session } from '../session.ts';
 import { playSound } from '../sound.ts';
@@ -106,6 +109,11 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const player = startLesson(exercise).position.turn;
   const goal = exercise.goal;
+  const { screenReader } = useStore(prefs);
+  // The moves of this try, for the screen reader mode's announcements; a restart starts a new try.
+  const [history, setHistory] = useState<{ positions: Position[]; moves: Move[] }>(() => ({ positions: [startLesson(exercise).position], moves: [] }));
+  const [round, setRound] = useState(0);
+  const played = (move: Move, after: Position) => setHistory((h) => ({ positions: [...h.positions, after], moves: [...h.moves, move] }));
 
   useEffect(() => {
     if (top.current && bottom.current) setHands({ top: top.current, bottom: bottom.current });
@@ -120,6 +128,8 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
     if (timer.current) clearTimeout(timer.current);
     request.current++;
     setState(startLesson(exercise));
+    setHistory({ positions: [startLesson(exercise).position], moves: [] });
+    setRound((n) => n + 1);
     setLastMove(null);
     setStars(null);
     setMistakes(0);
@@ -150,6 +160,7 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
         playSound('error');
         timer.current = setTimeout(() => {
           setState(before);
+          setHistory((h) => ({ positions: h.positions.slice(0, -1), moves: h.moves.slice(0, -1) }));
           setLastMove(null);
           setWaiting(false);
         }, WRONG_DELAY_MS);
@@ -164,7 +175,9 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
       setMessage(t.lessons.mateDefends);
       timer.current = setTimeout(() => {
         playSound(defense.kind === 'move' && defense.action === 'capture' ? 'capture' : 'move');
-        setState({ ...after, position: applyMove(after.position, defense) });
+        const defended = applyMove(after.position, defense);
+        setState({ ...after, position: defended });
+        played(defense, defended);
         setLastMove(defense);
         setMessage(null);
         setWaiting(false);
@@ -178,6 +191,7 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
     const after = playLesson(exercise, state, move);
     playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
     setState(after);
+    played(move, after.position);
     setLastMove(move);
     if (goal.kind === 'mate') return mateMove(state, after, move);
     if (lessonDone(exercise, after, player)) finish(after.moves, mistakes);
@@ -261,7 +275,7 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
           </div>
           <LoginLine />
         </section>
-        <div class="ligungi-lesson__board">
+        <div class="ligungi-lesson__board" aria-hidden={screenReader ? 'true' : undefined}>
           <div class="ligungi-lesson__hand" ref={top} />
           {hands && (
             <BoardView
@@ -278,6 +292,21 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
           <div class="ligungi-lesson__hand" ref={bottom} />
         </div>
       </div>
+      {screenReader && (
+        <BlindPanel
+          key={round}
+          position={state.position}
+          legal={doneAvailable ? allMoves : boardMoves}
+          onMove={onMove}
+          positions={history.positions}
+          moves={history.moves}
+          orientation={player}
+          goal={[text?.instruction, targets.length ? t.blind.targets(t.blind.list(targets.map(squareText))) : ''].filter(Boolean).join(' ')}
+          notice={message}
+          result={finished ? `${message ?? ''} ${t.lessons.stars(stars, LESSON_STARS_MAX)}`.trim() : null}
+          timeInfo={`${goal.kind === 'mate' ? t.lessons.mateStars : t.lessons.par(exercise.par)}. ${t.lessons.moves(state.moves)}.`}
+        />
+      )}
     </main>
   );
 };

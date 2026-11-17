@@ -1,4 +1,4 @@
-import type { Color, Move, Position } from '@ligungi/engine';
+import { toFen, type Color, type Move, type Position } from '@ligungi/engine';
 import { byoyomiState, type TimeControl } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
@@ -6,8 +6,10 @@ import { formatClock, useT } from '../i18n/index.ts';
 import { useMoveText } from '../notation.ts';
 import { icons } from '../icons.ts';
 import { prefs } from '../prefs.ts';
+import { useStore } from '../store.ts';
 import { playSound, speak } from '../sound.ts';
 import { BeginnerHint } from './BeginnerHint.tsx';
+import { BlindPanel, type BlindCommands } from './BlindPanel.tsx';
 import { BoardView, type BoardProps } from './BoardView.tsx';
 import { DraftPanel, TowerPanel } from './Panels.tsx';
 
@@ -53,6 +55,21 @@ interface RoundLayoutProps {
   readonly myTurn?: boolean;
   /** The hidden pieces training may apply (not in rated games). */
   readonly training?: boolean;
+  /** The result once the game is over, announced in the screen reader mode. */
+  readonly result?: string | null;
+  /** Something to announce in the screen reader mode, such as a draw offer. */
+  readonly notice?: string | null;
+  /** Typed commands of the screen reader mode beyond moving. */
+  readonly commands?: BlindCommands;
+  /** The task, for the screen reader mode (a puzzle, a practice position). */
+  readonly goal?: string | null;
+  /** What the screen reader mode answers to `r` without clocks, such as a puzzle run's timer. */
+  readonly timeInfo?: string | null;
+  /**
+   * Tells one game from the next when the page stays (a rematch, the next puzzle), so the screen reader mode starts over
+   * instead of reading the change as moves taken back. The start position by default.
+   */
+  readonly gameKey?: string;
 }
 
 const LOW_TIME = 20_000;
@@ -263,6 +280,8 @@ export const RoundLayout = (props: RoundLayoutProps) => {
   }, []);
   const top: Color = props.orientation === 'white' ? 'black' : 'white';
   const bottom: Color = props.orientation;
+  const { screenReader } = useStore(prefs);
+  const shown = props.board.position;
 
   return (
     <main class="round">
@@ -280,7 +299,7 @@ export const RoundLayout = (props: RoundLayoutProps) => {
         </div>
       </aside>
       <div class="round__app variant-standard">
-        <div class="round__app__board main-board">
+        <div class="round__app__board main-board" aria-hidden={screenReader ? 'true' : undefined}>
           {hands && (
             <BoardView
               {...props.board}
@@ -292,8 +311,8 @@ export const RoundLayout = (props: RoundLayoutProps) => {
             />
           )}
         </div>
-        <div class="pocket is2d pocket-top" ref={topHand} />
-        <div class="pocket is2d pocket-bottom" ref={bottomHand} />
+        <div class="pocket is2d pocket-top" ref={topHand} aria-hidden={screenReader ? 'true' : undefined} />
+        <div class="pocket is2d pocket-bottom" ref={bottomHand} aria-hidden={screenReader ? 'true' : undefined} />
         <div class="round__app__table" />
         <UserBox player={props.players[top]} color={top} position="top" />
         <UserBox player={props.players[bottom]} color={bottom} position="bottom" myTurn={props.myTurn ?? false} />
@@ -310,7 +329,39 @@ export const RoundLayout = (props: RoundLayoutProps) => {
         />
         <div class="rcontrols">{props.controls}</div>
       </div>
-      <div class="round__underboard">{props.under}</div>
+      <div class="round__underboard">
+        {screenReader && shown && (
+          <BlindPanel
+            key={props.gameKey ?? (props.positions[0] ? toFen(props.positions[0]) : '')}
+            position={shown}
+            legal={props.board.moves ?? []}
+            onMove={props.board.onMove ?? undefined}
+            positions={props.positions}
+            moves={props.moves}
+            live={props.ply === null}
+            onLive={() => props.onPly(null)}
+            ply={props.ply}
+            navigation={{
+              prev: () => props.onPly(Math.max(0, (props.ply ?? props.moves.length) - 1)),
+              next: () => {
+                const next = (props.ply ?? props.moves.length) + 1;
+                props.onPly(next >= props.moves.length ? null : next);
+              },
+              first: () => props.onPly(0),
+              end: () => props.onPly(null),
+            }}
+            orientation={props.orientation}
+            goal={props.goal}
+            timeInfo={props.timeInfo}
+            names={{ white: props.players.white.name, black: props.players.black.name }}
+            clocks={props.clocks}
+            result={props.result}
+            notice={props.notice}
+            commands={props.commands}
+          />
+        )}
+        {props.under}
+      </div>
     </main>
   );
 };

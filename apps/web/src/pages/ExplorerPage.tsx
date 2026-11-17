@@ -2,12 +2,15 @@ import { initialPosition, legalMoves, parseMove, toFen, type Move, type Position
 import { EXPLORER_BANDS, EXPLORER_MODES, type ExplorerBand, type ExplorerMode, type ExplorerStats, type ExplorerView } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { Checkbox, Field, OptionCards, Select } from '../components/ui.tsx';
 import { formatDate, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { useMoveText } from '../notation.ts';
+import { prefs } from '../prefs.ts';
 import { replayFrom } from '../replay.ts';
+import { useStore } from '../store.ts';
 
 const percent = (part: number, whole: number) => (whole === 0 ? 0 : Math.round((part / whole) * 100));
 
@@ -73,6 +76,8 @@ export const ExplorerPage = () => {
     };
   }, [mode, band, rated, fen]);
 
+  const { screenReader } = useStore(prefs);
+  const hidden = screenReader ? 'true' : undefined;
   const boardMoves = useMemo(() => (inDraft ? legalMoves(position) : []), [position]);
   const go = (move: Move) => setPath([...path, move]);
   const changeMode = (next: ExplorerMode) => {
@@ -99,9 +104,10 @@ export const ExplorerPage = () => {
               </button>
             ))}
           </nav>
-          <div class="ligungi-lesson__hand" ref={top} />
+          <div class="ligungi-lesson__hand" ref={top} aria-hidden={hidden} />
           {hands && (
-            <BoardView
+            <div aria-hidden={hidden}>
+              <BoardView
               position={position}
               orientation="white"
               movableColor={inDraft ? position.turn : null}
@@ -109,9 +115,10 @@ export const ExplorerPage = () => {
               lastMove={path[path.length - 1] ?? null}
               handElements={hands}
               onMove={go}
-            />
+              />
+            </div>
           )}
-          <div class="ligungi-lesson__hand" ref={bottom} />
+          <div class="ligungi-lesson__hand" ref={bottom} aria-hidden={hidden} />
         </div>
         <section class="ligungi-card ligungi-explorer__panel">
           <div class="form3 ligungi-explorer__filters">
@@ -179,6 +186,19 @@ export const ExplorerPage = () => {
           )}
         </section>
       </div>
+      {screenReader && (
+        <BlindPanel
+          key={mode}
+          title={t.blind.boardTitle}
+          position={position}
+          legal={boardMoves}
+          onMove={go}
+          positions={replay.positions}
+          moves={path}
+          navigation={{ prev: () => setPath(path.slice(0, -1)), first: () => setPath([]) }}
+          notice={inDraft ? null : t.explorer.draftOver}
+        />
+      )}
     </main>
   );
 };

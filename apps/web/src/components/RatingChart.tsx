@@ -73,6 +73,19 @@ export const RatingChart = ({
           );
         })}
       </svg>
+      <details class="ligungi-dist__table">
+        <summary>{t.players.bandsList}</summary>
+        <ul>
+          {columns
+            .filter((column) => column.players > 0 || column.from === yourBand)
+            .map((column) => (
+              <li key={column.from}>
+                {t.players.band(column.from, column.from + RATING_BAND - 1, column.players)}
+                {column.from === yourBand ? ` (${t.players.you})` : ''}
+              </li>
+            ))}
+        </ul>
+      </details>
     </figure>
   );
 };

@@ -11,7 +11,10 @@ import {
 } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { prefs } from '../prefs.ts';
+import { useStore } from '../store.ts';
 import { useT } from '../i18n/index.ts';
+import { BlindPanel } from './BlindPanel.tsx';
 import { BoardView } from './BoardView.tsx';
 import { Checkbox, OptionCards } from './ui.tsx';
 
@@ -63,6 +66,9 @@ export const PieceTrainer = ({
   const [enemies, setEnemies] = useState(false);
   const [position, setPosition] = useState(() => setup(role, 1, false));
   const [lastMove, setLastMove] = useState<Move | null>(null);
+  const { screenReader } = useStore(prefs);
+  // The moves since the last setup, for the screen reader mode's announcements.
+  const [history, setHistory] = useState<{ positions: Position[]; moves: Move[] }>(() => ({ positions: [setup(role, 1, false)], moves: [] }));
   const [hands, setHands] = useState<{ top: HTMLElement; bottom: HTMLElement } | null>(null);
   const top = useRef<HTMLDivElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
@@ -71,10 +77,21 @@ export const PieceTrainer = ({
     if (top.current && bottom.current) setHands({ top: top.current, bottom: bottom.current });
   }, []);
 
-  useEffect(() => {
-    setPosition(setup(role, level, enemies));
+  const reset = () => {
+    const start = setup(role, level, enemies);
+    setPosition(start);
+    setHistory({ positions: [start], moves: [] });
     setLastMove(null);
-  }, [role, level, enemies]);
+  };
+
+  useEffect(reset, [role, level, enemies]);
+
+  const play = (move: Move) => {
+    const after = { ...applyMove(position, move), turn: 'white' as const };
+    setLastMove(move);
+    setPosition(after);
+    setHistory((h) => ({ positions: [...h.positions, after], moves: [...h.moves, move] }));
+  };
 
   const moves = useMemo(() => legalMoves(position).filter((m) => m.kind === 'move'), [position]);
 
@@ -92,11 +109,11 @@ export const PieceTrainer = ({
           onChange={setLevel}
         />
         <Checkbox id="trainer-enemies" checked={enemies} onChange={setEnemies} label={t.trainer.enemies} />
-        <button type="button" class="button button-empty" onClick={() => (setPosition(setup(role, level, enemies)), setLastMove(null))}>
+        <button type="button" class="button button-empty" onClick={reset}>
           {t.trainer.restart}
         </button>
       </div>
-      <div class="ligungi-trainer__board">
+      <div class="ligungi-trainer__board" aria-hidden={screenReader ? 'true' : undefined}>
         {hands && (
           <BoardView
             position={position}
@@ -105,16 +122,26 @@ export const PieceTrainer = ({
             moves={moves}
             lastMove={lastMove}
             handElements={hands}
-            onMove={(move) => {
-              setLastMove(move);
-              setPosition({ ...applyMove(position, move), turn: 'white' });
-            }}
+            onMove={play}
           />
         )}
         <div hidden ref={top} />
         <div hidden ref={bottom} />
         <p class="ligungi-trainer__hint">{t.trainer.hint}</p>
       </div>
+      {screenReader && (
+        <BlindPanel
+          key={`${role}-${level}-${enemies}`}
+          title={t.blind.boardTitle}
+          position={position}
+          legal={moves}
+          onMove={play}
+          positions={history.positions}
+          moves={history.moves}
+          goal={t.trainer.hint}
+          autoFocus={false}
+        />
+      )}
       {children !== undefined && <div class="ligungi-trainer__extra">{children}</div>}
     </div>
   );

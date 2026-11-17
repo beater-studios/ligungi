@@ -64,6 +64,8 @@ export interface Prefs {
   readonly zoom: number;
   /** Mark the squares a hovered piece could reach. */
   readonly hoverReach: boolean;
+  /** Game pages add a text version of the board: announced moves and a field for typed moves and questions. */
+  readonly screenReader: boolean;
 }
 
 const KEY = 'ligungi.prefs';
@@ -89,6 +91,7 @@ const DEFAULTS: Prefs = {
   zoom: 80,
   hoverReach: true,
   byoyomiVoice: false,
+  screenReader: false,
 };
 
 const validCustomBoard = (value: unknown): CustomBoard => {
@@ -130,6 +133,7 @@ const load = (): Prefs => {
       hidePieces: stored.hidePieces === true,
       peekPieces: stored.peekPieces === true,
       byoyomiVoice: stored.byoyomiVoice === true,
+      screenReader: stored.screenReader === true,
       notation:
         stored.notation === 'rulebook' || stored.notation === 'named' || stored.notation === 'machine'
           ? stored.notation

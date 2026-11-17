@@ -2,8 +2,10 @@ import { useEffect, useState } from 'preact/hooks';
 import { ApiError } from '../api.ts';
 import { Field, SubmitButton } from '../components/ui.tsx';
 import { asSentence, formatDate, useT } from '../i18n/index.ts';
+import { prefs, updatePrefs } from '../prefs.ts';
 import { navigate } from '../router.ts';
 import { login } from '../session.ts';
+import { useStore } from '../store.ts';
 
 export const AuthPage = ({ signup }: { signup: boolean }) => {
   const t = useT();
@@ -14,6 +16,7 @@ export const AuthPage = ({ signup }: { signup: boolean }) => {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { screenReader } = useStore(prefs);
 
   // Switching between signing in and signing up keeps what was typed but not the other form's error.
   useEffect(() => setError(null), [signup]);
@@ -54,6 +57,13 @@ export const AuthPage = ({ signup }: { signup: boolean }) => {
 
   return (
     <main class={`ligungi-page ligungi-auth${signup ? ' ligungi-auth--signup' : ''}`}>
+      {/* First on the page, where a screen reader meets it before anything else, as on lichess. */}
+      <p class="ligungi-auth__a11y">
+        {screenReader ? t.blind.isOn : t.blind.authPrompt}{' '}
+        <button type="button" class="ligungi-link-button" onClick={() => updatePrefs({ screenReader: !screenReader })}>
+          {screenReader ? t.blind.turnOff : t.blind.turnOn}
+        </button>
+      </p>
       {pitch}
       <section class="ligungi-card ligungi-auth__card">
         <nav class="ligungi-segmented ligungi-auth__tabs" aria-label={t.auth.tabs}>

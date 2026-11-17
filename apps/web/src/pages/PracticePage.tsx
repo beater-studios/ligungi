@@ -171,6 +171,10 @@ const PracticeGame = ({ practice, record }: { practice: PracticePosition; record
       analysisHref={`/analysis?fen=${encodeURIComponent(toFen(position))}`}
       myTurn={myTurn}
       status={status}
+      gameKey={practice.id}
+      goal={`${t.practice.positions[practice.id as keyof typeof t.practice.positions]}. ${goalText(t, practice.goal)}`}
+      result={result === 'won' || result === 'failed' ? status : null}
+      timeInfo={`${t.practice.movesUsed(playerMoves, practice.goal.moves)}.`}
       controls={
         <div class="follow-up">
           {result === 'won' && next && (

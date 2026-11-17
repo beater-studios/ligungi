@@ -13,6 +13,7 @@ import {
   positionProblems,
   toFen,
   toRulebook,
+  topOf,
   type Color,
   type Mode,
   type Piece,
@@ -22,13 +23,19 @@ import {
   type Square,
 } from '@ligungi/engine';
 import { useEffect, useState } from 'preact/hooks';
+import { isWord, normalize, readPieceWords, squareText } from '../blind.ts';
+import { BlindPanel } from '../components/BlindPanel.tsx';
 import { PieceGlyph } from '../components/PieceGlyph.tsx';
 import { Field, OptionCards, Select } from '../components/ui.tsx';
 import { usePieceNames, useT, type Messages } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
+import { prefs } from '../prefs.ts';
 import { navigate, useLocation } from '../router.ts';
+import { useStore } from '../store.ts';
 
 type Tool = { readonly kind: 'piece'; readonly piece: Piece } | { readonly kind: 'erase' };
+
+const NO_MOVES: readonly never[] = [];
 
 /** The editor only makes positions in the play phase: a draft is set up by playing it. */
 const asPlay = (position: Position): Position => ({ ...position, phase: 'play', freeDraft: false, draftDone: { white: true, black: true } });
@@ -95,6 +102,7 @@ export const EditorPage = () => {
   const [fenInput, setFenInput] = useState('');
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   useEffect(() => setPosition(fromSearch(search)), [search]);
+  const { screenReader } = useStore(prefs);
 
   const problems = positionProblems(position);
   const fen = toFen(position);
@@ -116,6 +124,46 @@ export const EditorPage = () => {
       ...position,
       hands: { ...position.hands, [color]: { ...position.hands[color], [role]: Math.max(0, position.hands[color][role] + delta) } },
     });
+  /** Typed commands of the screen reader mode: pieces placed on or taken off the board and the hands, the turn. */
+  const editorCommand = (text: string): string | null => {
+    const b = t.blind;
+    const words = normalize(text).split(' ');
+    const first = words[0] ?? '';
+    const speaker = { t, names };
+    if (words.length === 1 && isWord(speaker, 'clear', first)) {
+      setPosition({ ...position, board: emptyBoard() });
+      return b.boardCleared;
+    }
+    if (words.length > 1 && isWord(speaker, 'turn', first)) {
+      const { color } = readPieceWords(words.slice(1).join(' '));
+      if (!color) return b.unreadable;
+      setPosition({ ...position, turn: color });
+      return b.turn(color, false);
+    }
+    const removing = isWord(speaker, 'remove', first);
+    const body = removing ? words.slice(1) : words;
+    const toHand = body.length > 1 && isWord(speaker, 'hands', body[0]!);
+    const { role, color, squares, rest } = readPieceWords((toHand ? body.slice(1) : body).join(' '));
+    if (rest.length || (!removing && !toHand && squares.length === 0)) return null;
+    const pieceText = (piece: Piece) => b.piece(pieceName(piece.role, names), piece.color);
+    if (toHand) {
+      if (!role || !color || squares.length) return b.unreadable;
+      if (removing && position.hands[color][role] === 0) return b.emptyHand(color);
+      changeHand(color, role, removing ? -1 : 1);
+      return (removing ? b.removed : b.placed)(`${pieceText({ role, color })}, ${b.handOf(color)}`);
+    }
+    if (squares.length !== 1) return b.unreadable;
+    const square = squares[0]!;
+    if (removing) {
+      const top = topOf(position.board[square]!);
+      if (!top) return b.emptySquare(squareText(square));
+      setTower(square, (tower) => tower.slice(0, -1));
+      return b.removed(b.onSquare(pieceText(top), squareText(square)));
+    }
+    if (!role || !color) return b.unreadable;
+    setTower(square, (tower) => [...tower, { role, color }]);
+    return b.placed(b.onSquare(pieceText({ role, color }), squareText(square)));
+  };
   const onBoard = (color: Color, role: Role) =>
     position.board.reduce((sum, tower) => sum + tower.filter((piece) => piece.color === color && piece.role === role).length, 0);
 
@@ -319,6 +367,18 @@ export const EditorPage = () => {
           </section>
         </div>
       </div>
+      {screenReader && (
+        <BlindPanel
+          title={t.blind.boardTitle}
+          position={position}
+          legal={NO_MOVES}
+          positions={NO_MOVES}
+          moves={NO_MOVES}
+          notice={problems.length ? problems.map((problem) => problemText(t, names, problem)).join(' ') : t.editor.valid}
+          onCommand={editorCommand}
+          help={t.blind.editorHelp}
+        />
+      )}
     </main>
   );
 };

@@ -18,14 +18,17 @@ import {
 } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { DraftPanel, TowerPanel } from '../components/Panels.tsx';
 import { ReportButton } from '../components/ReportButton.tsx';
 import { ChapterSettingsModal, NewChapterModal, StudySettingsModal } from '../components/StudyForms.tsx';
 import { StudyMoves } from '../components/StudyMoves.tsx';
 import { Field, Toggle } from '../components/ui.tsx';
-import { errorText, timeAgo, useT } from '../i18n/index.ts';
+import { describeMove, describeShapes, isWord, normalize, parseDrawing, type Speaker } from '../blind.ts';
+import { errorText, timeAgo, usePieceNames, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
+import { prefs } from '../prefs.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
@@ -34,6 +37,9 @@ import { addMove, deleteAt, lineEnd, nodeAt, positionAt, promote, updateAt, type
 /** The editor saves on its own this long after the last change. */
 const SAVE_DELAY_MS = 800;
 const NOTICE_MS = 4000;
+
+/** The study reads each move through `where`, so the screen reader mode gets no move list to announce. */
+const NO_MOVES: readonly never[] = [];
 
 const toStudyShape = (shape: Shape, color: ShapeColor): StudyShape =>
   shape.kind === 'arrow' ? { kind: 'arrow', from: shape.from, to: shape.to, color } : { kind: 'square', square: shape.square, color };
@@ -104,6 +110,8 @@ export const StudyPage = ({ id }: { id: string }) => {
   const topHand = useRef<HTMLDivElement>(null);
   const bottomHand = useRef<HTMLDivElement>(null);
   const pending = useRef<Pending | null>(null);
+  const { screenReader } = useStore(prefs);
+  const speaker: Speaker = { t, names: usePieceNames() };
   const saving = useRef(false);
   const timer = useRef<number | undefined>(undefined);
 
@@ -216,6 +224,47 @@ export const StudyPage = ({ id }: { id: string }) => {
     const shapes = toggleShape(node.shapes, toStudyShape(shape, color));
     if (shapes === 'limit') return setNotice(t.study.limit(STUDY_ARROWS_MAX, STUDY_SQUARES_MAX));
     edit(updateAt(tree, path, (n) => ({ ...n, shapes })));
+  };
+
+  // Read when the player moves to another point of the chapter, not on every key of a comment being written.
+  const where = useMemo(() => {
+    if (!start || !tree || !node || !position) return null;
+    const parts: string[] = [];
+    const move = path.length ? parseMove((node as StudyNode).move) : undefined;
+    parts.push(move ? t.blind.atMove(path.length, describeMove(speaker, positionAt(start, tree, path.slice(0, -1)), move)) : t.blind.atStart);
+    if (node.comment) parts.push(t.blind.comment(node.comment));
+    if (node.shapes.length) parts.push(t.blind.drawings(describeShapes(speaker, node.shapes)));
+    if (node.children.length > 1) {
+      const options = node.children.map((child, index) => t.blind.option(index + 1, describeMove(speaker, position, parseMove(child.move)!)));
+      parts.push(t.blind.variations(t.blind.list(options)));
+    }
+    return parts.join(' ');
+  }, [path.join('.'), chapter?.id, tree !== null]);
+
+  /** The study's own typed commands: reading and drawing the shapes, entering a variation. */
+  const studyCommand = (text: string): string | null => {
+    if (!tree || !node) return null;
+    const words = normalize(text).split(' ');
+    const [first = '', second = ''] = words;
+    if (words.length === 1 && isWord(speaker, 'drawings', first)) return node.shapes.length ? t.blind.drawings(describeShapes(speaker, node.shapes)) : t.blind.noDrawings;
+    if (words.length === 2 && isWord(speaker, 'variation', first) && /^\d+$/.test(second)) {
+      const index = Number(second) - 1;
+      if (!node.children[index]) return t.blind.noVariation;
+      setPath([...path, index]);
+      return '';
+    }
+    if (words.length === 1 && isWord(speaker, 'clear', first)) {
+      if (!editable) return t.blind.notAuthor;
+      edit(updateAt(tree, path, (n) => ({ ...n, shapes: [] })));
+      return t.blind.cleared;
+    }
+    const shape = parseDrawing(speaker, text, color);
+    if (!shape) return null;
+    if (!editable) return t.blind.notAuthor;
+    const shapes = toggleShape(node.shapes, shape);
+    if (shapes === 'limit') return t.study.limit(STUDY_ARROWS_MAX, STUDY_SQUARES_MAX);
+    edit(updateAt(tree, path, (n) => ({ ...n, shapes })));
+    return (shapes.length < node.shapes.length ? t.blind.erased : t.blind.drawn)(describeShapes(speaker, [shape]));
   };
 
   useEffect(() => {
@@ -332,7 +381,7 @@ export const StudyPage = ({ id }: { id: string }) => {
           </div>
         )}
       </div>
-      <div class="analyse__board main-board">
+      <div class="analyse__board main-board" aria-hidden={screenReader ? 'true' : undefined}>
         {notice && (
           <p class="ligungi-study__toast" role="status">
             {notice}
@@ -357,8 +406,8 @@ export const StudyPage = ({ id }: { id: string }) => {
           />
         )}
       </div>
-      <div class="pocket is2d pocket-top" ref={topHand} />
-      <div class="pocket is2d pocket-bottom" ref={bottomHand} />
+      <div class="pocket is2d pocket-top" ref={topHand} aria-hidden={screenReader ? 'true' : undefined} />
+      <div class="pocket is2d pocket-bottom" ref={bottomHand} aria-hidden={screenReader ? 'true' : undefined} />
       <div class="analyse__tools">
         <div class="analyse__moves areplay">
           {start && tree && <StudyMoves start={start} root={tree} current={path} onSelect={setPath} empty={editable ? t.study.emptyAuthor : t.study.empty} />}
@@ -441,6 +490,28 @@ export const StudyPage = ({ id }: { id: string }) => {
         </div>
       </div>
       <div class="analyse__underboard">
+        {screenReader && position && tree && (
+          <BlindPanel
+            key={chapter?.id}
+            title={t.blind.boardTitle}
+            position={position}
+            legal={legal}
+            onMove={editable ? onMove : undefined}
+            positions={NO_MOVES}
+            moves={NO_MOVES}
+            where={where}
+            navigation={{
+              prev: () => setPath(path.slice(0, -1)),
+              next: () => node?.children.length && setPath([...path, 0]),
+              first: () => setPath([]),
+              end: () => setPath(lineEnd(tree, path)),
+            }}
+            orientation={orientation}
+            notice={notice}
+            onCommand={studyCommand}
+            help={t.blind.studyHelp}
+          />
+        )}
         {study && position && (
           <div class="ligungi-study__under box">
             <div class="ligungi-study__actions">

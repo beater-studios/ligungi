@@ -112,6 +112,10 @@ const homeData = (t: Messages, lang: Lang): object => ({
       license: LINKS.agpl,
       codeRepository: SOURCE_URL,
       publisher: organization,
+      // schema.org accessibility properties; only what the screen reader mode really offers is claimed.
+      accessibilityAPI: 'ARIA',
+      accessibilitySummary:
+        'The site can be used with a screen reader: a screen reader mode announces every move in words, takes typed moves and questions about the position, and offers a board moved through with the arrow keys, on every screen with a board (games, TV, analysis, studies, the board editor, lessons, puzzles, practice and the coordinate trainer).',
     },
   ],
 });

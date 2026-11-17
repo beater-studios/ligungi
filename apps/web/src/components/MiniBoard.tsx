@@ -8,14 +8,16 @@ interface MiniBoardProps {
   readonly orientation?: Color;
   /** Extra class per square, e.g. movement diagrams. */
   readonly marks?: ReadonlyMap<Square, string>;
+  /** What the board shows, for screen readers; without it the board is decoration beside text that says the same. */
+  readonly label?: string;
 }
 
 /** Static, non-interactive board for lists, TV and diagrams. */
-export const MiniBoard = ({ position, fen, orientation = 'white', marks }: MiniBoardProps) => {
+export const MiniBoard = ({ position, fen, orientation = 'white', marks, label }: MiniBoardProps) => {
   const pos = position ?? (fen ? parseFen(fen) : undefined);
   if (!pos) return null;
   return (
-    <div class="gg-mini gg-palette">
+    <div class="gg-mini gg-palette" {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': 'true' })}>
       {visualOrder(orientation).map((square) => {
         const tower = pos.board[square]!;
         const top = topOf(tower);

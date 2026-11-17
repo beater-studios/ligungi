@@ -144,6 +144,7 @@ export const SettingsPage = () => {
               </div>
             </SettingRow>
             {toggle('byoyomiVoice', s.byoyomiVoice, s.byoyomiVoiceHelp)}
+            {toggle('screenReader', t.blind.setting, t.blind.settingHelp)}
           </Group>
 
           <Group title={s.groupPieces} help={s.groupPiecesHelp} preview={<PiecePreview />}>

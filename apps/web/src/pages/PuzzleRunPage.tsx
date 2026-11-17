@@ -278,6 +278,17 @@ export const PuzzleRunPage = ({ kind }: { kind: PuzzleRunKind }) => {
       onFlip={() => setFlipped((f) => !f)}
       myTurn={solver.yourTurn && !over}
       status={status}
+      gameKey={entry.puzzle.id}
+      goal={over ? null : task}
+      notice={flash?.text ?? null}
+      result={over ? [status, praise, `${t.puzzleRuns.solved}: ${score}.`].filter(Boolean).join(' ') : null}
+      timeInfo={[
+        kind === 'storm' ? `${t.puzzleRuns.timeLeft}: ${formatClock(left)}.` : '',
+        `${t.puzzleRuns.solved}: ${score}.`,
+        kind === 'storm' ? `${t.puzzleRuns.combo}: ${state.combo}.` : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       controls={
         <>
           {!over && (

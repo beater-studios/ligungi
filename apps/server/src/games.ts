@@ -1,4 +1,4 @@
-import { moveToString, opposite, type Color, type Mode, type Outcome } from '@ligungi/engine';
+import { applyMove, initialPosition, moveToString, opposite, parseMove, toFen, type Color, type Mode, type Outcome } from '@ligungi/engine';
 import {
   BOOKMARKS_MAX,
   CROSSTABLE_RECENT,
@@ -597,13 +597,43 @@ export class Games {
   }
 
   /** Summary of a stored game without keeping its room in memory. */
+  /**
+   * The summary of a game not held in memory (a finished one) straight from its row. Its moves were checked when they
+   * were played, so they are applied as stored: rebuilding the room would generate the legal moves again at every ply,
+   * over a second for a few long games, and lists of games (players, profiles, bookmarks) ask for many.
+   */
   #summaryOf(row: GameRow): GameSummary {
     const cached = this.#rooms.get(row.id);
     if (cached) return cached.summary();
-    const room = this.#roomFrom(row);
-    const summary = room.summary();
-    room.dispose();
-    return summary;
+    const moves = row.moves ? row.moves.split(' ') : [];
+    let position = initialPosition(row.mode, row.first_player, { freeDraft: row.free_draft === 1 });
+    for (const text of moves) {
+      const move = parseMove(text);
+      if (!move) throw new Error(`cannot read move ${text} of game ${row.id}`);
+      position = applyMove(position, move);
+    }
+    const player = (color: Color) => {
+      const seat = seatFrom(row, color);
+      return { name: seat.name, rating: seat.rating, ratingDiff: seat.ratingDiff, user: seat.userId ? { id: seat.userId, name: seat.name } : null };
+    };
+    return {
+      id: row.id,
+      mode: row.mode,
+      rated: row.rated === 1,
+      timeControl: timeControlOf(row),
+      players: { white: player('white'), black: player('black') },
+      status: row.status,
+      outcome: rowOutcome(row),
+      plies: moves.length,
+      fen: toFen(position),
+      createdAt: row.created_at,
+      endedAt: row.ended_at,
+      clock: null,
+      daysPerMove: row.days_per_move,
+      deadlineIn: null,
+      turn: null,
+      voided: row.voided === 1,
+    };
   }
 
   /** Stops timers and forgets finished rooms. */

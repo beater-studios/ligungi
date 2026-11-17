@@ -235,6 +235,34 @@ describe('byo-yomi games', () => {
   });
 });
 
+describe('finished game summaries', () => {
+  it('are read from the stored row the same as from a rebuilt room, without replaying the game', () => {
+    const db = openDatabase(':memory:');
+    const users = new Users(db, Date.now);
+    const options = { now: Date.now, abortAfterMs: 60_000, claimAfterMs: 30_000, broadcast: () => {} };
+    const games = new Games(db, users, options);
+    const room = games.create({
+      mode: 'beginner',
+      rated: false,
+      timeControl: { initial: 300, increment: 3 },
+      daysPerMove: null,
+      freeDraft: false,
+      players: { white: { sessionId: 'w', userId: null, name: 'White' }, black: { sessionId: 'b', userId: null, name: 'Black' } },
+    });
+    for (let i = 0; i < 6; i++) {
+      const move = legalMoves(room.game.position).find((m) => m.kind === 'move')!;
+      expect(room.move(room.game.position.turn, moveToString(move), room.plies)).toBeNull();
+    }
+    room.resign('black');
+    const expected = room.summary();
+    // A new store holds no finished room in memory, so the summary comes from the row.
+    const fresh = new Games(db, users, options);
+    expect(fresh.recentlyFinished(1)).toEqual([expected]);
+    expect(fresh.cachedCount).toBe(0);
+    db.close();
+  });
+});
+
 describe('tv channels', () => {
   it('shows the strongest game, keeps it while it is played and moves on a few seconds after it ends', () => {
     let now = 1_000_000;

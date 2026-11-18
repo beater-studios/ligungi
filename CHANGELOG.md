@@ -4,6 +4,14 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- On a phone held upright, tapping a tower shows every piece in it right where you look: by default in a balloon next to the square, or in a strip under the board. Settings > Board > Tower on tap picks one, or keeps only the side panel. On a computer the side panel still shows the hovered tower. It works on games, puzzles, practice, the analysis board and studies.
+
+### Fixed
+
+- On touch screens, a tapped tower no longer disappears as soon as the finger lifts.
+
 ## [0.7.0] - 2026-11-17
 
 ### Added

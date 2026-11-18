@@ -66,7 +66,12 @@ export interface Prefs {
   readonly hoverReach: boolean;
   /** Game pages add a text version of the board: announced moves and a field for typed moves and questions. */
   readonly screenReader: boolean;
+  /** On a phone, what tapping a tower shows: a balloon next to it, a strip under the board, or only the side panel. */
+  readonly towerTap: TowerTap;
 }
+
+export const TOWER_TAPS = ['balloon', 'strip', 'panel'] as const;
+export type TowerTap = (typeof TOWER_TAPS)[number];
 
 const KEY = 'ligungi.prefs';
 const DEFAULTS: Prefs = {
@@ -92,6 +97,7 @@ const DEFAULTS: Prefs = {
   hoverReach: true,
   byoyomiVoice: false,
   screenReader: false,
+  towerTap: 'balloon',
 };
 
 const validCustomBoard = (value: unknown): CustomBoard => {
@@ -134,6 +140,7 @@ const load = (): Prefs => {
       peekPieces: stored.peekPieces === true,
       byoyomiVoice: stored.byoyomiVoice === true,
       screenReader: stored.screenReader === true,
+      towerTap: oneOf(TOWER_TAPS, stored.towerTap, DEFAULTS.towerTap),
       notation:
         stored.notation === 'rulebook' || stored.notation === 'named' || stored.notation === 'machine'
           ? stored.notation

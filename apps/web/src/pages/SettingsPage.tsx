@@ -7,7 +7,7 @@ import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../p
 import { ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
 import { MESSAGES, themeLabel, useT } from '../i18n/index.ts';
 import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../looks.tsx';
-import { BOARD_SIZES, BOARD_THEMES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, prefs, updatePrefs, type Prefs } from '../prefs.ts';
+import { BOARD_SIZES, BOARD_THEMES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs } from '../prefs.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
 import { SettingsShell } from './AccountPage.tsx';
@@ -270,6 +270,7 @@ export const SettingsPage = () => {
                 ),
               },
             )}
+            {choice('towerTap', s.towerTap, TOWER_TAPS.map((value) => [value, s.towerTaps[value]]), { help: s.towerTapHelp })}
             {toggle('hoverReach', s.hoverReach, s.hoverReachHelp)}
             {toggle('animation', s.animation, s.animationHelp)}
             {toggle('hidePieces', s.hidePieces, s.hidePiecesHelp)}

@@ -20,7 +20,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
-import { DraftPanel, TowerPanel } from '../components/Panels.tsx';
+import { DraftPanel, TowerPanel, TowerStrip } from '../components/Panels.tsx';
 import { ReportButton } from '../components/ReportButton.tsx';
 import { ChapterSettingsModal, NewChapterModal, StudySettingsModal } from '../components/StudyForms.tsx';
 import { StudyMoves } from '../components/StudyMoves.tsx';
@@ -32,6 +32,7 @@ import { prefs } from '../prefs.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
+import { useTowerTap } from '../towerTap.ts';
 import { addMove, deleteAt, lineEnd, nodeAt, positionAt, promote, updateAt, type Path } from '../studyTree.ts';
 
 /** The editor saves on its own this long after the last change. */
@@ -111,6 +112,7 @@ export const StudyPage = ({ id }: { id: string }) => {
   const bottomHand = useRef<HTMLDivElement>(null);
   const pending = useRef<Pending | null>(null);
   const { screenReader } = useStore(prefs);
+  const tap = useTowerTap(true);
   const speaker: Speaker = { t, names: usePieceNames() };
   const saving = useRef(false);
   const timer = useRef<number | undefined>(undefined);
@@ -314,7 +316,7 @@ export const StudyPage = ({ id }: { id: string }) => {
   };
 
   return (
-    <main class="analyse variant-crazyhouse ligungi-study">
+    <main class={`analyse variant-crazyhouse ligungi-study${tap.strip ? ' ligungi-has-strip' : ''}`}>
       <div class="analyse__side">
         {study && (
           <div class="game__meta ligungi-study__meta">
@@ -397,7 +399,8 @@ export const StudyPage = ({ id }: { id: string }) => {
             lastMove={lastMove}
             onMove={onMove}
             handElements={hands}
-            inspector={false}
+            inspector={tap.balloon}
+            inspectSelection={tap.balloon}
             onInspect={setInspected}
             shapes={node?.shapes ?? []}
             onDraw={editable ? onDraw : null}
@@ -406,6 +409,7 @@ export const StudyPage = ({ id }: { id: string }) => {
           />
         )}
       </div>
+      {tap.strip && position && <TowerStrip position={position} square={inspected} />}
       <div class="pocket is2d pocket-top" ref={topHand} aria-hidden={screenReader ? 'true' : undefined} />
       <div class="pocket is2d pocket-bottom" ref={bottomHand} aria-hidden={screenReader ? 'true' : undefined} />
       <div class="analyse__tools">

@@ -2,6 +2,7 @@ import { initialPosition, parseFen, parseSquare } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { FeedList } from '../components/Activity.tsx';
+import { TowerStrip } from '../components/Panels.tsx';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { CrosstableView } from '../components/Crosstable.tsx';
@@ -834,6 +835,15 @@ export const DesignPage = () => {
                 <span class="ligungi-study__count">Arrows 1 of 2 · Squares 2 of 4</span>
               </div>
               <p class="ligungi-study__comment">A comment on the current move, as readers see it under the board.</p>
+            </div>
+          </Example>
+          <Example label="Tower on tap, on a phone (the towerTap preference): the strip under the board (TowerStrip, .ligungi-tower-strip), empty and with a tower. The balloon choice is the board's own floating panel (inspector and inspectSelection)">
+            <div style={{ display: 'grid', gap: '0.75rem', width: '100%', maxWidth: '24rem' }}>
+              <TowerStrip position={initialPosition('intro')} square={null} />
+              <TowerStrip
+                position={parseFen('4m4/9/9/9/4(Psp)4/9/9/9/4M4 w - advanced p w')}
+                square={parseSquare('e5')!}
+              />
             </div>
           </Example>
           <Example label="Activity (.ligungi-activity, one day of the profile's last 30) and the feed of followed players (FeedList, home and friends page)">

@@ -52,6 +52,11 @@ export interface Config {
   /** Shows the floating tower panel next to hovered towers. */
   inspector: boolean;
   /**
+   * The floating panel also shows the tower of the selected piece, not only of a tower that cannot be moved: on a
+   * touch screen, where nothing is hovered, tapping an own tower selects it.
+   */
+  inspectSelection: boolean;
+  /**
    * Called with the square whose tower the user is looking at (hovered, tapped or selected), or
    * null. Lets the page show the tower in a fixed panel instead of the floating one.
    */

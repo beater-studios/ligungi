@@ -136,6 +136,30 @@ describe('Gungiground', () => {
     expect([...inspector.querySelectorAll('.gg-level')].map((n) => n.textContent)).toEqual(['nível 2', 'nível 1']);
   });
 
+  it('shows the tower of the selected piece only when asked to, for touch screens', () => {
+    mount(build({ e5: 'pP' }, { turn: 'white' }), { movableColor: 'white' });
+    click('e5');
+    expect(squareEl('e5').classList.contains('gg-selected')).toBe(true);
+    expect(root.querySelector('.gg-inspector')!.hasAttribute('hidden')).toBe(true);
+    api!.set({ inspectSelection: true });
+    expect(root.querySelector('.gg-inspector')!.hasAttribute('hidden')).toBe(false);
+    expect([...root.querySelectorAll('.gg-inspector .gg-name')].map((n) => n.textContent)).toEqual(['Soldado', 'Soldado']);
+  });
+
+  it('keeps a tapped tower shown when the finger lifts, and drops it when the mouse leaves the board', () => {
+    mount(build({ e5: 'Pp' }, { turn: 'white' }), { movableColor: 'white' });
+    click('e5');
+    const leave = (pointerType: string) => {
+      const event = new MouseEvent('pointerleave');
+      Object.defineProperty(event, 'pointerType', { value: pointerType });
+      root.querySelector('.gg-board')!.dispatchEvent(event);
+    };
+    leave('touch');
+    expect(root.querySelector('.gg-inspector')!.hasAttribute('hidden')).toBe(false);
+    leave('mouse');
+    expect(root.querySelector('.gg-inspector')!.hasAttribute('hidden')).toBe(true);
+  });
+
   it('uses Japanese names when configured', () => {
     mount(build({ e5: 'Pp' }), { movableColor: null, pieceNames: 'ja' });
     click('e5');

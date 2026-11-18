@@ -55,6 +55,7 @@ const DEFAULTS: Config = {
   animation: true,
   handElements: null,
   inspector: true,
+  inspectSelection: false,
   onInspect: null,
   hoverReach: false,
   targets: [],
@@ -262,7 +263,11 @@ export class Board implements Api {
     };
     on(this.#board, 'pointerdown', (event) => this.#onBoardDown(event));
     on(this.#board, 'pointerover', (event) => this.#onHover(event));
-    on(this.#board, 'pointerleave', () => this.#setHover(null));
+    // A finger lifting off the screen also fires pointerleave: only the mouse leaving clears the tower looked at, or a
+    // tapped tower would be dropped as soon as it was shown.
+    on(this.#board, 'pointerleave', (event) => {
+      if (event.pointerType === 'mouse') this.#setHover(null);
+    });
     on(this.#board, 'contextmenu', (event) => event.preventDefault());
     for (const hand of Object.values(this.#hands)) on(hand, 'pointerdown', (event) => this.#onHandDown(event));
     on(this.#chooserEl, 'pointerdown', (event) => this.#onChooserDown(event));
@@ -733,7 +738,8 @@ export class Board implements Api {
   #renderInspector(): void {
     this.#notifyInspect();
     this.#renderReach();
-    const square = this.#chooser ? null : this.#inspected;
+    const selected = this.#config.inspectSelection && this.#selection?.kind === 'square' ? this.#selection.square : null;
+    const square = this.#chooser || this.#drag?.ghost ? null : (this.#inspected ?? selected);
     const tower = square === null ? [] : this.#config.position.board[square]!;
     const node = this.#inspectorEl;
     if (!this.#config.inspector || square === null || tower.length < 2) {

@@ -17,7 +17,7 @@ import { api } from '../api.ts';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { ImportGame } from '../components/ImportGame.tsx';
-import { DraftPanel, TowerPanel } from '../components/Panels.tsx';
+import { DraftPanel, TowerPanel, TowerStrip } from '../components/Panels.tsx';
 import { Select } from '../components/ui.tsx';
 import { outcomeText, useT } from '../i18n/index.ts';
 import { useMoveText } from '../notation.ts';
@@ -26,6 +26,7 @@ import { useLocalGame } from '../localGame.ts';
 import { prefs } from '../prefs.ts';
 import { navigate, useLocation } from '../router.ts';
 import { useStore } from '../store.ts';
+import { useTowerTap } from '../towerTap.ts';
 
 export const AnalysisPage = () => {
   const t = useT();
@@ -44,6 +45,7 @@ export const AnalysisPage = () => {
   const [importing, setImporting] = useState(false);
   const { screenReader } = useStore(prefs);
   const hidden = screenReader ? 'true' : undefined;
+  const tap = useTowerTap(true);
 
   useEffect(() => {
     if (topHand.current && bottomHand.current) setHands({ top: topHand.current, bottom: bottomHand.current });
@@ -143,7 +145,7 @@ export const AnalysisPage = () => {
     : t.turnStatus(position.phase === 'draft', position.turn, null);
 
   return (
-    <main class="analyse variant-crazyhouse">
+    <main class={`analyse variant-crazyhouse${tap.strip ? ' ligungi-has-strip' : ''}`}>
       <div class="analyse__side">
         <div class="game__meta">
           <section>
@@ -179,11 +181,13 @@ export const AnalysisPage = () => {
             lastMove={local.lastMove}
             onMove={local.play}
             handElements={hands}
-            inspector={false}
+            inspector={tap.balloon}
+            inspectSelection={tap.balloon}
             onInspect={setInspected}
           />
         )}
       </div>
+      {tap.strip && <TowerStrip position={position} square={inspected} />}
       <div class="pocket is2d pocket-top" ref={topHand} aria-hidden={hidden} />
       <div class="pocket is2d pocket-bottom" ref={bottomHand} aria-hidden={hidden} />
       <div class="analyse__tools">

@@ -43,6 +43,42 @@ export const TowerPanel = ({ position, square, training = false }: { position: P
   );
 };
 
+/** The tapped tower in a strip under the board, top piece first, for phones (the `strip` choice of `towerTap`). */
+export const TowerStrip = ({ position, square }: { position: Position; square: Square | null }) => {
+  const t = useT();
+  const pieceNames = usePieceNames();
+  const tower = square === null ? [] : position.board[square]!;
+  return (
+    <section class="ligungi-tower-strip gg-palette" aria-live="polite">
+      {tower.length === 0 ? (
+        <p class="ligungi-tower-strip__hint">{t.panels.stripHint}</p>
+      ) : (
+        <>
+          <h3>{tower.length > 1 ? t.panels.tower(tower.length) : t.panels.piece}</h3>
+          <ol>
+            {[...tower]
+              .map((piece, level) => ({ piece, level }))
+              .reverse()
+              .map(({ piece, level }) => (
+                <li key={level}>
+                  <span class={`gg-mini-piece ${piece.color}`}>
+                    <PieceGlyph role={piece.role} />
+                  </span>
+                  <span class="ligungi-tower-strip__name">
+                    {pieceName(piece.role, pieceNames)}
+                    <small>
+                      {t.colors[piece.color]} · {t.panels.level(level + 1)}
+                    </small>
+                  </span>
+                </li>
+              ))}
+          </ol>
+        </>
+      )}
+    </section>
+  );
+};
+
 /** Draft progress: pieces placed, pieces left in hand and who declared done. */
 export const DraftPanel = ({ position, names }: { position: Position; names: Readonly<Record<Color, string>> }) => {
   const t = useT();

@@ -11,7 +11,8 @@ import { playSound, speak } from '../sound.ts';
 import { BeginnerHint } from './BeginnerHint.tsx';
 import { BlindPanel, type BlindCommands } from './BlindPanel.tsx';
 import { BoardView, type BoardProps } from './BoardView.tsx';
-import { DraftPanel, TowerPanel } from './Panels.tsx';
+import { DraftPanel, TowerPanel, TowerStrip } from './Panels.tsx';
+import { useTowerTap } from '../towerTap.ts';
 
 export interface RoundPlayer {
   readonly name: string;
@@ -282,6 +283,7 @@ export const RoundLayout = (props: RoundLayoutProps) => {
   const bottom: Color = props.orientation;
   const { screenReader } = useStore(prefs);
   const shown = props.board.position;
+  const tap = useTowerTap(props.training ?? false);
 
   return (
     <main class="round">
@@ -298,7 +300,7 @@ export const RoundLayout = (props: RoundLayoutProps) => {
           {props.board.position && <TowerPanel position={props.board.position} square={inspected} training={props.training ?? false} />}
         </div>
       </aside>
-      <div class="round__app variant-standard">
+      <div class={`round__app variant-standard${tap.strip ? ' ligungi-has-strip' : ''}`}>
         <div class="round__app__board main-board" aria-hidden={screenReader ? 'true' : undefined}>
           {hands && (
             <BoardView
@@ -306,11 +308,13 @@ export const RoundLayout = (props: RoundLayoutProps) => {
               training={props.training ?? false}
               orientation={props.orientation}
               handElements={hands}
-              inspector={false}
+              inspector={tap.balloon}
+              inspectSelection={tap.balloon}
               onInspect={setInspected}
             />
           )}
         </div>
+        {tap.strip && shown && <TowerStrip position={shown} square={inspected} />}
         <div class="pocket is2d pocket-top" ref={topHand} aria-hidden={screenReader ? 'true' : undefined} />
         <div class="pocket is2d pocket-bottom" ref={bottomHand} aria-hidden={screenReader ? 'true' : undefined} />
         <div class="round__app__table" />

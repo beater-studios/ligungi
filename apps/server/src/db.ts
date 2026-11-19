@@ -285,6 +285,20 @@ const MIGRATIONS = [
   create index study_chapters_study on study_chapters(study_id, position);
   alter table reports add column study_id text;
   `,
+  `
+  alter table users add column follow_policy text not null default 'everyone';
+  create table notices (
+    id integer primary key autoincrement,
+    user_id text not null references users(id) on delete cascade,
+    kind text not null,
+    actor_id text references users(id) on delete cascade,
+    subject text,
+    ref text,
+    created_at integer not null,
+    read_at integer
+  );
+  create index notices_user on notices(user_id, id);
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

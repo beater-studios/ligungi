@@ -37,6 +37,10 @@ import {
   type Topic,
   type UserProfile,
   CHALLENGE_POLICIES,
+  FOLLOW_POLICIES,
+  NOTICES_KEPT,
+  type NoticeKind,
+  type NoticeView,
   ONLINE_LIST_MAX,
   RANKING_PAGE_SIZE,
   RANKING_QUERY_MAX,
@@ -116,6 +120,7 @@ import {
 import { Hub, type Client } from './hub.ts';
 import { Lobby } from './lobby.ts';
 import { Moderation } from './moderation.ts';
+import { Notices, type NoticeDetails } from './notices.ts';
 import { PUZZLE_COUNT, PuzzleStore, isPuzzle } from './puzzles.ts';
 import type { GameRoom } from './room.ts';
 import { SeekStore } from './seeks.ts';
@@ -174,6 +179,7 @@ export const createApp = (config: ServerConfig): App => {
   const twoFactor = new TwoFactor(db, config.now);
   const moderation = new Moderation(db, config.now);
   const users = new Users(db, config.now);
+  const notices = new Notices(db, config.now);
   const hub = new Hub();
   const authLimiter = new RateLimiter(10, 60_000, config.now);
   /** Failed logins per username, whatever the IP, so a botnet cannot brute-force one account. */
@@ -199,6 +205,20 @@ export const createApp = (config: ServerConfig): App => {
       .filter((room) => room.daysPerMove !== null && room.seats[room.game.position.turn].userId === userId)
       .map((room) => room.summary());
     for (const client of hub.clients()) if (client.player.userId === userId) hub.send(client, { t: 'turns', games: waiting });
+  };
+
+  const sendNotices = (userId: string): void => {
+    let list: NoticeView[] | null = null;
+    for (const client of hub.clients()) {
+      if (client.player.userId !== userId) continue;
+      list ??= notices.list(userId);
+      hub.send(client, { t: 'notices', notices: list });
+    }
+  };
+
+  /** Records a notice for the bell and shows it at once wherever the player is connected. */
+  const notice = (userId: string, kind: NoticeKind, details?: NoticeDetails): void => {
+    if (notices.add(userId, kind, details)) sendNotices(userId);
   };
 
   const publishGame = (room: GameRoom) => {
@@ -795,6 +815,7 @@ export const createApp = (config: ServerConfig): App => {
       const hide = hidden !== false;
       studies.setHidden(study.id, hide);
       moderation.log(hide ? 'hideStudy' : 'unhideStudy', moderator.name, { id: study.ownerId, name: study.ownerName }, `${study.title} (${study.id}) · ${text}`);
+      if (hide !== study.hidden) notice(study.ownerId, hide ? 'studyHidden' : 'studyRestored', { subject: study.title, ref: study.id });
       sendJson(ctx.res, 200, { ok: true });
     })
     .add('POST', '/api/mod/studies/:id/delete', async (ctx) => {
@@ -805,6 +826,7 @@ export const createApp = (config: ServerConfig): App => {
       const text = reasonOf(reason);
       studies.delete(study.id);
       moderation.log('deleteStudy', moderator.name, { id: study.ownerId, name: study.ownerName }, `${study.title} (${study.id}) · ${text}`);
+      notice(study.ownerId, 'studyDeleted', { subject: study.title });
       sendJson(ctx.res, 200, { ok: true });
     })
     .add('GET', '/api/mod/reports', (ctx) => {
@@ -820,6 +842,7 @@ export const createApp = (config: ServerConfig): App => {
       const text = reasonOf(resolution);
       moderation.closeReport(report.id, moderator.name, text);
       moderation.log('closeReport', moderator.name, report.target, text, report.gameId);
+      if (report.status === 'open') notice(report.reporter.id, 'reportClosed', { subject: report.target.name });
       sendJson(ctx.res, 200, { ok: true });
     })
     .add('GET', '/api/mod/log', (ctx) => {
@@ -861,6 +884,7 @@ export const createApp = (config: ServerConfig): App => {
       const text = reasonOf(reason);
       moderation.unsuspend(target.id);
       moderation.log('unsuspend', moderator.name, { id: target.id, name: target.name }, text);
+      notice(target.id, 'suspensionLifted');
       sendJson(ctx.res, 200, { ok: true });
     })
     .add('POST', '/api/mod/users/:name/rename', async (ctx) => {
@@ -875,6 +899,7 @@ export const createApp = (config: ServerConfig): App => {
       // Their sockets carry the old name: reconnecting picks up the new one.
       closeUserSockets(target.id);
       moderation.log('rename', moderator.name, { id: target.id, name: username }, `${target.name} → ${username} · ${text}`);
+      notice(target.id, 'renamed', { subject: username });
       sendJson(ctx.res, 200, { user: { id: target.id, name: username } });
     })
     .add('POST', '/api/mod/users/:name/clear-profile', async (ctx) => {
@@ -885,6 +910,7 @@ export const createApp = (config: ServerConfig): App => {
       // The bio and the linked profiles are what can offend; the country stays.
       users.setDetails(target.id, { ...users.details(target.id), bio: '', links: {} });
       moderation.log('clearProfile', moderator.name, { id: target.id, name: target.name }, text);
+      notice(target.id, 'profileCleared');
       sendJson(ctx.res, 200, { ok: true });
     })
     .add('POST', '/api/mod/games/:id/void', async (ctx) => {
@@ -895,6 +921,7 @@ export const createApp = (config: ServerConfig): App => {
       if (room === 'gameNotFound') throw new HttpError(404, 'gameNotFound');
       if (room === 'gameNotVoidable') throw new HttpError(409, 'gameNotVoidable');
       moderation.log('void', moderator.name, null, text, room.id);
+      for (const seat of Object.values(room.seats)) if (seat.userId) notice(seat.userId, 'gameVoided', { ref: room.id });
       publishGame(room);
       sendJson(ctx.res, 200, { ok: true });
     })
@@ -932,7 +959,7 @@ export const createApp = (config: ServerConfig): App => {
         about: 'Personal data held by ligungi for this account (LGPD access right). Display preferences live only in your browser.',
         exportedAt: iso(config.now()),
         account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
-        settings: { challengePolicy: users.challengePolicy(userId) },
+        settings: { challengePolicy: users.challengePolicy(userId), followPolicy: users.followPolicy(userId) },
         profile: users.details(userId),
         puzzles: (() => {
           const { rating, history } = puzzles.dashboard(userId);
@@ -974,6 +1001,7 @@ export const createApp = (config: ServerConfig): App => {
         ratings: users.ratings(userId),
         following: users.following(userId).map((entry) => entry.name),
         followers: users.followers(userId).map((entry) => entry.name),
+        notices: notices.list(userId, NOTICES_KEPT).map(({ kind, actor, subject, ref, createdAt, read }) => ({ kind, player: actor, subject, ref, date: iso(createdAt), read })),
         sessions: sessions.listForUser(userId).map((session) => ({
           current: session.id === ctx.session.id,
           createdAt: iso(session.createdAt),
@@ -1027,6 +1055,7 @@ export const createApp = (config: ServerConfig): App => {
         ...users.followCounts(user.id),
         followed: ctx.session.userId ? users.isFollowing(ctx.session.userId, user.id) : false,
         canChallenge: ctx.session.userId ? users.canChallenge(ctx.session.userId, user.id) : false,
+        canFollow: ctx.session.userId ? users.canFollow(ctx.session.userId, user.id) : false,
         details: users.details(user.id),
         playing: games.ongoing().filter((room) => room.colorOf('', user.id)).map((room) => room.summary()),
         recent: games.recentFor(user.id, 20),
@@ -1118,14 +1147,15 @@ export const createApp = (config: ServerConfig): App => {
       if (!users.isFollowing(userId, target.id) && users.followCounts(userId).following >= MAX_FOLLOWS) {
         throw new HttpError(400, 'tooManyFollows');
       }
-      users.follow(userId, target.id);
-      sendJson(ctx.res, 200, { followed: true, ...users.followCounts(target.id) });
+      if (!users.isFollowing(userId, target.id) && !users.canFollow(userId, target.id)) throw new HttpError(403, 'followRefused');
+      if (users.follow(userId, target.id)) notice(target.id, 'follow', { actorId: userId });
+      sendJson(ctx.res, 200, { followed: true, canFollow: true, ...users.followCounts(target.id) });
     })
     .add('DELETE', '/api/users/:name/follow', (ctx) => {
       const userId = requireUser(ctx);
       const target = findUser(ctx.params.name!);
       users.unfollow(userId, target.id);
-      sendJson(ctx.res, 200, { followed: false, ...users.followCounts(target.id) });
+      sendJson(ctx.res, 200, { followed: false, canFollow: users.canFollow(userId, target.id), ...users.followCounts(target.id) });
     })
     .add('GET', '/api/following', (ctx) => {
       const userId = requireUser(ctx);
@@ -1253,15 +1283,24 @@ export const createApp = (config: ServerConfig): App => {
     })
     .add('GET', '/api/account/settings', (ctx) => {
       const userId = requireUser(ctx);
-      sendJson(ctx.res, 200, { challengePolicy: users.challengePolicy(userId) });
+      sendJson(ctx.res, 200, { challengePolicy: users.challengePolicy(userId), followPolicy: users.followPolicy(userId) });
     })
     .add('POST', '/api/account/settings', async (ctx) => {
       const userId = requireUser(ctx);
-      const { challengePolicy } = (await ctx.body()) as { challengePolicy?: unknown };
-      const policy = CHALLENGE_POLICIES.find((value) => value === challengePolicy);
-      if (!policy) throw new HttpError(400, 'invalidChallengePolicy');
-      users.setChallengePolicy(userId, policy);
-      sendJson(ctx.res, 200, { challengePolicy: policy });
+      const { challengePolicy, followPolicy } = (await ctx.body()) as { challengePolicy?: unknown; followPolicy?: unknown };
+      const challenge = CHALLENGE_POLICIES.find((value) => value === challengePolicy);
+      const follow = FOLLOW_POLICIES.find((value) => value === followPolicy);
+      if (challengePolicy !== undefined && !challenge) throw new HttpError(400, 'invalidChallengePolicy');
+      if (followPolicy !== undefined && !follow) throw new HttpError(400, 'invalidFollowPolicy');
+      if (!challenge && !follow) throw new HttpError(400, 'invalidChallengePolicy');
+      if (challenge) users.setChallengePolicy(userId, challenge);
+      if (follow) users.setFollowPolicy(userId, follow);
+      sendJson(ctx.res, 200, { challengePolicy: users.challengePolicy(userId), followPolicy: users.followPolicy(userId) });
+    })
+    .add('POST', '/api/notices/read', (ctx) => {
+      const userId = requireUser(ctx);
+      if (notices.markRead(userId)) sendNotices(userId);
+      sendJson(ctx.res, 200, { ok: true });
     })
     .add('GET', '/api/account/profile', (ctx) => sendJson(ctx.res, 200, users.details(requireUser(ctx))))
     .add('POST', '/api/account/profile', async (ctx) => {
@@ -1515,6 +1554,7 @@ export const createApp = (config: ServerConfig): App => {
     if (player.userId) {
       sendIncoming(player.userId);
       sendTurns(player.userId);
+      sendNotices(player.userId);
     }
     publishLobby();
   };

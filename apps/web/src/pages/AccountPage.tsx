@@ -5,6 +5,7 @@ import {
   PROFILE_SITES,
   profileLinkName,
   type ChallengePolicy,
+  type FollowPolicy,
   type Country,
   type ProfileDetails,
   type ProfileSite,
@@ -162,49 +163,62 @@ const Sessions = () => {
   );
 };
 
-const ChallengeSettings = () => {
+type PrivacyChoices = { readonly challengePolicy: ChallengePolicy; readonly followPolicy: FollowPolicy };
+
+const PrivacySettings = () => {
   const t = useT();
-  const [policy, setPolicy] = useState<ChallengePolicy | null>(null);
+  const [choices, setChoices] = useState<PrivacyChoices | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   useEffect(() => {
     api
-      .get<{ challengePolicy: ChallengePolicy }>('/api/account/settings')
-      .then((settings) => setPolicy(settings.challengePolicy))
+      .get<PrivacyChoices>('/api/account/settings')
+      .then(setChoices)
       .catch((err: Error) => setMessage({ ok: false, text: err.message }));
   }, []);
 
-  const change = async (next: ChallengePolicy) => {
-    const previous = policy;
-    setPolicy(next);
+  const change = async (patch: Partial<PrivacyChoices>) => {
+    const previous = choices;
+    setChoices((current) => current && { ...current, ...patch });
     setMessage(null);
     try {
-      await api.post('/api/account/settings', { challengePolicy: next });
+      setChoices(await api.post<PrivacyChoices>('/api/account/settings', patch));
       setMessage({ ok: true, text: t.account.challengesSaved });
     } catch (err) {
-      setPolicy(previous);
+      setChoices(previous);
       setMessage({ ok: false, text: (err as Error).message });
     }
   };
 
+  const options = [
+    { value: 'everyone' as const, label: t.account.policyEveryone },
+    { value: 'following' as const, label: t.account.policyFollowing },
+    { value: 'nobody' as const, label: t.account.policyNobody },
+  ];
   return (
     <form class="form3" onSubmit={(e) => e.preventDefault()}>
-      <p>{t.account.challengesText}</p>
-      {policy && (
-        <OptionCards
-          name="acc-challenges"
-          legend={t.account.challengesTitle}
-          hideLegend
-          layout="segmented"
-          value={policy}
-          options={[
-            { value: 'everyone' as const, label: t.account.policyEveryone },
-            { value: 'following' as const, label: t.account.policyFollowing },
-            { value: 'nobody' as const, label: t.account.policyNobody },
-          ]}
-          onChange={(next) => void change(next)}
-        />
+      {choices && (
+        <>
+          <OptionCards
+            name="acc-challenges"
+            legend={t.account.challengesTitle}
+            layout="segmented"
+            value={choices.challengePolicy}
+            options={options}
+            onChange={(challengePolicy) => void change({ challengePolicy })}
+            help={t.account.challengesText}
+          />
+          <OptionCards
+            name="acc-followers"
+            legend={t.account.followTitle}
+            layout="segmented"
+            value={choices.followPolicy}
+            options={options}
+            onChange={(followPolicy) => void change({ followPolicy })}
+            help={t.account.followText}
+          />
+        </>
       )}
-      {message && <p class={message.ok ? 'ligungi-success' : 'error'}>{message.text}</p>}
+      {message && <p class={message.ok ? 'ligungi-success' : 'error'} role="status">{message.text}</p>}
     </form>
   );
 };
@@ -664,8 +678,8 @@ export const AccountPage = () => {
             </section>
             <div class="ligungi-account__column">
               <section class="ligungi-card ligungi-settings__card">
-                <h2>{t.account.challengesTitle}</h2>
-                <ChallengeSettings />
+                <h2>{t.account.privacyTitle}</h2>
+                <PrivacySettings />
               </section>
               <section class="ligungi-card ligungi-settings__card">
                 <h2>{t.account.dataTitle}</h2>

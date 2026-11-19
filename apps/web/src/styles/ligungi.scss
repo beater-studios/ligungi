@@ -1334,6 +1334,45 @@ body:has(main.ligungi-auth) #clinput {
   }
 }
 
+// Two choices in one card (who may challenge, who may follow): the second legend needs air after the first help text.
+.ligungi-settings__card .ligungi-choice + .ligungi-choice {
+  margin-top: 1.2em;
+}
+
+// A follower or a moderation decision, in the bell's dropdown.
+.ligungi-bell-notice {
+  & + & {
+    border-top: $border;
+  }
+
+  > a,
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    padding: 0.7em 1em;
+    border-inline-start: 3px solid transparent;
+    color: $c-header-dropdown;
+  }
+
+  > a:hover {
+    background: $c-bg-zebra;
+  }
+
+  &--unread > a,
+  &--unread > div {
+    border-inline-start-color: $c-primary;
+  }
+
+  &--unread &__text {
+    font-weight: 600;
+  }
+
+  small {
+    color: $c-font-dim;
+  }
+}
+
 .ligungi-challenge {
   display: flex;
   align-items: center;

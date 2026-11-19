@@ -1,4 +1,7 @@
-import type { ChallengeView, GameSummary } from '@ligungi/protocol';
+import { opposite } from '@ligungi/engine';
+import type { ChallengeView, GameSummary, NoticeView } from '@ligungi/protocol';
+import { formatClock, getT, playerName, settingsText, type Messages } from './i18n/index.ts';
+import { notify } from './notify.ts';
 import { session } from './session.ts';
 import { socket } from './socket.ts';
 import { playSound } from './sound.ts';
@@ -10,6 +13,55 @@ export const incoming = createStore<readonly ChallengeView[]>([]);
 /** The signed-in user's correspondence games waiting for their move, kept up to date by the server. */
 export const turns = createStore<readonly GameSummary[]>([]);
 
+/** What the server recorded for the signed-in user while they were away or looking elsewhere: followers and moderation. */
+export const notices = createStore<readonly NoticeView[]>([]);
+
+export const noticeText = (t: Messages, notice: NoticeView): string => {
+  const n = t.notices;
+  const subject = notice.subject ?? '';
+  switch (notice.kind) {
+    case 'follow':
+      return n.follow(notice.actor ?? '');
+    case 'reportClosed':
+      return n.reportClosed(subject);
+    case 'renamed':
+      return n.renamed(subject);
+    case 'studyHidden':
+      return n.studyHidden(subject);
+    case 'studyRestored':
+      return n.studyRestored(subject);
+    case 'studyDeleted':
+      return n.studyDeleted(subject);
+    case 'profileCleared':
+    case 'gameVoided':
+    case 'suspensionLifted':
+      return n[notice.kind];
+  }
+};
+
+/** The page a notice is about, when there is one to open. */
+export const noticePath = (notice: NoticeView): string | null => {
+  if (notice.kind === 'follow') return notice.actor ? `/@/${notice.actor}` : null;
+  if (notice.kind === 'renamed') return notice.subject ? `/@/${notice.subject}` : null;
+  if (notice.kind === 'profileCleared') return '/account';
+  if (notice.kind === 'gameVoided') return notice.ref ? `/${notice.ref}` : null;
+  if (notice.kind === 'studyHidden' || notice.kind === 'studyRestored') return notice.ref ? `/study/${notice.ref}` : null;
+  return null;
+};
+
+/** The notification for a game waiting for the viewer's move; the game page uses the same tag for a live game. */
+export const turnNotice = (game: Pick<GameSummary, 'id' | 'mode' | 'players' | 'turn' | 'deadlineIn'>, body?: string) => {
+  const t = getT();
+  const opponent = game.players[opposite(game.turn ?? 'white')];
+  const left = game.deadlineIn !== null ? ` · ${t.nav.timeLeft(formatClock(game.deadlineIn))}` : '';
+  return {
+    title: t.nav.turnAgainst(playerName(t, opponent)),
+    body: body ?? `${t.modes[game.mode]}${left}`,
+    tag: `turn:${game.id}`,
+    path: `/${game.id}`,
+  };
+};
+
 let started = false;
 
 export const watchIncoming = (): void => {
@@ -20,17 +72,44 @@ export const watchIncoming = (): void => {
   // Same idea for games: a move that arrives while the page is open is news, the list on connecting is not.
   let turnsSeeded = false;
   let waiting = new Set<string>();
+  let noticesSeeded = false;
+  let lastNotice = 0;
   socket.on((message) => {
     if (message.t === 'turns') {
-      if (turnsSeeded && message.games.some((game) => !waiting.has(game.id))) playSound('notify');
+      const arrived = turnsSeeded ? message.games.filter((game) => !waiting.has(game.id)) : [];
+      if (arrived.length) playSound('notify');
+      for (const game of arrived) notify(turnNotice(game));
       turnsSeeded = true;
       waiting = new Set(message.games.map((game) => game.id));
       turns.set(message.games);
       return;
     }
+    if (message.t === 'notices') {
+      const arrived = noticesSeeded ? message.notices.filter((entry) => !entry.read && entry.id > lastNotice) : [];
+      if (arrived.length) playSound('notify');
+      for (const entry of arrived) {
+        const t = getT();
+        const path = noticePath(entry);
+        notify({ title: t.notices.title, body: noticeText(t, entry), tag: `notice:${entry.id}`, ...(path ? { path } : {}) });
+      }
+      noticesSeeded = true;
+      lastNotice = Math.max(lastNotice, ...message.notices.map((entry) => entry.id));
+      notices.set(message.notices);
+      return;
+    }
     if (message.t !== 'incoming') return;
     // Challenges already pending when the page loads are shown without a sound; only new ones ring.
-    if (seeded && message.challenges.some((challenge) => !known.has(challenge.id))) playSound('challenge');
+    const fresh = seeded ? message.challenges.filter((challenge) => !known.has(challenge.id)) : [];
+    if (fresh.length) playSound('challenge');
+    for (const challenge of fresh) {
+      const t = getT();
+      notify({
+        title: t.notify.challenge(playerName(t, challenge.challenger)),
+        body: settingsText(t, challenge.settings),
+        tag: `challenge:${challenge.id}`,
+        path: `/challenge/${challenge.id}`,
+      });
+    }
     seeded = true;
     for (const challenge of message.challenges) known.add(challenge.id);
     incoming.set(message.challenges);
@@ -47,5 +126,8 @@ export const watchIncoming = (): void => {
     turnsSeeded = false;
     waiting = new Set();
     turns.set([]);
+    noticesSeeded = false;
+    lastNotice = 0;
+    notices.set([]);
   });
 };

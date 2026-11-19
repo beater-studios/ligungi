@@ -104,6 +104,8 @@ export const ERROR_MESSAGES = {
   loginRequired: 'Entre na sua conta para continuar.',
   cannotFollowSelf: 'Você não pode seguir a si mesmo.',
   tooManyFollows: 'Você já segue o máximo de jogadores.',
+  followRefused: 'Este jogador não aceita novos seguidores.',
+  invalidFollowPolicy: 'Opção de seguidores inválida.',
   invalidFilter: 'Filtro inválido.',
   invalidSearch: 'Busca inválida: confira os campos.',
 } as const;

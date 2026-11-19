@@ -275,7 +275,7 @@ export const en: Content = {
         </li>
         <li>
           <b>Games and activity:</b> moves, results, ratings, players you follow and your account creation date. This data
-          appears on your public profile. Who may challenge you from your profile is saved with your account.
+          appears on your public profile. Who may challenge you and who may follow you are saved with your account, and so are the notices of the bell (who started following you and what the moderators decided about your account or your reports), up to 50, deleted with the account.
           Challenges for live games are kept only in the server's memory while they wait for an answer. Correspondence
           challenges and open games, which wait up to 7 days, are stored in the database so a server restart does not lose
           them: open games are deleted when they expire and challenges 14 days after they were made, or sooner if you delete

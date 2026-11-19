@@ -8,6 +8,7 @@ import { ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../compon
 import { MESSAGES, themeLabel, useT } from '../i18n/index.ts';
 import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../looks.tsx';
 import { BOARD_SIZES, BOARD_THEMES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs } from '../prefs.ts';
+import { enableNotifications, notifyPermission } from '../notify.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
 import { SettingsShell } from './AccountPage.tsx';
@@ -105,6 +106,7 @@ export const SettingsPage = () => {
   const t = useT();
   const s = t.settings;
   const current = useStore(prefs);
+  const permission = useStore(notifyPermission);
   const choice = <K extends keyof Prefs>(
     key: K,
     title: string,
@@ -142,6 +144,22 @@ export const SettingsPage = () => {
                 </button>
                 <Toggle id="pref-sound" checked={current.sound} label={s.sound} onChange={(sound) => updatePrefs({ sound })} />
               </div>
+            </SettingRow>
+            <SettingRow
+              title={s.notifications}
+              htmlFor="pref-notifications"
+              help={permission === 'unsupported' ? s.notificationsUnsupported : permission === 'denied' ? s.notificationsBlocked : s.notificationsHelp}
+            >
+              <Toggle
+                id="pref-notifications"
+                checked={current.notifications && permission === 'granted'}
+                disabled={permission === 'unsupported'}
+                label={s.notifications}
+                onChange={(on) => {
+                  if (on) void enableNotifications({ title: s.notifications, body: s.notificationsSample });
+                  else updatePrefs({ notifications: false });
+                }}
+              />
             </SettingRow>
             {toggle('byoyomiVoice', s.byoyomiVoice, s.byoyomiVoiceHelp)}
             {toggle('screenReader', t.blind.setting, t.blind.settingHelp)}

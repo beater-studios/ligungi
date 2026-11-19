@@ -286,9 +286,9 @@ export const ProfilePage = ({ name }: { name: string }) => {
     try {
       const path = `/api/users/${encodeURIComponent(profile.user.name)}/follow`;
       const result = profile.followed
-        ? await api.delete<{ followed: boolean; followers: number }>(path)
-        : await api.post<{ followed: boolean; followers: number }>(path);
-      setProfile({ ...profile, followed: result.followed, followers: result.followers });
+        ? await api.delete<{ followed: boolean; canFollow: boolean; followers: number }>(path)
+        : await api.post<{ followed: boolean; canFollow: boolean; followers: number }>(path);
+      setProfile({ ...profile, followed: result.followed, canFollow: result.canFollow, followers: result.followers });
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -353,7 +353,8 @@ export const ProfilePage = ({ name }: { name: string }) => {
               type="button"
               class="button button-empty text"
               data-icon={profile.followed ? icons.X : icons.User}
-              disabled={busy}
+              disabled={busy || (!profile.followed && !profile.canFollow)}
+              title={profile.followed || profile.canFollow ? '' : t.profile.followRefused}
               onClick={toggleFollow}
             >
               {profile.followed ? t.profile.unfollow : t.profile.follow}

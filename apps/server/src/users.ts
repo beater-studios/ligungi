@@ -1,6 +1,6 @@
 import { MODES, type Mode } from '@ligungi/engine';
 import {
-  type ActivityEvent, CHALLENGE_POLICIES, COUNTRIES, DAY_MS, EMPTY_PROFILE, LEADERBOARD_ACTIVE_DAYS, parseProfileDetails, type ChallengePolicy, type Country, type NewPlayer, type ProfileDetails, type RatingView, type UserRef } from '@ligungi/protocol';
+  type ActivityEvent, CHALLENGE_POLICIES, COUNTRIES, FOLLOW_POLICIES, type FollowPolicy, DAY_MS, EMPTY_PROFILE, LEADERBOARD_ACTIVE_DAYS, parseProfileDetails, type ChallengePolicy, type Country, type NewPlayer, type ProfileDetails, type RatingView, type UserRef } from '@ligungi/protocol';
 import type { Db } from './db.ts';
 import { DEFAULT_RATING, PROVISIONAL_DEVIATION, type Rating } from './glicko.ts';
 import { randomId } from './ids.ts';
@@ -133,6 +133,7 @@ export class Users {
     this.#db.exec('begin');
     try {
       this.#db.prepare('delete from follows where user_id = ? or followed_id = ?').run(userId, userId);
+      this.#db.prepare('delete from notices where user_id = ? or actor_id = ?').run(userId, userId);
       this.#db.prepare('delete from ratings where user_id = ?').run(userId);
       this.#db.prepare('delete from sessions where user_id = ?').run(userId);
       this.#db.prepare('delete from recovery_codes where user_id = ?').run(userId);
@@ -161,6 +162,15 @@ export class Users {
 
   setChallengePolicy(userId: string, policy: ChallengePolicy): void {
     this.#db.prepare('update users set challenge_policy = ? where id = ?').run(policy, userId);
+  }
+
+  followPolicy(userId: string): FollowPolicy {
+    const row = this.#db.prepare('select follow_policy from users where id = ?').get(userId) as { follow_policy: string } | undefined;
+    return FOLLOW_POLICIES.find((policy) => policy === row?.follow_policy) ?? 'everyone';
+  }
+
+  setFollowPolicy(userId: string, policy: FollowPolicy): void {
+    this.#db.prepare('update users set follow_policy = ? where id = ?').run(policy, userId);
   }
 
   /** The best stars the player earned in each lesson exercise they finished. */
@@ -337,6 +347,13 @@ export class Users {
   canChallenge(fromId: string, toId: string): boolean {
     if (fromId === toId) return false;
     const policy = this.challengePolicy(toId);
+    return policy === 'everyone' || (policy === 'following' && this.isFollowing(toId, fromId));
+  }
+
+  /** Whether `fromId` may start following `toId`, by `toId`'s policy. Followers from before a stricter policy stay. */
+  canFollow(fromId: string, toId: string): boolean {
+    if (fromId === toId) return false;
+    const policy = this.followPolicy(toId);
     return policy === 'everyone' || (policy === 'following' && this.isFollowing(toId, fromId));
   }
 

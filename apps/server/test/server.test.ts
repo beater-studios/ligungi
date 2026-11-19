@@ -856,17 +856,19 @@ describe('sessions and data export', () => {
     const text = await res.text();
     const data = JSON.parse(text) as {
       account: { username: string };
-      settings: { challengePolicy: string };
+      settings: { challengePolicy: string; followPolicy: string };
       following: string[];
       followers: string[];
+      notices: Array<{ kind: string; player: string | null; read: boolean }>;
       sessions: Array<{ current: boolean }>;
       games: Array<{ id: string; color: string; opponent: string; result: string }>;
       ratings: Record<string, unknown>;
     };
     expect(data.account.username).toBe('Knuckle');
-    expect(data.settings).toEqual({ challengePolicy: 'everyone' });
+    expect(data.settings).toEqual({ challengePolicy: 'everyone', followPolicy: 'everyone' });
     expect(data.following).toEqual(['Shoot']);
     expect(data.followers).toEqual(['Shoot']);
+    expect(data.notices).toEqual([expect.objectContaining({ kind: 'follow', player: 'Shoot', read: false })]);
     expect(data.sessions).toEqual([expect.objectContaining({ current: true })]);
     expect(data.games).toEqual([expect.objectContaining({ id, opponent: 'Shoot', result: 'aborted' })]);
     expect(Object.keys(data.ratings)).toHaveLength(4);

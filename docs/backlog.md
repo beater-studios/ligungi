@@ -27,7 +27,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Rating range filter for seeks | Find opponents of similar strength | S | Low | lichess, lishogi |
 | Keyboard move input | Speed and accessibility | M | Low | lichess |
 | Zen mode (hide everything but the board and clocks) | Focus while playing | S | Low | lichess |
-| Tournaments: Arena and Swiss, then calendar, shields, ladders, round robin and team battles | Main engagement driver on lichess-style sites | L | Medium | lichess, lidraughts, lishogi |
 | Bot accounts through a bot API (engines play on the site, list of online bots) | Lets engine authors join, gives players more opponents | L | Low | lichess, lishogi |
 | Simultaneous exhibitions | Strong players against many at once | L | Low | lichess, lidraughts, lishogi |
 
@@ -44,7 +43,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Sound sets, including spoken moves | Personal taste and accessibility | M | Low | lichess, lishogi |
 | Custom background image | Personal taste | S | Low | lichess, lishogi |
 | Language shortcut in the header | Faster than opening the settings menu | S | Low | lishogi |
-| 3D board and board adjustments (brightness, contrast, hue) | Personal taste and accessibility | M | Low | lichess |
 | More languages through a community translation platform | lichess has over 100 languages translated by volunteers | M | Medium | lichess |
 
 ## Community
@@ -53,7 +51,7 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 |---|---|---|---|---|
 | Official social media: a Discord server first (community and support), then X, YouTube, Twitch and Instagram, each linked from the footer with its icon (icons from Simple Icons, CC0) | Gives players a place to meet, ask questions and follow news; Discord needs moderators before it opens | S | Medium | lichess, lishogi |
 | Community links in the menu and footer (GitHub issues, community group, social media) | The issue tracker is only linked from the FAQ and contact page | S | Medium | lichess, libaduk, lishogi |
-| Private messages, and notices for follows and moderation in the bell | The bell already lists challenges and correspondence games; moderation tools now exist | M | Medium | lichess |
+| Private messages, with a setting for who can message me | Players can only reach each other through a challenge today; moderation tools and reports now exist, and the account page already has who can challenge and who can follow | M | Medium | lichess |
 | User blogs | Community content | M | Low | lichess |
 | Chat in games, on TV and a site chat room | Social core of lichess. Moderation tools and reports now exist | M | Medium | lichess, lidraughts, libaduk, lishogi |
 | Teams, forum and blog | Community spaces | L | Low | lichess, lidraughts, lishogi |
@@ -74,5 +72,4 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 |---|---|---|---|---|
 | Public API with personal tokens (and OAuth for third-party apps) | Lets the community build tools, bots and integrations | L | Medium | lichess |
 | Donations or patrons | Funding, if wanted | S | Low | lichess, lidraughts, lishogi |
-| Browser notifications while the site is open in the background (your turn, game found, challenge) | Players leave the tab while waiting for an opponent or a move; no server change and no dependency, only the permission prompt | S | Medium | lichess |
-| Web push notifications with the site closed (correspondence turns, challenges) | Correspondence games last days, and today the turn notice only shows inside the site. Needs a service worker, VAPID keys, a table of subscriptions and the server sending the messages (with `node:crypto`, or the `web-push` package, which would be a new dependency) | M | Medium | lichess |
+| Web push notifications with the site closed (correspondence turns, challenges) | Correspondence games last days, and today the turn notice (in the bell or as a browser notification) needs the site open in some tab. Needs a service worker, VAPID keys, a table of subscriptions and the server sending the messages (with `node:crypto`, or the `web-push` package, which would be a new dependency) | M | Medium | lichess |

@@ -3,11 +3,15 @@ import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type GameView } from '@ligungi/p
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { turnNotice } from '../challenges.ts';
 import { BookmarkPanel } from '../components/BookmarkPanel.tsx';
 import { Crosstable } from '../components/Crosstable.tsx';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
 import { errorText, getT, outcomeText, playerName, speedText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
+import { moveText } from '../notation.ts';
+import { notify } from '../notify.ts';
+import { prefs, resolveLang } from '../prefs.ts';
 import { replayGame } from '../replay.ts';
 import { socket } from '../socket.ts';
 import { playSound } from '../sound.ts';
@@ -104,6 +108,13 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
       const last = replay.moves[replay.moves.length - 1];
       playSound(last?.kind === 'move' && last.action === 'capture' ? 'capture' : 'move');
       setNotice(null);
+      // A correspondence game is announced by the `turns` message, on whatever page the player is.
+      const played = replay.positions[replay.moves.length - 1];
+      if (last && played && me && view.status === 'started' && view.daysPerMove === null && replay.game.position.turn === me) {
+        const { notation, pieceNames, lang } = prefs.get();
+        const text = moveText(notation, played, last, getT(), pieceNames === 'ja' ? 'ja' : resolveLang(lang));
+        notify(turnNotice({ ...view, turn: me }, getT().notify.lastMove(text)));
+      }
     }
     if (before.status === 'started' && view.status !== 'started') {
       const winner = view.outcome?.winner;

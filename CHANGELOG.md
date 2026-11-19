@@ -8,6 +8,14 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 - On a phone held upright, tapping a tower shows every piece in it right where you look: by default in a balloon next to the square, or in a strip under the board. Settings > Board > Tower on tap picks one, or keeps only the side panel. On a computer the side panel still shows the hovered tower. It works on games, puzzles, practice, the analysis board and studies.
 
+- Browser notifications (Settings > General, off by default): with the site open in another tab or window, the browser tells you when it is your turn, when your game starts and when a challenge arrives, and a click opens the game. Turning them on asks for the browser's permission and shows a sample. They need the site open somewhere, and browsers that only show notifications through a service worker (Chrome on Android) do not have them yet.
+- Notices in the bell: it now also tells you when someone starts following you and what the moderators decided about your account or a report you sent (a report reviewed, a username changed, a profile cleared, a game voided, a study hidden, restored or deleted, a suspension lifted). Unread notices count on the badge and are marked as read when the bell closes; the moderator and the reason are never shown. They also come as browser notifications when those are on.
+- Privacy on the account page: choose who may start following you (any player, only players you follow, or nobody). The followers you already have stay. A profile that does not accept you shows the Follow button disabled.
+
+### Changed
+
+- The challenges icon in the header is now a bell, since it lists more than challenges.
+
 ### Fixed
 
 - On touch screens, a tapped tower no longer disappears as soon as the finger lifts.

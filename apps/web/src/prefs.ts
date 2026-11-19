@@ -68,6 +68,8 @@ export interface Prefs {
   readonly screenReader: boolean;
   /** On a phone, what tapping a tower shows: a balloon next to it, a strip under the board, or only the side panel. */
   readonly towerTap: TowerTap;
+  /** Browser notifications while the site is in the background; the browser's own permission is asked when turned on. */
+  readonly notifications: boolean;
 }
 
 export const TOWER_TAPS = ['balloon', 'strip', 'panel'] as const;
@@ -98,6 +100,7 @@ const DEFAULTS: Prefs = {
   byoyomiVoice: false,
   screenReader: false,
   towerTap: 'balloon',
+  notifications: false,
 };
 
 const validCustomBoard = (value: unknown): CustomBoard => {
@@ -140,6 +143,7 @@ const load = (): Prefs => {
       peekPieces: stored.peekPieces === true,
       byoyomiVoice: stored.byoyomiVoice === true,
       screenReader: stored.screenReader === true,
+      notifications: stored.notifications === true,
       towerTap: oneOf(TOWER_TAPS, stored.towerTap, DEFAULTS.towerTap),
       notation:
         stored.notation === 'rulebook' || stored.notation === 'named' || stored.notation === 'machine'

@@ -1,5 +1,6 @@
 import { MODES, MODE_RULES, type Color, type Mode, type Outcome } from '@ligungi/engine';
 import type { ErrorCode } from './errors.ts';
+import type { NoticeView } from './notices.ts';
 import type { Country, ProfileDetails } from './profile.ts';
 import type { PuzzleRatingView } from './puzzles.ts';
 
@@ -12,6 +13,7 @@ export * from './explorer.ts';
 export * from './studies.ts';
 export * from './search.ts';
 export * from './activity.ts';
+export * from './notices.ts';
 
 /**
  * Seconds. A Fischer clock adds `increment` after every move. A byo-yomi clock has no increment: once the main time
@@ -320,6 +322,8 @@ export interface UserProfile {
   readonly followed: boolean;
   /** Whether the viewer may challenge this user from the profile (signed in, not themselves, allowed by them). */
   readonly canChallenge: boolean;
+  /** Whether the viewer may start following this user (signed in, not themselves, allowed by them). */
+  readonly canFollow: boolean;
   readonly details: ProfileDetails;
   readonly playing: readonly GameSummary[];
   readonly recent: readonly GameSummary[];
@@ -636,6 +640,8 @@ export type ServerMessage =
   | { readonly t: 'incoming'; readonly challenges: readonly ChallengeView[] }
   /** The user's correspondence games waiting for their move, on connecting and after every change to one of them. */
   | { readonly t: 'turns'; readonly games: readonly GameSummary[] }
+  /** The user's latest notices (followers, moderation), on connecting and after every change. */
+  | { readonly t: 'notices'; readonly notices: readonly NoticeView[] }
   | { readonly t: 'redirect'; readonly path: string }
   | { readonly t: 'error'; readonly code: ErrorCode; readonly message: string }
   | { readonly t: 'pong' };

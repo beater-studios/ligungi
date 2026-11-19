@@ -1,7 +1,8 @@
 import { PIECE_STYLES } from '@ligungi/board';
 import type { VNode } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { MESSAGES, themeLabel, useT } from './i18n/index.ts';
+import { MESSAGES, getT, themeLabel, useT } from './i18n/index.ts';
+import { notify } from './notify.ts';
 import logoUrl from './assets/logo.svg';
 import { icons } from './icons.ts';
 import { SOURCE_URL } from './source.ts';
@@ -552,7 +553,10 @@ export const App = () => {
   useEffect(
     () =>
       socket.on((message) => {
-        if (message.t === 'redirect') navigate(message.path);
+        if (message.t !== 'redirect') return;
+        navigate(message.path);
+        const { gameStarted, gameStartedBody } = getT().notify;
+        notify({ title: gameStarted, body: gameStartedBody, tag: `start:${message.path}`, path: message.path });
       }),
     [],
   );

@@ -275,7 +275,7 @@ export const pt: Content = {
         </li>
         <li>
           <b>Partidas e atividade:</b> lances, resultados, ratings, jogadores que você segue e a data de criação da conta.
-          Esses dados aparecem no seu perfil público. A opção de quem pode desafiar você pelo perfil fica salva na conta. Os
+          Esses dados aparecem no seu perfil público. As opções de quem pode desafiar e de quem pode seguir você ficam salvas na conta, assim como os avisos do sino (quem começou a seguir você e o que a moderação decidiu sobre a sua conta ou as suas denúncias), até 50, apagados com a conta. Os
           desafios para partidas em tempo real ficam só na memória do servidor enquanto esperam resposta. Os desafios e as
           partidas abertas por correspondência, que esperam até 7 dias, ficam guardados no banco de dados para não se
           perderem quando o servidor reinicia: as partidas abertas são apagadas quando expiram e os desafios 14 dias depois de

@@ -277,8 +277,7 @@ export const es: Content = {
         </li>
         <li>
           <b>Partidas y actividad:</b> jugadas, resultados, puntuaciones, jugadores que sigues y la fecha de creación de la
-          cuenta. Estos datos aparecen en tu perfil público. La opción de quién puede desafiarte desde el perfil se guarda en la
-          cuenta. Los desafíos para partidas en vivo solo se guardan en la memoria del servidor
+          cuenta. Estos datos aparecen en tu perfil público. Las opciones de quién puede desafiarte y de quién puede seguirte se guardan en la cuenta, igual que los avisos de la campana (quién ha empezado a seguirte y lo que la moderación ha decidido sobre tu cuenta o tus denuncias), hasta 50, que se borran con la cuenta. Los desafíos para partidas en vivo solo se guardan en la memoria del servidor
           mientras esperan respuesta. Los desafíos y las partidas abiertas por correspondencia, que esperan hasta 7
           días, se guardan en la base de datos para no perderse cuando el servidor se reinicia: las partidas abiertas se borran
           al expirar y los desafíos 14 días después de crearse, o antes si eliminas la cuenta, y forman parte de la copia de

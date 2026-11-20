@@ -21,7 +21,7 @@ describe('protocol', () => {
   it('validates correspondence settings', () => {
     const correspondence = { mode: 'intro', rated: true, timeControl: null, daysPerMove: 3, color: 'white' };
     expect(parseSettings(correspondence)).toMatchObject({ rated: true, timeControl: null, daysPerMove: 3 });
-    for (const days of [1, 7]) expect(parseSettings({ ...correspondence, daysPerMove: days })).toMatchObject({ daysPerMove: days });
+    for (const days of [1, 7, 14]) expect(parseSettings({ ...correspondence, daysPerMove: days })).toMatchObject({ daysPerMove: days });
     expect(parseSettings({ ...correspondence, daysPerMove: 2 })).toBe('invalidDaysPerMove');
     expect(parseSettings({ ...correspondence, daysPerMove: '3' })).toBe('invalidDaysPerMove');
     expect(parseSettings({ ...correspondence, timeControl: { initial: 600, increment: 5 } })).toBe('invalidDaysPerMove');

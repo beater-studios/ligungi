@@ -1006,7 +1006,7 @@ describe('search and health', () => {
 describe('correspondence', () => {
   const corr = (days: number, extra: object = {}) => ({ ...casual, mode: 'intro', rated: true, timeControl: null, daysPerMove: days, ...extra });
 
-  it('creates games with an account and 1, 3 or 7 days per move', async () => {
+  it('creates games with an account and 1, 3, 7 or 14 days per move', async () => {
     server = await startServer();
     const anon = client();
     const a = client();
@@ -1021,6 +1021,8 @@ describe('correspondence', () => {
     const link = await a.request<ChallengeView>('POST', '/api/challenges', corr(3));
     expect(link.data.settings).toMatchObject({ daysPerMove: 3, timeControl: null, rated: true });
     expect((await anon.request('POST', `/api/challenges/${link.data.id}/accept`)).data).toMatchObject({ code: 'correspondenceNeedsAccount' });
+    expect((await a.request<ChallengeView>('POST', '/api/challenges', corr(14))).data.settings).toMatchObject({ daysPerMove: 14, rated: true });
+    expect((await a.request('POST', '/api/challenges', corr(10))).data).toMatchObject({ code: 'invalidDaysPerMove' });
   });
 
   it('keeps a seek in the lobby for days, with its owner away or playing, and pairs it only with the same pace', async () => {
@@ -1116,6 +1118,20 @@ describe('correspondence', () => {
     const ended = await a.waitGame(id, (g) => g.status === 'ended');
     expect(ended.outcome).toEqual({ winner: 'black', reason: 'timeout' });
     expect(ended.players.white.ratingDiff).not.toBeNull();
+
+    // 14 days: still on time a minute before the deadline, lost on it.
+    ({ id } = await startGame(a, b, corr(14)));
+    view = (await a.request<GameView>('GET', `/api/games/${id}`)).data;
+    expect(view.deadlineIn).toBe(14 * day);
+    view = await play(a, b, view);
+    view = await play(b, a, view);
+    expect(view.deadlineIn).toBe(14 * day);
+    now += 14 * day - 60_000;
+    server.app.games.get(id)!.tick();
+    expect((await a.request<GameView>('GET', `/api/games/${id}`)).data.status).toBe('started');
+    now += 60_000;
+    server.app.games.get(id)!.tick();
+    expect((await a.waitGame(id, (g) => g.status === 'ended')).outcome).toEqual({ winner: 'black', reason: 'timeout' });
   });
 });
 

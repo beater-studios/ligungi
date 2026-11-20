@@ -60,7 +60,7 @@ export const en: Messages = {
     invalidInitialTime: 'Initial time must be between 1 and 180 minutes.',
     invalidByoyomi: 'Invalid byo-yomi: pick the seconds per move and 1 to 3 periods, with no increment.',
     invalidIncrement: 'Increment must be between 0 and 180 seconds.',
-    invalidDaysPerMove: 'Correspondence games give 1, 3 or 7 days per move, without a clock.',
+    invalidDaysPerMove: 'Correspondence games give 1, 3, 7 or 14 days per move, without a clock.',
     correspondenceNeedsAccount: 'Sign in to play by correspondence.',
     unlimitedNotRated: 'Games without a clock cannot be rated.',
     invalidDraftOption: 'Invalid draft option.',

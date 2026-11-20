@@ -10,7 +10,7 @@ export const ERROR_MESSAGES = {
   invalidInitialTime: 'Tempo inicial deve ficar entre 1 e 180 minutos.',
   invalidByoyomi: 'Byo-yomi inválido: escolha os segundos por lance e de 1 a 3 períodos, sem incremento.',
   invalidIncrement: 'Incremento deve ficar entre 0 e 180 segundos.',
-  invalidDaysPerMove: 'Na correspondência, o prazo por lance é de 1, 3 ou 7 dias, sem relógio.',
+  invalidDaysPerMove: 'Na correspondência, o prazo por lance é de 1, 3, 7 ou 14 dias, sem relógio.',
   correspondenceNeedsAccount: 'Entre na sua conta para jogar por correspondência.',
   unlimitedNotRated: 'Partidas sem relógio não valem rating.',
   invalidDraftOption: 'Opção de draft inválida.',

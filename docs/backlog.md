@@ -61,7 +61,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
-| Record a game played on a physical board (kifu), move by move with players and result | Gungi has an official physical board; owners could record home games and analyse them here. Import already opens a written game in the analysis board; what is missing is a screen to enter it move by move with names, date and result, saved to the account | S | High | libaduk |
 | Computer analysis in the browser (evaluation, best line, mistakes in a finished game) | Core study tool on lichess-style sites. Needs a stronger engine | L | Medium | lichess, lishogi |
 | Learn from your mistakes: replay the critical moments of your own games | The most loved study feature on lichess. Needs the computer analysis | M | Medium | lichess |
 | Record a physical board with the camera | Computer vision; a strong differentiator | XL | Low | libaduk |

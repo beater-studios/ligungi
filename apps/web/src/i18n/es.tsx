@@ -61,7 +61,7 @@ export const es: Messages = {
     invalidInitialTime: 'El tiempo inicial debe estar entre 1 y 180 minutos.',
     invalidByoyomi: 'Byo-yomi no válido: elige los segundos por jugada y de 1 a 3 periodos, sin incremento.',
     invalidIncrement: 'El incremento debe estar entre 0 y 180 segundos.',
-    invalidDaysPerMove: 'Por correspondencia, el plazo por jugada es de 1, 3 o 7 días, sin reloj.',
+    invalidDaysPerMove: 'Por correspondencia, el plazo por jugada es de 1, 3, 7 o 14 días, sin reloj.',
     correspondenceNeedsAccount: 'Entra en tu cuenta para jugar por correspondencia.',
     unlimitedNotRated: 'Las partidas sin reloj no son puntuables.',
     invalidDraftOption: 'Opción de draft no válida.',

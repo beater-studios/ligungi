@@ -3531,10 +3531,10 @@ body:has(main.ligungi-auth) #clinput {
     line-height: 1.1;
   }
 
-  // Periods read as one more row of the clock: the label beside three small buttons.
-  &__box .ligungi-choice:has([name='cg-periods']) {
+  // Byo-yomi seconds and periods read as more rows of the clock, like the sliders: the label beside the buttons.
+  &__box .ligungi-choice:has([name='cg-byoyomi'], [name='cg-periods']) {
     display: grid;
-    grid-template-columns: 9rem minmax(0, 12rem);
+    grid-template-columns: 9rem minmax(0, 1fr);
     align-items: center;
     gap: 0.75rem;
 

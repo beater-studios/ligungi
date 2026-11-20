@@ -15,6 +15,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Changed
 
+- Correspondence games can also give 14 days per move, besides 1, 3 and 7.
+- In the create a game dialog, the byo-yomi seconds are buttons, like the periods below them.
 - The challenges icon in the header is now a bell, since it lists more than challenges.
 
 ### Fixed

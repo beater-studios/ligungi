@@ -142,7 +142,14 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
               <Slider id="cg-minutes" label={t.create.minutes} values={byo ? BYOYOMI_MINUTES : MINUTES} value={minutes} onChange={setMinutes} />
               {byo ? (
                 <>
-                  <Slider id="cg-byoyomi" label={t.create.byoyomiSeconds} values={BYOYOMI_SECONDS} value={byoyomi} format={(s) => `${s} s`} onChange={setByoyomi} />
+                  <OptionCards
+                    name="cg-byoyomi"
+                    legend={t.create.byoyomiSeconds}
+                    layout="segmented"
+                    value={byoyomi}
+                    options={BYOYOMI_SECONDS.map((s) => ({ value: s, label: `${s} s` }))}
+                    onChange={setByoyomi}
+                  />
                   <OptionCards
                     name="cg-periods"
                     legend={t.create.periods}
@@ -163,10 +170,9 @@ export const CreateGame = ({ target, to, onClose }: { target: CreateTarget; to?:
               <OptionCards
                 name="cg-days"
                 legend={t.create.daysPerMove}
-                hideLegend
                 layout="segmented"
                 value={days}
-                options={CORRESPONDENCE_DAYS.map((n) => ({ value: n, label: t.daysPerMove(n) }))}
+                options={CORRESPONDENCE_DAYS.map((n) => ({ value: n, label: t.days(n) }))}
                 onChange={setDays}
               />
               <p class="ligungi-create__note">{t.create.correspondenceHelp}</p>

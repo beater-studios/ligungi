@@ -81,7 +81,7 @@ export const TIME_PRESETS: readonly TimeControl[] = [
 ];
 
 /** Days per move offered for correspondence games. */
-export const CORRESPONDENCE_DAYS: readonly number[] = [1, 3, 7];
+export const CORRESPONDENCE_DAYS: readonly number[] = [1, 3, 7, 14];
 
 /** How long a correspondence challenge or seek waits for an answer, against two hours for other challenges. */
 export const CORRESPONDENCE_WAIT_DAYS = 7;

@@ -19,6 +19,8 @@
     "preact": "11.2.0"
   },
   "devDependencies": {
+    "axe-core": "4.14.0",
+    "jsdom": "31.0.0",
     "preact-render-to-string": "6.8.2",
     "sass-embedded": "1.108.0",
     "typescript": "7.0.2",

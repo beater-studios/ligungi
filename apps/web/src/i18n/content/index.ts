@@ -1,13 +1,13 @@
-import { prefs, resolveLang, type Lang } from '../../prefs.ts';
+import { useEffect } from 'preact/hooks';
+import { prefs, resolveLang } from '../../prefs.ts';
 import { useStore } from '../../store.ts';
-import { en } from './en.tsx';
-import { es } from './es.tsx';
-import { pt } from './pt.tsx';
-import type { Content } from './shared.tsx';
+import { loads, loadPages, pageSource, type LongPage } from './pages.ts';
 
-const CONTENT: Readonly<Record<string, Content>> = { pt, en, es };
+export { LEGAL_UPDATED, LONG_PAGES, loadAllPages, loadPages, pageSource, type LongPage } from './pages.ts';
 
-/** The long pages in a language; in English until they are translated (they are not on the translation platform yet). */
-export const contentFor = (lang: Lang): Content => CONTENT[lang] ?? en;
-
-export const useContent = (): Content => contentFor(resolveLang(useStore(prefs).lang));
+export const usePage = (page: LongPage): string | null => {
+  const lang = resolveLang(useStore(prefs).lang);
+  useStore(loads);
+  useEffect(() => void loadPages(lang), [lang]);
+  return pageSource(lang, page);
+};

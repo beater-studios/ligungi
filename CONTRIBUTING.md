@@ -58,7 +58,7 @@ The site is translated by volunteers. The plan is [Weblate](https://weblate.org/
 - A language appears in the language menu once 80% of its messages are translated.
 - The messages under `pieces` are the piece names: `names` in full, `short` for the move list (an abbreviation only for names longer than 9 letters, otherwise the same name) and `letters`, two letters for the letters piece style. No two pieces may share their name or their letters, or the site keeps the English set.
 - The lists under `blind.words` are other words a player may type in the screen reader mode, one per line, written without accents. The English words always work too.
-- The long pages (about, FAQ, terms, privacy) are not on Weblate yet and stay in English for new languages.
+- The long pages (about, FAQ, contact, friendly sites, terms, privacy and the rule sources) are Markdown files in `apps/web/src/i18n/content/<language>/`, one per page, translated from the English ones in `en/`. Keep the links as they are: the part in parentheses names a page of the site (`/learn`) or an address the site knows (`lila`), and other links are not shown. Keep `{email}` and `{sources}` too. In the FAQ, each `## ` heading is a question. A page you have not translated shows in English.
 
 ## Commits and pull requests
 

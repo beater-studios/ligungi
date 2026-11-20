@@ -215,11 +215,11 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
 
   return (
     <main class="ligungi-page ligungi-lesson">
-      <nav class="ligungi-lesson__crumbs">
+      <div class="ligungi-lesson__crumbs">
         <a href="/lessons" data-icon={icons.Back} class="text">
           {t.lessons.map}
         </a>
-      </nav>
+      </div>
       <div class="ligungi-lesson__layout">
         <section class="ligungi-card ligungi-lesson__panel">
           <p class="ligungi-lesson__stage">

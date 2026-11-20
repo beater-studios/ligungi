@@ -413,10 +413,10 @@ main.page-menu {
   display: grid;
   gap: 1em;
 
-  h3 {
+  h2 {
     font-size: 1em;
     font-weight: 700;
-    margin-bottom: 0.4em;
+    margin: 0 0 0.4em;
     color: $c-font-dim;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -8940,7 +8940,7 @@ $lesson-star: #e8a800;
   justify-content: center;
   gap: 0.3rem;
 
-  h3 {
+  h2 {
     margin: 0;
     color: $c-font-dim;
     font-size: 0.75rem;

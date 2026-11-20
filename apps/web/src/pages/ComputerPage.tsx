@@ -173,6 +173,7 @@ export const ComputerPage = () => {
 
   return (
     <RoundLayout
+      heading={t.computer.title}
       training
       board={{
         position: local.position,

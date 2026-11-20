@@ -15,7 +15,7 @@ export const TowerPanel = ({ position, square, training = false }: { position: P
   const hidden = training && hidePieces && !peekPieces;
   return (
     <section class="ligungi-tower gg-palette">
-      <h3>{tower.length > 1 ? t.panels.tower(tower.length) : t.panels.piece}</h3>
+      <h2>{tower.length > 1 ? t.panels.tower(tower.length) : t.panels.piece}</h2>
       {tower.length === 0 || hidden ? (
         <p class="ligungi-notice">{hidden ? t.panels.hiddenHint : t.panels.towerHint}</p>
       ) : (
@@ -54,7 +54,7 @@ export const TowerStrip = ({ position, square }: { position: Position; square: S
         <p class="ligungi-tower-strip__hint">{t.panels.stripHint}</p>
       ) : (
         <>
-          <h3>{tower.length > 1 ? t.panels.tower(tower.length) : t.panels.piece}</h3>
+          <h2>{tower.length > 1 ? t.panels.tower(tower.length) : t.panels.piece}</h2>
           <ol>
             {[...tower]
               .map((piece, level) => ({ piece, level }))
@@ -87,7 +87,7 @@ export const DraftPanel = ({ position, names }: { position: Position; names: Rea
     position.board.reduce((sum, tower) => sum + tower.filter((piece) => piece.color === color).length, 0);
   return (
     <section class="ligungi-draft">
-      <h3>{t.panels.draft}</h3>
+      <h2>{t.panels.draft}</h2>
       <ul>
         {(['white', 'black'] as const).map((color) => (
           <li key={color} class={position.turn === color ? 'active' : ''}>

@@ -62,6 +62,7 @@ export const TvChannelPage = ({ channel }: { channel: TvChannel }) => {
   if (game) return <GamePage id={game.id} tv={list} />;
   return (
     <main class="ligungi-page ligungi-tv-channel-page">
+      <h1 class="ligungi-sr-only">{t.tv.title}</h1>
       {list}
       <p class="ligungi-card ligungi-tv__empty">{channels === null ? (failed ? t.genericError : t.common.loading) : t.tv.channelEmpty}</p>
     </main>

@@ -581,7 +581,8 @@
     "rematchOffered": "Revanche proposta",
     "rematch": "Revanche",
     "premove": "Pré-lance: {move}. Clique no tabuleiro para cancelar.",
-    "export": "Exportar"
+    "export": "Exportar",
+    "heading": "{white} contra {black}"
   },
   "computer": {
     "fromPosition": "A partida começa da posição abaixo ({mode}, vez do {turn, select, white {Branco} other {Preto}}).",
@@ -786,7 +787,8 @@
     "hint": "Siga jogadores pelo perfil deles para vê-los aqui. Em Conta, nos desafios, você pode deixar que só quem você segue desafie você."
   },
   "info": {
-    "pages": "Páginas"
+    "pages": "Páginas",
+    "updated": "Última atualização: {date}."
   },
   "lessons": {
     "title": "Lições",

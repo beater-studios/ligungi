@@ -158,6 +158,7 @@ export const AnalysisPage = () => {
 
   return (
     <main class={`analyse variant-crazyhouse${tap.strip ? ' ligungi-has-strip' : ''}`}>
+      <h1 class="ligungi-sr-only">{t.analysis.title}</h1>
       <div class="analyse__side">
         <div class="game__meta">
           <section>

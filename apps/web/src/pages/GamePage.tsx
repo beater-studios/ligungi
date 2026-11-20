@@ -442,6 +442,7 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
 
   return (
     <RoundLayout
+      heading={t.game.heading(playerName(t, view.players.white), playerName(t, view.players.black))}
       training={!view.rated}
       board={{
         // A move waiting for Confirm is shown played, and the board waits for the answer.

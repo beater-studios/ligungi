@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import { renderToString } from 'preact-render-to-string';
 import { describe, expect, it } from 'vitest';
 import { languages, MIN_COVERAGE, offeredLanguages } from '../scripts/languages.ts';
+import { faqItems, Markdown, markdownProblems } from '../src/i18n/content/markdown.tsx';
+import { LEGAL_UPDATED, LONG_PAGES, usablePage } from '../src/i18n/content/pages.ts';
 import { argumentsOf, checkMessage, formatParts, formatText, IcuError, tagsOf } from '../src/i18n/icu.ts';
 import { LANGS, matchLang } from '../src/i18n/languages.ts';
 import { buildMessages, ENGLISH, loadAllLanguages, messagesFor, usable, type Json } from '../src/i18n/messages.ts';
@@ -136,5 +138,58 @@ describe('languages', () => {
     );
     expect(renderToString(<>{ENGLISH.friends.summary(1, 2)}</>)).toBe('You follow <strong>1</strong> player · <strong class="ligungi-friends-page__online">2 online</strong>');
     expect(renderToString(<>{ENGLISH.study.by(<b>Ana</b>)}</>)).toBe('by <b>Ana</b>');
+  });
+});
+
+describe('long pages', () => {
+  const CONTENT = fileURLToPath(new URL('../src/i18n/content', import.meta.url));
+  const html = (source: string) => renderToString(<Markdown source={source} sources={<p>S</p>} />);
+
+  it('renders the Markdown subset', () => {
+    expect(html('## Title\n\nSome **bold** and [a page](/learn).\n\n- one\n- [two](lila)\n\n1. first\n2. second\n\n{sources}\n\nWrite to {email}.')).toBe(
+      '<h2>Title</h2><p>Some <b>bold</b> and <a href="/learn">a page</a>.</p><ul><li>one</li><li><a href="https://github.com/lichess-org/lila" target="_blank" rel="noopener noreferrer">two</a></li></ul><ol><li>first</li><li>second</li></ol><p>S</p><p>Write to <a href="mailto:contato@ligungi.org">contato@ligungi.org</a>.</p>',
+    );
+    expect(faqItems('## Q1?\n\nA1.\n\n## Q2?\n\nA2.\n\n- x')).toEqual([
+      { q: 'Q1?', a: 'A1.' },
+      { q: 'Q2?', a: 'A2.\n\n- x' },
+    ]);
+  });
+
+  it('never links where the code does not', () => {
+    expect(html('[bad](https://evil.example) and [worse](javascript:alert(1)) <script>x</script>')).toBe(
+      '<p>bad and worse) &lt;script>x&lt;/script></p>',
+    );
+    expect(markdownProblems('[bad](https://evil.example) {name} **open')).toHaveLength(3);
+    expect(usablePage('contact', 'Write to us.')).toBe(false);
+    expect(usablePage('contact', 'Write to {email}.')).toBe(true);
+  });
+
+  it('are usable in every language that has them', () => {
+    for (const lang of readdirSync(CONTENT, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name)) {
+      for (const page of LONG_PAGES) {
+        const file = `${CONTENT}/${lang}/${page}.md`;
+        let source: string;
+        try {
+          source = readFileSync(file, 'utf8');
+        } catch {
+          expect(lang, `${page} is missing in English`).not.toBe('en');
+          continue;
+        }
+        expect(markdownProblems(source), `${lang}/${page}`).toEqual([]);
+        expect(usablePage(page, source), `${lang}/${page}`).toBe(true);
+        if (page === 'faq') expect(faqItems(source).length, lang).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('dates the legal pages in each language', async () => {
+    await loadAllLanguages();
+    const date = (lang: string) => {
+      const t = messagesFor(lang);
+      return t.info.updated(new Date(`${LEGAL_UPDATED}T12:00:00Z`).toLocaleDateString(t.locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }));
+    };
+    expect(date('en')).toBe('Last updated: November 17, 2026.');
+    expect(date('pt')).toBe('Última atualização: 17 de novembro de 2026.');
+    expect(date('es')).toBe('Última actualización: 17 de noviembre de 2026.');
   });
 });

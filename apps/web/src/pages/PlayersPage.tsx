@@ -172,6 +172,7 @@ export const PlayersPage = () => {
   return (
     <main class="ligungi-page ligungi-players">
       <CommunityNav active="players" />
+      {!view && <h1 class="ligungi-sr-only">{t.nav.playerList}</h1>}
       {error && <p class="error">{error}</p>}
       {!view && !error && <p class="ligungi-notice">{t.common.loading}</p>}
       {view && (

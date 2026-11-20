@@ -581,7 +581,8 @@
     "rematchOffered": "Rematch offered",
     "rematch": "Rematch",
     "premove": "Premove: {move}. Click the board to cancel.",
-    "export": "Export"
+    "export": "Export",
+    "heading": "{white} against {black}"
   },
   "computer": {
     "fromPosition": "The game starts from the position below ({mode}, {turn, select, white {White} other {Black}} to move).",
@@ -786,7 +787,8 @@
     "hint": "Follow players from their profile to see them here. In Account, under challenges, you can let only the people you follow challenge you."
   },
   "info": {
-    "pages": "Pages"
+    "pages": "Pages",
+    "updated": "Last updated: {date}."
   },
   "lessons": {
     "title": "Lessons",

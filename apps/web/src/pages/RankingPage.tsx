@@ -151,6 +151,7 @@ export const RankingPage = ({ mode }: { mode?: Mode }) => {
   return (
     <main class="ligungi-page ligungi-ranking-page">
       <CommunityNav active="ranking" />
+      {!view && <h1 class="ligungi-sr-only">{t.nav.players}</h1>}
       {error && !view && <p class="error">{error}</p>}
       {!view && !error && <p class="ligungi-notice">{t.common.loading}</p>}
       {view && shown && (

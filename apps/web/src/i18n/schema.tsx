@@ -101,6 +101,7 @@ export const SCHEMA = {
   'auth.suspended': text<[until: string, reason: string]>('until', 'reason'),
   'auth.suspendedForever': text<[reason: string]>('reason'),
 
+  'game.heading': text<[white: string, black: string]>('white', 'black'),
   'game.giveTime': text<[seconds: number]>('seconds'),
   'game.periodsLeft': text<[n: number]>('n'),
   'game.premove': text<[move: string]>('move'),
@@ -149,6 +150,8 @@ export const SCHEMA = {
 
   'friends.login': rich<[]>(AUTH),
   'friends.summary': rich<[n: number, online: number]>({ strong, online: onlineCount }, 'n', 'online'),
+
+  'info.updated': text<[date: string]>('date'),
 
   'lessons.stage': text<[n: number]>('n'),
   'lessons.exerciseOf': text<[n: number, total: number]>('n', 'total'),

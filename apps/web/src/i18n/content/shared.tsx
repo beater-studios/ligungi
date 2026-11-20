@@ -1,4 +1,4 @@
-import type { ComponentChildren, JSX } from 'preact';
+import type { ComponentChildren } from 'preact';
 import { SOURCE_URL } from '../../source.ts';
 
 export const CONTACT_EMAIL = 'contato@ligungi.org';
@@ -33,20 +33,3 @@ export const Ext = ({ href, children }: { href: string; children: ComponentChild
 );
 
 export const Mail = () => <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>;
-
-export interface FaqItem {
-  readonly q: string;
-  readonly a: JSX.Element;
-}
-
-export interface Content {
-  readonly updated: string;
-  readonly about: JSX.Element;
-  readonly faq: readonly FaqItem[];
-  readonly contact: JSX.Element;
-  /** Friendly sites: the other sites built on lila, and other free board game sites. */
-  readonly sites: JSX.Element;
-  readonly terms: JSX.Element;
-  readonly privacy: JSX.Element;
-  readonly sources: JSX.Element;
-}

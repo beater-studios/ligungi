@@ -37,6 +37,8 @@ export interface RoundClock {
 }
 
 interface RoundLayoutProps {
+  /** The screen's name for screen readers, where the side panel has no heading of its own. */
+  readonly heading?: string;
   readonly board: BoardProps;
   readonly orientation: Color;
   readonly players: Readonly<Record<Color, RoundPlayer>>;
@@ -292,6 +294,7 @@ export const RoundLayout = (props: RoundLayoutProps) => {
 
   return (
     <main class="round">
+      {props.heading && <h1 class="ligungi-sr-only">{props.heading}</h1>}
       <aside class="round__side">
         {props.side}
         <BeginnerHint />

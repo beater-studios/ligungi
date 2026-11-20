@@ -690,6 +690,7 @@ export class Board implements Api {
     const node = this.#hands[slot];
     node.dataset.color = color;
     node.classList.toggle('gg-hand-active', active);
+    node.setAttribute('role', 'group');
     node.setAttribute('aria-label', `${labels.hand} (${colorLabel(color, labels)})`);
     node.innerHTML = ROLES.filter((role) => hand[role] > 0)
       .map((role) => {

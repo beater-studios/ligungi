@@ -63,7 +63,8 @@ The same panel (`BlindPanel`) serves every screen with a board, with what each s
 
 ### Testing
 
-- VoiceOver (macOS, iOS) and NVDA (Windows), plus an automated check (axe) on each screen. Not done yet: every screen was checked in a browser (focus, the board hidden from screen readers, the log filling in, typed moves and commands, the board by keyboard) but not with a real screen reader.
+- Automated: `apps/web/test/a11y.test.tsx` runs axe on every screen that renders without a server (in their empty or error state where they need one), with the screen reader mode on and off, plus a game against the computer in play, and checks that each screen has one `h1`. It runs in jsdom, which has no layout, so color contrast and sizes are not covered there.
+- Manual: VoiceOver (macOS, iOS) and NVDA (Windows). Not done yet: every screen was checked in a browser (focus, the board hidden from screen readers, the log filling in, typed moves and commands, the board by keyboard) but not with a real screen reader. Color contrast is checked by hand in both themes.
 - Before calling it done, a player who uses a screen reader every day tries it.
 
 ## Screen map
@@ -101,4 +102,5 @@ What each screen shows only visually, and what blind mode needs there. Status: *
 - Anything that changes on its own (a move, a result, a timer running out) is also announced in text, not only drawn.
 - Anything shown on a board or a chart can also be read as text.
 - The screen map above says what blind mode will need on this screen.
-- When the screen reader mode reaches a new screen, also update what the site says about it: the screen reader question of the FAQ (`src/i18n/content/`), `accessibilitySummary` in the home's JSON-LD (`src/seo.ts`) and the summary of `llms.txt` (`scripts/prerender.ts`).
+- The screen has one `h1` (`ligungi-sr-only` when the design shows none) and its path is in `PATHS` of `apps/web/test/a11y.test.tsx`, which must pass.
+- When the screen reader mode reaches a new screen, also update what the site says about it: the screen reader question of the FAQ (`src/i18n/content/*/faq.md`), `accessibilitySummary` in the home's JSON-LD (`src/seo.ts`) and the summary of `llms.txt` (`scripts/prerender.ts`).

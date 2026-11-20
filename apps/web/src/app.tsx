@@ -377,7 +377,7 @@ const Header = () => {
             ligungi<span>.org</span>
           </div>
         </a>
-        <nav id="topnav" class="hover">
+        <nav id="topnav" class="hover" aria-label={t.nav.navigation}>
           <section>
             <a href="/">
               <span class="play">{t.nav.play}</span>

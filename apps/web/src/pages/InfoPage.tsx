@@ -1,6 +1,7 @@
 import { useEffect } from 'preact/hooks';
 import { CookiePreferences } from '../components/Consent.tsx';
-import { useContent } from '../i18n/content/index.ts';
+import { LEGAL_UPDATED, usePage } from '../i18n/content/index.ts';
+import { faqItems, Markdown } from '../i18n/content/markdown.tsx';
 import { useT } from '../i18n/index.ts';
 
 export const INFO_KINDS = ['about', 'faq', 'contact', 'sites', 'terms', 'privacy'] as const;
@@ -11,7 +12,8 @@ export const isInfoKind = (value: string): value is InfoKind => (INFO_KINDS as r
 /** About, FAQ, contact, friendly sites and legal pages: a menu between them beside (on phones above) the article. */
 export const InfoPage = ({ kind }: { kind: InfoKind }) => {
   const t = useT();
-  const content = useContent();
+  const source = usePage(kind);
+  const sources = usePage('sources');
   const dated = kind === 'terms' || kind === 'privacy';
   // On phones the menu is a row that scrolls sideways: centre the current page's chip by scrolling the row only, never the page.
   useEffect(() => {
@@ -30,19 +32,25 @@ export const InfoPage = ({ kind }: { kind: InfoKind }) => {
       </nav>
       <article class="ligungi-card ligungi-info__article">
         <h1>{t.nav[kind]}</h1>
-        {dated && <p class="ligungi-notice">{content.updated}</p>}
+        {dated && (
+          <p class="ligungi-notice">
+            {t.info.updated(new Date(`${LEGAL_UPDATED}T12:00:00Z`).toLocaleDateString(t.locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }))}
+          </p>
+        )}
         <div class="ligungi-info__body">
-          {kind === 'faq' ? (
+          {source === null ? null : kind === 'faq' ? (
             <div class="ligungi-faq">
-              {content.faq.map((item, index) => (
+              {faqItems(source).map((item, index) => (
                 <details key={item.q} open={index === 0}>
                   <summary>{item.q}</summary>
-                  <div class="ligungi-faq__answer">{item.a}</div>
+                  <div class="ligungi-faq__answer">
+                    <Markdown source={item.a} />
+                  </div>
                 </details>
               ))}
             </div>
           ) : (
-            content[kind]
+            <Markdown source={source} sources={sources !== null && <Markdown source={sources} />} {...(kind === 'sites' ? { listClass: 'ligungi-sites' } : {})} />
           )}
           {kind === 'privacy' && <CookiePreferences />}
         </div>

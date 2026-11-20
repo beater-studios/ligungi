@@ -1,5 +1,6 @@
 import type { Messages } from './i18n/index.ts';
 import { LINKS, STUDIO } from './i18n/content/shared.tsx';
+import { localeOf } from './i18n/languages.ts';
 import { LANGS, type Lang } from './prefs.ts';
 import { SITE_URL, SOURCE_URL } from './source.ts';
 
@@ -47,8 +48,9 @@ export const PAGES: readonly Page[] = (
  */
 const PRIVATE = /^\/(account(\/(privacy|security|data))?|friends|settings|design|login|signup|mod|puzzles\/dashboard|study\/[A-Za-z0-9]+)$/;
 
-export const OG_LOCALES: Readonly<Record<Lang, string>> = { pt: 'pt_BR', en: 'en_US', es: 'es_ES' };
-export const HTML_LANGS: Readonly<Record<Lang, string>> = { pt: 'pt-BR', en: 'en', es: 'es' };
+/** Open Graph wants language_TERRITORY; the languages without a territory in their tag get their main one. */
+const OG_TERRITORIES: Readonly<Record<string, string>> = { en: 'en_US', es: 'es_ES' };
+const ogLocale = (lang: Lang): string => OG_TERRITORIES[lang] ?? localeOf(lang).replace('-', '_');
 
 export const OG_IMAGE = { path: '/og.png', width: 1200, height: 630 } as const;
 
@@ -96,7 +98,7 @@ const homeData = (t: Messages, lang: Lang): object => ({
       '@type': 'WebSite',
       name: 'ligungi',
       url: `${SITE_URL}/`,
-      inLanguage: LANGS.map((code) => HTML_LANGS[code]),
+      inLanguage: LANGS.map(localeOf),
       description: t.seo.pages.default.description,
       publisher: organization,
     },
@@ -108,7 +110,7 @@ const homeData = (t: Messages, lang: Lang): object => ({
       applicationCategory: 'GameApplication',
       genre: 'Board game',
       operatingSystem: 'Any (web browser)',
-      inLanguage: HTML_LANGS[lang],
+      inLanguage: localeOf(lang),
       isAccessibleForFree: true,
       offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' },
       license: LINKS.agpl,
@@ -152,8 +154,8 @@ export const headHtml = ({ t, lang, page, fixedLang, faq }: HeadOptions): string
     `<meta property="og:image:width" content="${OG_IMAGE.width}" />`,
     `<meta property="og:image:height" content="${OG_IMAGE.height}" />`,
     `<meta property="og:image:alt" content="${escape(t.seo.imageAlt)}" />`,
-    `<meta property="og:locale" content="${OG_LOCALES[lang]}" />`,
-    ...LANGS.filter((code) => code !== lang).map((code) => `<meta property="og:locale:alternate" content="${OG_LOCALES[code]}" />`),
+    `<meta property="og:locale" content="${ogLocale(lang)}" />`,
+    ...LANGS.filter((code) => code !== lang).map((code) => `<meta property="og:locale:alternate" content="${ogLocale(code)}" />`),
     `<meta name="twitter:card" content="summary_large_image" />`,
   ];
   if (page) {
@@ -161,7 +163,7 @@ export const headHtml = ({ t, lang, page, fixedLang, faq }: HeadOptions): string
     tags.push(
       `<link rel="canonical" href="${canonical}" />`,
       `<meta property="og:url" content="${canonical}" />`,
-      ...LANGS.map((code) => `<link rel="alternate" hreflang="${HTML_LANGS[code]}" href="${pageUrl(page.path, code)}" />`),
+      ...LANGS.map((code) => `<link rel="alternate" hreflang="${localeOf(code)}" href="${pageUrl(page.path, code)}" />`),
       `<link rel="alternate" hreflang="x-default" href="${pageUrl(page.path)}" />`,
     );
     if (page.key === 'home') tags.push(jsonLd(homeData(t, lang)));

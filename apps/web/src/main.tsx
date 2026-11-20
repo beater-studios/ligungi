@@ -6,13 +6,14 @@ import './styles/ligungi.scss';
 import { render } from 'preact';
 import { App } from './app.tsx';
 import { watchIncoming } from './challenges.ts';
-import './prefs.ts';
+import { loadLanguage } from './i18n/index.ts';
+import { prefs, resolveLang } from './prefs.ts';
 import { loadSession } from './session.ts';
 import { socket } from './socket.ts';
 
 const root = document.getElementById('app')!;
 
-loadSession()
+Promise.all([loadSession().catch(() => undefined), loadLanguage(resolveLang(prefs.get().lang))])
   .catch(() => undefined)
   .finally(() => {
     watchIncoming();

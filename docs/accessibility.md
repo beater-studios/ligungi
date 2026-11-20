@@ -44,7 +44,7 @@ The visual board stays on screen for a sighted helper, hidden from screen reader
 | `r` | the clocks |
 | `done`, `resign` (typed twice to confirm), `draw` (offers, or accepts an offer), `help` | what they say; `resign` and `draw` only in online games |
 
-An ambiguous move lists numbered options ("1: Samurai from 4-8. 2: Samurai from 5-8."); typing the number picks one. Short letters and whole words both work (`p` or `position`), in the interface language.
+An ambiguous move lists numbered options ("1: Samurai from 4-8. 2: Samurai from 5-8."); typing the number picks one. Short letters and whole words both work (`p` or `position`), in the interface language and in English (the words of each language are translated with the site, under `blind.words`). Piece names work in the interface language, in English and as the Japanese readings.
 
 **3. The board by keyboard**, under the log, folded by default (`<details>`): the 81 squares as buttons. Arrow keys move between them, each square is read ("4-7, black Samurai over white Soldier, tier 2"), Enter picks a piece and then its destination. The hands are a list under it.
 

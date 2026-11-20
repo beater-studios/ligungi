@@ -6,7 +6,8 @@ import { initialPosition, legalMoves, topOf } from '@ligungi/engine';
 import { customBoardStyle, DEFAULT_CUSTOM_BOARD, type BoardWarning } from '../boardColors.ts';
 import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../pieceColors.ts';
 import { Checkbox, ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
-import { MESSAGES, themeLabel, useT, type Messages } from '../i18n/index.ts';
+import { setLanguage, themeLabel, useT, type Messages } from '../i18n/index.ts';
+import { languageName } from '../i18n/languages.ts';
 import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../looks.tsx';
 import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, BYOYOMI_COUNTS, CONFIRM_MOVES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, SOUND_SETS, SPEECH_PLACES, SPEECH_STYLES, SPOKEN_MOVES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs, type SpeechPlace } from '../prefs.ts';
 import { enableNotifications, notifyPermission } from '../notify.ts';
@@ -164,7 +165,7 @@ export const SettingsPage = () => {
     key: K,
     title: string,
     options: Array<[Prefs[K], string]>,
-    extra: { help?: ComponentChildren; layout?: 'row' | 'segmented' } = {},
+    extra: { help?: ComponentChildren; layout?: 'row' | 'segmented'; onChange?: (value: Prefs[K]) => void } = {},
   ) => (
     <div class="ligungi-setting">
       <OptionCards
@@ -173,7 +174,7 @@ export const SettingsPage = () => {
         layout={extra.layout ?? 'segmented'}
         value={current[key]}
         options={options.map(([value, label]) => ({ value, label }))}
-        onChange={(value) => updatePrefs({ [key]: value } as Partial<Prefs>)}
+        onChange={(value) => (extra.onChange ? extra.onChange(value) : updatePrefs({ [key]: value } as Partial<Prefs>))}
         {...(extra.help !== undefined ? { help: extra.help } : {})}
       />
     </div>
@@ -195,7 +196,7 @@ export const SettingsPage = () => {
         </nav>
         <form class="form3 ligungi-prefs" onSubmit={(e) => e.preventDefault()}>
           <Group id="prefs-appearance" title={s.groupAppearance} help={s.groupAppearanceHelp} preview={<PiecePreview />}>
-            {choice('lang', s.language, [['auto', s.auto], ...LANGS.map((lang): [Prefs['lang'], string] => [lang, MESSAGES[lang].languageName])])}
+            {choice('lang', s.language, [['auto', s.auto], ...LANGS.map((lang): [Prefs['lang'], string] => [lang, languageName(lang)])], { onChange: (lang) => void setLanguage(lang) })}
             {choice('theme', s.theme, THEMES.map((theme) => [theme, themeLabel(t, theme)]))}
             {choice('boardView', s.boardView, BOARD_VIEWS.map((view) => [view, s.boardViews[view]]), { help: s.boardViewHelp })}
             {choice(

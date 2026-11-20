@@ -2,25 +2,34 @@ import type { PieceNames } from '@ligungi/board';
 import type { Outcome } from '@ligungi/engine';
 import { DAY_MS, formatTimeControl, isErrorCode, type GameSettings, type TimeControl } from '@ligungi/protocol';
 import type { ColorChoice } from '@ligungi/protocol';
-import { prefs, resolveLang, type Lang, type Theme } from '../prefs.ts';
+import { prefs, resolveLang, updatePrefs, type Prefs, type Theme } from '../prefs.ts';
 import { useStore } from '../store.ts';
-import { en } from './en.tsx';
-import { es } from './es.tsx';
-import { pt, type Messages } from './pt.tsx';
+import { ENGLISH, listText, loadAllLanguages, loadLanguage, loads, messagesFor, pieceNamesFor, type Messages } from './messages.ts';
 
-export type { Messages };
+export { ENGLISH, listText, loadAllLanguages, loadLanguage, messagesFor, pieceNamesFor, type Messages };
 
-export const MESSAGES: Readonly<Record<Lang, Messages>> = { pt, en, es };
+/** Switches the language once its messages are in, so the page does not show English in between. */
+export const setLanguage = async (lang: Prefs['lang']): Promise<void> => {
+  await loadLanguage(resolveLang(lang));
+  updatePrefs({ lang });
+};
+
+// A language chosen another way (another tab, the browser languages) loads too.
+prefs.subscribe(() => void loadLanguage(resolveLang(prefs.get().lang)));
 
 /** Messages for code outside components (API errors, document title). */
-export const getT = (): Messages => MESSAGES[resolveLang(prefs.get().lang)];
+export const getT = (): Messages => messagesFor(resolveLang(prefs.get().lang));
 
-export const useT = (): Messages => MESSAGES[resolveLang(useStore(prefs).lang)];
-
-export const usePieceNames = (): PieceNames => {
-  const { lang, pieceNames } = useStore(prefs);
-  return pieceNames === 'ja' ? 'ja' : resolveLang(lang);
+export const useT = (): Messages => {
+  useStore(loads);
+  return messagesFor(resolveLang(useStore(prefs).lang));
 };
+
+export const usePieceNames = (): PieceNames => pieceNamesFor(useT(), useStore(prefs).pieceNames);
+
+/** The non-zero counts of an activity entry: "2 wins, 1 loss". */
+export const activityRecord = (t: Messages, wins: number, draws: number, losses: number): string =>
+  [wins && t.activity.wins(wins), draws && t.activity.draws(draws), losses && t.activity.losses(losses)].filter(Boolean).join(', ');
 
 /** Players without an account are stored with a placeholder name; show it in the reader's language. */
 export const playerName = (t: Messages, player: { readonly name: string; readonly user: unknown }): string =>

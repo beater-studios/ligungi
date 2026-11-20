@@ -1,13 +1,17 @@
 import { defineConfig } from 'vite';
+import { fileURLToPath } from 'node:url';
 import { buildCommit, buildVersion } from '../../scripts/build-info.ts';
+import { offeredLanguages } from './scripts/languages.ts';
 
 const server = process.env.LIGUNGI_SERVER ?? 'http://localhost:4000';
+const locales = fileURLToPath(new URL('./src/i18n/locales', import.meta.url));
 
 export default defineConfig(({ isSsrBuild }) => ({
   oxc: { jsx: { runtime: 'automatic', importSource: 'preact' } },
   define: {
     __LIGUNGI_VERSION__: JSON.stringify(buildVersion()),
     __LIGUNGI_COMMIT__: JSON.stringify(buildCommit()),
+    __LIGUNGI_LANGUAGES__: JSON.stringify(offeredLanguages(locales).map(({ code, locale, name }) => ({ code, locale, name }))),
   },
   css: {
     preprocessorOptions: {

@@ -10,7 +10,7 @@ A free platform to play Gungi (軍儀), the board game from HUNTER×HUNTER, onli
 - Optional accounts, Glicko-2 rating per mode, leaderboards, following other players, and profiles with a filterable game history.
 - Play against the computer (in the browser), analysis board, live games, and a rules page with diagrams and an interactive piece trainer.
 - All 4 official modes: Introductory, Beginner, Intermediate and Advanced (with the draft).
-- Interface in Portuguese, English and Spanish.
+- Interface in Portuguese, English and Spanish, open to more languages translated by volunteers.
 
 ## Documentation
 

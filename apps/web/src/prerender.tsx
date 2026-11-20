@@ -6,14 +6,18 @@ import type { VNode } from 'preact';
 import { renderToString } from 'preact-render-to-string';
 import { App } from './app.tsx';
 import { consent } from './consent.ts';
-import { CONTENT } from './i18n/content/index.ts';
-import { MESSAGES } from './i18n/index.ts';
+import { contentFor } from './i18n/content/index.ts';
+import { loadAllLanguages, messagesFor } from './i18n/index.ts';
+import { localeOf } from './i18n/languages.ts';
 import { LANGS, prefs, type Lang } from './prefs.ts';
 import { navigate } from './router.ts';
-import { HTML_LANGS, PAGES, headHtml, pageUrl, type Page } from './seo.ts';
+import { PAGES, headHtml, pageUrl, type Page } from './seo.ts';
 import { SITE_URL } from './source.ts';
 
-export { HTML_LANGS, LANGS, PAGES, SITE_URL, pageUrl };
+export { LANGS, PAGES, SITE_URL, localeOf, pageUrl };
+
+/** Loads every language's messages; call it before rendering. */
+export const ready = loadAllLanguages;
 
 // Crawlers never answer the cookie notice; keep it out of the indexed text.
 consent.set('rejected');
@@ -36,10 +40,10 @@ export interface Rendered {
 export const renderPage = (page: Page, lang: Lang, fixedLang: boolean): Rendered => {
   prefs.set({ ...prefs.get(), lang });
   navigate(page.path, false, false);
-  const t = MESSAGES[lang];
-  const faq = page.key === 'faq' ? CONTENT[lang].faq.map(({ q, a }) => ({ q: plainText(q), a: plainText(a) })) : undefined;
+  const t = messagesFor(lang);
+  const faq = page.key === 'faq' ? contentFor(lang).faq.map(({ q, a }) => ({ q: plainText(q), a: plainText(a) })) : undefined;
   return {
-    lang: HTML_LANGS[lang],
+    lang: localeOf(lang),
     head: headHtml({ t, lang, page, fixedLang, ...(faq ? { faq } : {}) }),
     body: renderToString(<App />),
   };
@@ -47,7 +51,7 @@ export const renderPage = (page: Page, lang: Lang, fixedLang: boolean): Rendered
 
 /** Head of routes that are not prerendered (profiles, games): the language is right, the body stays empty. */
 export const renderShell = (lang: Lang): Rendered => ({
-  lang: HTML_LANGS[lang],
-  head: headHtml({ t: MESSAGES[lang], lang, page: null, fixedLang: false }),
+  lang: localeOf(lang),
+  head: headHtml({ t: messagesFor(lang), lang, page: null, fixedLang: false }),
   body: '',
 });

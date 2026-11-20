@@ -276,7 +276,7 @@ const DailyPuzzleCard = () => {
     api.get<DailyPuzzle>('/api/puzzles/daily').then(setDaily).catch(() => {});
   }, []);
   if (!daily) return null;
-  const task = daily.kind === 'mate' ? t.puzzles.taskMate(t.colors[daily.color], daily.moves) : t.puzzles.taskMaterial(t.colors[daily.color]);
+  const task = daily.kind === 'mate' ? t.puzzles.taskMate(daily.color, daily.moves) : t.puzzles.taskMaterial(daily.color);
   return (
     <section class="ligungi-card ligungi-home__daily">
       <div class="ligungi-home__card-head">

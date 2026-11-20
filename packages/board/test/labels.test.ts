@@ -1,10 +1,10 @@
 import { ROLES } from '@ligungi/engine';
 import { describe, expect, it } from 'vitest';
-import { pieceName, pieceShortName, type PieceNames } from '../src/index.ts';
+import { ENGLISH_PIECE_NAMES, JAPANESE_PIECE_NAMES, pieceName, pieceShortName } from '../src/index.ts';
 
 describe('piece names', () => {
   it('abbreviates only the long names for the move list, and never two pieces alike', () => {
-    for (const names of ['pt', 'en', 'es', 'ja'] as PieceNames[]) {
+    for (const names of [ENGLISH_PIECE_NAMES, JAPANESE_PIECE_NAMES]) {
       const short = ROLES.map((role) => pieceShortName(role, names));
       expect(new Set(short).size).toBe(ROLES.length);
       for (const role of ROLES) {
@@ -14,7 +14,6 @@ describe('piece names', () => {
         if (full.length <= 9) expect(abbreviated).toBe(full);
       }
     }
-    expect(pieceShortName('lieutenant', 'pt')).toBe('Ten.-Gen.');
-    expect(pieceShortName('major', 'en')).toBe('Maj. Gen.');
+    expect(pieceShortName('major', ENGLISH_PIECE_NAMES)).toBe('Maj. Gen.');
   });
 });

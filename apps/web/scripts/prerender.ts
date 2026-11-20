@@ -64,10 +64,11 @@ interface Page {
   readonly path: string;
   readonly slug: string;
 }
-type Lang = 'pt' | 'en' | 'es';
+type Lang = string;
 interface Prerender {
   readonly LANGS: readonly Lang[];
-  readonly HTML_LANGS: Readonly<Record<Lang, string>>;
+  readonly localeOf: (lang: Lang) => string;
+  readonly ready: () => Promise<unknown>;
   readonly PAGES: readonly Page[];
   readonly SITE_URL: string;
   readonly pageUrl: (path: string, lang?: Lang) => string;
@@ -77,6 +78,7 @@ interface Prerender {
 
 installBrowserShims();
 const app = (await import(pathToFileURL(join(root, 'dist-ssr', 'prerender.js')).href)) as Prerender;
+await app.ready();
 
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
 const SEO_BLOCK = /<!--seo-->[\s\S]*?<!--\/seo-->/;
@@ -104,7 +106,7 @@ for (const lang of app.LANGS) {
 
 const alternates = (path: string): string =>
   [
-    ...app.LANGS.map((lang) => `<xhtml:link rel="alternate" hreflang="${app.HTML_LANGS[lang]}" href="${app.pageUrl(path, lang)}"/>`),
+    ...app.LANGS.map((lang) => `<xhtml:link rel="alternate" hreflang="${app.localeOf(lang)}" href="${app.pageUrl(path, lang)}"/>`),
     `<xhtml:link rel="alternate" hreflang="x-default" href="${app.pageUrl(path)}"/>`,
   ].join('');
 const urls = app.PAGES.flatMap((page) =>
@@ -138,13 +140,15 @@ writeFileSync(
 
 // llms.txt (https://llmstxt.org): a short, link-rich summary for AI assistants. The full rules go in llms-full.txt.
 const en = (path: string) => app.pageUrl(path, 'en');
+const englishNames = new Intl.DisplayNames(['en'], { type: 'language' });
+const inWords = (items: readonly string[]) => new Intl.ListFormat('en', { type: 'conjunction' }).format(items);
 writeFileSync(
   join(dist, 'llms.txt'),
   `# ligungi
 
 > ligungi is a free, open source website to play Gungi online with the official 2022 rules. Gungi (軍儀) is the two-player strategy board game from the HUNTER×HUNTER manga, released as a physical game in 2022. It is similar to shogi, but pieces stack into towers of up to three and a taller tower extends the reach of the piece on top. ligungi is a fan project by Beater Studios, not affiliated with the rights holders.
 
-The site works like lichess: rated and casual games with Glicko-2 ratings, games against the computer, a free analysis board, studies, puzzles, interactive lessons, live games, leaderboards and a rules page with diagrams and an interactive piece trainer. It is available in Portuguese, English and Spanish; add \`?lang=pt\`, \`?lang=en\` or \`?lang=es\` to any page. The site can be used with a screen reader: a screen reader mode (Settings, or the top of the sign in page) announces every move in words, takes typed moves and questions about the position and offers a board moved through with the arrow keys, on every screen with a board. Source priority for the rules: the official 2022 rulebook, then the official Universal Music FAQ.
+The site works like lichess: rated and casual games with Glicko-2 ratings, games against the computer, a free analysis board, studies, puzzles, interactive lessons, live games, leaderboards and a rules page with diagrams and an interactive piece trainer. It is available in ${inWords(app.LANGS.map((lang) => englishNames.of(lang) ?? lang))}; add ${new Intl.ListFormat('en', { type: 'disjunction' }).format(app.LANGS.map((lang) => `\`?lang=${lang}\``))} to any page. The site can be used with a screen reader: a screen reader mode (Settings, or the top of the sign in page) announces every move in words, takes typed moves and questions about the position and offers a board moved through with the arrow keys, on every screen with a board. Source priority for the rules: the official 2022 rulebook, then the official Universal Music FAQ.
 
 ## Play and learn
 

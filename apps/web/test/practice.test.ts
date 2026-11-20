@@ -1,12 +1,10 @@
 import { legalMoves, parseFen, positionProblems } from '@ligungi/engine';
 import { PRACTICE_POSITIONS, PRACTICE_SECTIONS, practiceResult } from '@ligungi/protocol';
 import { describe, expect, it } from 'vitest';
-import { en } from '../src/i18n/en.tsx';
-import { es } from '../src/i18n/es.tsx';
-import { pt } from '../src/i18n/pt.tsx';
+import { ENGLISH } from '../src/i18n/messages.ts';
 
 describe('practice', () => {
-  it('has valid positions, each named in every language', () => {
+  it('has valid positions, each named', () => {
     expect(new Set(PRACTICE_POSITIONS.map((position) => position.id)).size).toBe(PRACTICE_POSITIONS.length);
     for (const section of PRACTICE_SECTIONS) expect(section.positions.length).toBeGreaterThan(0);
     for (const position of PRACTICE_POSITIONS) {
@@ -14,7 +12,7 @@ describe('practice', () => {
       expect(positionProblems(start), position.id).toEqual([]);
       expect(start.phase).toBe('play');
       expect(legalMoves(start).length, position.id).toBeGreaterThan(0);
-      for (const t of [pt, en, es]) expect(t.practice.positions[position.id as keyof typeof t.practice.positions], position.id).toBeTruthy();
+      expect(ENGLISH.practice.positions[position.id as keyof typeof ENGLISH.practice.positions], position.id).toBeTruthy();
     }
   });
 

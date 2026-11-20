@@ -2,7 +2,7 @@ import { MODES, type Mode } from '@ligungi/engine';
 import type { ActivityEvent, ActivityView, FeedItem } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
-import { formatDate, timeAgo, useT } from '../i18n/index.ts';
+import { activityRecord, formatDate, timeAgo, useT } from '../i18n/index.ts';
 
 const signed = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '±0');
 
@@ -39,7 +39,7 @@ const Day = ({ events }: { events: readonly ActivityEvent[] }) => {
         const entry = games.get(mode)!;
         return (
           <li key={mode} class="ligungi-activity__item is-games">
-            {a.games(entry.count, t.modes[mode])}: {a.record(entry.wins, entry.draws, entry.losses)}
+            {a.games(entry.count, t.modes[mode])}: {activityRecord(t, entry.wins, entry.draws, entry.losses)}
             {entry.diff !== null && <span class={`ligungi-activity__diff ${entry.diff >= 0 ? 'is-up' : 'is-down'}`}> {signed(entry.diff)}</span>}
           </li>
         );

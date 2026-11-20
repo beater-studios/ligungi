@@ -27,7 +27,7 @@ import { ChapterSettingsModal, NewChapterModal, StudySettingsModal } from '../co
 import { StudyMoves } from '../components/StudyMoves.tsx';
 import { Field, Toggle } from '../components/ui.tsx';
 import { describeMove, describeShapes, isWord, normalize, parseDrawing, type Speaker } from '../blind.ts';
-import { errorText, timeAgo, usePieceNames, useT } from '../i18n/index.ts';
+import { errorText, listText, timeAgo, usePieceNames, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { prefs } from '../prefs.ts';
 import { navigate, useLocation } from '../router.ts';
@@ -248,7 +248,7 @@ export const StudyPage = ({ id }: { id: string }) => {
     if (node.shapes.length) parts.push(t.blind.drawings(describeShapes(speaker, node.shapes)));
     if (node.children.length > 1) {
       const options = node.children.map((child, index) => t.blind.option(index + 1, describeMove(speaker, position, parseMove(child.move)!)));
-      parts.push(t.blind.variations(t.blind.list(options)));
+      parts.push(t.blind.variations(listText(t, options)));
     }
     return parts.join(' ');
   }, [path.join('.'), chapter?.id, tree !== null]);

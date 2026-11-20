@@ -210,12 +210,12 @@ describe('static files', () => {
 });
 
 describe('prerendered pages', () => {
-  const site = () => {
+  const site = (langs = ['pt', 'en', 'es']) => {
     const staticDir = mkdtempSync(join(tmpdir(), 'ligungi-static-'));
     dirs.push(staticDir);
     writeFileSync(join(staticDir, 'index.html'), 'bare');
     writeFileSync(join(staticDir, 'sitemap.xml'), '<urlset/>');
-    for (const lang of ['pt', 'en', 'es']) {
+    for (const lang of langs) {
       mkdirSync(join(staticDir, 'pages', lang), { recursive: true });
       for (const slug of ['home', 'faq']) {
         writeFileSync(join(staticDir, 'pages', lang, `${slug}.html`), `${slug} ${lang} fixed`);
@@ -237,6 +237,13 @@ describe('prerendered pages', () => {
     expect((await get('/', 'fr-FR, es;q=0.5, en;q=0.7')).text).toBe('home en auto');
     expect((await get('/', 'de')).text).toBe('home en auto');
     expect((await get('/faq?lang=xx')).text).toBe('faq en auto');
+  });
+
+  it('offers the languages the build prerendered', async () => {
+    server = await startServer({ staticDir: site(['pt', 'en', 'es', 'fr']) });
+    expect(await get('/', 'fr-FR, es;q=0.5, en;q=0.7')).toMatchObject({ text: 'home fr auto', lang: 'fr' });
+    expect((await get('/faq?lang=fr')).text).toBe('faq fr fixed');
+    expect((await get('/faq?lang=de', 'de, *;q=0.5')).text).toBe('faq en auto');
   });
 
   it('gives other routes the shell of their language and hides the page files', async () => {

@@ -14,7 +14,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { Stars } from '../components/Stars.tsx';
-import { useT } from '../i18n/index.ts';
+import { listText, useT } from '../i18n/index.ts';
 import { squareText } from '../blind.ts';
 import { icons } from '../icons.ts';
 import { useLessonProgress, type LessonProgress } from '../lessonProgress.ts';
@@ -302,7 +302,7 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
           positions={history.positions}
           moves={history.moves}
           orientation={player}
-          goal={[text?.instruction, targets.length ? t.blind.targets(t.blind.list(targets.map(squareText))) : ''].filter(Boolean).join(' ')}
+          goal={[text?.instruction, targets.length ? t.blind.targets(listText(t, targets.map(squareText))) : ''].filter(Boolean).join(' ')}
           notice={message}
           result={finished ? `${message ?? ''} ${t.lessons.stars(stars, LESSON_STARS_MAX)}`.trim() : null}
           timeInfo={`${goal.kind === 'mate' ? t.lessons.mateStars : t.lessons.par(exercise.par)}. ${t.lessons.moves(state.moves)}.`}

@@ -1,4 +1,4 @@
-import { createReadStream, statSync } from 'node:fs';
+import { createReadStream, readdirSync, statSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { ERROR_MESSAGES, type ErrorCode } from '@ligungi/protocol';
@@ -136,27 +136,53 @@ const MIME: Record<string, string> = {
   '.xml': 'application/xml; charset=utf-8',
 };
 
-const LANGS = ['pt', 'en', 'es'] as const;
-type Lang = (typeof LANGS)[number];
-const asLang = (value: string | null | undefined): Lang | undefined => LANGS.find((lang) => lang === value);
+/** A language code of the web app: the name of its locale file and of its folder of prerendered pages. */
+type Lang = string;
+
+const LANG_CODE = /^[a-z]{2,3}(-[A-Za-z0-9]+)*$/;
+const buildLangs = new Map<string, readonly Lang[]>();
+
+/** The languages the web build prerendered (one folder each under pages/); read once, since a new build restarts the server. */
+const langsOf = (base: string): readonly Lang[] => {
+  let langs = buildLangs.get(base);
+  if (!langs) {
+    try {
+      langs = readdirSync(join(base, 'pages'), { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && LANG_CODE.test(entry.name))
+        .map((entry) => entry.name);
+    } catch {
+      langs = [];
+    }
+    buildLangs.set(base, langs);
+  }
+  return langs;
+};
+
+/** The offered language for a language tag: the same tag, else the same base language ("pt-BR" gets "pt"). */
+const matchLang = (langs: readonly Lang[], tag: string): Lang | undefined => {
+  const lower = tag.toLowerCase();
+  const base = lower.split('-')[0];
+  return langs.find((lang) => lang.toLowerCase() === lower) ?? langs.find((lang) => lang.toLowerCase().split('-')[0] === base);
+};
 
 /**
- * Language of a page request: `?lang=` fixes it; otherwise the first supported language of Accept-Language, as the
+ * Language of a page request: `?lang=` fixes it; otherwise the first offered language of Accept-Language, as the
  * app does with the browser languages (English when none matches).
  */
-export const pageLang = (search: URLSearchParams, acceptLanguage: string | undefined): { lang: Lang; fixed: boolean } => {
-  const fixed = asLang(search.get('lang'));
+export const pageLang = (search: URLSearchParams, acceptLanguage: string | undefined, langs: readonly Lang[]): { lang: Lang; fixed: boolean } => {
+  const asked = search.get('lang');
+  const fixed = asked && langs.includes(asked) ? asked : undefined;
   if (fixed) return { lang: fixed, fixed: true };
   const ranked = (acceptLanguage ?? '')
     .split(',')
     .map((part, index) => {
       const [tag = '', ...params] = part.trim().split(';');
       const q = Number(params.find((param) => param.trim().startsWith('q='))?.trim().slice(2) ?? 1);
-      return { base: tag.trim().slice(0, 2).toLowerCase(), q: Number.isFinite(q) ? q : 0, index };
+      return { tag: tag.trim(), q: Number.isFinite(q) ? q : 0, index };
     })
-    .filter((entry) => entry.q > 0)
+    .filter((entry) => entry.q > 0 && entry.tag !== '*')
     .sort((a, b) => b.q - a.q || a.index - b.index);
-  return { lang: ranked.map((entry) => asLang(entry.base)).find(Boolean) ?? 'en', fixed: false };
+  return { lang: ranked.map((entry) => matchLang(langs, entry.tag)).find(Boolean) ?? 'en', fixed: false };
 };
 
 /**
@@ -193,7 +219,7 @@ export const serveStatic = (
   const headers: Record<string, string> = {};
   if (!stats?.isFile()) {
     if (extname(pathname)) return false;
-    const { lang, fixed } = pageLang(url.searchParams, acceptLanguage);
+    const { lang, fixed } = pageLang(url.searchParams, acceptLanguage, langsOf(base));
     file = pageFile(base, pathname, lang, fixed);
     stats = safeStat(file);
     if (!stats?.isFile()) return false;

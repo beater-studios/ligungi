@@ -1,9 +1,10 @@
 import { PIECE_STYLES, type PieceStyle } from '@ligungi/board';
 import { customBoardStyle, DEFAULT_CUSTOM_BOARD, isHexColor, type CustomBoard } from './boardColors.ts';
 import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type CustomPieces } from './pieceColors.ts';
+import { isLang, LANGS, localeOf, matchLang, type Lang } from './i18n/languages.ts';
 import { createStore } from './store.ts';
 
-export type Lang = 'pt' | 'en' | 'es';
+export { LANGS, type Lang };
 export type Theme = Prefs['theme'];
 export const THEMES: readonly Theme[] = ['auto', 'light', 'dark'];
 /** Board themes, as `gg-theme-<name>` classes of the board package; `wood` is its default look, `custom` the player's colors. */
@@ -31,7 +32,6 @@ export const BOARD_SIZES = [40, 60, 80, 100] as const;
 
 const nearestBoardSize = (zoom: unknown): number =>
   BOARD_SIZES.reduce((best, size) => (Math.abs(size - Number(zoom)) < Math.abs(best - Number(zoom)) ? size : best), 80);
-export const LANGS: readonly Lang[] = ['pt', 'en', 'es'];
 
 export interface Prefs {
   readonly lang: 'auto' | Lang;
@@ -202,7 +202,7 @@ const load = (): Prefs => {
       boardView: oneOf(BOARD_VIEWS, stored.boardView, DEFAULTS.boardView),
       // Older versions had a free 0-100 slider; snap those values to the sizes offered today.
       zoom: Number.isFinite(Number(stored.zoom)) ? nearestBoardSize(stored.zoom) : DEFAULTS.zoom,
-      lang: merged.lang === 'auto' || LANGS.includes(merged.lang) ? merged.lang : 'auto',
+      lang: isLang(merged.lang) ? merged.lang : 'auto',
     };
   } catch {
     return DEFAULTS;
@@ -219,11 +219,11 @@ const URL_LANG_KEY = 'ligungi.urlLang';
  */
 const urlLang = (): Lang | undefined => {
   const value = new URLSearchParams(window.location.search).get('lang');
-  const fromUrl = LANGS.find((lang) => lang === value);
+  const fromUrl = isLang(value) ? value : undefined;
   try {
     if (fromUrl) sessionStorage.setItem(URL_LANG_KEY, fromUrl);
     const stored = sessionStorage.getItem(URL_LANG_KEY);
-    return fromUrl ?? LANGS.find((lang) => lang === stored);
+    return fromUrl ?? (isLang(stored) ? stored : undefined);
   } catch {
     return fromUrl;
   }
@@ -234,8 +234,8 @@ const detectLang = (): Lang => {
   if (URL_LANG) return URL_LANG;
   const tags = navigator.languages?.length ? navigator.languages : [navigator.language];
   for (const tag of tags) {
-    const base = tag?.toLowerCase().slice(0, 2) as Lang;
-    if (LANGS.includes(base)) return base;
+    const lang = tag ? matchLang(tag) : undefined;
+    if (lang) return lang;
   }
   return 'en';
 };
@@ -261,7 +261,7 @@ const apply = () => {
   for (const name of ALL_PALETTES) root.classList.toggle(`gg-pieces-${name}`, name === palette);
   for (const property of Object.entries(customPieceStyle(customPieces).vars)) root.style.setProperty(...property);
   for (const font of KANJI_FONTS) root.classList.toggle(`ligungi-kanji-${font}`, font === kanjiFont);
-  root.lang = { pt: 'pt-BR', en: 'en', es: 'es' }[resolveLang(lang)];
+  root.lang = localeOf(resolveLang(lang));
   document.body.style.setProperty('---zoom', String(zoom));
 };
 systemLight?.addEventListener('change', apply);

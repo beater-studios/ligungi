@@ -251,7 +251,7 @@ export const PuzzleRunPage = ({ kind }: { kind: PuzzleRunKind }) => {
   const { info } = entry;
   const solverColor: Color = info.color;
   const { local } = solver;
-  const task = info.kind === 'mate' ? t.puzzles.taskMate(t.colors[solverColor], info.moves) : t.puzzles.taskMaterial(t.colors[solverColor]);
+  const task = info.kind === 'mate' ? t.puzzles.taskMate(solverColor, info.moves) : t.puzzles.taskMaterial(solverColor);
   const last = state.played[state.played.length - 1];
   const lastLost = kind === 'streak' && over && last?.outcome === 'lost' ? last : undefined;
   const allDone = over && state.played.length === sequence.length && (kind === 'storm' ? state.leftAtEnd > 0 : !lastLost);

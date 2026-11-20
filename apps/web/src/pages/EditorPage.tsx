@@ -135,7 +135,7 @@ export const EditorPage = () => {
       return b.boardCleared;
     }
     if (words.length > 1 && isWord(speaker, 'turn', first)) {
-      const { color } = readPieceWords(words.slice(1).join(' '));
+      const { color } = readPieceWords(speaker, words.slice(1).join(' '));
       if (!color) return b.unreadable;
       setPosition({ ...position, turn: color });
       return b.turn(color, false);
@@ -143,7 +143,7 @@ export const EditorPage = () => {
     const removing = isWord(speaker, 'remove', first);
     const body = removing ? words.slice(1) : words;
     const toHand = body.length > 1 && isWord(speaker, 'hands', body[0]!);
-    const { role, color, squares, rest } = readPieceWords((toHand ? body.slice(1) : body).join(' '));
+    const { role, color, squares, rest } = readPieceWords(speaker, (toHand ? body.slice(1) : body).join(' '));
     if (rest.length || (!removing && !toHand && squares.length === 0)) return null;
     const pieceText = (piece: Piece) => b.piece(pieceName(piece.role, names), piece.color);
     if (toHand) {

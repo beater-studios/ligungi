@@ -1,4 +1,4 @@
-import { pieceName, type PieceNames } from '@ligungi/board';
+import { JAPANESE_PIECE_NAMES, pieceName, type PieceNames } from '@ligungi/board';
 import {
   applyMove,
   COLORS,
@@ -23,7 +23,7 @@ import {
   type Square,
 } from '@ligungi/engine';
 import { SHAPE_COLORS, type ShapeColor, type StudyShape } from '@ligungi/protocol';
-import type { Messages } from './i18n/index.ts';
+import { ENGLISH, listText, type Messages } from './i18n/messages.ts';
 
 /**
  * Text for the screen reader mode: moves, squares, towers and hands described in words, and what a player types turned
@@ -43,7 +43,7 @@ const name = (s: Speaker, role: Role): string => pieceName(role, s.names);
 const pieceText = (s: Speaker, piece: Piece): string => s.t.blind.piece(name(s, piece.role), piece.color);
 
 /** A tower read from the top down: "Samurai of Black, over Soldier of White". */
-const below = (s: Speaker, pieces: readonly Piece[]): string => s.t.blind.list([...pieces].reverse().map((piece) => pieceText(s, piece)));
+const below = (s: Speaker, pieces: readonly Piece[]): string => listText(s.t, [...pieces].reverse().map((piece) => pieceText(s, piece)));
 
 /** Needs the position before the move. */
 export const describeMove = (s: Speaker, before: Position, move: Move): string => {
@@ -67,7 +67,7 @@ export const describeMove = (s: Speaker, before: Position, move: Move): string =
   }
   if (move.betray?.length) {
     const turned = move.betray.map((index) => b.atLevel(pieceText(s, target[index]!), index + 1));
-    text += ` ${b.betray(b.list(turned), turned.length, color)}`;
+    text += ` ${b.betray(listText(s.t, turned), turned.length, color)}`;
   }
   return text;
 };
@@ -109,14 +109,14 @@ export const describeSquare = (s: Speaker, position: Position, square: Square): 
   const tower = position.board[square]!;
   if (tower.length === 0) return b.emptySquare(squareText(square));
   if (tower.length === 1) return b.square(squareText(square), pieceText(s, tower[0]!));
-  return b.tower(squareText(square), tower.length, b.list(tower.map((piece, index) => b.level(index + 1, pieceText(s, piece)))));
+  return b.tower(squareText(square), tower.length, listText(s.t, tower.map((piece, index) => b.level(index + 1, pieceText(s, piece)))));
 };
 
 export const describeHands = (s: Speaker, position: Position): string =>
   COLORS.map((color) => {
     const hand = position.hands[color];
     const pieces = ROLES.filter((role) => hand[role] > 0).map((role) => s.t.blind.handPiece(name(s, role), hand[role]));
-    return pieces.length ? s.t.blind.hand(color, s.t.blind.list(pieces)) : s.t.blind.emptyHand(color);
+    return pieces.length ? s.t.blind.hand(color, listText(s.t, pieces)) : s.t.blind.emptyHand(color);
   }).join(' ');
 
 /** The whole position: whose turn it is, each side's pieces on top of a square with what lies under them, and the hands. */
@@ -150,7 +150,7 @@ export const describeReach = (s: Speaker, position: Position, square: Square): s
     [squaresFor('stack'), b.stackOn],
     [squaresFor('capture'), b.captureOn],
   ] as const;
-  const said = parts.filter(([squares]) => squares.length > 0).map(([squares, phrase]) => phrase(b.list(squares)));
+  const said = parts.filter(([squares]) => squares.length > 0).map(([squares, phrase]) => phrase(listText(s.t, squares)));
   const who = pieceText(s, piece);
   return said.length ? b.reach(who, squareText(square), said.join('; ')) : b.noMoves(who, squareText(square));
 };
@@ -174,40 +174,30 @@ export const normalize = (text: string): string =>
 
 type Words = Messages['blind']['words'];
 
-/** The English words work in every language, beside the short letters. */
-const BASE_WORDS: Readonly<Record<keyof Words, readonly string[]>> = {
-  position: ['p', 'position'],
-  square: ['c', 'square'],
-  hands: ['m', 'hands', 'hand'],
-  reach: ['l', 'moves'],
-  last: ['u', 'last'],
-  clocks: ['r', 'clock', 'clocks'],
-  help: ['h', 'help', '?'],
-  goal: ['g', 'goal'],
-  prev: ['<', 'prev', 'back'],
-  next: ['>', 'next'],
-  first: ['first', 'start'],
-  end: ['end'],
-  done: ['done'],
-  draw: ['draw'],
-  resign: ['resign'],
-  capture: ['capture', 'x'],
-  stack: ['stack', '='],
-  betray: ['betray'],
-  drop: ['drop', 'new', '+'],
-  arrow: ['arrow'],
-  paint: ['paint'],
-  clear: ['clear'],
-  drawings: ['d', 'drawings'],
-  remove: ['remove'],
-  turn: ['turn'],
-  variation: ['v', 'variation'],
+/** Letters and signs that work in every language, beside the words of the reader's language and of English. */
+const SHORT_WORDS: Readonly<Partial<Record<keyof Words, readonly string[]>>> = {
+  position: ['p'],
+  square: ['c'],
+  hands: ['m'],
+  reach: ['l'],
+  last: ['u'],
+  clocks: ['r'],
+  help: ['h', '?'],
+  goal: ['g'],
+  prev: ['<'],
+  next: ['>'],
+  capture: ['x'],
+  stack: ['='],
+  drop: ['+'],
+  drawings: ['d'],
+  variation: ['v'],
 };
 
 /** Words people put between squares and names ("samurai from 6-7 to 6-6"), skipped in any language. */
 const FILLERS = new Set(['to', 'from', 'on', 'de', 'do', 'da', 'para', 'em', 'no', 'na', 'a', 'al', 'del', 'en', 'desde', 'hasta']);
 
-export const isWord = (s: Speaker, key: keyof Words, token: string): boolean => BASE_WORDS[key].includes(token) || s.t.blind.words[key].some((word) => normalize(word) === token);
+export const isWord = (s: Speaker, key: keyof Words, token: string): boolean =>
+  Boolean(SHORT_WORDS[key]?.includes(token)) || [s.t, ENGLISH].some((t) => t.blind.words[key].some((word) => normalize(word) === token));
 
 /** A square written as the rulebook's column-row (with an optional tier) or in the machine notation's letters. */
 export const readSquare = (token: string): { square: Square; level?: number } | null => {
@@ -235,13 +225,23 @@ export const parseCommand = (s: Speaker, input: string): Command | null => {
   return { kind: 'move', text: input.trim() };
 };
 
-const NAME_SETS: readonly PieceNames[] = ['pt', 'en', 'es', 'ja'];
+const pieceWordCache = new WeakMap<PieceNames, ReadonlyArray<readonly [string, Role]>>();
 
-/** Every way a piece can be named, normalized, longest first so "tenente general" is found before "general". */
-const PIECE_WORDS: ReadonlyArray<readonly [string, Role]> = ROLES.flatMap((role) => [
-  ...NAME_SETS.map((set) => [normalize(pieceName(role, set)), role] as const),
-  [ROLE_INFO[role].kanji, role] as const,
-]).sort((a, b) => b[0].length - a[0].length);
+/**
+ * Every way a piece can be named (in the reader's language, in English and the Japanese readings, which include the
+ * names in use), normalized, longest first so "tenente general" is found before "general".
+ */
+const pieceWords = (s: Speaker): ReadonlyArray<readonly [string, Role]> => {
+  let words = pieceWordCache.get(s.t.pieces);
+  if (!words) {
+    const sets = [...new Set([s.t.pieces, ENGLISH.pieces, JAPANESE_PIECE_NAMES])];
+    words = ROLES.flatMap((role) => [...sets.map((set) => [normalize(pieceName(role, set)), role] as const), [ROLE_INFO[role].kanji, role] as const]).sort(
+      (a, b) => b[0].length - a[0].length,
+    );
+    pieceWordCache.set(s.t.pieces, words);
+  }
+  return words;
+};
 
 /** The rulebook notation with the piece name instead of the kanji, without the marks: "6-6-1 samurai". */
 const namedText = (position: Position, move: Move, names: PieceNames): string => {
@@ -270,13 +270,13 @@ export const matchMoves = (s: Speaker, position: Position, legal: readonly Move[
     (move) =>
       normalize(moveToRulebook(position, move)) === text ||
       namedText(position, move, s.names) === text ||
-      namedText(position, move, 'ja') === text,
+      namedText(position, move, JAPANESE_PIECE_NAMES) === text,
   );
   if (written.length) return written;
 
   let rest = ` ${text} `;
   const roles = new Set<Role>();
-  for (const [word, role] of PIECE_WORDS) {
+  for (const [word, role] of pieceWords(s)) {
     const kanji = word.length === 1;
     const pattern = kanji ? word : ` ${word} `;
     if (rest.includes(pattern)) {
@@ -298,7 +298,7 @@ export const matchMoves = (s: Speaker, position: Position, legal: readonly Move[
     else if (isWord(s, 'betray', token)) betray = true;
     else {
       // A piece name cut short: a unique start of any of its names ("sam", "lanc").
-      const found = new Set(PIECE_WORDS.filter(([word]) => token.length >= 3 && word.split(' ').some((part) => part.startsWith(token))).map(([, role]) => role));
+      const found = new Set(pieceWords(s).filter(([word]) => token.length >= 3 && word.split(' ').some((part) => part.startsWith(token))).map(([, role]) => role));
       if (found.size !== 1) return null;
       roles.add([...found][0]!);
     }
@@ -324,11 +324,11 @@ export const matchMoves = (s: Speaker, position: Position, legal: readonly Move[
 
 /** The drawings of a study move as text: "green arrow from 5-7 to 5-5; red square on 4-5". */
 export const describeShapes = (s: Speaker, shapes: readonly StudyShape[]): string =>
-  s.t.blind.list(
+  listText(s.t, 
     shapes.map((shape) =>
       shape.kind === 'arrow'
-        ? s.t.blind.arrow(s.t.study.colors[shape.color], squareText(shape.from), squareText(shape.to))
-        : s.t.blind.painted(s.t.study.colors[shape.color], squareText(shape.square)),
+        ? s.t.blind.arrow(s.t.study.colors[shape.color].toLocaleLowerCase(s.t.locale), squareText(shape.from), squareText(shape.to))
+        : s.t.blind.painted(s.t.study.colors[shape.color].toLocaleLowerCase(s.t.locale), squareText(shape.square)),
     ),
   );
 
@@ -352,10 +352,10 @@ const COLOR_STARTS: Readonly<Record<Color, readonly string[]>> = { white: ['whit
  * A piece written as words, for the board editor: its name (whole or cut short), its color in any language and the
  * squares, in any order. The other words are left in `rest`.
  */
-export const readPieceWords = (input: string): { role: Role | null; color: Color | null; squares: Square[]; rest: string[] } => {
+export const readPieceWords = (s: Speaker, input: string): { role: Role | null; color: Color | null; squares: Square[]; rest: string[] } => {
   let text = ` ${normalize(input)} `;
   let role: Role | null = null;
-  for (const [word, candidate] of PIECE_WORDS) {
+  for (const [word, candidate] of pieceWords(s)) {
     const pattern = word.length === 1 ? word : ` ${word} `;
     if (!role && text.includes(pattern)) {
       role = candidate;
@@ -368,7 +368,7 @@ export const readPieceWords = (input: string): { role: Role | null; color: Color
   for (const token of text.split(' ').filter(Boolean)) {
     const square = readSquare(token);
     const tone = COLORS.find((c) => COLOR_STARTS[c].some((start) => token.startsWith(start)));
-    const cut = token.length >= 3 ? new Set(PIECE_WORDS.filter(([word]) => word.split(' ').some((part) => part.startsWith(token))).map(([, r]) => r)) : new Set<Role>();
+    const cut = token.length >= 3 ? new Set(pieceWords(s).filter(([word]) => word.split(' ').some((part) => part.startsWith(token))).map(([, r]) => r)) : new Set<Role>();
     if (square) squares.push(square.square);
     else if (tone && !color) color = tone;
     else if (!role && cut.size === 1) role = [...cut][0]!;

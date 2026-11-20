@@ -1,7 +1,8 @@
 import { Game, initialPosition, parseMove, type Move, type Position } from '@ligungi/engine';
-import { useT } from '../i18n/index.ts';
+import { JAPANESE_PIECE_NAMES } from '@ligungi/board';
+import { pieceNamesFor, useT } from '../i18n/index.ts';
 import { moveText, type Notation } from '../notation.ts';
-import { prefs, resolveLang } from '../prefs.ts';
+import { prefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
 
 const NOTATIONS: readonly Notation[] = ['named', 'rulebook', 'machine'];
@@ -36,9 +37,9 @@ const sample = (): readonly Step[] | null => {
 /** A short move list in the chosen notation and piece names, laid out like the one beside the board. */
 export const MoveListPreview = () => {
   const t = useT();
-  const { notation, pieceNames, lang } = useStore(prefs);
-  const local = resolveLang(lang);
-  const shown = pieceNames === 'ja' ? 'ja' : local;
+  const { notation, pieceNames } = useStore(prefs);
+  const local = t.pieces;
+  const shown = pieceNamesFor(t, pieceNames);
   const steps = sample();
   if (!steps) return null;
   const rows = [];
@@ -52,7 +53,7 @@ export const MoveListPreview = () => {
       const step = steps[j]!;
       // Every other notation and naming is laid out invisibly in the same cell, so the preview keeps the width of the
       // longest one and the form beside it does not shift while the player compares the options.
-      const others = NOTATIONS.flatMap((n) => [local, 'ja' as const].map((names) => moveText(n, step.position, step.move, t, names, true)));
+      const others = NOTATIONS.flatMap((n) => [local, JAPANESE_PIECE_NAMES].map((names) => moveText(n, step.position, step.move, t, names, true)));
       rows.push(
         <span key={j} class={`ligungi-moves-preview__move${j === steps.length - 1 ? ' active' : ''}`}>
           <span>{moveText(notation, step.position, step.move, t, shown, true)}</span>

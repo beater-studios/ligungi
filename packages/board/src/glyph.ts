@@ -1,7 +1,7 @@
 import { ROLE_INFO, type Role } from '@ligungi/engine';
 import { guideMarks, guidesSvg } from './guides.ts';
 import { PIECE_ICONS, TRACE_ICONS } from './icons.ts';
-import { pieceLetters, type PieceNames } from './labels.ts';
+import { ENGLISH_PIECE_NAMES, pieceLetters, type PieceNames } from './labels.ts';
 
 /**
  * What a piece shows: `kanji` as on the physical game, `illustrated` an icon, `trace` the same icon as outlines, and
@@ -26,7 +26,7 @@ const iconSvg = (role: Role, trace: boolean, guides: boolean): string => {
  * the board, the piece panel and the static mini boards so a piece looks the same everywhere. `names` picks the
  * language of the letters style.
  */
-export const pieceGlyph = (role: Role, style: PieceStyle, guides: boolean, names: PieceNames = 'en'): string => {
+export const pieceGlyph = (role: Role, style: PieceStyle, guides: boolean, names: PieceNames = ENGLISH_PIECE_NAMES): string => {
   if (style === 'illustrated' || style === 'trace') return iconSvg(role, style === 'trace', guides);
   const text = style === 'letters' ? `<b class="gg-letters">${pieceLetters(role, names)}</b>` : ROLE_INFO[role].kanji;
   return guides ? `${guidesSvg(role)}${text}` : text;

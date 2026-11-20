@@ -58,7 +58,7 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 
 - Node runs the TypeScript source directly (type stripping), so use only erasable syntax: no `enum`, `namespace` or constructor parameter properties.
 - Runtime dependencies stay minimal (only `ws`). Do not add one without asking.
-- Errors are stable codes from `packages/protocol/src/errors.ts` (`HttpError(status, code)`, WebSocket `{ t: 'error', code, message }`). Add new codes there and their translations in the web dictionaries.
+- Errors are stable codes from `packages/protocol/src/errors.ts` (`HttpError(status, code)`, WebSocket `{ t: 'error', code, message }`). Add new codes there and their English message in `apps/web/src/i18n/locales/en.json` (`errors`).
 - SQL always uses bound parameters. Never interpolate user input into SQL.
 - Schema changes are new entries appended to `MIGRATIONS` in `apps/server/src/db.ts`. Never edit an existing migration.
 - Do not weaken the security checks in `app.ts`: JSON content type and same-origin for writes, origin check on WebSocket, auth rate limit, CSP.
@@ -67,7 +67,7 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 
 - Styles: `apps/web/vendor/lila` is lila's SCSS copied unmodified (see its `NOTICE.md`). Never edit it. Our own styles go in `apps/web/src/styles/ligungi.scss`, using lila's theme variables so light and dark themes both work.
 - Screens reuse lila's markup and class names so the vendored CSS applies. lila's custom tags (`i5d`, `bo3`, `app`, `z7yx`, `qzm`, `move`, `index`, `group`, `rating`, `name`, `line`, and the tree view's `interrupt`, `lines`, `branch`, `comment`, `inline`, `shapes`) must be written in lowercase and declared in `src/lila-elements.d.ts`.
-- Never hardcode user-facing text. Use `useT()` and the dictionaries in `src/i18n/`: `pt.tsx` is the source, and `en.tsx` and `es.tsx` share its type, so a missing key fails the typecheck. Always add all three languages.
+- Never hardcode user-facing text. Use `useT()` and the locale files in `src/i18n/locales/` (ICU MessageFormat in nested JSON). `en.json` is the source of the keys and of the `Messages` type; a message with arguments, `<tag>` markup or one item per line is also declared in `src/i18n/schema.tsx` (arguments in the order the code passes them), and `test/i18n.test.tsx` checks both agree. Add the pt and es texts too; other languages come from volunteers (pull requests now, Weblate once the project qualifies, see `docs/roadmap.md`), and any missing or invalid translation falls back to English per message. Never write translations for a language other than pt and es, and never put logic in messages that ICU plural or select cannot express: split the message and join the parts in code.
 - Long-form page content (about, FAQ, contact, terms, privacy, rule sources) lives in `src/i18n/content/`, one file per language typed by `Content`, read through `useContent()`. Shared external links and the repository URL (`SOURCE_URL`, set by `VITE_SOURCE_URL`) live in `src/i18n/content/shared.tsx` and `src/source.ts`; never hardcode them elsewhere.
 - Piece names come from `usePieceNames()` and board labels from `t.board`, so they follow the chosen language.
 - Public pages are prerendered for crawlers (see "Search engines" in `docs/architecture.md`). A new public page goes in `PAGES` in `src/seo.ts` with its title and description in `t.seo`; code that runs while modules load or render must not assume a full browser (the prerender only shims a few globals).

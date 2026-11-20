@@ -10,6 +10,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 - A sound of its own when a move leaves the other side's Marshal attacked, in every set.
 - Byo-yomi count with the sound set's countdown, second by second, besides the beep and the voice (the spoken count switch became this three-way choice, and players who had it on keep the voice).
 - Friendly sites (`/sites`, in the footer and beside About and FAQ): the other sites built on lila (lichess, lishogi, lidraughts and PlayStrategy), and libaduk for go.
+- The site can be translated into more languages by volunteers: a language appears in the language menu once 80% of its texts are translated, and the texts still missing show in English. Piece names are translated with the rest. See Translations in CONTRIBUTING.md.
 - Spoken moves (Settings > Preferences > Play): the browser's voice says the moves, every move or only the opponent's, in a short form ("Samurai, 6-6.") or in full sentences ("White: Samurai from 6-7 to 6-6."), and you pick where: games against people, against the computer, games you watch, puzzles, lessons and practice, and the analysis board and studies (off by default, said as you step through the moves). It replaces the move sound, follows the site's language and piece names, and stays quiet in screen reader mode.
 
 ### Changed
@@ -19,6 +20,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 - Profiles on other game sites show the game they are for (a chess knight, a shogi piece, a draughts man, go stones) instead of a plain link mark, and the profile form names the game beside the site.
 - Game search: player, opponent, mode and result are always shown and the other filters fold under More filters (open when one is set); the results are a compact table, with previous and next pages kept in the address.
 - The Tower on tap setting shows a phone with what each choice does: the balloon, the strip or only the side panel. The strip's pieces keep their size whatever the screen width.
+- The language menu lists each language by its own name, in alphabetical order.
 - Every page title has the same size, form labels have more room above their field, and the quick settings menu lines its values up beside the arrows.
 
 ## [0.8.0] - 2026-11-19

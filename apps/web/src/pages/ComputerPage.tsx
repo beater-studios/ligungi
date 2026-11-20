@@ -122,7 +122,7 @@ export const ComputerPage = () => {
                 <MiniBoard position={custom} />
               </div>
               <p>
-                {t.computer.fromPosition(t.modes[custom.mode], t.colors[custom.turn])} <a href="/computer">{t.computer.normalGame}</a>
+                {t.computer.fromPosition(t.modes[custom.mode], custom.turn)} <a href="/computer">{t.computer.normalGame}</a>
               </p>
             </div>
           ) : (

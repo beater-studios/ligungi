@@ -17,7 +17,7 @@ import {
 } from '@ligungi/engine';
 import { coordinateLabels, visualSquares } from './geometry.ts';
 import { glyphClass, pieceGlyph } from './glyph.ts';
-import { DEFAULT_LABELS, colorLabel, pieceName, type Labels } from './labels.ts';
+import { DEFAULT_LABELS, ENGLISH_PIECE_NAMES, colorLabel, pieceName, type Labels } from './labels.ts';
 import type { Api, Config, Selection, Shape } from './types.ts';
 
 const DRAG_THRESHOLD = 4;
@@ -44,7 +44,7 @@ const DEFAULTS: Config = {
   lastMove: null,
   coordinates: true,
   coordinateStyle: 'rulebook',
-  pieceNames: 'pt',
+  pieceNames: ENGLISH_PIECE_NAMES,
   moveGuides: false,
   pieceStyle: 'kanji',
   labels: {},

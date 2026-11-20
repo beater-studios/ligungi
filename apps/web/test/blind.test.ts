@@ -16,13 +16,13 @@ import {
   spokenMoveText,
   type Speaker,
 } from '../src/blind.ts';
-import { en } from '../src/i18n/en.tsx';
-import { es } from '../src/i18n/es.tsx';
-import { pt } from '../src/i18n/pt.tsx';
+import { loadAllLanguages, messagesFor } from '../src/i18n/messages.ts';
 
-const portuguese: Speaker = { t: pt, names: 'pt' };
-const english: Speaker = { t: en, names: 'en' };
-const spanish: Speaker = { t: es, names: 'es' };
+await loadAllLanguages();
+const speaker = (lang: string): Speaker => ({ t: messagesFor(lang), names: messagesFor(lang).pieces });
+const portuguese = speaker('pt');
+const english = speaker('en');
+const spanish = speaker('es');
 const start = initialPosition('beginner');
 const legal = legalMoves(start);
 const move = (text: string): Move => parseMove(text)!;
@@ -145,10 +145,10 @@ describe('navigation, drawings and the editor', () => {
   });
 
   it('reads a piece, its color and squares for the board editor in any order and language', () => {
-    expect(readPieceWords('4-7 samurai branco')).toEqual({ role: 'samurai', color: 'white', squares: [fromRulebook(4, 7)], rest: [] });
-    expect(readPieceWords('black tenente-general 5-5')).toEqual({ role: 'lieutenant', color: 'black', squares: [fromRulebook(5, 5)], rest: [] });
-    expect(readPieceWords('negras arq')).toEqual({ role: 'archer', color: 'black', squares: [], rest: [] });
-    expect(readPieceWords('p')).toEqual({ role: null, color: null, squares: [], rest: ['p'] });
+    expect(readPieceWords(portuguese, '4-7 samurai branco')).toEqual({ role: 'samurai', color: 'white', squares: [fromRulebook(4, 7)], rest: [] });
+    expect(readPieceWords(portuguese, 'black tenente-general 5-5')).toEqual({ role: 'lieutenant', color: 'black', squares: [fromRulebook(5, 5)], rest: [] });
+    expect(readPieceWords(portuguese, 'negras arq')).toEqual({ role: 'archer', color: 'black', squares: [], rest: [] });
+    expect(readPieceWords(portuguese, 'p')).toEqual({ role: null, color: null, squares: [], rest: ['p'] });
   });
 });
 

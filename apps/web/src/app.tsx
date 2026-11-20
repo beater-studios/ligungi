@@ -1,7 +1,8 @@
 import { PIECE_STYLES } from '@ligungi/board';
 import type { VNode } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { MESSAGES, getT, themeLabel, useT } from './i18n/index.ts';
+import { getT, setLanguage, themeLabel, useT } from './i18n/index.ts';
+import { languageName, localeOf } from './i18n/languages.ts';
 import { notify } from './notify.ts';
 import logoUrl from './assets/logo.svg';
 import { icons } from './icons.ts';
@@ -212,7 +213,7 @@ const Dasher = () => {
               <div class="subs">
                 <button type="button" class="sub" data-icon={icons.Language} onClick={() => setView('language')}>
                   <span>{t.nav.language}</span>
-                  <span class="ligungi-dasher__value">{MESSAGES[lang].languageName}</span>
+                  <span class="ligungi-dasher__value">{languageName(lang)}</span>
                 </button>
                 <button type="button" class="sub" data-icon={icons.Switch} onClick={() => setView('theme')}>
                   <span>{t.settings.theme}</span>
@@ -240,12 +241,12 @@ const Dasher = () => {
                     <button
                       key={option}
                       type="button"
-                      lang={option === 'auto' ? undefined : MESSAGES[option].locale}
+                      lang={option === 'auto' ? undefined : localeOf(option)}
                       class={current.lang === option ? 'current' : ''}
                       aria-pressed={current.lang === option}
-                      onClick={() => updatePrefs({ lang: option })}
+                      onClick={() => void setLanguage(option)}
                     >
-                      {option === 'auto' ? t.settings.auto : MESSAGES[option].languageName}
+                      {option === 'auto' ? t.settings.auto : languageName(option)}
                     </button>
                   ))}
                 </div>

@@ -29,6 +29,8 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Zen mode (hide everything but the board and clocks) | Focus while playing | S | Low | lichess |
 | Bot accounts through a bot API (engines play on the site, list of online bots) | Lets engine authors join, gives players more opponents | L | Low | lichess, lishogi |
 | Simultaneous exhibitions | Strong players against many at once | L | Low | lichess, lidraughts, lishogi |
+| Queued draft placements: during the draft a player programs several placements (and the done declaration), and the server plays the next one the moment their turn comes, even with them away | A correspondence draft can take days, one placement per turn. Within the rulebook: the draft stays alternating and in the open, and a player who queues only gives up reacting to the opponent's next placements (like lichess's conditional premoves in correspondence), so rated games can use it. If the draft ends first (the second player's done), the rest of the queue is dropped. The queue lives on the server so it plays while the player is away | M | Medium | lichess |
+| Blind draft (casual option): each player builds their whole draft without seeing the other's, and both are shown once both confirm | Speeds up the draft, mostly in correspondence. A variant, not the rulebook: no reacting to the other's placements, and the second player's done no longer ends the draft (it plays like the free draft). Casual only, like the free draft, and recorded in section 7.1 and 11 of rules.md. The starting territories never touch, so the two drafts can be merged into an ordinary free draft record (placements interleaved), and replay, analysis and export keep working | M | Low | internal |
 
 ## Watch
 

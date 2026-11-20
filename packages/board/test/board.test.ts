@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { ROLES, initialPosition, legalMoves, moveToString, type Move, type Position } from '@ligungi/engine';
-import { Gungiground, PIECE_ICONS, guidesSvg, type Api, type Shape } from '../src/index.ts';
+import { Gungiground, JAPANESE_PIECE_NAMES, PIECE_ICONS, guidesSvg, type Api, type Shape } from '../src/index.ts';
 import { build, sq } from '../../engine/test/helpers.ts';
 
 let api: Api | undefined;
@@ -139,7 +139,7 @@ describe('Gungiground', () => {
     click('e5');
     const inspector = root.querySelector('.gg-inspector')!;
     expect(inspector.hasAttribute('hidden')).toBe(false);
-    expect([...inspector.querySelectorAll('.gg-name')].map((n) => n.textContent)).toEqual(['Soldado', 'Soldado']);
+    expect([...inspector.querySelectorAll('.gg-name')].map((n) => n.textContent)).toEqual(['Soldier', 'Soldier']);
     expect([...inspector.querySelectorAll('.gg-level')].map((n) => n.textContent)).toEqual(['nível 2', 'nível 1']);
   });
 
@@ -150,7 +150,7 @@ describe('Gungiground', () => {
     expect(root.querySelector('.gg-inspector')!.hasAttribute('hidden')).toBe(true);
     api!.set({ inspectSelection: true });
     expect(root.querySelector('.gg-inspector')!.hasAttribute('hidden')).toBe(false);
-    expect([...root.querySelectorAll('.gg-inspector .gg-name')].map((n) => n.textContent)).toEqual(['Soldado', 'Soldado']);
+    expect([...root.querySelectorAll('.gg-inspector .gg-name')].map((n) => n.textContent)).toEqual(['Soldier', 'Soldier']);
   });
 
   it('keeps a tapped tower shown when the finger lifts, and drops it when the mouse leaves the board', () => {
@@ -168,7 +168,7 @@ describe('Gungiground', () => {
   });
 
   it('uses Japanese names when configured', () => {
-    mount(build({ e5: 'Pp' }), { movableColor: null, pieceNames: 'ja' });
+    mount(build({ e5: 'Pp' }), { movableColor: null, pieceNames: JAPANESE_PIECE_NAMES });
     click('e5');
     expect(root.querySelector('.gg-inspector .gg-name')!.textContent).toBe('Hyō');
   });

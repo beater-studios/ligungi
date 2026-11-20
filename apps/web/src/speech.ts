@@ -1,15 +1,15 @@
 import { applyMove, isMarshalAttacked, type Move, type Position } from '@ligungi/engine';
 import { spokenMoveText, type Speaker } from './blind.ts';
-import { getT } from './i18n/index.ts';
-import { prefs, resolveLang, type SpeechPlace } from './prefs.ts';
+import { getT, pieceNamesFor } from './i18n/index.ts';
+import { prefs, type SpeechPlace } from './prefs.ts';
 import { playSound, speak } from './sound.ts';
 
 /** Who made the move, from the viewer's side: their own, their opponent's, or a game they only watch or review. */
 export type Mover = 'self' | 'opponent' | 'other';
 
 const speaker = (): Speaker => {
-  const { pieceNames, lang } = prefs.get();
-  return { t: getT(), names: pieceNames === 'ja' ? 'ja' : resolveLang(lang) };
+  const t = getT();
+  return { t, names: pieceNamesFor(t, prefs.get().pieceNames) };
 };
 
 /**

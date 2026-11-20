@@ -185,7 +185,7 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
   const changeFilter = (next: { theme: PuzzleTheme | null; mode: Mode | null }) => navigate(`/puzzles${filterQuery(next)}`);
   const finished = stage === 'done';
   const solvedHere = filtered.filter((entry) => solved?.has(entry.puzzle.id)).length;
-  const task = info.kind === 'mate' ? t.puzzles.taskMate(t.colors[solverColor], info.moves) : t.puzzles.taskMaterial(t.colors[solverColor]);
+  const task = info.kind === 'mate' ? t.puzzles.taskMate(solverColor, info.moves) : t.puzzles.taskMaterial(solverColor);
   const players = {
     [solverColor]: { name: t.common.you },
     [opposite(solverColor)]: { name: t.puzzles.opponent },

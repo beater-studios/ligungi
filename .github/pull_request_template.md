@@ -7,5 +7,5 @@
 - [ ] `npm run typecheck`, `npm test` and `npm run build` pass
 - [ ] Tests added or updated for engine, protocol or server changes
 - [ ] Rule changes cite their source and update `docs/rules.md`
-- [ ] New user-facing texts added to `pt.tsx`, `en.tsx` and `es.tsx`
+- [ ] New user-facing texts added to `locales/en.json` (and `pt.json`, `es.json` when possible), with arguments declared in `schema.tsx`
 - [ ] Screenshots attached for visual changes

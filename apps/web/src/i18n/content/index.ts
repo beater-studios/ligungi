@@ -5,6 +5,9 @@ import { es } from './es.tsx';
 import { pt } from './pt.tsx';
 import type { Content } from './shared.tsx';
 
-export const CONTENT: Readonly<Record<Lang, Content>> = { pt, en, es };
+const CONTENT: Readonly<Record<string, Content>> = { pt, en, es };
 
-export const useContent = (): Content => CONTENT[resolveLang(useStore(prefs).lang)];
+/** The long pages in a language; in English until they are translated (they are not on the translation platform yet). */
+export const contentFor = (lang: Lang): Content => CONTENT[lang] ?? en;
+
+export const useContent = (): Content => contentFor(resolveLang(useStore(prefs).lang));

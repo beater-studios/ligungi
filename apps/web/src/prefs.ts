@@ -73,6 +73,9 @@ export interface Prefs {
   /** On a phone, what tapping a tower shows: a balloon next to it, a strip under the board, or only the side panel. */
   readonly towerTap: TowerTap;
   readonly confirmMove: ConfirmMove;
+  readonly spokenMoves: SpokenMoves;
+  readonly spokenStyle: SpeechStyle;
+  readonly spokenPlaces: readonly SpeechPlace[];
   /** Browser notifications while the site is in the background; the browser's own permission is asked when turned on. */
   readonly notifications: boolean;
 }
@@ -80,6 +83,19 @@ export interface Prefs {
 /** When a move made on the board waits for a click on Confirm before it is sent: never, in correspondence games, always. */
 export const CONFIRM_MOVES = ['never', 'correspondence', 'always'] as const;
 export type ConfirmMove = (typeof CONFIRM_MOVES)[number];
+
+/** Spoken moves: never, only the opponent's, or every move. */
+export const SPOKEN_MOVES = ['off', 'opponent', 'all'] as const;
+export type SpokenMoves = (typeof SPOKEN_MOVES)[number];
+/** The short form ("Samurai, 6-6.") or the full sentences of the screen reader mode. */
+export const SPEECH_STYLES = ['short', 'full'] as const;
+export type SpeechStyle = (typeof SPEECH_STYLES)[number];
+/**
+ * Where moves are said: games against people, against the computer, games watched (TV, other people's games), training
+ * (puzzles, lessons, practice) and review (stepping through the analysis board and studies).
+ */
+export const SPEECH_PLACES = ['online', 'computer', 'watching', 'training', 'review'] as const;
+export type SpeechPlace = (typeof SPEECH_PLACES)[number];
 
 export const TOWER_TAPS = ['balloon', 'strip', 'panel'] as const;
 export type TowerTap = (typeof TOWER_TAPS)[number];
@@ -111,6 +127,9 @@ const DEFAULTS: Prefs = {
   screenReader: false,
   towerTap: 'balloon',
   confirmMove: 'correspondence',
+  spokenMoves: 'off',
+  spokenStyle: 'short',
+  spokenPlaces: ['online', 'computer', 'watching', 'training'],
   notifications: false,
 };
 
@@ -157,6 +176,11 @@ const load = (): Prefs => {
       notifications: stored.notifications === true,
       towerTap: oneOf(TOWER_TAPS, stored.towerTap, DEFAULTS.towerTap),
       confirmMove: oneOf(CONFIRM_MOVES, stored.confirmMove, DEFAULTS.confirmMove),
+      spokenMoves: oneOf(SPOKEN_MOVES, stored.spokenMoves, DEFAULTS.spokenMoves),
+      spokenStyle: oneOf(SPEECH_STYLES, stored.spokenStyle, DEFAULTS.spokenStyle),
+      spokenPlaces: Array.isArray(stored.spokenPlaces)
+        ? SPEECH_PLACES.filter((place) => (stored.spokenPlaces as unknown[]).includes(place))
+        : DEFAULTS.spokenPlaces,
       notation:
         stored.notation === 'rulebook' || stored.notation === 'named' || stored.notation === 'machine'
           ? stored.notation

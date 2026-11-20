@@ -4,12 +4,17 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Spoken moves (Settings > Preferences > Play): the browser's voice says the moves, every move or only the opponent's, in a short form ("Samurai, 6-6.") or in full sentences ("White: Samurai from 6-7 to 6-6."), and you pick where: games against people, against the computer, games you watch, puzzles, lessons and practice, and the analysis board and studies (off by default, said as you step through the moves). It replaces the move sound, follows the site's language and piece names, and stays quiet in screen reader mode.
+
 ### Changed
 
 - Menus: Puzzles has a menu of its own (puzzles, puzzle of the day, Streak, Storm and the puzzle dashboard), and Learn keeps the rules, lessons, practice, studies and the coordinate trainer. The footer follows the menus in four columns: Play, Learn, Tools and Site.
 - Settings in five sections, each on its own page: Profile (`/account`), Preferences, Privacy, Security (password, two-step verification and sessions) and Data and account. Preferences are grouped as Display, Play, Game record and Accessibility, with an index at the top.
 - Profiles on other game sites show the game they are for (a chess knight, a shogi piece, a draughts man, go stones) instead of a plain link mark, and the profile form names the game beside the site.
 - Game search: player, opponent, mode and result are always shown and the other filters fold under More filters (open when one is set); the results are a compact table, with previous and next pages kept in the address.
+- The Tower on tap setting shows a phone with what each choice does: the balloon, the strip or only the side panel. The strip's pieces keep their size whatever the screen width.
 - Every page title has the same size, form labels have more room above their field, and the quick settings menu lines its values up beside the arrows.
 
 ## [0.8.0] - 2026-11-19

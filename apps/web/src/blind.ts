@@ -1,5 +1,6 @@
 import { pieceName, type PieceNames } from '@ligungi/board';
 import {
+  applyMove,
   COLORS,
   ROLES,
   ROLE_INFO,
@@ -78,6 +79,30 @@ export const moveNotes = (s: Speaker, before: Position, after: Position): string
   if (after.phase === 'play' && isMarshalAttacked(after, after.turn)) notes.push(s.t.blind.check(after.turn));
   return notes;
 };
+
+/** The short form, quick enough for fast games: "Samurai, 6-6.", "Lancer stacks on 4-7, tier 2.", "Check." */
+export const shortMoveText = (s: Speaker, before: Position, move: Move): string => {
+  const w = s.t.speech;
+  if (move.kind === 'done') return w.done;
+  const parts = rulebookParts(before, move);
+  const level = parts.done ? 1 : parts.level;
+  const to = squareText(move.to);
+  let text: string;
+  if (move.kind === 'drop') text = w.drop(name(s, move.role), to, level);
+  else {
+    const piece = name(s, topOf(before.board[move.from]!)!.role);
+    text = move.action === 'capture' ? w.capture(piece, to) : move.action === 'stack' ? w.stack(piece, to, level) : w.move(piece, to);
+  }
+  if (move.betray?.length) text += ` ${w.betray}`;
+  const after = applyMove(before, move);
+  if (before.phase === 'draft' && after.phase === 'play') text += ` ${w.draftOver}`;
+  if (after.phase === 'play' && isMarshalAttacked(after, after.turn)) text += ` ${w.check}`;
+  return text;
+};
+
+/** The move in the chosen form: the short one, or the full sentences of the screen reader mode. */
+export const spokenMoveText = (s: Speaker, before: Position, move: Move, style: 'short' | 'full'): string =>
+  style === 'short' ? shortMoveText(s, before, move) : [describeMove(s, before, move), ...moveNotes(s, before, applyMove(before, move))].join(' ');
 
 export const describeSquare = (s: Speaker, position: Position, square: Square): string => {
   const b = s.t.blind;

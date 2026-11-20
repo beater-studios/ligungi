@@ -10,6 +10,7 @@ import { useLocalGame } from '../localGame.ts';
 import { usePracticeProgress, type PracticeProgress } from '../practiceProgress.ts';
 import { session } from '../session.ts';
 import { playSound } from '../sound.ts';
+import { moveSound } from '../speech.ts';
 import { useStore } from '../store.ts';
 
 const MIN_THINK_MS = 450;
@@ -105,7 +106,7 @@ const PracticeGame = ({ practice, record }: { practice: PracticePosition; record
         if (request.current !== id) return;
         const move = parseMove(event.data.move);
         if (move) {
-          playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
+          moveSound('training', local.position, move, 'opponent');
           local.play(move);
         }
         setThinking(false);
@@ -156,7 +157,7 @@ const PracticeGame = ({ practice, record }: { practice: PracticePosition; record
         moves,
         lastMove: local.lastMove,
         onMove: (move) => {
-          playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
+          moveSound('training', local.position, move, 'self');
           local.play(move);
         },
       }}

@@ -2,15 +2,18 @@ import type { ComponentChildren } from 'preact';
 import { MoveListPreview } from '../components/MoveListPreview.tsx';
 import { PiecePreview } from '../components/PiecePreview.tsx';
 import { PIECE_STYLES } from '@ligungi/board';
+import { initialPosition, legalMoves, topOf } from '@ligungi/engine';
 import { customBoardStyle, DEFAULT_CUSTOM_BOARD, type BoardWarning } from '../boardColors.ts';
 import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../pieceColors.ts';
-import { ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
+import { Checkbox, ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
 import { MESSAGES, themeLabel, useT, type Messages } from '../i18n/index.ts';
 import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../looks.tsx';
-import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, CONFIRM_MOVES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs } from '../prefs.ts';
+import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, CONFIRM_MOVES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, SPEECH_PLACES, SPEECH_STYLES, SPOKEN_MOVES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs, type SpeechPlace } from '../prefs.ts';
 import { enableNotifications, notifyPermission } from '../notify.ts';
 import { playSound } from '../sound.ts';
+import { speakSample } from '../speech.ts';
 import { useStore } from '../store.ts';
+import { TowerTapPreview } from '../components/TowerTapPreview.tsx';
 import { SettingsShell } from './AccountPage.tsx';
 
 /** A titled group of settings; with a preview, the rows sit on the left and the preview on the right. */
@@ -24,6 +27,48 @@ const Group = ({ id, title, help, preview, children }: { id: string; title: stri
     </div>
   </section>
 );
+
+/** A Samurai stepping forward from the start, said in the chosen form when the player tries the voice. */
+const SAMPLE = (() => {
+  const start = initialPosition('beginner');
+  const move = legalMoves(start).find((m) => m.kind === 'move' && topOf(start.board[m.from]!)?.role === 'samurai' && m.action === 'move');
+  return { start, move: move ?? legalMoves(start)[0]! };
+})();
+
+/** How moves are said and where, under the spoken moves choice. */
+const SpeechSettings = () => {
+  const s = useT().settings;
+  const { spokenStyle, spokenPlaces } = useStore(prefs);
+  const toggle = (place: SpeechPlace, on: boolean) =>
+    updatePrefs({ spokenPlaces: SPEECH_PLACES.filter((p) => (p === place ? on : spokenPlaces.includes(p))) });
+  return (
+    <>
+      <div class="ligungi-setting">
+        <OptionCards
+          name="pref-spokenStyle"
+          legend={s.spokenStyle}
+          layout="segmented"
+          value={spokenStyle}
+          options={SPEECH_STYLES.map((value) => ({ value, label: s.spokenStyles[value] }))}
+          onChange={(value) => updatePrefs({ spokenStyle: value })}
+          help={s.spokenStyleHelp}
+        />
+      </div>
+      <div class="ligungi-setting">
+        <fieldset class="ligungi-speech-places">
+          <legend class="ligungi-choice__legend">{s.spokenPlaces}</legend>
+          {SPEECH_PLACES.map((place) => (
+            <Checkbox key={place} id={`pref-speech-${place}`} checked={spokenPlaces.includes(place)} label={s.spokenPlaceNames[place]} onChange={(on) => toggle(place, on)} />
+          ))}
+          <small class="form-help">{s.spokenPlacesHelp}</small>
+          <button type="button" class="button button-empty" onClick={() => speakSample(SAMPLE.start, SAMPLE.move)}>
+            {s.test}
+          </button>
+        </fieldset>
+      </div>
+    </>
+  );
+};
 
 /** The groups of the page, in order, for the index at the top. */
 const GROUPS: ReadonlyArray<readonly [string, (s: Messages['settings']) => string]> = [
@@ -262,6 +307,8 @@ export const SettingsPage = () => {
                 <Toggle id="pref-sound" checked={current.sound} label={s.sound} onChange={(sound) => updatePrefs({ sound })} />
               </div>
             </SettingRow>
+            {choice('spokenMoves', s.spokenMoves, SPOKEN_MOVES.map((value) => [value, s.spokenMovesOptions[value]]), { help: s.spokenMovesHelp })}
+            {current.spokenMoves !== 'off' && <SpeechSettings />}
             <SettingRow
               title={s.notifications}
               htmlFor="pref-notifications"
@@ -278,7 +325,18 @@ export const SettingsPage = () => {
                 }}
               />
             </SettingRow>
-            {choice('towerTap', s.towerTap, TOWER_TAPS.map((value) => [value, s.towerTaps[value]]), { help: s.towerTapHelp })}
+            <div class="ligungi-setting ligungi-tap-setting">
+              <OptionCards
+                name="pref-towerTap"
+                legend={s.towerTap}
+                layout="row"
+                value={current.towerTap}
+                options={TOWER_TAPS.map((value) => ({ value, label: s.towerTaps[value] }))}
+                onChange={(towerTap) => updatePrefs({ towerTap })}
+                help={s.towerTapHelp}
+              />
+              <TowerTapPreview mode={current.towerTap} />
+            </div>
             {toggle('hoverReach', s.hoverReach, s.hoverReachHelp)}
             {toggle('animation', s.animation, s.animationHelp)}
             {toggle('hidePieces', s.hidePieces, s.hidePiecesHelp)}

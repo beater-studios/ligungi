@@ -18,6 +18,7 @@ import {
 } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { sayMove } from '../speech.ts';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { DraftPanel, TowerPanel, TowerStrip } from '../components/Panels.tsx';
@@ -199,6 +200,15 @@ export const StudyPage = ({ id }: { id: string }) => {
   const node = tree ? (nodeAt(tree, path) ?? tree) : null;
   const legal = useMemo(() => (editable && position ? legalMoves(position) : []), [editable, position]);
   const lastMove = path.length && node ? (parseMove((node as StudyNode).move) ?? null) : null;
+  // Spoken moves: the move of the node reached, each time it changes; opening a chapter says nothing.
+  const pathKey = path.join('.');
+  const spokenChapter = useRef<string | null>(null);
+  useEffect(() => {
+    const opened = spokenChapter.current !== (chapter?.id ?? null);
+    spokenChapter.current = chapter?.id ?? null;
+    if (opened || !lastMove || !start || !tree) return;
+    sayMove('review', positionAt(start, tree, path.slice(0, -1)), lastMove, 'other');
+  }, [pathKey, chapter?.id]);
 
   /** Applies an edit of the author and saves it shortly after, unless it would make the chapter too big. */
   const edit = (next: StudyRoot, nextPath: Path = path) => {

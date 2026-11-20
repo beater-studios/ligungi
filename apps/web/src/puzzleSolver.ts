@@ -1,8 +1,8 @@
-import { initialPosition, legalMoves, moveToString, parseMove, toFen, type Move, type Position } from '@ligungi/engine';
+import { applyMove, initialPosition, legalMoves, moveToString, parseMove, toFen, type Move, type Position } from '@ligungi/engine';
 import type { Puzzle, PuzzleInfo } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { useLocalGame } from './localGame.ts';
-import { playSound } from './sound.ts';
+import { moveSound } from './speech.ts';
 
 export interface PuzzleEntry {
   readonly puzzle: Puzzle;
@@ -21,8 +21,6 @@ export interface SolveEvents {
 }
 
 const PLACEHOLDER = initialPosition('intro');
-
-export const playMoveSound = (move: Move): void => playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
 
 /**
  * Solving one puzzle at a time on a local board: the solver's moves are checked against the stored line, and in mates any
@@ -80,7 +78,8 @@ export const usePuzzleSolver = (events: SolveEvents, answerDelay = 450) => {
   const yourTurn = entry !== null && stage === 'solving' && local.ply === null && position.turn === entry.info.color && !replay.game.outcome;
   const moves = useMemo(() => (yourTurn ? legalMoves(position) : []), [yourTurn, position]);
 
-  const answer = (reply: string | null, last: boolean) => {
+  /** `from`: the position after the solver's move, which the reply is played from. */
+  const answer = (reply: string | null, last: boolean, from: Position) => {
     if (last || reply === null) {
       setStage('done');
       latest.current.onCorrect(true);
@@ -91,7 +90,7 @@ export const usePuzzleSolver = (events: SolveEvents, answerDelay = 450) => {
     timer.current = setTimeout(() => {
       const move = parseMove(reply);
       if (move) {
-        playMoveSound(move);
+        moveSound('training', from, move, 'opponent');
         local.play(move);
       }
       setStage('solving');
@@ -110,9 +109,10 @@ export const usePuzzleSolver = (events: SolveEvents, answerDelay = 450) => {
     const played = replay.moves.length;
     const left = info.moves - Math.floor(played / 2);
     const text = moveToString(move);
-    playMoveSound(move);
+    moveSound('training', before, move, 'self');
     local.play(move);
-    if (onLine.current && puzzle.line[played] === text) return answer(puzzle.line[played + 1] ?? null, left === 1);
+    const after = applyMove(before, move);
+    if (onLine.current && puzzle.line[played] === text) return answer(puzzle.line[played + 1] ?? null, left === 1, after);
     if (info.kind === 'material') return wrong(false);
     setStage('checking');
     const ticket = ++request.current;
@@ -122,7 +122,7 @@ export const usePuzzleSolver = (events: SolveEvents, answerDelay = 450) => {
       if (request.current !== ticket) return;
       if (!event.data.ok) return wrong(!event.data.check);
       onLine.current = false;
-      answer(event.data.defense, left === 1);
+      answer(event.data.defense, left === 1, after);
     };
     worker.current?.addEventListener('message', listener);
     worker.current?.postMessage({ id: ticket, fen: toFen(before), move: text, moves: left });

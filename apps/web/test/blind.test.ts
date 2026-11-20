@@ -12,6 +12,8 @@ import {
   parseCommand,
   parseDrawing,
   readPieceWords,
+  shortMoveText,
+  spokenMoveText,
   type Speaker,
 } from '../src/blind.ts';
 import { en } from '../src/i18n/en.tsx';
@@ -147,5 +149,27 @@ describe('navigation, drawings and the editor', () => {
     expect(readPieceWords('black tenente-general 5-5')).toEqual({ role: 'lieutenant', color: 'black', squares: [fromRulebook(5, 5)], rest: [] });
     expect(readPieceWords('negras arq')).toEqual({ role: 'archer', color: 'black', squares: [], rest: [] });
     expect(readPieceWords('p')).toEqual({ role: null, color: null, squares: [], rest: ['p'] });
+  });
+});
+
+describe('spoken moves', () => {
+  it('says moves, stacks, drops and captures in the short form, in each language', () => {
+    expect(shortMoveText(portuguese, start, move('d3d4'))).toBe('Samurai, 6-6.');
+    expect(shortMoveText(english, start, move('d3d4'))).toBe('Samurai, 6-6.');
+    expect(shortMoveText(spanish, start, move('d3d4'))).toBe('Samurái, 6-6.');
+    expect(shortMoveText(portuguese, start, move('e2f3='))).toBe('Lanceiro empilha em 4-7, nível 2.');
+    expect(shortMoveText(english, start, move('e2f3='))).toBe('Lancer stacks on 4-7, tier 2.');
+    expect(shortMoveText(portuguese, start, move('J*f3'))).toBe('Major-General da mão em 4-7, nível 2.');
+    const facing = parseFen('4m4/9/9/9/4s4/4S4/9/9/4M4 w - beginner p w');
+    expect(shortMoveText(portuguese, facing, move('e4e5x'))).toBe('Samurai captura em 5-5.');
+    expect(shortMoveText(portuguese, initialPosition('advanced'), { kind: 'done' })).toBe('Pronto.');
+  });
+
+  it('adds the check, and uses the full sentences of the screen reader mode when asked', () => {
+    const near = parseFen('4m4/9/4S4/9/9/9/9/9/4M4 w - beginner p w');
+    expect(shortMoveText(portuguese, near, move('e7e8'))).toBe('Samurai, 5-2. Xeque.');
+    expect(shortMoveText(english, near, move('e7e8'))).toBe('Samurai, 5-2. Check.');
+    expect(spokenMoveText(portuguese, start, move('d3d4'), 'full')).toBe('Branco: Samurai de 6-7 para 6-6.');
+    expect(spokenMoveText(portuguese, start, move('d3d4'), 'short')).toBe('Samurai, 6-6.');
   });
 });

@@ -10,6 +10,7 @@ import { colorChoiceOptions, outcomeText, useT } from '../i18n/index.ts';
 import { useLocalGame } from '../localGame.ts';
 import { useLocation } from '../router.ts';
 import { playSound } from '../sound.ts';
+import { moveSound } from '../speech.ts';
 
 const MIN_THINK_MS = 450;
 
@@ -65,7 +66,7 @@ export const ComputerPage = () => {
         if (request.current !== id) return;
         const move = parseMove(event.data.move);
         if (move) {
-          playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
+          moveSound('computer', local.position, move, 'opponent');
           local.play(move);
         }
         setThinking(false);
@@ -179,7 +180,7 @@ export const ComputerPage = () => {
         moves,
         lastMove: local.lastMove,
         onMove: (move) => {
-          playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
+          moveSound('computer', local.position, move, 'self');
           local.play(move);
         },
       }}

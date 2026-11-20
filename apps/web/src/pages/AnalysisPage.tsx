@@ -14,6 +14,7 @@ import {
 import type { GameView } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { sayMove } from '../speech.ts';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { ImportGame } from '../components/ImportGame.tsx';
@@ -89,6 +90,17 @@ export const AnalysisPage = () => {
   const doneAvailable = position.phase === 'draft' && legal.some((m) => m.kind === 'done');
   const { replay } = local;
   const current = local.ply ?? replay.moves.length;
+  // Spoken moves: the move that leads to the position shown, each time it changes (a new position says nothing).
+  const shownMove = current > 0 ? replay.moves[current - 1] : undefined;
+  const firstShown = useRef(true);
+  useEffect(() => {
+    if (firstShown.current) {
+      firstShown.current = false;
+      return;
+    }
+    const before = replay.positions[current - 1];
+    if (shownMove && before) sayMove('review', before, shownMove, 'other');
+  }, [current, shownMove]);
   const go = (next: number) => {
     const clamped = Math.max(0, Math.min(replay.moves.length, next));
     local.setPly(clamped === replay.moves.length ? null : clamped);

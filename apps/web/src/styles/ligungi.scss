@@ -2694,6 +2694,88 @@ body:has(main.ligungi-auth) #clinput {
   }
 }
 
+// Tower on tap: the choices beside a phone that shows what each one does.
+.ligungi-setting.ligungi-tap-setting {
+  align-items: flex-start;
+
+  > .ligungi-choice {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @media (max-width: at-most($small)) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.ligungi-tap-preview {
+  flex: none;
+  margin: 0;
+
+  @media (max-width: at-most($small)) {
+    align-self: center;
+  }
+
+  figcaption {
+    margin-top: 0.4rem;
+    color: $c-font-dim;
+    font-size: 0.85em;
+    text-align: center;
+  }
+}
+
+// Drawn at a phone's real width, so the balloon and the strip look as they do there, then shrunk as a whole.
+.ligungi-tap-preview__phone {
+  width: 22rem;
+  padding: 0.9rem 0.6rem;
+  border: 3px solid $c-border;
+  border-radius: 1.6rem;
+  background: $c-bg-page;
+  zoom: 0.6;
+}
+
+.ligungi-tap-preview__board {
+  position: relative;
+}
+
+.ligungi-tap-preview__tapped {
+  box-shadow: inset 0 0 0 2px var(--gg-selected);
+  background: color-mix(in srgb, var(--gg-selected) 45%, transparent);
+}
+
+.ligungi-tap-preview__note {
+  margin: 0.8rem 0.3rem 0;
+  color: $c-font-dim;
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+// Where spoken moves are said: a column of checkboxes under a legend, its help, then the button to hear a sample.
+.ligungi-speech-places {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  .ligungi-check {
+    margin: 0;
+  }
+
+  .form-help {
+    margin-top: 0.3rem;
+  }
+
+  .button {
+    margin-top: 0.4rem;
+  }
+}
+
 // The index jumps to a group: leave room for the fixed header above it.
 .ligungi-prefs-group {
   scroll-margin-top: 4rem;
@@ -8878,9 +8960,11 @@ $lesson-star: #e8a800;
     flex: none;
   }
 
+  // The kanji follows the piece's own size, not the width of whatever container is around the strip.
   .gg-mini-piece {
     width: 1.8rem;
     height: 1.8rem;
+    font-size: 1.08rem;
   }
 }
 

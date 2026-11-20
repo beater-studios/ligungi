@@ -22,6 +22,7 @@ import { prefs } from '../prefs.ts';
 import { navigate } from '../router.ts';
 import { session } from '../session.ts';
 import { playSound } from '../sound.ts';
+import { moveSound } from '../speech.ts';
 import { useStore } from '../store.ts';
 
 const DEFENSE_DELAY_MS = 450;
@@ -174,7 +175,7 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
       }
       setMessage(t.lessons.mateDefends);
       timer.current = setTimeout(() => {
-        playSound(defense.kind === 'move' && defense.action === 'capture' ? 'capture' : 'move');
+        moveSound('training', after.position, defense, 'opponent');
         const defended = applyMove(after.position, defense);
         setState({ ...after, position: defended });
         played(defense, defended);
@@ -189,7 +190,7 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
 
   const onMove = (move: Move) => {
     const after = playLesson(exercise, state, move);
-    playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
+    moveSound('training', state.position, move, 'self');
     setState(after);
     played(move, after.position);
     setLastMove(move);

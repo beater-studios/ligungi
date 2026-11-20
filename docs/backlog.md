@@ -36,15 +36,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 |---|---|---|---|---|
 | TV channel for games against the computer | Something to watch even when few people play. Games against the computer run in the browser, so the server never sees them; it needs bots that play on the server, as with bot accounts | S | Low | lishogi |
 
-## Display and settings
-
-| Item | Why | Size | Priority | Seen on |
-|---|---|---|---|---|
-| Sound sets, including spoken moves | Personal taste and accessibility | M | Low | lichess, lishogi |
-| Custom background image | Personal taste | S | Low | lichess, lishogi |
-| Language shortcut in the header | Faster than opening the settings menu | S | Low | lishogi |
-| More languages through a community translation platform | lichess has over 100 languages translated by volunteers | M | Medium | lichess |
-
 ## Community
 
 | Item | Why | Size | Priority | Seen on |
@@ -55,7 +46,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | User blogs | Community content | M | Low | lichess |
 | Chat in games, on TV and a site chat room | Social core of lichess. Moderation tools and reports now exist | M | Medium | lichess, lidraughts, libaduk, lishogi |
 | Teams, forum and blog | Community spaces | L | Low | lichess, lidraughts, lishogi |
-| Friendly sites page | Cross-links with other lichess-style sites | S | Low | lishogi |
 
 ## Tools
 
@@ -64,7 +54,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Puzzles made by players: pick a position from a game or the editor, enter the solution, and publish it after a check (for mates, the engine confirms the solution is the only one) | Asked by a player who has games worth turning into puzzles; more variety than the generated set. Needs the check, moderation and reports like studies, and a way to rate them. Meanwhile studies can hold a position and its solution | M | Medium | internal |
 | Computer analysis in the browser (evaluation, best line, mistakes in a finished game) | Core study tool on lichess-style sites. Needs a stronger engine | L | Medium | lichess, lishogi |
 | Learn from your mistakes: replay the critical moments of your own games | The most loved study feature on lichess. Needs the computer analysis | M | Medium | lichess |
-| Record a physical board with the camera | Computer vision; a strong differentiator | XL | Low | libaduk |
 
 ## Platform
 

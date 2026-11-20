@@ -15,6 +15,7 @@ import { prefs, resolveLang } from '../prefs.ts';
 import { replayGame } from '../replay.ts';
 import { socket } from '../socket.ts';
 import { playSound } from '../sound.ts';
+import { moveSound } from '../speech.ts';
 import { ReportButton } from '../components/ReportButton.tsx';
 import { VoidGame } from '../components/VoidGame.tsx';
 import { session } from '../session.ts';
@@ -110,10 +111,10 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
     }
     if (view.moves.length > before.plies) {
       const last = replay.moves[replay.moves.length - 1];
-      playSound(last?.kind === 'move' && last.action === 'capture' ? 'capture' : 'move');
+      const played = replay.positions[replay.moves.length - 1];
+      if (last && played) moveSound(view.you ? 'online' : 'watching', played, last, !view.you ? 'other' : played.turn === view.you ? 'self' : 'opponent');
       setNotice(null);
       // A correspondence game is announced by the `turns` message, on whatever page the player is.
-      const played = replay.positions[replay.moves.length - 1];
       if (last && played && me && view.status === 'started' && view.daysPerMove === null && replay.game.position.turn === me) {
         const { notation, pieceNames, lang } = prefs.get();
         const text = moveText(notation, played, last, getT(), pieceNames === 'ja' ? 'ja' : resolveLang(lang));

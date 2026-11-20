@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { request as httpRequest, type IncomingMessage } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { DISCORD_INVITE } from '@ligungi/protocol';
 import { afterEach, describe, expect, it } from 'vitest';
 import { hashPassword, needsRehash, verifyPassword } from '../src/auth.ts';
 import { RateLimiter, clientIp } from '../src/http.ts';
@@ -237,6 +238,15 @@ describe('prerendered pages', () => {
     expect((await get('/', 'fr-FR, es;q=0.5, en;q=0.7')).text).toBe('home en auto');
     expect((await get('/', 'de')).text).toBe('home en auto');
     expect((await get('/faq?lang=xx')).text).toBe('faq en auto');
+  });
+
+  it('redirects the short links, with or without a build', async () => {
+    server = await startServer({ staticDir: site() });
+    const get = (path: string) => fetch(server!.base + path, { redirect: 'manual' });
+    const res = await get('/discord');
+    expect([res.status, res.headers.get('location'), res.headers.get('cache-control')]).toEqual([302, DISCORD_INVITE, 'no-store']);
+    expect((await get('/discord/extra')).status).not.toBe(302);
+    expect((await get('/constructor')).status).not.toBe(302);
   });
 
   it('offers the languages the build prerendered', async () => {

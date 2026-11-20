@@ -43,7 +43,7 @@ import { useDropdown } from './components/useDropdown.ts';
 import { TvChannelPage } from './pages/TvChannelPage.tsx';
 import { TvPage } from './pages/TvPage.tsx';
 import { MODES, type Mode } from '@ligungi/engine';
-import { LESSON_STAGE_IDS, TV_CHANNELS, type TvChannel } from '@ligungi/protocol';
+import { LESSON_STAGE_IDS, SHORT_LINKS, TV_CHANNELS, type TvChannel } from '@ligungi/protocol';
 import { Swatch, boardFaces, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from './looks.tsx';
 import { BOARD_THEMES, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, prefs, resolveLang, updatePrefs } from './prefs.ts';
 import { matchRoute, navigate, useLocation, type Route } from './router.ts';
@@ -54,7 +54,19 @@ import { socket } from './socket.ts';
 import { useStore } from './store.ts';
 
 
+/** A short link reached inside the site (the server redirects it on a full page load): leave for its target. */
+const ShortLink = ({ to }: { to: string }) => {
+  const t = useT();
+  useEffect(() => window.location.replace(to), [to]);
+  return (
+    <main class="ligungi-page">
+      <p class="ligungi-notice">{t.common.loading}</p>
+    </main>
+  );
+};
+
 const ROUTES: Route<VNode>[] = [
+  ...Object.entries(SHORT_LINKS).map(([path, to]): Route<VNode> => ({ pattern: new RegExp(`^${path}$`), render: () => <ShortLink to={to} /> })),
   { pattern: /^\/$/, render: () => <HomePage /> },
   { pattern: /^\/computer$/, render: () => <ComputerPage /> },
   { pattern: /^\/analysis$/, render: () => <AnalysisPage /> },
@@ -508,6 +520,7 @@ export const SiteFooter = () => {
         ['/about', t.nav.about],
         ['/faq', t.nav.faq],
         ['/contact', t.nav.contact],
+        [LINKS.discord, t.nav.discord],
         ['/sites', t.nav.sites],
         [LINKS.status, t.nav.status],
         [SOURCE_URL, t.footer.sourceCode],

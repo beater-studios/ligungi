@@ -4,8 +4,11 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-20
+
 ### Added
 
+- A Discord server for the community (ligungi.org/discord): chat in English, Portuguese and Spanish, strategy, your games, help and feedback. Linked from the footer and the contact page.
 - Sound sets (Settings > Preferences > Play): Default, Piano, Futuristic and 8-bit, the free sets by Enigmahack from lila. Each one changes every sound of the site, and picking one plays a sample.
 - A sound of its own when a move leaves the other side's Marshal attacked, in every set.
 - Byo-yomi count with the sound set's countdown, second by second, besides the beep and the voice (the spoken count switch became this three-way choice, and players who had it on keep the voice).
@@ -268,7 +271,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/beater-studios/ligungi/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/beater-studios/ligungi/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/beater-studios/ligungi/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/beater-studios/ligungi/compare/v0.5.0...v0.6.0

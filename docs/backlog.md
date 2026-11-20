@@ -42,7 +42,7 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
-| Official social media: a Discord server first (community and support), then X, YouTube, Twitch and Instagram, each linked from the footer with its icon (icons from Simple Icons, CC0) | Gives players a place to meet, ask questions and follow news; Discord needs moderators before it opens | S | Medium | lichess, lishogi |
+| Official social media: X, YouTube, Twitch and Instagram, each linked from the footer with its icon (icons from Simple Icons, CC0) | Follow news and see the game played; the Discord server already exists (see [community/discord.md](community/discord.md)) | S | Medium | lichess, lishogi |
 | Community links in the menu and footer (GitHub issues, community group, social media) | The issue tracker is only linked from the FAQ and contact page | S | Medium | lichess, libaduk, lishogi |
 | Private messages, with a setting for who can message me | Players can only reach each other through a challenge today; moderation tools and reports now exist, and the account page already has who can challenge and who can follow | M | Medium | lichess |
 | User blogs | Community content | M | Low | lichess |

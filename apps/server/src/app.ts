@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { MODES, parseFen, type Color, type Mode } from '@ligungi/engine';
 import {
   ERROR_MESSAGES,
+  SHORT_LINKS,
   LEADERBOARD_MAX,
   LEADERBOARD_TOP,
   RECENT_GAMES,
@@ -1465,6 +1466,12 @@ export const createApp = (config: ServerConfig): App => {
     res.setHeader('x-content-type-options', 'nosniff');
     res.setHeader('referrer-policy', 'strict-origin-when-cross-origin');
     if (!url.pathname.startsWith('/api/')) {
+      const shortLink = Object.hasOwn(SHORT_LINKS, url.pathname) ? SHORT_LINKS[url.pathname] : undefined;
+      if (shortLink && (req.method === 'GET' || req.method === 'HEAD')) {
+        res.writeHead(302, { location: shortLink, 'cache-control': 'no-store' });
+        res.end();
+        return;
+      }
       res.setHeader('content-security-policy', csp);
       if ((req.method === 'GET' || req.method === 'HEAD') && config.staticDir && serveStatic(config.staticDir, url, req.headers['accept-language'], res, req.method === 'HEAD')) return;
       sendText(res, 404, 'Not found');

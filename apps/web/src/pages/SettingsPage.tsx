@@ -8,7 +8,7 @@ import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../p
 import { Checkbox, ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
 import { MESSAGES, themeLabel, useT, type Messages } from '../i18n/index.ts';
 import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../looks.tsx';
-import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, CONFIRM_MOVES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, SPEECH_PLACES, SPEECH_STYLES, SPOKEN_MOVES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs, type SpeechPlace } from '../prefs.ts';
+import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, BYOYOMI_COUNTS, CONFIRM_MOVES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, SOUND_SETS, SPEECH_PLACES, SPEECH_STYLES, SPOKEN_MOVES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs, type SpeechPlace } from '../prefs.ts';
 import { enableNotifications, notifyPermission } from '../notify.ts';
 import { playSound } from '../sound.ts';
 import { speakSample } from '../speech.ts';
@@ -307,6 +307,21 @@ export const SettingsPage = () => {
                 <Toggle id="pref-sound" checked={current.sound} label={s.sound} onChange={(sound) => updatePrefs({ sound })} />
               </div>
             </SettingRow>
+            <div class="ligungi-setting">
+              <OptionCards
+                name="pref-soundSet"
+                legend={s.soundSet}
+                layout="segmented"
+                value={current.soundSet}
+                options={SOUND_SETS.map((value) => ({ value, label: s.soundSets[value] }))}
+                onChange={(soundSet) => {
+                  updatePrefs({ soundSet });
+                  playSound('move');
+                }}
+                help={s.soundSetHelp}
+              />
+            </div>
+            {choice('byoyomiCount', s.byoyomiCount, BYOYOMI_COUNTS.map((value) => [value, s.byoyomiCounts[value]]), { help: s.byoyomiCountHelp })}
             {choice('spokenMoves', s.spokenMoves, SPOKEN_MOVES.map((value) => [value, s.spokenMovesOptions[value]]), { help: s.spokenMovesHelp })}
             {current.spokenMoves !== 'off' && <SpeechSettings />}
             <SettingRow
@@ -367,7 +382,6 @@ export const SettingsPage = () => {
 
           <Group id="prefs-accessibility" title={s.groupAccessibility} help={s.groupAccessibilityHelp}>
             {toggle('screenReader', t.blind.setting, t.blind.settingHelp)}
-            {toggle('byoyomiVoice', s.byoyomiVoice, s.byoyomiVoiceHelp)}
           </Group>
         </form>
         <p class="ligungi-notice">{s.saved}</p>

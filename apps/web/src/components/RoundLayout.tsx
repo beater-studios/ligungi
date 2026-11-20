@@ -7,7 +7,7 @@ import { useMoveText } from '../notation.ts';
 import { icons } from '../icons.ts';
 import { prefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
-import { playSound, speak } from '../sound.ts';
+import { playCountdown, playSound, speak } from '../sound.ts';
 import { BeginnerHint } from './BeginnerHint.tsx';
 import { BlindPanel, type BlindCommands } from './BlindPanel.tsx';
 import { BoardView, type BoardProps } from './BoardView.tsx';
@@ -83,8 +83,9 @@ const LOW_TIME = 20_000;
 const periodWarning = (byoyomi: number): number => Math.min(10_000, (byoyomi * 1000) / 2);
 
 /**
- * The last seconds of the player's own byo-yomi period: a beep when the warning starts or, with the spoken countdown,
- * the browser's voice then and from five down. `spoken` remembers the last second announced, so each is said once.
+ * The last seconds of the player's own byo-yomi period: a beep when the warning starts; with the voice, the browser
+ * says that second and every one from five down; with the sound set's countdown, every second plays its sound.
+ * `spoken` remembers the last second announced, so each is counted once.
  */
 const announcePeriod = (period: number, warning: number, spoken: { current: number | null }, locale: string): void => {
   const second = Math.ceil(period / 1000);
@@ -95,9 +96,11 @@ const announcePeriod = (period: number, warning: number, spoken: { current: numb
   if (period > warning || second <= 0 || second === spoken.current) return;
   spoken.current = second;
   const first = second === Math.ceil(warning / 1000);
-  if (prefs.get().byoyomiVoice) {
+  const count = prefs.get().byoyomiCount;
+  if (count === 'voice') {
     if (first || second <= 5) speak(String(second), locale);
-  } else if (first) playSound('lowtime');
+  } else if (count === 'sounds') playCountdown(second);
+  else if (first) playSound('lowtime');
 };
 
 const ClockBox = ({ color, position, clock }: { color: Color; position: 'top' | 'bottom'; clock: RoundClock }) => {

@@ -57,7 +57,7 @@ export const es: Content = {
           Diseño: <Ext href={LINKS.lila}>lila</Ext>, el código abierto de lichess.org (AGPL-3.0).
         </li>
         <li>
-          Sonidos: el conjunto "sfx" de Enigmahack y la fuente de iconos, ambos de lila (ver el{' '}
+          Sonidos: los conjuntos sfx, piano, futuristic y nes, de Enigmahack, y la fuente de iconos, ambos de lila (ver el{' '}
           <Ext href={LINKS.lilaCopying}>COPYING.md de lila</Ext>).
         </li>
         <li>

@@ -6,6 +6,9 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Sound sets (Settings > Preferences > Play): Default, Piano, Futuristic and 8-bit, the free sets by Enigmahack from lila. Each one changes every sound of the site, and picking one plays a sample.
+- A sound of its own when a move leaves the other side's Marshal attacked, in every set.
+- Byo-yomi count with the sound set's countdown, second by second, besides the beep and the voice (the spoken count switch became this three-way choice, and players who had it on keep the voice).
 - Friendly sites (`/sites`, in the footer and beside About and FAQ): the other sites built on lila (lichess, lishogi, lidraughts and PlayStrategy), and libaduk for go.
 - Spoken moves (Settings > Preferences > Play): the browser's voice says the moves, every move or only the opponent's, in a short form ("Samurai, 6-6.") or in full sentences ("White: Samurai from 6-7 to 6-6."), and you pick where: games against people, against the computer, games you watch, puzzles, lessons and practice, and the analysis board and studies (off by default, said as you step through the moves). It replaces the move sound, follows the site's language and piece names, and stays quiet in screen reader mode.
 

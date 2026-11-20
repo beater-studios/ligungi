@@ -1,4 +1,4 @@
-import type { Move, Position } from '@ligungi/engine';
+import { applyMove, isMarshalAttacked, type Move, type Position } from '@ligungi/engine';
 import { spokenMoveText, type Speaker } from './blind.ts';
 import { getT } from './i18n/index.ts';
 import { prefs, resolveLang, type SpeechPlace } from './prefs.ts';
@@ -25,9 +25,15 @@ export const sayMove = (place: SpeechPlace, before: Position, move: Move, mover:
   return true;
 };
 
-/** The voice when the move is said, else the move or capture sound: where a page used to play only the sound. */
+/**
+ * The voice when the move is said; else the check sound when the move leaves the other side's Marshal attacked, or the
+ * move or capture sound: where a page used to play only the sound.
+ */
 export const moveSound = (place: SpeechPlace, before: Position, move: Move, mover: Mover): void => {
-  if (!sayMove(place, before, move, mover)) playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
+  if (sayMove(place, before, move, mover)) return;
+  const after = applyMove(before, move);
+  if (after.phase === 'play' && isMarshalAttacked(after, after.turn)) playSound('check');
+  else playSound(move.kind === 'move' && move.action === 'capture' ? 'capture' : 'move');
 };
 
 /** A sample for the settings page, in the chosen form, wherever spoken moves are set to go. */

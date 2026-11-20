@@ -55,8 +55,9 @@ export interface Prefs {
   /** Move list notation: the rulebook's (kanji), the same with piece names, or the machine notation. */
   readonly notation: 'rulebook' | 'named' | 'machine';
   readonly sound: boolean;
-  /** Byo-yomi: the browser's voice counts down the last seconds of each period (a beep otherwise). */
-  readonly byoyomiVoice: boolean;
+  readonly soundSet: SoundSet;
+  /** Byo-yomi: how the last seconds of each period are counted. */
+  readonly byoyomiCount: ByoyomiCount;
   readonly theme: 'auto' | 'light' | 'dark';
   readonly boardTheme: BoardTheme;
   readonly boardView: BoardView;
@@ -84,6 +85,12 @@ export interface Prefs {
 export const CONFIRM_MOVES = ['never', 'correspondence', 'always'] as const;
 export type ConfirmMove = (typeof CONFIRM_MOVES)[number];
 
+/** The sound sets, folders of src/assets/sound: lila's free sets by Enigmahack. */
+export const SOUND_SETS = ['sfx', 'piano', 'futuristic', 'nes'] as const;
+export type SoundSet = (typeof SOUND_SETS)[number];
+/** The last seconds of a byo-yomi period: a beep, the browser's voice, or the countdown of the sound set. */
+export const BYOYOMI_COUNTS = ['beep', 'voice', 'sounds'] as const;
+export type ByoyomiCount = (typeof BYOYOMI_COUNTS)[number];
 /** Spoken moves: never, only the opponent's, or every move. */
 export const SPOKEN_MOVES = ['off', 'opponent', 'all'] as const;
 export type SpokenMoves = (typeof SPOKEN_MOVES)[number];
@@ -123,7 +130,8 @@ const DEFAULTS: Prefs = {
   animation: true,
   zoom: 80,
   hoverReach: true,
-  byoyomiVoice: false,
+  soundSet: 'sfx',
+  byoyomiCount: 'beep',
   screenReader: false,
   towerTap: 'balloon',
   confirmMove: 'correspondence',
@@ -171,7 +179,9 @@ const load = (): Prefs => {
       customPieces: validCustomPieces(stored.customPieces),
       hidePieces: stored.hidePieces === true,
       peekPieces: stored.peekPieces === true,
-      byoyomiVoice: stored.byoyomiVoice === true,
+      soundSet: oneOf(SOUND_SETS, stored.soundSet, DEFAULTS.soundSet),
+      // The spoken countdown used to be a switch of its own.
+      byoyomiCount: oneOf(BYOYOMI_COUNTS, stored.byoyomiCount, (stored as Record<string, unknown>).byoyomiVoice === true ? 'voice' : DEFAULTS.byoyomiCount),
       screenReader: stored.screenReader === true,
       notifications: stored.notifications === true,
       towerTap: oneOf(TOWER_TAPS, stored.towerTap, DEFAULTS.towerTap),

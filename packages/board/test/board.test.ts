@@ -46,6 +46,13 @@ describe('Gungiground', () => {
     expect(squareEl('e9').querySelector('.gg-flipped')).not.toBeNull();
   });
 
+  it('stretches the drawings with the board, so they stay on their squares in the 3D view', () => {
+    mount(initialPosition('intro'));
+    const svg = root.querySelector('.gg-shapes')!;
+    expect(svg.getAttribute('viewBox')).toBe('0 0 9 9');
+    expect(svg.getAttribute('preserveAspectRatio')).toBe('none');
+  });
+
   it('labels the board with the machine notation squares when asked', () => {
     mount(initialPosition('intro'), { coordinateStyle: 'algebraic' });
     const labels = () => [root.querySelectorAll('.gg-columns span'), root.querySelectorAll('.gg-rows span')].map((list) => [...list].map((n) => n.textContent).join(''));

@@ -23,6 +23,9 @@ export const PIECE_PALETTES = {
 export type DiscPalette = (typeof PIECE_PALETTES.disc)[number];
 export type KomaPalette = (typeof PIECE_PALETTES.koma)[number];
 const ALL_PALETTES: readonly string[] = [...new Set([...PIECE_PALETTES.disc, ...PIECE_PALETTES.koma])];
+/** The board seen from above, or in the 3D view of the board package (`gg-3d`), where towers show their height. */
+export const BOARD_VIEWS = ['2d', '3d'] as const;
+export type BoardView = (typeof BOARD_VIEWS)[number];
 /** lila zoom values (0 to 100) offered as board sizes. */
 export const BOARD_SIZES = [40, 60, 80, 100] as const;
 
@@ -56,6 +59,7 @@ export interface Prefs {
   readonly byoyomiVoice: boolean;
   readonly theme: 'auto' | 'light' | 'dark';
   readonly boardTheme: BoardTheme;
+  readonly boardView: BoardView;
   /** Colors of the `custom` board theme, kept when another theme is picked. */
   readonly customBoard: CustomBoard;
   readonly coordinates: boolean;
@@ -92,6 +96,7 @@ const DEFAULTS: Prefs = {
   sound: true,
   theme: 'auto',
   boardTheme: 'wood',
+  boardView: '2d',
   customBoard: DEFAULT_CUSTOM_BOARD,
   coordinates: true,
   animation: true,
@@ -153,6 +158,7 @@ const load = (): Prefs => {
             : DEFAULTS.notation,
       boardTheme: BOARD_THEMES.find((name) => name === stored.boardTheme) ?? DEFAULTS.boardTheme,
       customBoard: validCustomBoard(stored.customBoard),
+      boardView: oneOf(BOARD_VIEWS, stored.boardView, DEFAULTS.boardView),
       // Older versions had a free 0-100 slider; snap those values to the sizes offered today.
       zoom: Number.isFinite(Number(stored.zoom)) ? nearestBoardSize(stored.zoom) : DEFAULTS.zoom,
       lang: merged.lang === 'auto' || LANGS.includes(merged.lang) ? merged.lang : 'auto',
@@ -199,7 +205,7 @@ const systemLight = window.matchMedia?.('(prefers-color-scheme: light)');
 
 /** lila themes: the default (dark) theme lives on :root, `html.light` switches to the light one. */
 const apply = () => {
-  const { theme, zoom, lang, boardTheme, customBoard, pieceShape, kanjiFont, discPalette, komaPalette, customPieces } = prefs.get();
+  const { theme, zoom, lang, boardTheme, boardView, customBoard, pieceShape, kanjiFont, discPalette, komaPalette, customPieces } = prefs.get();
   const light = theme === 'light' || (theme === 'auto' && Boolean(systemLight?.matches));
   const root = document.documentElement;
   root.classList.toggle('light', light);
@@ -208,6 +214,7 @@ const apply = () => {
   for (const name of BOARD_THEMES) root.classList.toggle(`gg-theme-${name}`, name === boardTheme);
   // Always set: they are read only under gg-theme-custom, and the preview of that theme needs them too.
   for (const [property, value] of Object.entries(customBoardStyle(customBoard).vars)) root.style.setProperty(property, value);
+  root.classList.toggle('gg-3d', boardView === '3d');
   root.classList.toggle('gg-shape-koma', pieceShape === 'koma');
   const palette = pieceShape === 'koma' ? komaPalette : discPalette;
   for (const name of ALL_PALETTES) root.classList.toggle(`gg-pieces-${name}`, name === palette);

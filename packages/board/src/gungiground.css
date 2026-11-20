@@ -492,6 +492,77 @@
 }
 
 /*
+ * 3D view: put `gg-3d` on the board or any ancestor. As on lichess, an oblique view rather than a perspective one: the
+ * board is squashed to 82% of its width in height, and each disc lies on it squashed by the same 82%, with its edge
+ * showing below its face. The bottom of a disc, where it touches the board, is centred on its square, and a tower rises
+ * from there one disc's thickness per piece, so its height shows at a glance. The squares stay rectangles, so pointing,
+ * dragging and the marks work unchanged; the pieces in the hands and in the inspector stay as seen from above.
+ *
+ * A board drawn by the page (a preview) gets the same discs by adding `gg-stage` to it, with squares as tall as 82% of
+ * their width and `--gg-thick`, `--gg-side` and `--gg-3d-font` set for its size.
+ */
+.gg-3d .gg-board {
+  aspect-ratio: 100 / 82;
+  /* The thickness of a disc on screen: 12% of the width of a square. */
+  --gg-thick: calc(100cqw / 75);
+  /* The same thickness before the disc is squashed, which is how its edge is drawn. */
+  --gg-side: calc(100cqw / 61.5);
+  /* The front edge of the board under it, then its shadow. */
+  box-shadow:
+    inset 0 0 0 2px var(--gg-board-edge),
+    0 calc(100cqw / 60) 0 color-mix(in srgb, var(--gg-board-edge) 70%, #000),
+    0 calc(100cqw / 60 + 2px) 10px rgba(0, 0, 0, 0.3);
+}
+
+.gg-3d .gg-board-wrap {
+  /* Room for the front edge of the board (a sixtieth of its width), so it does not run into the hand below. */
+  padding-bottom: 1.8%;
+}
+
+/*
+ * A disc 78% of a square wide, drawn round and squashed: as tall as it is wide (78% of the width is 95.12% of the
+ * height of a square), centred, then raised so that the bottom of its edge sits on the middle of the square.
+ */
+.gg-3d :is(.gg-board, .gg-stage) .gg-piece {
+  left: 11%;
+  top: 2.44%;
+  width: 78%;
+  height: 95.12%;
+  font-size: var(--gg-3d-font, calc(100cqw / 9 * 0.42));
+  transform: translateY(calc(var(--gg-thick) * -1)) scaleY(0.82);
+}
+
+.gg-3d :is(.gg-board, .gg-stage) .gg-tower .gg-piece {
+  transform: translateY(calc((var(--level) + 1) * var(--gg-thick) * -1)) scaleY(0.82);
+}
+
+.gg-3d :is(.gg-board, .gg-stage) .gg-piece.gg-white {
+  --gg-side-color: color-mix(in srgb, var(--gg-white-rim) 78%, #000);
+}
+
+.gg-3d :is(.gg-board, .gg-stage) .gg-piece.gg-black {
+  --gg-side-color: color-mix(in srgb, var(--gg-black-face) 55%, #000);
+}
+
+.gg-3d :is(.gg-board, .gg-stage) .gg-piece.gg-white,
+.gg-3d :is(.gg-board, .gg-stage) .gg-piece.gg-black {
+  box-shadow:
+    0 calc(var(--gg-side) / 3) 0 var(--gg-side-color),
+    0 calc(var(--gg-side) * 2 / 3) 0 var(--gg-side-color),
+    0 var(--gg-side) 0 var(--gg-side-color),
+    0 calc(var(--gg-side) + 1px) 3px rgba(0, 0, 0, 0.45);
+}
+
+/* The koma's face is a clipped layer, so its edge is drawn by shadows of its shape, each one under the last. */
+.gg-3d.gg-shape-koma :is(.gg-board, .gg-stage) .gg-piece,
+.gg-3d .gg-shape-koma :is(.gg-board, .gg-stage) .gg-piece,
+.gg-shape-koma .gg-3d :is(.gg-board, .gg-stage) .gg-piece {
+  box-shadow: none;
+  filter: drop-shadow(0 calc(var(--gg-side) / 3) 0 var(--gg-side-color)) drop-shadow(0 calc(var(--gg-side) / 3) 0 var(--gg-side-color))
+    drop-shadow(0 calc(var(--gg-side) / 3) 0 var(--gg-side-color)) drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.5));
+}
+
+/*
  * Koma shape: a pentagon of wood pointing at the opponent, as in shogi. Put `gg-shape-koma` on an ancestor. A clipped
  * pseudo-element draws the face, so the drop shadow on the piece follows the shape; the glyph moves down into the wide
  * part and shrinks a little. Meant without the movement guides, which are laid out for a disc.

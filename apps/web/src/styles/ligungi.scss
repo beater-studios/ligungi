@@ -216,6 +216,20 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   }
 }
 
+// The 3D view squashes the board to 82% of its width (see the board package); the band below is its front edge.
+.gg-3d .main-board {
+  padding-bottom: 85%;
+
+  .board-view {
+    bottom: calc(100% - 82 / 85 * 100%);
+  }
+
+  // The band under the board view already leaves room for the edge.
+  .gg-board-wrap {
+    padding-bottom: 0;
+  }
+}
+
 /* Hands (pieces in hand) in lila's pocket areas, above and below the board. */
 .round__app .pocket,
 .analyse .pocket {
@@ -1059,6 +1073,10 @@ select.ligungi-select {
     .gg-piece {
       font-size: 44cqw;
     }
+
+    .gg-height {
+      font-size: 20cqw;
+    }
   }
 
   // Placed like the board's own coordinates: column numbers in the top left of the first row, row numbers on the right.
@@ -1085,6 +1103,19 @@ select.ligungi-select {
     right: 3px;
     transform: translateY(-50%);
   }
+}
+
+// The 3D view, as on the board (see the board package): squares 82% as tall as wide, the front edge below, and the
+// disc's thickness and kanji size measured on a square here (100cqw), where the board measures them on itself.
+.gg-3d .ligungi-board-preview {
+  grid-template-rows: repeat(3, 4.1rem);
+  margin-bottom: 0.3rem;
+  box-shadow:
+    0 0.3rem 0 color-mix(in srgb, var(--gg-board-edge) 70%, #000),
+    0 calc(0.3rem + 2px) 6px rgba(0, 0, 0, 0.3);
+  --gg-thick: 12cqw;
+  --gg-side: 14.63cqw;
+  --gg-3d-font: 42cqw;
 }
 
 // Same proportions as the move list beside the board: move number, then white and black.

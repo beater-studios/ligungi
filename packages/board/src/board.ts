@@ -131,6 +131,8 @@ export class Board implements Api {
     this.#shapesEl = doc.createElementNS(SVG_NS, 'svg');
     this.#shapesEl.setAttribute('class', 'gg-shapes');
     this.#shapesEl.setAttribute('viewBox', '0 0 9 9');
+    // The board is squashed in the 3D view; the drawings lie on it, so they squash with it.
+    this.#shapesEl.setAttribute('preserveAspectRatio', 'none');
     this.#shapesEl.setAttribute('aria-hidden', 'true');
     this.#board.appendChild(this.#shapesEl);
     this.#chooserEl = el('gg-chooser', boardWrap);

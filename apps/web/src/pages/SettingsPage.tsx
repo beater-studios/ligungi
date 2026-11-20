@@ -7,7 +7,7 @@ import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../p
 import { ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
 import { MESSAGES, themeLabel, useT } from '../i18n/index.ts';
 import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../looks.tsx';
-import { BOARD_SIZES, BOARD_THEMES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs } from '../prefs.ts';
+import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs } from '../prefs.ts';
 import { enableNotifications, notifyPermission } from '../notify.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
@@ -166,6 +166,7 @@ export const SettingsPage = () => {
           </Group>
 
           <Group title={s.groupPieces} help={s.groupPiecesHelp} preview={<PiecePreview />}>
+            {choice('boardView', s.boardView, BOARD_VIEWS.map((view) => [view, s.boardViews[view]]), { help: s.boardViewHelp })}
             {choice(
               'boardTheme',
               s.boardTheme,

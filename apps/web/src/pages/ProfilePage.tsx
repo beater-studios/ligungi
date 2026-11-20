@@ -367,7 +367,7 @@ export const ProfilePage = ({ name }: { name: string }) => {
           )}
           {!isMe && me && <ReportButton username={profile.user.name} />}
           {isMe && (
-            <a class="button button-empty text" href="/account#profile" data-icon={icons.Pencil}>
+            <a class="button button-empty text" href="/account" data-icon={icons.Pencil}>
               {t.profile.edit}
             </a>
           )}

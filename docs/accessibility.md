@@ -93,7 +93,7 @@ What each screen shows only visually, and what blind mode needs there. Status: *
 | Insights | `/@/<name>/insights` | the result bars | each bar has its wins, draws and losses in words beside it | ok |
 | Rules page | `/learn` | piece movement diagrams | each diagram described in text | built (diagrams and piece trainer) |
 | Bell (header) | every page, signed in | none: lists of links and buttons | the count is in the button's label; an unread notice starts with "Unread" for screen readers | ok |
-| Settings, account, sign in, info pages | `/settings`, `/account`, `/login`, `/about`... | swatches, previews | forms from `ui.tsx` with labels; previews are decoration | ok |
+| Settings, account, sign in, info pages | `/settings`, `/account` (profile), `/account/privacy`, `/account/security`, `/account/data`, `/login`, `/about`... | swatches, previews | forms from `ui.tsx` with labels; previews are decoration | ok |
 
 ## Checklist for a new or changed screen
 

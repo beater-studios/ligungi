@@ -710,6 +710,18 @@ html.light {
 }
 
 
+/* ===== Page titles ===== */
+
+// Every page has its title at the same size (each page used to set its own, from 21 to 38px). The id beats the
+// per-page rules; the player's name on a profile and the pitch beside the sign in form are not page titles and keep
+// theirs, and the panels beside a board (puzzles, runs) are not pages of this kind.
+#main-wrap main.ligungi-page h1:not(.ligungi-profile__identity h1, .ligungi-auth__pitch h1),
+#main-wrap main.page-small h1.box__top {
+  font-size: 1.9rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
 /* ===== Forms: styles of the shared components in components/ui.tsx ===== */
 
 // lila's form-group margin (3rem) suits long account pages; ligungi forms are short and denser.
@@ -721,6 +733,12 @@ html.light {
 .ligungi-modal .form3 .ligungi-field,
 .ligungi-modal .form3 .ligungi-check {
   margin-bottom: 1.1rem;
+}
+
+// lila's label sits 0.5rem above its control, which reads as glued to it under a bold label.
+.ligungi-field > .form-label {
+  display: block;
+  margin-bottom: 0.7rem;
 }
 
 .ligungi-field .form-help {
@@ -1178,7 +1196,10 @@ body:has(main.ligungi-auth) #clinput {
 }
 
 .ligungi-dasher {
-  width: 240px;
+  // Wide enough for the longest theme and piece names beside their labels (lila sets 240px on the id).
+  &#dasher_app {
+    width: 270px;
+  }
 
   .subs .sub {
     gap: 0.4em;
@@ -1188,10 +1209,17 @@ body:has(main.ligungi-auth) #clinput {
     }
   }
 
+  // The value takes the room left and keeps to the right, beside the arrow, so every value lines up there.
   &__value {
-    margin-inline-start: auto;
+    flex: 1;
+    min-width: 0;
+    margin-inline-start: 0.5em;
+    overflow: hidden;
+    text-align: end;
     color: $c-font-dim;
     font-size: 0.9em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .sub:hover &__value {
@@ -1978,7 +2006,7 @@ body:has(main.ligungi-auth) #clinput {
 
   &__main {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 1fr));
     gap: 2rem;
 
     @media (max-width: at-most($small)) {
@@ -2601,13 +2629,17 @@ body:has(main.ligungi-auth) #clinput {
 }
 
 .ligungi-settings__menu {
-  flex: 0 0 13.5rem;
+  flex: 0 0 15rem;
   display: flex;
   flex-direction: column;
+  gap: 2px;
   padding: 0.5rem;
 
   a {
-    padding: 0.7rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.65rem 0.9rem;
     border-radius: 4px;
     color: $c-font;
 
@@ -2624,6 +2656,49 @@ body:has(main.ligungi-auth) #clinput {
   }
 }
 
+// Under each section of the settings menu, what it holds.
+.ligungi-settings__hint {
+  color: $c-font-dim;
+  font-size: 0.8em;
+}
+
+.ligungi-settings__menu a:hover .ligungi-settings__hint,
+.ligungi-settings__menu a.active .ligungi-settings__hint {
+  color: $c-font;
+}
+
+// The page title, with a link beside it on the profile section.
+.ligungi-settings__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.ligungi-settings__aside {
+  font-size: 0.95em;
+}
+
+.ligungi-prefs-index {
+  margin-top: -0.25rem;
+
+  button {
+    background: none;
+    cursor: pointer;
+
+    &:hover {
+      border-color: $c-bg-zebra2;
+      color: $c-font-clear;
+    }
+  }
+}
+
+// The index jumps to a group: leave room for the fixed header above it.
+.ligungi-prefs-group {
+  scroll-margin-top: 4rem;
+}
+
 .ligungi-settings__body {
   flex: 1 1 0;
   min-width: 0;
@@ -2631,11 +2706,9 @@ body:has(main.ligungi-auth) #clinput {
   flex-direction: column;
   gap: 1.25rem;
 
-  > h1 {
+  h1 {
     margin: 0;
     color: $c-font-clear;
-    font-size: 1.9rem;
-    font-weight: 400;
   }
 
   .ligungi-prefs {
@@ -2673,19 +2746,6 @@ body:has(main.ligungi-auth) #clinput {
   flex: 1;
 }
 
-.ligungi-account__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
-  gap: 1.25rem;
-  align-items: start;
-}
-
-.ligungi-account__column {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
 .button.ligungi-account__download {
   display: inline-flex;
   box-shadow: inset 0 0 0 1px $c-border;
@@ -2697,26 +2757,29 @@ body:has(main.ligungi-auth) #clinput {
     align-items: stretch;
   }
 
+  // Five sections do not fit side by side: a row that scrolls sideways, without the hints.
   .ligungi-card.ligungi-settings__menu {
     flex: none;
     flex-direction: row;
     gap: 4px;
     padding: 4px;
+    overflow-x: auto;
     background: $c-bg-page;
     box-shadow: none;
 
     a {
-      flex: 1;
+      flex: none;
       text-align: center;
+      white-space: nowrap;
 
       &.active {
         box-shadow: none;
       }
     }
-  }
 
-  .ligungi-settings__body > h1 {
-    font-size: 1.5rem;
+    .ligungi-settings__hint {
+      display: none;
+    }
   }
 
   .ligungi-settings__card {
@@ -4308,6 +4371,24 @@ $lesson-star: #e8a800;
 
 /* ===== Draft explorer (pages/ExplorerPage.tsx): the board with its path, beside the filters and the placements ===== */
 .ligungi-explorer {
+  // The mode, the rating band and the rated only box, one under the other with the same room between them.
+  &__filters {
+    display: grid;
+    gap: 1.1rem;
+
+    .ligungi-field,
+    .ligungi-check {
+      margin-bottom: 0;
+    }
+
+    // The rating band's label looks like the legend of the modes above it, as in the create a game dialog.
+    .form-label {
+      color: $c-font-clear;
+      font-size: 1.05rem;
+      font-weight: 400;
+    }
+  }
+
   &__layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(20rem, 28rem);
@@ -8313,9 +8394,6 @@ $lesson-star: #e8a800;
 
   h1 {
     margin: 0 0 0.3rem;
-    color: $c-font-clear;
-    font-size: 1.6rem;
-    font-weight: 500;
   }
 }
 
@@ -8324,8 +8402,33 @@ $lesson-star: #e8a800;
   color: $c-font-dim;
 }
 
-.ligungi-game-search__form .ligungi-field-row {
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+// The four filters most searches need, in one row; the others fold under "More filters".
+.ligungi-game-search__main,
+.ligungi-game-search__more {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 1rem;
+  align-items: start;
+
+  @media (max-width: at-most($small)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.form3 .ligungi-game-search__main .ligungi-field,
+.form3 .ligungi-game-search__more .ligungi-field {
+  margin-bottom: 1.1rem;
+}
+
+.ligungi-game-search__more {
+  padding-top: 1.1rem;
+  border-top: $border;
+
+  // Three rows that keep each pair together: color, type and ending; rating and moves; the dates.
+  > :nth-child(4),
+  > :nth-child(8) {
+    grid-column-start: 1;
+  }
 }
 
 .ligungi-game-search__actions {
@@ -8344,28 +8447,130 @@ $lesson-star: #e8a800;
   }
 }
 
-.ligungi-game-search__results {
-  padding: 1rem 1.25rem;
+// Reads as a link beside the buttons: it opens the other filters, it does not search.
+.button.ligungi-game-search__toggle {
+  margin-inline-start: auto;
+  box-shadow: none;
+  text-transform: none;
+}
 
-  > .ligungi-notice {
-    margin: 0;
+.ligungi-game-search__results {
+  padding: 0.5rem 0 0;
+  overflow: hidden;
+
+  > .ligungi-notice,
+  > .error {
+    margin: 0.5rem 1.25rem 1rem;
   }
 }
 
-.ligungi-game-search__row {
-  grid-template-columns: 9rem minmax(0, 1fr) auto;
+// The results as a table: each row is a link to the game, every other one shaded.
+.ligungi-search-table__head,
+.ligungi-search-table__row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.3fr) minmax(0, 2fr) 4rem 9.5rem;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.6rem 1.25rem;
+}
 
-  .ligungi-game-row__result {
-    background: color-mix(in srgb, #{$c-font-dim} 20%, transparent);
-    color: $c-font;
+.ligungi-search-table__head {
+  color: $c-font-dim;
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ligungi-search-table {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li:nth-child(odd) {
+    background: $c-bg-zebra;
+  }
+}
+
+.ligungi-search-table__row {
+  color: $c-font;
+
+  &:hover {
+    background: $c-bg-zebra2;
+    color: $c-font-clear;
+  }
+}
+
+.ligungi-search-table__players {
+  color: $c-font-clear;
+}
+
+.ligungi-search-table__result small {
+  display: block;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-search-table__mode {
+  font-size: 0.92em;
+}
+
+.ligungi-search-table__moves,
+.ligungi-search-table__date {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.ligungi-search-table__date {
+  color: $c-font-dim;
+  white-space: nowrap;
+}
+
+// Phones: players and date on the first line, the result and the mode under them.
+@media (max-width: at-most($small)) {
+  .ligungi-search-table__head {
+    display: none;
   }
 
-  @include mq-is-col1 {
+  .ligungi-search-table__row {
     grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.2rem 0.75rem;
+    padding: 0.7rem 1rem;
+  }
 
-    .ligungi-game-row__result {
-      grid-column: 1 / -1;
-    }
+  .ligungi-search-table__players {
+    grid-column: 1;
+  }
+
+  .ligungi-search-table__date {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .ligungi-search-table__result,
+  .ligungi-search-table__mode {
+    grid-column: 1 / -1;
+    font-size: 0.9em;
+  }
+
+  .ligungi-search-table__moves {
+    display: none;
+  }
+}
+
+.ligungi-game-search__pager {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0.9rem 1.25rem;
+  border-top: $border;
+
+  > :last-child {
+    text-align: end;
+  }
+
+  [aria-current] {
+    color: $c-font-dim;
   }
 }
 

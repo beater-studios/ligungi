@@ -81,7 +81,8 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/tv$/, render: () => <TvPage /> },
   { pattern: new RegExp(`^/tv/(${TV_CHANNELS.join('|')})$`), render: ([channel]) => <TvChannelPage channel={channel as TvChannel} /> },
   { pattern: /^\/settings$/, render: () => <SettingsPage /> },
-  { pattern: /^\/account$/, render: () => <AccountPage /> },
+  { pattern: /^\/account$/, render: () => <AccountPage section="profile" /> },
+  { pattern: /^\/account\/(privacy|security|data)$/, render: ([section]) => <AccountPage section={section === 'security' ? 'security' : section === 'data' ? 'data' : 'privacy'} /> },
   { pattern: /^\/mod$/, render: () => <ModPage /> },
   { pattern: /^\/friends$/, render: () => <FriendsPage /> },
   { pattern: /^\/design$/, render: () => <DesignPage /> },
@@ -225,7 +226,7 @@ const Dasher = () => {
                 <button type="button" class="sub ligungi-dasher__look" onClick={() => setView('pieces')}>
                   <Swatch faces={paletteFaces(palette, current.customPieces)} />
                   <span>{t.nav.pieces}</span>
-                  <span class="ligungi-dasher__value">{styleLabel(s, current.pieceStyle)}</span>
+                  <span class="ligungi-dasher__value">{current.pieceStyle === 'kanji' ? s.pieceStyleKanjiShort : styleLabel(s, current.pieceStyle)}</span>
                 </button>
               </div>
             </>
@@ -388,13 +389,20 @@ const Header = () => {
             </div>
           </section>
           <section>
-            <a href="/learn">{t.nav.learn}</a>
+            <a href="/puzzles">{t.nav.puzzles}</a>
             <div role="group">
-              <a href="/lessons">{t.nav.lessons}</a>
-              <a href="/learn">{t.nav.rules}</a>
               <a href="/puzzles">{t.nav.puzzles}</a>
+              <a href="/puzzles/daily">{t.nav.puzzleDaily}</a>
               <a href="/streak">{t.nav.streak}</a>
               <a href="/storm">{t.nav.storm}</a>
+              <a href="/puzzles/dashboard">{t.nav.puzzleDashboard}</a>
+            </div>
+          </section>
+          <section>
+            <a href="/learn">{t.nav.learn}</a>
+            <div role="group">
+              <a href="/learn">{t.nav.rules}</a>
+              <a href="/lessons">{t.nav.lessons}</a>
               <a href="/practice">{t.nav.practice}</a>
               <a href="/study">{t.nav.studies}</a>
               <a href="/coordinates">{t.nav.coordinates}</a>
@@ -461,7 +469,38 @@ const footerLink = (href: string, label: string) => {
 
 export const SiteFooter = () => {
   const t = useT();
+  // The columns follow the menus at the top; the site column also holds the code and the legal pages.
   const columns: Array<{ title: string; links: Array<[string, string]> }> = [
+    {
+      title: t.nav.play,
+      links: [
+        ['/?create=lobby', t.nav.createGame],
+        ['/computer', t.nav.playComputer],
+        ['/tv', t.nav.liveGames],
+        ['/players', t.nav.playerList],
+        ['/ranking', t.nav.players],
+      ],
+    },
+    {
+      title: t.nav.learn,
+      links: [
+        ['/learn', t.nav.rules],
+        ['/lessons', t.nav.lessons],
+        ['/puzzles', t.nav.puzzles],
+        ['/practice', t.nav.practice],
+        ['/study', t.nav.studies],
+      ],
+    },
+    {
+      title: t.nav.tools,
+      links: [
+        ['/analysis', t.nav.analysis],
+        ['/editor', t.nav.editor],
+        ['/explorer', t.nav.explorer],
+        ['/games', t.nav.gameSearch],
+        ['/analysis?import', t.nav.importGame],
+      ],
+    },
     {
       title: t.footer.siteTitle,
       links: [
@@ -469,30 +508,6 @@ export const SiteFooter = () => {
         ['/faq', t.nav.faq],
         ['/contact', t.nav.contact],
         [LINKS.status, t.nav.status],
-      ],
-    },
-    {
-      title: t.footer.playTitle,
-      links: [
-        ['/lessons', t.nav.lessons],
-        ['/learn', t.nav.rules],
-        ['/puzzles', t.nav.puzzles],
-        ['/practice', t.nav.practice],
-        ['/study', t.nav.studies],
-        ['/coordinates', t.nav.coordinates],
-        ['/computer', t.nav.playComputer],
-        ['/analysis', t.nav.analysis],
-        ['/editor', t.nav.editor],
-        ['/explorer', t.nav.explorer],
-        ['/games', t.nav.gameSearch],
-        ['/players', t.nav.playerList],
-        ['/ranking', t.nav.players],
-        ['/tv', t.nav.liveGames],
-      ],
-    },
-    {
-      title: t.footer.codeTitle,
-      links: [
         [SOURCE_URL, t.footer.sourceCode],
         [LINKS.lila, t.footer.basedOnLila],
         ['/terms', t.nav.terms],

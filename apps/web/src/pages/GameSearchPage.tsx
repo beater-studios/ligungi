@@ -1,8 +1,8 @@
 import { MODES } from '@ligungi/engine';
-import { GAME_REASONS, type GameSearchResult, type GameSummary } from '@ligungi/protocol';
+import { GAME_REASONS, GAME_SEARCH_PAGES_MAX, type GameSearchResult, type GameSummary } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
-import { Field, FieldRow, Select, SubmitButton } from '../components/ui.tsx';
+import { Field, Select, SubmitButton } from '../components/ui.tsx';
 import { formatDate, playerName, speedText, useT } from '../i18n/index.ts';
 import { navigate, useLocation } from '../router.ts';
 
@@ -28,7 +28,12 @@ const queryOf = (form: Form, page = 1): string => {
   return params.toString();
 };
 
-/** One game of the results: both players with their ratings, the result and how it went. */
+/** The filters beyond player, opponent, mode and result, folded under "More filters" unless one is set. */
+const ADVANCED: ReadonlyArray<keyof Form> = ['color', 'rated', 'reason', 'ratingMin', 'ratingMax', 'movesMin', 'movesMax', 'from', 'to'];
+
+const pageFrom = (search: string): number => Math.min(GAME_SEARCH_PAGES_MAX, Math.max(1, Math.floor(Number(new URLSearchParams(search).get('page'))) || 1));
+
+/** One game of the results, as a row of a table: players, result, mode and pace, moves and date. */
 const ResultRow = ({ game }: { game: GameSummary }) => {
   const t = useT();
   const side = (color: 'white' | 'black') => {
@@ -37,54 +42,50 @@ const ResultRow = ({ game }: { game: GameSummary }) => {
   };
   const winner = game.outcome?.winner;
   const result = winner ? t.gameSearch.results[winner] : t.gameSearch.results.draw;
-  const meta = [
-    t.modes[game.mode],
-    speedText(t, game),
-    game.rated ? t.rated : t.casual,
-    ...(game.outcome ? [`${t.reasons[game.outcome.reason]} · ${t.profile.moves(game.plies)}`] : []),
-    ...(game.voided ? [t.profile.voided] : []),
-  ].join(' · ');
+  const how = [...(game.outcome ? [t.reasons[game.outcome.reason]] : []), ...(game.voided ? [t.profile.voided] : [])].join(' · ');
   return (
     <li>
-      <a class="ligungi-game-row ligungi-game-search__row" href={`/${game.id}`}>
-        <span class="ligungi-game-row__result">{result}</span>
-        <span class="ligungi-game-row__main">
-          <span class="ligungi-game-row__opponent">{t.gameSearch.versus(side('white'), side('black'))}</span>
-          <span class="ligungi-game-row__meta">{meta}</span>
+      <a class="ligungi-search-table__row" href={`/${game.id}`}>
+        <span class="ligungi-search-table__players">{t.gameSearch.versus(side('white'), side('black'))}</span>
+        <span class="ligungi-search-table__result">
+          {result}
+          {how && <small>{how}</small>}
         </span>
-        <span class="ligungi-game-row__date">{formatDate(t, game.createdAt)}</span>
+        <span class="ligungi-search-table__mode">{[t.modes[game.mode], speedText(t, game), game.rated ? t.rated : t.casual].join(' · ')}</span>
+        <span class="ligungi-search-table__moves">
+          <span class="ligungi-sr-only">{t.gameSearch.columns.moves}: </span>
+          {game.plies}
+        </span>
+        <span class="ligungi-search-table__date">{formatDate(t, game.createdAt)}</span>
       </a>
     </li>
   );
 };
 
-/** Search over every finished game, with the filters kept in the address so a search can be shared. */
+/** Search over every finished game, with the filters and the page kept in the address so a search can be shared. */
 export const GameSearchPage = () => {
   const t = useT();
   const s = t.gameSearch;
   const { search } = useLocation();
   const [form, setForm] = useState<Form>(() => formFrom(search));
+  const [open, setOpen] = useState(() => ADVANCED.some((field) => formFrom(search)[field] !== ''));
   const [games, setGames] = useState<GameSummary[] | null>(null);
   const [more, setMore] = useState(false);
-  const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
-
-  const load = (query: string, pageToLoad: number, append: boolean) => {
-    api
-      .get<GameSearchResult>(`/api/games/search?${query}${pageToLoad > 1 ? `&page=${pageToLoad}` : ''}`)
-      .then((result) => {
-        setGames((previous) => (append && previous ? [...previous, ...result.games] : [...result.games]));
-        setMore(result.more);
-        setPage(pageToLoad);
-        setError(null);
-      })
-      .catch((err: Error) => setError(err.message));
-  };
+  const page = pageFrom(search);
 
   useEffect(() => {
     const current = formFrom(search);
     setForm(current);
-    load(queryOf(current), 1, false);
+    setGames(null);
+    api
+      .get<GameSearchResult>(`/api/games/search?${queryOf(current, page)}`)
+      .then((result) => {
+        setGames([...result.games]);
+        setMore(result.more);
+        setError(null);
+      })
+      .catch((err: Error) => setError(err.message));
   }, [search]);
 
   const set = (field: keyof Form) => (value: string) => setForm((previous) => ({ ...previous, [field]: value }));
@@ -103,6 +104,10 @@ export const GameSearchPage = () => {
   };
   const any = { value: '', label: s.any };
   const withPlayer = form.player.trim() !== '';
+  const pageHref = (target: number) => {
+    const query = queryOf(formFrom(search), target);
+    return `/games${query ? `?${query}` : ''}`;
+  };
 
   return (
     <main class="ligungi-page ligungi-game-search">
@@ -116,23 +121,15 @@ export const GameSearchPage = () => {
             navigate(`/games${queryOf(form) ? `?${queryOf(form)}` : ''}`);
           }}
         >
-          <FieldRow>
-            <Field label={s.player} htmlFor="search-player" help={s.playerHelp}>
+          <div class="ligungi-game-search__main">
+            <Field label={s.player} htmlFor="search-player">
               {text('player')}
-            </Field>
-            <Field label={s.color} htmlFor="search-color">
-              <Select id="search-color" value={withPlayer ? form.color : ''} options={[any, { value: 'white', label: t.colors.white }, { value: 'black', label: t.colors.black }]} onChange={set('color')} />
             </Field>
             <Field label={s.vs} htmlFor="search-vs" help={s.vsHelp}>
               {text('vs')}
             </Field>
-          </FieldRow>
-          <FieldRow>
             <Field label={t.common.mode} htmlFor="search-mode">
               <Select id="search-mode" value={form.mode} options={[any, ...MODES.map((mode) => ({ value: mode, label: t.modes[mode] }))]} onChange={set('mode')} />
-            </Field>
-            <Field label={s.kind} htmlFor="search-rated">
-              <Select id="search-rated" value={form.rated} options={[any, { value: '1', label: t.rated }, { value: '0', label: t.casual }]} onChange={set('rated')} />
             </Field>
             <Field label={s.result} htmlFor="search-result">
               <Select
@@ -146,57 +143,75 @@ export const GameSearchPage = () => {
                 onChange={set('result')}
               />
             </Field>
-            <Field label={s.reason} htmlFor="search-reason">
-              <Select id="search-reason" value={form.reason} options={[any, ...GAME_REASONS.map((value) => ({ value, label: t.reasons[value] }))]} onChange={set('reason')} />
-            </Field>
-          </FieldRow>
-          <FieldRow>
-            <Field label={`${s.rating}: ${s.min}`} htmlFor="search-ratingMin" help={s.ratingHelp}>
-              {text('ratingMin', 'number', { min: 0, max: 4000, step: 50 })}
-            </Field>
-            <Field label={`${s.rating}: ${s.max}`} htmlFor="search-ratingMax">
-              {text('ratingMax', 'number', { min: 0, max: 4000, step: 50 })}
-            </Field>
-            <Field label={`${s.moves}: ${s.min}`} htmlFor="search-movesMin" help={s.movesHelp}>
-              {text('movesMin', 'number', { min: 0, max: 2000 })}
-            </Field>
-            <Field label={`${s.moves}: ${s.max}`} htmlFor="search-movesMax">
-              {text('movesMax', 'number', { min: 0, max: 2000 })}
-            </Field>
-          </FieldRow>
-          <FieldRow>
-            <Field label={s.from} htmlFor="search-from" help={s.datesHelp}>
-              {text('from', 'date')}
-            </Field>
-            <Field label={s.to} htmlFor="search-to">
-              {text('to', 'date')}
-            </Field>
-          </FieldRow>
+          </div>
+          {open && (
+            <div id="search-more" class="ligungi-game-search__more">
+              <Field label={s.color} htmlFor="search-color" help={s.colorHelp}>
+                <Select id="search-color" value={withPlayer ? form.color : ''} options={[any, { value: 'white', label: t.colors.white }, { value: 'black', label: t.colors.black }]} onChange={set('color')} />
+              </Field>
+              <Field label={s.kind} htmlFor="search-rated">
+                <Select id="search-rated" value={form.rated} options={[any, { value: '1', label: t.rated }, { value: '0', label: t.casual }]} onChange={set('rated')} />
+              </Field>
+              <Field label={s.reason} htmlFor="search-reason">
+                <Select id="search-reason" value={form.reason} options={[any, ...GAME_REASONS.map((value) => ({ value, label: t.reasons[value] }))]} onChange={set('reason')} />
+              </Field>
+              <Field label={`${s.rating}: ${s.min}`} htmlFor="search-ratingMin" help={s.ratingHelp}>
+                {text('ratingMin', 'number', { min: 0, max: 4000, step: 50 })}
+              </Field>
+              <Field label={`${s.rating}: ${s.max}`} htmlFor="search-ratingMax">
+                {text('ratingMax', 'number', { min: 0, max: 4000, step: 50 })}
+              </Field>
+              <Field label={`${s.moves}: ${s.min}`} htmlFor="search-movesMin" help={s.movesHelp}>
+                {text('movesMin', 'number', { min: 0, max: 2000 })}
+              </Field>
+              <Field label={`${s.moves}: ${s.max}`} htmlFor="search-movesMax">
+                {text('movesMax', 'number', { min: 0, max: 2000 })}
+              </Field>
+              <Field label={s.from} htmlFor="search-from" help={s.datesHelp}>
+                {text('from', 'date')}
+              </Field>
+              <Field label={s.to} htmlFor="search-to">
+                {text('to', 'date')}
+              </Field>
+            </div>
+          )}
           <div class="ligungi-game-search__actions">
             <SubmitButton>{s.search}</SubmitButton>
             <a class="button button-empty" href="/games">
               {s.clear}
             </a>
+            <button type="button" class="button button-empty ligungi-game-search__toggle" aria-expanded={open} aria-controls="search-more" onClick={() => setOpen(!open)}>
+              {open ? s.fewerFilters : s.moreFilters}
+            </button>
           </div>
         </form>
       </section>
-      <section class="ligungi-card ligungi-game-search__results">
+      <section class="ligungi-card ligungi-game-search__results" aria-label={s.resultsLabel}>
         {error && <p class="error">{error}</p>}
         {!error && games === null && <p class="ligungi-notice">{t.common.loading}</p>}
         {games?.length === 0 && <p class="ligungi-notice">{s.none}</p>}
         {games && games.length > 0 && (
-          <ul class="ligungi-game-list">
-            {games.map((game) => (
-              <ResultRow key={game.id} game={game} />
-            ))}
-          </ul>
+          <>
+            <div class="ligungi-search-table__head" aria-hidden="true">
+              <span>{s.columns.players}</span>
+              <span>{s.columns.result}</span>
+              <span>{s.columns.mode}</span>
+              <span class="ligungi-search-table__moves">{s.columns.moves}</span>
+              <span class="ligungi-search-table__date">{s.columns.date}</span>
+            </div>
+            <ul class="ligungi-search-table">
+              {games.map((game) => (
+                <ResultRow key={game.id} game={game} />
+              ))}
+            </ul>
+          </>
         )}
-        {more && (
-          <div class="ligungi-actions">
-            <button type="button" class="button button-empty" onClick={() => load(queryOf(formFrom(search)), page + 1, true)}>
-              {s.more}
-            </button>
-          </div>
+        {(page > 1 || more) && (
+          <nav class="ligungi-game-search__pager" aria-label={s.pages}>
+            {page > 1 ? <a href={pageHref(page - 1)}>{s.previous}</a> : <span />}
+            <span aria-current="page">{s.page(page)}</span>
+            {more && page < GAME_SEARCH_PAGES_MAX ? <a href={pageHref(page + 1)}>{s.next}</a> : <span />}
+          </nav>
         )}
       </section>
     </main>

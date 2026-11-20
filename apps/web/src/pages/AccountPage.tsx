@@ -27,23 +27,51 @@ import { loadSession, session } from '../session.ts';
 import { socket } from '../socket.ts';
 import { useStore } from '../store.ts';
 
-/** The preferences and account pages: a menu between the two beside (on phones above) the page's cards. */
-export const SettingsShell = ({ active, title, children }: { active: 'settings' | 'account'; title: string; children: ComponentChildren }) => {
+export type SettingsSection = 'profile' | 'settings' | 'privacy' | 'security' | 'data';
+
+/**
+ * The settings pages: a menu of the five sections beside (on phones above) the page's cards. Visitors have only the
+ * preferences, kept in the browser; the other sections belong to an account.
+ */
+export const SettingsShell = ({
+  active,
+  title,
+  aside,
+  children,
+}: {
+  active: SettingsSection;
+  title: string;
+  aside?: ComponentChildren;
+  children: ComponentChildren;
+}) => {
   const t = useT();
+  const m = t.account.menu;
   const { user } = useStore(session);
-  const link = (key: typeof active, href: string, label: string) => (
+  const menu = useRef<HTMLElement>(null);
+  // On phones the menu is a row that scrolls sideways: bring the current section into view.
+  useEffect(() => {
+    menu.current?.querySelector('.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [active, user]);
+  const link = (key: SettingsSection, href: string, label: string, hint: string) => (
     <a class={active === key ? 'active' : ''} href={href} aria-current={active === key ? 'page' : undefined}>
-      {label}
+      <span class="ligungi-settings__label">{label}</span>
+      <small class="ligungi-settings__hint">{hint}</small>
     </a>
   );
   return (
     <main class="ligungi-page ligungi-settings">
-      <nav class="ligungi-card ligungi-settings__menu" aria-label={t.settings.menu}>
-        {link('settings', '/settings', t.settings.title)}
-        {user && link('account', '/account', t.account.title)}
+      <nav class="ligungi-card ligungi-settings__menu" aria-label={t.settings.menu} ref={menu}>
+        {user && link('profile', '/account', m.profile, m.profileHint)}
+        {link('settings', '/settings', t.settings.title, m.settingsHint)}
+        {user && link('privacy', '/account/privacy', m.privacy, m.privacyHint)}
+        {user && link('security', '/account/security', m.security, m.securityHint)}
+        {user && link('data', '/account/data', m.data, m.dataHint)}
       </nav>
       <div class="ligungi-settings__body">
-        <h1>{title}</h1>
+        <div class="ligungi-settings__head">
+          <h1>{title}</h1>
+          {aside}
+        </div>
         {children}
       </div>
     </main>
@@ -271,6 +299,7 @@ const ProfileForm = () => {
     }
   };
 
+  const gameNames: Partial<Record<ProfileSite, string>> = t.account.gameNames;
   const group = (kind: 'social' | 'games', title: string) => (
     <fieldset class="ligungi-profile-form__links">
       <legend>{title}</legend>
@@ -279,7 +308,7 @@ const ProfileForm = () => {
           key={site}
           label={
             <>
-              <SiteIcon site={site} /> {SITE_NAMES[site]}
+              <SiteIcon site={site} /> {gameNames[site] ? `${gameNames[site]} (${SITE_NAMES[site]})` : SITE_NAMES[site]}
             </>
           }
           htmlFor={`acc-link-${site}`}
@@ -652,44 +681,44 @@ const DeleteForm = () => {
   );
 };
 
-export const AccountPage = () => {
+export type AccountSection = Exclude<SettingsSection, 'settings'>;
+
+/** The account's sections, one page each: profile, privacy, security, and the data and deletion of the account. */
+export const AccountPage = ({ section }: { section: AccountSection }) => {
   const t = useT();
+  const m = t.account.menu;
   const { user, loaded } = useStore(session);
   // Bumped to reload the list of devices after two-step setup signs the others out.
   const [sessionsVersion, setSessionsVersion] = useState(0);
+  const title = { profile: m.profile, privacy: m.privacy, security: m.security, data: m.data }[section];
+  const aside =
+    section === 'profile' && user ? (
+      <a class="ligungi-settings__aside" href={`/@/${user.name}`}>
+        {t.account.viewProfile}
+      </a>
+    ) : undefined;
   return (
-    <SettingsShell active="account" title={t.account.title}>
+    <SettingsShell active={section} title={title} aside={aside}>
       {loaded && !user ? (
         <section class="ligungi-card ligungi-settings__card">
           <p>
             {t.account.loginNeeded} <a href="/login">{t.nav.signIn}</a>
           </p>
         </section>
-      ) : (
+      ) : section === 'profile' ? (
+        <section class="ligungi-card ligungi-settings__card" id="profile">
+          <ProfileForm />
+        </section>
+      ) : section === 'privacy' ? (
+        <section class="ligungi-card ligungi-settings__card">
+          <PrivacySettings />
+        </section>
+      ) : section === 'security' ? (
         <>
-          <section class="ligungi-card ligungi-settings__card" id="profile">
-            <h2>{t.account.profileTitle}</h2>
-            <ProfileForm />
+          <section class="ligungi-card ligungi-settings__card">
+            <h2>{t.account.passwordTitle}</h2>
+            <PasswordForm />
           </section>
-          <div class="ligungi-account__grid">
-            <section class="ligungi-card ligungi-settings__card">
-              <h2>{t.account.passwordTitle}</h2>
-              <PasswordForm />
-            </section>
-            <div class="ligungi-account__column">
-              <section class="ligungi-card ligungi-settings__card">
-                <h2>{t.account.privacyTitle}</h2>
-                <PrivacySettings />
-              </section>
-              <section class="ligungi-card ligungi-settings__card">
-                <h2>{t.account.dataTitle}</h2>
-                <p>{t.account.dataText}</p>
-                <a class="button button-empty ligungi-account__download" href="/api/account/export" download>
-                  {t.account.dataDownload}
-                </a>
-              </section>
-            </div>
-          </div>
           <section class="ligungi-card ligungi-settings__card">
             <h2>{t.account.twoFactorTitle}</h2>
             <TwoFactorSettings onSignedOutOthers={() => setSessionsVersion((n) => n + 1)} />
@@ -697,6 +726,16 @@ export const AccountPage = () => {
           <section class="ligungi-card ligungi-settings__card">
             <h2>{t.account.sessionsTitle}</h2>
             <Sessions key={sessionsVersion} />
+          </section>
+        </>
+      ) : (
+        <>
+          <section class="ligungi-card ligungi-settings__card">
+            <h2>{t.account.dataTitle}</h2>
+            <p>{t.account.dataText}</p>
+            <a class="button button-empty ligungi-account__download" href="/api/account/export" download>
+              {t.account.dataDownload}
+            </a>
           </section>
           <section class="ligungi-card ligungi-settings__card ligungi-danger-zone">
             <h2>{t.account.deleteTitle}</h2>

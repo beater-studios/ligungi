@@ -5,7 +5,7 @@ import { PIECE_STYLES } from '@ligungi/board';
 import { customBoardStyle, DEFAULT_CUSTOM_BOARD, type BoardWarning } from '../boardColors.ts';
 import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../pieceColors.ts';
 import { ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
-import { MESSAGES, themeLabel, useT } from '../i18n/index.ts';
+import { MESSAGES, themeLabel, useT, type Messages } from '../i18n/index.ts';
 import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../looks.tsx';
 import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, CONFIRM_MOVES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs } from '../prefs.ts';
 import { enableNotifications, notifyPermission } from '../notify.ts';
@@ -14,8 +14,8 @@ import { useStore } from '../store.ts';
 import { SettingsShell } from './AccountPage.tsx';
 
 /** A titled group of settings; with a preview, the rows sit on the left and the preview on the right. */
-const Group = ({ title, help, preview, children }: { title: string; help?: string; preview?: ComponentChildren; children: ComponentChildren }) => (
-  <section class={`ligungi-card ligungi-settings__card ligungi-prefs-group${preview ? ' ligungi-prefs-group--preview' : ''}`}>
+const Group = ({ id, title, help, preview, children }: { id: string; title: string; help?: string; preview?: ComponentChildren; children: ComponentChildren }) => (
+  <section id={id} class={`ligungi-card ligungi-settings__card ligungi-prefs-group${preview ? ' ligungi-prefs-group--preview' : ''}`}>
     <h2>{title}</h2>
     {help && <p class="ligungi-prefs-group__help">{help}</p>}
     <div class="ligungi-prefs-group__body">
@@ -24,6 +24,14 @@ const Group = ({ title, help, preview, children }: { title: string; help?: strin
     </div>
   </section>
 );
+
+/** The groups of the page, in order, for the index at the top. */
+const GROUPS: ReadonlyArray<readonly [string, (s: Messages['settings']) => string]> = [
+  ['prefs-appearance', (s) => s.groupAppearance],
+  ['prefs-game', (s) => s.groupGame],
+  ['prefs-record', (s) => s.groupRecord],
+  ['prefs-accessibility', (s) => s.groupAccessibility],
+];
 
 type BooleanPref = { [K in keyof Prefs]: Prefs[K] extends boolean ? K : never }[keyof Prefs];
 
@@ -133,39 +141,17 @@ export const SettingsPage = () => {
 
   return (
     <SettingsShell active="settings" title={s.title}>
+        <nav class="ligungi-chips ligungi-prefs-index" aria-label={s.groupsIndex}>
+          {GROUPS.map(([id, label]) => (
+            <button key={id} type="button" class="ligungi-chip" onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+              {label(s)}
+            </button>
+          ))}
+        </nav>
         <form class="form3 ligungi-prefs" onSubmit={(e) => e.preventDefault()}>
-          <Group title={s.groupGeneral}>
+          <Group id="prefs-appearance" title={s.groupAppearance} help={s.groupAppearanceHelp} preview={<PiecePreview />}>
             {choice('lang', s.language, [['auto', s.auto], ...LANGS.map((lang): [Prefs['lang'], string] => [lang, MESSAGES[lang].languageName])])}
             {choice('theme', s.theme, THEMES.map((theme) => [theme, themeLabel(t, theme)]))}
-            <SettingRow title={s.sound} htmlFor="pref-sound" help={s.soundHelp}>
-              <div class="ligungi-setting__inline">
-                <button type="button" class="button button-empty" onClick={() => playSound('move')}>
-                  {s.test}
-                </button>
-                <Toggle id="pref-sound" checked={current.sound} label={s.sound} onChange={(sound) => updatePrefs({ sound })} />
-              </div>
-            </SettingRow>
-            <SettingRow
-              title={s.notifications}
-              htmlFor="pref-notifications"
-              help={permission === 'unsupported' ? s.notificationsUnsupported : permission === 'denied' ? s.notificationsBlocked : s.notificationsHelp}
-            >
-              <Toggle
-                id="pref-notifications"
-                checked={current.notifications && permission === 'granted'}
-                disabled={permission === 'unsupported'}
-                label={s.notifications}
-                onChange={(on) => {
-                  if (on) void enableNotifications({ title: s.notifications, body: s.notificationsSample });
-                  else updatePrefs({ notifications: false });
-                }}
-              />
-            </SettingRow>
-            {toggle('byoyomiVoice', s.byoyomiVoice, s.byoyomiVoiceHelp)}
-            {toggle('screenReader', t.blind.setting, t.blind.settingHelp)}
-          </Group>
-
-          <Group title={s.groupPieces} help={s.groupPiecesHelp} preview={<PiecePreview />}>
             {choice('boardView', s.boardView, BOARD_VIEWS.map((view) => [view, s.boardViews[view]]), { help: s.boardViewHelp })}
             {choice(
               'boardTheme',
@@ -247,9 +233,59 @@ export const SettingsPage = () => {
               />
             </SettingRow>
             {toggle('coordinates', s.coordinates, s.coordinatesHelp)}
+            {choice(
+              'zoom',
+              s.boardSize,
+              [
+                [BOARD_SIZES[0], s.sizeSmall],
+                [BOARD_SIZES[1], s.sizeMedium],
+                [BOARD_SIZES[2], s.sizeLarge],
+                [BOARD_SIZES[3], s.sizeMax],
+              ],
+              {
+                help: (
+                  <a href="/analysis" target="_blank" rel="noopener">
+                    {s.viewOnBoard}
+                  </a>
+                ),
+              },
+            )}
           </Group>
 
-          <Group title={s.groupRecord} help={s.groupRecordHelp} preview={<MoveListPreview />}>
+          <Group id="prefs-game" title={s.groupGame} help={s.groupGameHelp}>
+            {choice('confirmMove', s.confirmMove, CONFIRM_MOVES.map((value) => [value, s.confirmMoves[value]]), { help: s.confirmMoveHelp })}
+            <SettingRow title={s.sound} htmlFor="pref-sound" help={s.soundHelp}>
+              <div class="ligungi-setting__inline">
+                <button type="button" class="button button-empty" onClick={() => playSound('move')}>
+                  {s.test}
+                </button>
+                <Toggle id="pref-sound" checked={current.sound} label={s.sound} onChange={(sound) => updatePrefs({ sound })} />
+              </div>
+            </SettingRow>
+            <SettingRow
+              title={s.notifications}
+              htmlFor="pref-notifications"
+              help={permission === 'unsupported' ? s.notificationsUnsupported : permission === 'denied' ? s.notificationsBlocked : s.notificationsHelp}
+            >
+              <Toggle
+                id="pref-notifications"
+                checked={current.notifications && permission === 'granted'}
+                disabled={permission === 'unsupported'}
+                label={s.notifications}
+                onChange={(on) => {
+                  if (on) void enableNotifications({ title: s.notifications, body: s.notificationsSample });
+                  else updatePrefs({ notifications: false });
+                }}
+              />
+            </SettingRow>
+            {choice('towerTap', s.towerTap, TOWER_TAPS.map((value) => [value, s.towerTaps[value]]), { help: s.towerTapHelp })}
+            {toggle('hoverReach', s.hoverReach, s.hoverReachHelp)}
+            {toggle('animation', s.animation, s.animationHelp)}
+            {toggle('hidePieces', s.hidePieces, s.hidePiecesHelp)}
+            {current.hidePieces && toggle('peekPieces', s.peekPieces, s.peekPiecesHelp)}
+          </Group>
+
+          <Group id="prefs-record" title={s.groupRecord} help={s.groupRecordHelp} preview={<MoveListPreview />}>
             {choice(
               'pieceNames',
               s.pieceNames,
@@ -271,32 +307,10 @@ export const SettingsPage = () => {
             )}
           </Group>
 
-          <Group title={s.groupBoard}>
-            {choice(
-              'zoom',
-              s.boardSize,
-              [
-                [BOARD_SIZES[0], s.sizeSmall],
-                [BOARD_SIZES[1], s.sizeMedium],
-                [BOARD_SIZES[2], s.sizeLarge],
-                [BOARD_SIZES[3], s.sizeMax],
-              ],
-              {
-                help: (
-                  <a href="/analysis" target="_blank" rel="noopener">
-                    {s.viewOnBoard}
-                  </a>
-                ),
-              },
-            )}
-            {choice('towerTap', s.towerTap, TOWER_TAPS.map((value) => [value, s.towerTaps[value]]), { help: s.towerTapHelp })}
-            {choice('confirmMove', s.confirmMove, CONFIRM_MOVES.map((value) => [value, s.confirmMoves[value]]), { help: s.confirmMoveHelp })}
-            {toggle('hoverReach', s.hoverReach, s.hoverReachHelp)}
-            {toggle('animation', s.animation, s.animationHelp)}
-            {toggle('hidePieces', s.hidePieces, s.hidePiecesHelp)}
-            {current.hidePieces && toggle('peekPieces', s.peekPieces, s.peekPiecesHelp)}
+          <Group id="prefs-accessibility" title={s.groupAccessibility} help={s.groupAccessibilityHelp}>
+            {toggle('screenReader', t.blind.setting, t.blind.settingHelp)}
+            {toggle('byoyomiVoice', s.byoyomiVoice, s.byoyomiVoiceHelp)}
           </Group>
-
         </form>
         <p class="ligungi-notice">{s.saved}</p>
     </SettingsShell>

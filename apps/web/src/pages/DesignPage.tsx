@@ -388,6 +388,36 @@ export const DesignPage = () => {
               </nav>
             </div>
           </Example>
+          <Example label="Results table (.ligungi-search-table): a header row, then one link per row, every other one shaded; on phones the columns fold into two lines (game search)">
+            <div class="ligungi-card" style={{ width: '100%', overflow: 'hidden' }}>
+              <div class="ligungi-search-table__head" aria-hidden="true">
+                <span>Players</span>
+                <span>Result</span>
+                <span>Mode and pace</span>
+                <span class="ligungi-search-table__moves">Moves</span>
+                <span class="ligungi-search-table__date">Date</span>
+              </div>
+              <ul class="ligungi-search-table">
+                {[
+                  ['Mira (1580) × tenzo (1502)', 'White wins', 'resignation', 'Advanced · 10+5 · Rated', 131],
+                  ['kaiq (1577) × Rafa (1490)', 'Draw', 'repetition', 'Beginner · 3 days per move · Casual', 64],
+                ].map(([players, result, how, mode, moves]) => (
+                  <li key={String(players)}>
+                    <a class="ligungi-search-table__row" href="#pages">
+                      <span class="ligungi-search-table__players">{players}</span>
+                      <span class="ligungi-search-table__result">
+                        {result}
+                        <small>{how}</small>
+                      </span>
+                      <span class="ligungi-search-table__mode">{mode}</span>
+                      <span class="ligungi-search-table__moves">{moves}</span>
+                      <span class="ligungi-search-table__date">Nov 20, 2026</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Example>
           <Example label="Live badge (.ligungi-live-badge)">
             <span class="ligungi-live-badge">Live</span>
           </Example>

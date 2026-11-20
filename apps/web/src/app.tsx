@@ -507,6 +507,7 @@ export const SiteFooter = () => {
         ['/about', t.nav.about],
         ['/faq', t.nav.faq],
         ['/contact', t.nav.contact],
+        ['/sites', t.nav.sites],
         [LINKS.status, t.nav.status],
         [SOURCE_URL, t.footer.sourceCode],
         [LINKS.lila, t.footer.basedOnLila],

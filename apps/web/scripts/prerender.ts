@@ -170,6 +170,7 @@ The site works like lichess: rated and casual games with Glicko-2 ratings, games
 - [About](${en('/about')}): the project and the rule sources
 - [FAQ](${en('/faq')}): common questions about the rules and the site
 - [Contact](${en('/contact')})
+- [Friendly sites](${en('/sites')}): other free board game sites built on lila (lichess, lishogi, lidraughts, PlayStrategy) and libaduk for go
 - [Terms of service](${en('/terms')})
 - [Privacy policy](${en('/privacy')})
 

@@ -18,6 +18,11 @@ export const LINKS = {
   agpl: `${REPO}/blob/main/LICENSE`,
   cloudflarePrivacy: 'https://www.cloudflare.com/privacypolicy/',
   status: 'https://beaterstudios.betteruptime.com/',
+  lichess: 'https://lichess.org/',
+  lishogi: 'https://lishogi.org/',
+  lidraughts: 'https://lidraughts.org/',
+  playstrategy: 'https://playstrategy.org/',
+  libaduk: 'https://libaduk.com/',
 } as const;
 
 /** External link, opened in a new tab. */
@@ -39,6 +44,8 @@ export interface Content {
   readonly about: JSX.Element;
   readonly faq: readonly FaqItem[];
   readonly contact: JSX.Element;
+  /** Friendly sites: the other sites built on lila, and other free board game sites. */
+  readonly sites: JSX.Element;
   readonly terms: JSX.Element;
   readonly privacy: JSX.Element;
   readonly sources: JSX.Element;

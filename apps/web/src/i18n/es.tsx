@@ -224,6 +224,7 @@ export const es: Messages = {
     about: 'Acerca de',
     faq: 'FAQ',
     contact: 'Contacto',
+    sites: 'Sitios amigos',
     terms: 'Condiciones de uso',
     account: 'Cuenta',
     moderation: 'Moderación',
@@ -1678,6 +1679,10 @@ export const es: Messages = {
       contact: {
         title: 'Contacto · ligungi',
         description: 'Escribe al equipo de ligungi: dudas, sugerencias y errores en las reglas o en el sitio.',
+      },
+      sites: {
+        title: 'Sitios amigos · ligungi',
+        description: 'Otros sitios gratuitos de juegos de mesa hechos sobre lila, como lichess, lishogi y lidraughts, y más.',
       },
       terms: {
         title: 'Condiciones de uso · ligungi',

@@ -223,6 +223,7 @@ export const en: Messages = {
     about: 'About',
     faq: 'FAQ',
     contact: 'Contact',
+    sites: 'Friendly sites',
     terms: 'Terms of service',
     account: 'Account',
     moderation: 'Moderation',
@@ -1676,6 +1677,10 @@ export const en: Messages = {
       contact: {
         title: 'Contact · ligungi',
         description: 'Get in touch with the ligungi team: questions, suggestions and mistakes in the rules or the site.',
+      },
+      sites: {
+        title: 'Friendly sites · ligungi',
+        description: 'Other free board game sites built on lila, such as lichess, lishogi and lidraughts, and more.',
       },
       terms: {
         title: 'Terms of service · ligungi',

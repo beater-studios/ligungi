@@ -196,6 +196,42 @@ export const es: Content = {
     </>
   ),
 
+  sites: (
+    <>
+      <p>
+        ligungi está hecho sobre <Ext href={LINKS.lila}>lila</Ext>, el código abierto de lichess. Otros sitios nacieron de la
+        misma base, cada uno para un juego. Si te gusta ligungi, vale la pena conocerlos:
+      </p>
+      <ul class="ligungi-sites">
+        <li>
+          <Ext href={LINKS.lichess}>lichess.org</Ext>: ajedrez. El sitio donde todo empezó, gratuito, sin anuncios y de código
+          abierto.
+        </li>
+        <li>
+          <Ext href={LINKS.lishogi}>lishogi.org</Ext>: shogi, el ajedrez japonés, en una versión de lichess reescrita para él.
+        </li>
+        <li>
+          <Ext href={LINKS.lidraughts}>lidraughts.org</Ext>: damas internacionales y sus variantes, sobre la misma base que
+          lichess.
+        </li>
+        <li>
+          <Ext href={LINKS.playstrategy}>PlayStrategy</Ext>: más de 40 juegos de estrategia, como ajedrez, go, damas, shogi,
+          othello y backgammon, hecho sobre lila.
+        </li>
+      </ul>
+      <h2>Otros juegos de mesa</h2>
+      <ul class="ligungi-sites">
+        <li>
+          <Ext href={LINKS.libaduk}>libaduk.com</Ext>: go (baduk), para jugar y aprender, con lecciones y una biblioteca de
+          partidas.
+        </li>
+      </ul>
+      <p>
+        ¿Tienes un sitio parecido y quieres aparecer aquí? Escríbenos desde la página de <a href="/contact">contacto</a>.
+      </p>
+    </>
+  ),
+
   terms: (
     <>
       <p>

@@ -3,12 +3,12 @@ import { CookiePreferences } from '../components/Consent.tsx';
 import { useContent } from '../i18n/content/index.ts';
 import { useT } from '../i18n/index.ts';
 
-export const INFO_KINDS = ['about', 'faq', 'contact', 'terms', 'privacy'] as const;
+export const INFO_KINDS = ['about', 'faq', 'contact', 'sites', 'terms', 'privacy'] as const;
 export type InfoKind = (typeof INFO_KINDS)[number];
 
 export const isInfoKind = (value: string): value is InfoKind => (INFO_KINDS as readonly string[]).includes(value);
 
-/** About, FAQ, contact and legal pages: a menu between them beside (on phones above) the article. */
+/** About, FAQ, contact, friendly sites and legal pages: a menu between them beside (on phones above) the article. */
 export const InfoPage = ({ kind }: { kind: InfoKind }) => {
   const t = useT();
   const content = useContent();

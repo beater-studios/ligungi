@@ -35,6 +35,7 @@ export const PAGES: readonly Page[] = (
     ['/about', 'about'],
     ['/faq', 'faq'],
     ['/contact', 'contact'],
+    ['/sites', 'sites'],
     ['/terms', 'terms'],
     ['/privacy', 'privacy'],
   ] as const

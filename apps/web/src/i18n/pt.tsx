@@ -118,6 +118,7 @@ export const pt = {
     about: 'Sobre',
     faq: 'FAQ',
     contact: 'Contato',
+    sites: 'Sites amigos',
     terms: 'Condições de uso',
     account: 'Conta',
     moderation: 'Moderação',
@@ -1573,6 +1574,10 @@ export const pt = {
       contact: {
         title: 'Contato · ligungi',
         description: 'Fale com a equipe do ligungi: dúvidas, sugestões e erros nas regras ou no site.',
+      },
+      sites: {
+        title: 'Sites amigos · ligungi',
+        description: 'Outros sites gratuitos de jogos de tabuleiro feitos sobre o lila, como o lichess, o lishogi e o lidraughts, e mais.',
       },
       terms: {
         title: 'Condições de uso · ligungi',

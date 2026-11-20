@@ -2694,6 +2694,11 @@ body:has(main.ligungi-auth) #clinput {
   }
 }
 
+// Friendly sites: one line per site, a little apart so each name stands out.
+.ligungi-sites li + li {
+  margin-top: 0.6rem;
+}
+
 // Tower on tap: the choices beside a phone that shows what each one does.
 .ligungi-setting.ligungi-tap-setting {
   align-items: flex-start;

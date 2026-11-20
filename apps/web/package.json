@@ -20,11 +20,11 @@
   },
   "devDependencies": {
     "axe-core": "4.14.0",
-    "jsdom": "31.0.0",
-    "preact-render-to-string": "6.8.2",
-    "sass-embedded": "1.108.0",
+    "jsdom": "31.0.1",
+    "preact-render-to-string": "6.8.3",
+    "sass-embedded": "1.108.2",
     "typescript": "7.0.2",
-    "vite": "8.3.6",
+    "vite": "8.3.8",
     "vitest": "5.1.0"
   }
 }

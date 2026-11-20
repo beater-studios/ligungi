@@ -1,4 +1,4 @@
-import { legalMoves, moveToString, opposite, type Color, type Move } from '@ligungi/engine';
+import { applyMove, legalMoves, moveToString, opposite, type Color, type Move } from '@ligungi/engine';
 import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type GameView } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
@@ -9,7 +9,7 @@ import { Crosstable } from '../components/Crosstable.tsx';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
 import { errorText, getT, outcomeText, playerName, speedText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { moveText } from '../notation.ts';
+import { moveText, useMoveText } from '../notation.ts';
 import { notify } from '../notify.ts';
 import { prefs, resolveLang } from '../prefs.ts';
 import { replayGame } from '../replay.ts';
@@ -31,6 +31,10 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
   const [ply, setPly] = useState<number | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [premove, setPremove] = useState<Move | null>(null);
+  /** A move made on the board that waits for Confirm (the move confirmation preference). */
+  const [pending, setPending] = useState<Move | null>(null);
+  const { confirmMove } = useStore(prefs);
+  const listedMove = useMoveText();
   const [confirming, setConfirming] = useState<'resign' | 'draw' | null>(null);
   const previous = useRef<Pick<GameView, 'status' | 'drawOffer' | 'takebackOffer' | 'rematchOffer'> & { plies: number } | null>(null);
   /** The opponent turned down the viewer's offer: said once, until the next move or offer. */
@@ -147,6 +151,29 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
   );
 
   useEffect(() => setConfirming(null), [view?.moves.length, view?.status]);
+  useEffect(() => setPending(null), [view?.id, view?.moves.length, view?.status, ply]);
+
+  const askConfirm = Boolean(view) && (confirmMove === 'always' || (confirmMove === 'correspondence' && view?.daysPerMove !== null));
+  const onBoardMove = useCallback((move: Move) => (askConfirm ? setPending(move) : send(move)), [askConfirm, send]);
+  const confirmPending = useCallback(() => {
+    if (pending) send(pending);
+    setPending(null);
+  }, [pending, send]);
+
+  // Enter confirms and Escape cancels, unless the keys go to a field, a button or a link, which have their own.
+  useEffect(() => {
+    if (!pending) return;
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest('input, textarea, select, button, a, [contenteditable="true"]')) return;
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        confirmPending();
+      } else if (event.key === 'Escape') setPending(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pending, confirmPending]);
 
   useEffect(() => {
     if (!myTurn) return;
@@ -228,8 +255,18 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
     ? t.turnStatus(position.phase === 'draft', turn, myTurn ? 'you' : null)
     : outcomeText(t, view.outcome, view.status === 'aborted');
 
+  const pendingText = pending ? (({ text, full }) => full ?? text)(listedMove(position, pending)) : '';
   const controls = (
     <>
+      {pending && (
+        <div class="question ligungi-confirm-move" role="group" aria-label={t.game.confirmMove}>
+          <button type="button" class="no" title={t.game.cancel} aria-label={t.game.cancel} data-icon={icons.X} onClick={() => setPending(null)} />
+          <p>
+            {t.game.confirmMove} <strong>{pendingText}</strong>
+          </p>
+          <button type="button" class="yes" title={t.game.confirm} aria-label={t.game.confirm} data-icon={icons.Checkmark} onClick={confirmPending} />
+        </div>
+      )}
       {you && started && (
         <div class="ricons">
           {doneAvailable && (
@@ -405,15 +442,17 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
     <RoundLayout
       training={!view.rated}
       board={{
-        position,
-        movableColor: live && started && you ? you : null,
-        moves,
-        lastMove,
-        onMove: send,
-        premoveMoves,
+        // A move waiting for Confirm is shown played, and the board waits for the answer.
+        position: pending ? applyMove(position, pending) : position,
+        movableColor: live && started && you && !pending ? you : null,
+        moves: pending ? [] : moves,
+        lastMove: pending ?? lastMove,
+        onMove: onBoardMove,
+        premoveMoves: pending ? [] : premoveMoves,
         premove,
         onPremove: setPremove,
       }}
+      onTypedMove={send}
       orientation={orientation}
       players={{ white: player('white'), black: player('black') }}
       clocks={clocks}

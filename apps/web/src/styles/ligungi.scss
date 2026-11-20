@@ -555,6 +555,11 @@ main.page-menu {
   }
 }
 
+// The move confirmation answers the player's own click, every move in correspondence: it should not flash like an offer.
+.rcontrols .ligungi-confirm-move {
+  animation: none;
+}
+
 .rcontrols .pending p {
   color: $c-font-dim;
   font-size: 0.9em;

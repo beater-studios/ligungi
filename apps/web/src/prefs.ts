@@ -72,9 +72,14 @@ export interface Prefs {
   readonly screenReader: boolean;
   /** On a phone, what tapping a tower shows: a balloon next to it, a strip under the board, or only the side panel. */
   readonly towerTap: TowerTap;
+  readonly confirmMove: ConfirmMove;
   /** Browser notifications while the site is in the background; the browser's own permission is asked when turned on. */
   readonly notifications: boolean;
 }
+
+/** When a move made on the board waits for a click on Confirm before it is sent: never, in correspondence games, always. */
+export const CONFIRM_MOVES = ['never', 'correspondence', 'always'] as const;
+export type ConfirmMove = (typeof CONFIRM_MOVES)[number];
 
 export const TOWER_TAPS = ['balloon', 'strip', 'panel'] as const;
 export type TowerTap = (typeof TOWER_TAPS)[number];
@@ -105,6 +110,7 @@ const DEFAULTS: Prefs = {
   byoyomiVoice: false,
   screenReader: false,
   towerTap: 'balloon',
+  confirmMove: 'correspondence',
   notifications: false,
 };
 
@@ -150,6 +156,7 @@ const load = (): Prefs => {
       screenReader: stored.screenReader === true,
       notifications: stored.notifications === true,
       towerTap: oneOf(TOWER_TAPS, stored.towerTap, DEFAULTS.towerTap),
+      confirmMove: oneOf(CONFIRM_MOVES, stored.confirmMove, DEFAULTS.confirmMove),
       notation:
         stored.notation === 'rulebook' || stored.notation === 'named' || stored.notation === 'machine'
           ? stored.notation

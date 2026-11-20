@@ -61,6 +61,7 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
+| Puzzles made by players: pick a position from a game or the editor, enter the solution, and publish it after a check (for mates, the engine confirms the solution is the only one) | Asked by a player who has games worth turning into puzzles; more variety than the generated set. Needs the check, moderation and reports like studies, and a way to rate them. Meanwhile studies can hold a position and its solution | M | Medium | internal |
 | Computer analysis in the browser (evaluation, best line, mistakes in a finished game) | Core study tool on lichess-style sites. Needs a stronger engine | L | Medium | lichess, lishogi |
 | Learn from your mistakes: replay the critical moments of your own games | The most loved study feature on lichess. Needs the computer analysis | M | Medium | lichess |
 | Record a physical board with the camera | Computer vision; a strong differentiator | XL | Low | libaduk |

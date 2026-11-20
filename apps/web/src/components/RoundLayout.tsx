@@ -62,6 +62,8 @@ interface RoundLayoutProps {
   readonly notice?: string | null;
   /** Typed commands of the screen reader mode beyond moving. */
   readonly commands?: BlindCommands;
+  /** Moves typed in the screen reader mode, when they go somewhere else than the board's (no move confirmation). */
+  readonly onTypedMove?: (move: Move) => void;
   /** The task, for the screen reader mode (a puzzle, a practice position). */
   readonly goal?: string | null;
   /** What the screen reader mode answers to `r` without clocks, such as a puzzle run's timer. */
@@ -339,7 +341,7 @@ export const RoundLayout = (props: RoundLayoutProps) => {
             key={props.gameKey ?? (props.positions[0] ? toFen(props.positions[0]) : '')}
             position={shown}
             legal={props.board.moves ?? []}
-            onMove={props.board.onMove ?? undefined}
+            onMove={props.onTypedMove ?? props.board.onMove ?? undefined}
             positions={props.positions}
             moves={props.moves}
             live={props.ply === null}

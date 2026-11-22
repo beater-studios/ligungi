@@ -34,10 +34,14 @@ A line of text that describes a whole position: the towers on the board, the pie
 
 No. It is a fan project, not officially affiliated.
 
+## Where can I talk with other players?
+
+On our [Discord server](discord), also at ligungi.org/discord: find opponents, share games, talk strategy and ask about the rules. It has channels in English, Portuguese and Spanish.
+
 ## I found a bug. How do I report it?
 
-Open an [issue on GitHub](issues) or write to {email}. For security issues, use the [private report](security), never a public issue.
+Post it in #feedback on our [Discord server](discord), open an [issue on GitHub](issues) or write to {email}. For security issues, use the [private report](security), never a public issue.
 
 ## Can I help?
 
-Yes. The code is open and welcomes contributions: rule corrections backed by a source, translations, code and bug reports. Start at the [repository](repo).
+Yes. The code is open and welcomes contributions: rule corrections backed by a source, translations, code and bug reports. Start at the [repository](repo), or say hello in #development or #translations on our [Discord server](discord).

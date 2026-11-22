@@ -71,6 +71,7 @@ interface Prerender {
   readonly ready: () => Promise<unknown>;
   readonly PAGES: readonly Page[];
   readonly SITE_URL: string;
+  readonly SOURCE_URL: string;
   readonly pageUrl: (path: string, lang?: Lang) => string;
   readonly renderPage: (page: Page, lang: Lang, fixedLang: boolean) => Rendered;
   readonly renderShell: (lang: Lang) => Rendered;
@@ -148,7 +149,7 @@ writeFileSync(
 
 > ligungi is a free, open source website to play Gungi online with the official 2022 rules. Gungi (軍儀) is the two-player strategy board game from the HUNTER×HUNTER manga, released as a physical game in 2022. It is similar to shogi, but pieces stack into towers of up to three and a taller tower extends the reach of the piece on top. ligungi is a fan project by Beater Studios, not affiliated with the rights holders.
 
-The site works like lichess: rated and casual games with Glicko-2 ratings, games against the computer, a free analysis board, studies, puzzles, interactive lessons, live games, leaderboards and a rules page with diagrams and an interactive piece trainer. It is available in ${inWords(app.LANGS.map((lang) => englishNames.of(lang) ?? lang))}; add ${new Intl.ListFormat('en', { type: 'disjunction' }).format(app.LANGS.map((lang) => `\`?lang=${lang}\``))} to any page. The site can be used with a screen reader: a screen reader mode (Settings, or the top of the sign in page) announces every move in words, takes typed moves and questions about the position and offers a board moved through with the arrow keys, on every screen with a board. Source priority for the rules: the official 2022 rulebook, then the official Universal Music FAQ.
+The site works like lichess: rated and casual games with Glicko-2 ratings, live or by correspondence (days per move), games against the computer, a free analysis board, studies, puzzles, interactive lessons, live games, leaderboards and a rules page with diagrams and an interactive piece trainer. It is available in ${inWords(app.LANGS.map((lang) => englishNames.of(lang) ?? lang))}; add ${new Intl.ListFormat('en', { type: 'disjunction' }).format(app.LANGS.map((lang) => `\`?lang=${lang}\``))} to any page. The site can be used with a screen reader: a screen reader mode (Settings, or the top of the sign in page) announces every move in words, takes typed moves and questions about the position and offers a board moved through with the arrow keys, on every screen with a board. Source priority for the rules: the official 2022 rulebook, then the official Universal Music FAQ.
 
 ## Play and learn
 
@@ -177,6 +178,12 @@ The site works like lichess: rated and casual games with Glicko-2 ratings, games
 - [Friendly sites](${en('/sites')}): other free board game sites built on lila (lichess, lishogi, lidraughts, PlayStrategy) and libaduk for go
 - [Terms of service](${en('/terms')})
 - [Privacy policy](${en('/privacy')})
+
+## Community
+
+- [Discord server](${app.SITE_URL}/discord): players and the team, with channels in English, Portuguese and Spanish, help with the rules and feedback about the site
+- [Source code](${app.SOURCE_URL}): the whole site, AGPL-3.0-or-later, open to contributions and translations
+- [Changelog](${app.SOURCE_URL}/blob/main/CHANGELOG.md): what changed in each version
 
 ## Optional
 

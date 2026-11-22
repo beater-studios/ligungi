@@ -34,10 +34,14 @@ Uma linha de texto que descreve uma posição inteira: as torres no tabuleiro, a
 
 Não. É um projeto de fãs, sem afiliação oficial.
 
+## Onde converso com outros jogadores?
+
+No nosso [servidor do Discord](discord), também em ligungi.org/discord: encontre adversários, compartilhe partidas, converse sobre estratégia e tire dúvidas das regras. Tem canais em português, inglês e espanhol.
+
 ## Encontrei um erro. Como aviso?
 
-Abra uma [issue no GitHub](issues) ou escreva para {email}. Para falhas de segurança, use o [reporte privado](security), nunca uma issue pública.
+Poste no #feedback do nosso [servidor do Discord](discord), abra uma [issue no GitHub](issues) ou escreva para {email}. Para falhas de segurança, use o [reporte privado](security), nunca uma issue pública.
 
 ## Posso ajudar?
 
-Pode. O código é aberto e aceita contribuições: correções de regras com fonte, traduções, código e relatos de erro. Comece pelo [repositório](repo).
+Pode. O código é aberto e aceita contribuições: correções de regras com fonte, traduções, código e relatos de erro. Comece pelo [repositório](repo), ou dê um oi no #development ou no #translations do nosso [servidor do Discord](discord).

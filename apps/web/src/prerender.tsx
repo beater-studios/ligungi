@@ -13,9 +13,9 @@ import { localeOf } from './i18n/languages.ts';
 import { LANGS, prefs, type Lang } from './prefs.ts';
 import { navigate } from './router.ts';
 import { PAGES, headHtml, pageUrl, type Page } from './seo.ts';
-import { SITE_URL } from './source.ts';
+import { SITE_URL, SOURCE_URL } from './source.ts';
 
-export { LANGS, PAGES, SITE_URL, localeOf, pageUrl };
+export { LANGS, PAGES, SITE_URL, SOURCE_URL, localeOf, pageUrl };
 
 /** Loads every language's messages; call it before rendering. */
 export const ready = (): Promise<unknown> => Promise.all([loadAllLanguages(), loadAllPages()]);

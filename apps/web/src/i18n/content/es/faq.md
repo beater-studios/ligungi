@@ -34,10 +34,14 @@ Una línea de texto que describe una posición completa: las torres del tablero,
 
 No. Es un proyecto de fans, sin afiliación oficial.
 
+## ¿Dónde hablo con otros jugadores?
+
+En nuestro [servidor de Discord](discord), también en ligungi.org/discord: encuentra rivales, comparte partidas, habla de estrategia y pregunta sobre las reglas. Tiene canales en español, inglés y portugués.
+
 ## Encontré un error. ¿Cómo aviso?
 
-Abre un [issue en GitHub](issues) o escribe a {email}. Para fallos de seguridad, usa el [reporte privado](security), nunca un issue público.
+Publícalo en #feedback de nuestro [servidor de Discord](discord), abre un [issue en GitHub](issues) o escribe a {email}. Para fallos de seguridad, usa el [reporte privado](security), nunca un issue público.
 
 ## ¿Puedo ayudar?
 
-Sí. El código es abierto y acepta contribuciones: correcciones de reglas con fuente, traducciones, código y reportes de errores. Empieza por el [repositorio](repo).
+Sí. El código es abierto y acepta contribuciones: correcciones de reglas con fuente, traducciones, código y reportes de errores. Empieza por el [repositorio](repo), o saluda en #development o #translations de nuestro [servidor de Discord](discord).

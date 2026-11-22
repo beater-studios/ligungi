@@ -4,6 +4,11 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Changed
+
+- The FAQ says where to talk with other players (the Discord server), and bug reports and help can now go through the Discord too.
+- Search engines and AI assistants learn about the community: llms.txt links the Discord server, the source code and the changelog, and the home page's structured data links the site's GitHub, AlternativeTo and Discord pages.
+
 ## [0.9.0] - 2026-11-20
 
 ### Added

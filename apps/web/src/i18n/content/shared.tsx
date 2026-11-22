@@ -25,6 +25,7 @@ export const LINKS = {
   playstrategy: 'https://playstrategy.org/',
   libaduk: 'https://libaduk.com/',
   discord: DISCORD_INVITE,
+  alternativeTo: 'https://alternativeto.net/software/ligungi/about/',
 } as const;
 
 /** External link, opened in a new tab. */

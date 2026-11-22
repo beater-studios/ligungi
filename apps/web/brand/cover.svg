@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="38%" r="75%"><stop offset="0" stop-color="#2b2723"/><stop offset="1" stop-color="#161512"/></radialGradient>
+    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1.5"/></pattern>
+  </defs>
+  <rect width="600" height="800" fill="url(#glow)"/>
+  <rect width="600" height="800" fill="url(#grid)"/>
+  <g transform="translate(140 150) scale(5)">
+    <ellipse cx="32" cy="50" rx="26" ry="9" fill="#0d0d0d"/>
+    <rect x="6" y="41" width="52" height="9" fill="#0d0d0d"/>
+    <ellipse cx="32" cy="41" rx="26" ry="9" fill="#3a3a3a"/>
+    <ellipse cx="32" cy="38" rx="26" ry="9" fill="#efe8da"/>
+    <rect x="6" y="29" width="52" height="9" fill="#efe8da"/>
+    <ellipse cx="32" cy="29" rx="26" ry="9" fill="#d9cfbd"/>
+    <ellipse cx="32" cy="26" rx="26" ry="9" fill="#b8322f"/>
+    <rect x="6" y="17" width="52" height="9" fill="#b8322f"/>
+    <ellipse cx="32" cy="17" rx="26" ry="9" fill="#d8443f"/>
+    <text x="32" y="22" font-size="13" text-anchor="middle" fill="#fff7ee" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-weight="700">軍</text>
+  </g>
+  <g font-family="'Noto Sans', sans-serif" text-anchor="middle">
+    <text x="300" y="560" font-size="92" fill="#e8e6e3" letter-spacing="-2">ligungi</text>
+    <text x="300" y="625" font-size="36" fill="#c9c4bd">Gungi online <tspan font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#d8443f">軍儀</tspan></text>
+    <text x="300" y="700" font-size="22" fill="#8f8a83">official 2022 rules</text>
+    <text x="300" y="732" font-size="22" fill="#8f8a83">free and open source</text>
+  </g>
+</svg>

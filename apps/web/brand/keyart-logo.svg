@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <radialGradient id="glow" cx="30%" cy="45%" r="75%"><stop offset="0" stop-color="#2f2a25"/><stop offset="1" stop-color="#141311"/></radialGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e7c084"/><stop offset="1" stop-color="#cf9f5c"/></linearGradient>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" stroke="#ffffff" stroke-opacity="0.035" stroke-width="2"/></pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#glow)"/>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  <polygon points="818.1551954843279,590.0 1340.0,850.922402257836 1340.0,884.922402257836 818.1551954843279,624.0" fill="#9a6a33"/>
+  <polygon points="1340.0,850.922402257836 1861.844804515672,590.0 1861.844804515672,624.0 1340.0,884.922402257836" fill="#7d5426"/>
+  <polygon points="1340.0,329.07759774216396 1861.844804515672,590.0 1340.0,850.922402257836 818.1551954843279,590.0" fill="url(#wood)"/>
+  <line x1="1340.0" y1="329.1" x2="818.2" y2="590.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1340.0" y1="329.1" x2="1861.8" y2="590.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1398.0" y1="358.1" x2="876.1" y2="619.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1282.0" y1="358.1" x2="1803.9" y2="619.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1456.0" y1="387.1" x2="934.1" y2="648.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1224.0" y1="387.1" x2="1745.9" y2="648.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1513.9" y1="416.1" x2="992.1" y2="677.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1166.1" y1="416.1" x2="1687.9" y2="677.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1571.9" y1="445.0" x2="1050.1" y2="706.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1108.1" y1="445.0" x2="1629.9" y2="706.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1629.9" y1="474.0" x2="1108.1" y2="735.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1050.1" y1="474.0" x2="1571.9" y2="735.0" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1687.9" y1="503.0" x2="1166.1" y2="763.9" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="992.1" y1="503.0" x2="1513.9" y2="763.9" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1745.9" y1="532.0" x2="1224.0" y2="792.9" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="934.1" y1="532.0" x2="1456.0" y2="792.9" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1803.9" y1="561.0" x2="1282.0" y2="821.9" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="876.1" y1="561.0" x2="1398.0" y2="821.9" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="1861.8" y1="590.0" x2="1340.0" y2="850.9" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <line x1="818.2" y1="590.0" x2="1340.0" y2="850.9" stroke="#7a5a2c" stroke-opacity="0.55" stroke-width="1.6"/>
+  <ellipse cx="1340.0" cy="503.0" rx="5" ry="2.5" fill="#6b4a20"/>
+  <ellipse cx="1513.9" cy="590.0" rx="5" ry="2.5" fill="#6b4a20"/>
+  <ellipse cx="1166.1" cy="590.0" rx="5" ry="2.5" fill="#6b4a20"/>
+  <ellipse cx="1340.0" cy="677.0" rx="5" ry="2.5" fill="#6b4a20"/>
+  <ellipse cx="1282.0" cy="448.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1282.0" cy="445.0" rx="34.4" ry="17.2" fill="#000000"/>
+  <rect x="1247.6" y="429.9" width="68.9" height="15.17" fill="#1d1d1d"/>
+  <ellipse cx="1282.0" cy="429.9" rx="34.4" ry="17.2" fill="#303030"/>
+  <g transform="translate(1282.0 429.9) scale(1 0.62) rotate(180)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#efe8da">馬</text></g>
+  <ellipse cx="1571.9" cy="477.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1571.9" cy="474.0" rx="34.4" ry="17.2" fill="#000000"/>
+  <rect x="1537.5" y="458.9" width="68.9" height="15.17" fill="#1d1d1d"/>
+  <ellipse cx="1571.9" cy="458.9" rx="34.4" ry="17.2" fill="#303030"/>
+  <g transform="translate(1571.9 458.9) scale(1 0.62) rotate(180)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#efe8da">帥</text></g>
+  <ellipse cx="1456.0" cy="477.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1456.0" cy="474.0" rx="34.4" ry="17.2" fill="#000000"/>
+  <rect x="1421.5" y="458.9" width="68.9" height="15.17" fill="#1d1d1d"/>
+  <ellipse cx="1456.0" cy="458.9" rx="34.4" ry="17.2" fill="#303030"/>
+  <ellipse cx="1456.0" cy="458.9" rx="34.4" ry="17.2" fill="#000000"/>
+  <rect x="1421.5" y="443.7" width="68.9" height="15.17" fill="#1d1d1d"/>
+  <ellipse cx="1456.0" cy="443.7" rx="34.4" ry="17.2" fill="#303030"/>
+  <g transform="translate(1456.0 443.7) scale(1 0.62) rotate(180)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#efe8da">侍</text></g>
+  <ellipse cx="1687.9" cy="535.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1687.9" cy="532.0" rx="34.4" ry="17.2" fill="#000000"/>
+  <rect x="1653.5" y="516.8" width="68.9" height="15.17" fill="#1d1d1d"/>
+  <ellipse cx="1687.9" cy="516.8" rx="34.4" ry="17.2" fill="#303030"/>
+  <g transform="translate(1687.9 516.8) scale(1 0.62) rotate(180)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#efe8da">槍</text></g>
+  <ellipse cx="1108.1" cy="535.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1108.1" cy="532.0" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1073.6" y="516.8" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1108.1" cy="516.8" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <g transform="translate(1108.1 516.8) scale(1 0.62) rotate(0)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">兵</text></g>
+  <ellipse cx="1513.9" cy="564.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1513.9" cy="561.0" rx="34.4" ry="17.2" fill="#000000"/>
+  <rect x="1479.5" y="545.8" width="68.9" height="15.17" fill="#1d1d1d"/>
+  <ellipse cx="1513.9" cy="545.8" rx="34.4" ry="17.2" fill="#303030"/>
+  <ellipse cx="1513.9" cy="545.8" rx="34.4" ry="17.2" fill="#000000"/>
+  <rect x="1479.5" y="530.7" width="68.9" height="15.17" fill="#1d1d1d"/>
+  <ellipse cx="1513.9" cy="530.7" rx="34.4" ry="17.2" fill="#303030"/>
+  <ellipse cx="1513.9" cy="530.7" rx="34.4" ry="17.2" fill="#000000"/>
+  <rect x="1479.5" y="515.5" width="68.9" height="15.17" fill="#1d1d1d"/>
+  <ellipse cx="1513.9" cy="515.5" rx="34.4" ry="17.2" fill="#303030"/>
+  <g transform="translate(1513.9 515.5) scale(1 0.62) rotate(180)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#efe8da">弓</text></g>
+  <ellipse cx="1398.0" cy="564.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1398.0" cy="561.0" rx="34.4" ry="17.2" fill="#000000"/>
+  <rect x="1363.5" y="545.8" width="68.9" height="15.17" fill="#1d1d1d"/>
+  <ellipse cx="1398.0" cy="545.8" rx="34.4" ry="17.2" fill="#303030"/>
+  <g transform="translate(1398.0 545.8) scale(1 0.62) rotate(180)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#efe8da">大</text></g>
+  <ellipse cx="1687.9" cy="593.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1687.9" cy="590.0" rx="34.4" ry="17.2" fill="#000000"/>
+  <rect x="1653.5" y="574.8" width="68.9" height="15.17" fill="#1d1d1d"/>
+  <ellipse cx="1687.9" cy="574.8" rx="34.4" ry="17.2" fill="#303030"/>
+  <g transform="translate(1687.9 574.8) scale(1 0.62) rotate(180)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#efe8da">忍</text></g>
+  <ellipse cx="1166.1" cy="622.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1166.1" cy="619.0" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1131.6" y="603.8" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1166.1" cy="603.8" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <ellipse cx="1166.1" cy="603.8" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1131.6" y="588.7" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1166.1" cy="588.7" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <g transform="translate(1166.1 588.7) scale(1 0.62) rotate(0)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">槍</text></g>
+  <ellipse cx="1050.1" cy="622.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1050.1" cy="619.0" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1015.6" y="603.8" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1050.1" cy="603.8" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <g transform="translate(1050.1 603.8) scale(1 0.62) rotate(0)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">忍</text></g>
+  <ellipse cx="1456.0" cy="651.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1456.0" cy="648.0" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1421.5" y="632.8" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1456.0" cy="632.8" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <g transform="translate(1456.0 632.8) scale(1 0.62) rotate(0)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">中</text></g>
+  <ellipse cx="1340.0" cy="651.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1340.0" cy="648.0" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1305.6" y="632.8" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1340.0" cy="632.8" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <ellipse cx="1340.0" cy="632.8" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1305.6" y="617.6" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1340.0" cy="617.6" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <ellipse cx="1340.0" cy="617.6" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1305.6" y="602.5" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1340.0" cy="602.5" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <g transform="translate(1340.0 602.5) scale(1 0.62) rotate(0)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">侍</text></g>
+  <ellipse cx="1108.1" cy="709.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1108.1" cy="706.0" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1073.6" y="690.8" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1108.1" cy="690.8" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <g transform="translate(1108.1 690.8) scale(1 0.62) rotate(0)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">帥</text></g>
+  <ellipse cx="1282.0" cy="738.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1282.0" cy="735.0" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1247.6" y="719.8" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1282.0" cy="719.8" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <g transform="translate(1282.0 719.8) scale(1 0.62) rotate(0)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">馬</text></g>
+  <ellipse cx="1398.0" cy="738.0" rx="40.4" ry="20.2" fill="#000" fill-opacity="0.28"/>
+  <ellipse cx="1398.0" cy="735.0" rx="34.4" ry="17.2" fill="#9c9078"/>
+  <rect x="1363.5" y="719.8" width="68.9" height="15.17" fill="#d2c6ae"/>
+  <ellipse cx="1398.0" cy="719.8" rx="34.4" ry="17.2" fill="#f3ede1"/>
+  <g transform="translate(1398.0 719.8) scale(1 0.62) rotate(0)"><text x="0" y="13.6" text-anchor="middle" font-size="37.9" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">筒</text></g>
+  <g transform="translate(150 300) scale(3.1)">
+    <ellipse cx="32" cy="50" rx="26" ry="9" fill="#0d0d0d"/><rect x="6" y="41" width="52" height="9" fill="#0d0d0d"/><ellipse cx="32" cy="41" rx="26" ry="9" fill="#3a3a3a"/>
+    <ellipse cx="32" cy="38" rx="26" ry="9" fill="#efe8da"/><rect x="6" y="29" width="52" height="9" fill="#efe8da"/><ellipse cx="32" cy="29" rx="26" ry="9" fill="#d9cfbd"/>
+    <ellipse cx="32" cy="26" rx="26" ry="9" fill="#b8322f"/><rect x="6" y="17" width="52" height="9" fill="#b8322f"/><ellipse cx="32" cy="17" rx="26" ry="9" fill="#d8443f"/>
+    <text x="32" y="22" font-size="13" text-anchor="middle" fill="#fff7ee" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-weight="700">軍</text>
+  </g>
+  <g font-family="'Noto Sans', sans-serif">
+    <text x="146" y="610" font-size="128" fill="#e8e6e3" letter-spacing="-3">ligungi<tspan fill="#8f8a83">.org</tspan></text>
+    <text x="152" y="690" font-size="48" fill="#c9c4bd">Gungi online <tspan font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#d8443f">軍儀</tspan></text>
+    <text x="152" y="760" font-size="30" fill="#8f8a83">official 2022 rules · free and open source</text>
+  </g>
+</svg>

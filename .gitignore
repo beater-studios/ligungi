@@ -51,5 +51,9 @@ Thumbs.db
 *.swp
 *~
 .claude/settings.local.json
+__pycache__/
+*.pyc
 
 todo
+# Generated images for listings (IGDB, Discord, directories); sources in apps/web/brand
+/media/

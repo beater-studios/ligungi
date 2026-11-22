@@ -235,6 +235,19 @@ describe('draft', () => {
     expect(game.position.hands.white.soldier).toBe(3);
   });
 
+  it('makes the done declaration a turn of its own, placing nothing (rules section 11, item 12)', () => {
+    const game = new Game(initialPosition('advanced'));
+    game.play('M*e1');
+    game.play('M*e9');
+    game.play('P*d1');
+    const hand = game.position.hands.black;
+    expect(game.position.turn).toBe('black');
+    game.play('done');
+    expect(game.position.phase).toBe('play');
+    expect(game.position.hands.black).toEqual(hand);
+    expect(game.moves).toHaveLength(4);
+  });
+
   it('lets the first player keep placing after the second declares done with the free draft option', () => {
     const game = new Game(initialPosition('advanced', 'white', { freeDraft: true }));
     game.play('M*e1');

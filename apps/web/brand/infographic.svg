@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs><radialGradient id="glow" cx="30%" cy="20%" r="90%"><stop offset="0" stop-color="#2b2723"/><stop offset="1" stop-color="#161512"/></radialGradient></defs>
+  <rect width="1920" height="1080" fill="url(#glow)"/>
+  <text x="96" y="132" font-family="'Noto Sans', sans-serif" font-size="64" fill="#e8e6e3">Gungi at a glance</text>
+  <text x="98" y="184" font-family="'Noto Sans', sans-serif" font-size="28" fill="#8f8a83">The board game from HUNTER×HUNTER, with the official 2022 rules</text>
+  <rect x="96" y="236" width="414" height="222" rx="14" fill="#262421" stroke="#3a3632"/>
+  <text x="124" y="318" font-family="'Noto Sans', sans-serif" font-size="64" font-weight="700" fill="#d8443f">9×9</text>
+  <text x="260" y="314" font-family="'Noto Sans', sans-serif" font-size="30" fill="#e8e6e3">board</text>
+  <text x="124" y="366" font-family="'Noto Sans', sans-serif" font-size="25" fill="#bdb8b0">Each player starts in their own</text>
+  <text x="124" y="400" font-family="'Noto Sans', sans-serif" font-size="25" fill="#bdb8b0">3 rows.</text>
+  <rect x="534" y="236" width="414" height="222" rx="14" fill="#262421" stroke="#3a3632"/>
+  <text x="562" y="318" font-family="'Noto Sans', sans-serif" font-size="64" font-weight="700" fill="#d8443f">25</text>
+  <text x="658" y="314" font-family="'Noto Sans', sans-serif" font-size="30" fill="#e8e6e3">pieces each</text>
+  <text x="562" y="366" font-family="'Noto Sans', sans-serif" font-size="25" fill="#bdb8b0">14 kinds, from the Marshal to</text>
+  <text x="562" y="400" font-family="'Noto Sans', sans-serif" font-size="25" fill="#bdb8b0">the Soldiers.</text>
+  <rect x="972" y="236" width="414" height="222" rx="14" fill="#262421" stroke="#3a3632"/>
+  <text x="1000" y="318" font-family="'Noto Sans', sans-serif" font-size="64" font-weight="700" fill="#d8443f">3</text>
+  <text x="1056" y="314" font-family="'Noto Sans', sans-serif" font-size="30" fill="#e8e6e3">pieces high</text>
+  <text x="1000" y="366" font-family="'Noto Sans', sans-serif" font-size="25" fill="#bdb8b0">Stack on a piece: the higher</text>
+  <text x="1000" y="400" font-family="'Noto Sans', sans-serif" font-size="25" fill="#bdb8b0">the top one stands, the farther</text>
+  <text x="1000" y="434" font-family="'Noto Sans', sans-serif" font-size="25" fill="#bdb8b0">it reaches.</text>
+  <rect x="1410" y="236" width="414" height="222" rx="14" fill="#262421" stroke="#3a3632"/>
+  <text x="1438" y="318" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-size="64" font-weight="700" fill="#d8443f">帥</text>
+  <text x="1518" y="314" font-family="'Noto Sans', sans-serif" font-size="30" fill="#e8e6e3">the goal</text>
+  <text x="1438" y="366" font-family="'Noto Sans', sans-serif" font-size="25" fill="#bdb8b0">Capture the Marshal, or leave</text>
+  <text x="1438" y="400" font-family="'Noto Sans', sans-serif" font-size="25" fill="#bdb8b0">it with no safe move.</text>
+  <text x="96" y="524" font-family="'Noto Sans', sans-serif" font-size="30" fill="#e8e6e3">The pieces <tspan fill="#8f8a83" font-size="24">(how many each player has)</tspan></text>
+  <rect x="96.0" y="548" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="150.0" cy="608.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="116.0" y="594" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="150.0" cy="594" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(150.0 594) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">帥</text></g>
+  <text x="200.0" y="598" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Marshal</text>
+  <text x="200.0" y="640" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×1</text>
+  <rect x="345.1" y="548" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="399.1" cy="608.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="365.1" y="594" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="399.1" cy="594" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(399.1 594) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">大</text></g>
+  <text x="449.1" y="598" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">General</text>
+  <text x="449.1" y="640" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×1</text>
+  <rect x="594.3" y="548" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="648.3" cy="608.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="614.3" y="594" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="648.3" cy="594" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(648.3 594) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">中</text></g>
+  <text x="698.3" y="586" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Lieutenant</text>
+  <text x="698.3" y="614" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">General</text>
+  <text x="698.3" y="640" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×1</text>
+  <rect x="843.4" y="548" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="897.4" cy="608.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="863.4" y="594" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="897.4" cy="594" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(897.4 594) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">小</text></g>
+  <text x="947.4" y="586" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Major</text>
+  <text x="947.4" y="614" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">General</text>
+  <text x="947.4" y="640" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×2</text>
+  <rect x="1092.6" y="548" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="1146.6" cy="608.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="1112.6" y="594" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="1146.6" cy="594" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(1146.6 594) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">侍</text></g>
+  <text x="1196.6" y="598" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Samurai</text>
+  <text x="1196.6" y="640" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×2</text>
+  <rect x="1341.7" y="548" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="1395.7" cy="608.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="1361.7" y="594" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="1395.7" cy="594" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(1395.7 594) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">槍</text></g>
+  <text x="1445.7" y="598" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Lancer</text>
+  <text x="1445.7" y="640" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×3</text>
+  <rect x="1590.8" y="548" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="1644.8" cy="608.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="1610.8" y="594" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="1644.8" cy="594" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(1644.8 594) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">馬</text></g>
+  <text x="1694.8" y="598" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Knight</text>
+  <text x="1694.8" y="640" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×2</text>
+  <rect x="96.0" y="672" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="150.0" cy="732.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="116.0" y="718" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="150.0" cy="718" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(150.0 718) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">忍</text></g>
+  <text x="200.0" y="722" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Ninja</text>
+  <text x="200.0" y="764" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×2</text>
+  <rect x="345.1" y="672" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="399.1" cy="732.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="365.1" y="718" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="399.1" cy="718" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(399.1 718) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">砦</text></g>
+  <text x="449.1" y="722" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Fortress</text>
+  <text x="449.1" y="764" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×2</text>
+  <rect x="594.3" y="672" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="648.3" cy="732.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="614.3" y="718" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="648.3" cy="718" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(648.3 718) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">兵</text></g>
+  <text x="698.3" y="722" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Soldier</text>
+  <text x="698.3" y="764" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×4</text>
+  <rect x="843.4" y="672" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="897.4" cy="732.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="863.4" y="718" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="897.4" cy="718" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(897.4 718) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">砲</text></g>
+  <text x="947.4" y="722" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Cannon</text>
+  <text x="947.4" y="764" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×1</text>
+  <rect x="1092.6" y="672" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="1146.6" cy="732.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="1112.6" y="718" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="1146.6" cy="718" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(1146.6 718) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">弓</text></g>
+  <text x="1196.6" y="722" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Archer</text>
+  <text x="1196.6" y="764" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×2</text>
+  <rect x="1341.7" y="672" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="1395.7" cy="732.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="1361.7" y="718" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="1395.7" cy="718" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(1395.7 718) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">筒</text></g>
+  <text x="1445.7" y="722" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Musketeer</text>
+  <text x="1445.7" y="764" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×1</text>
+  <rect x="1590.8" y="672" width="233.1" height="110" rx="12" fill="#262421" stroke="#3a3632"/>
+  <ellipse cx="1644.8" cy="732.28" rx="34" ry="17.0" fill="#9c9078"/><rect x="1610.8" y="718" width="68" height="14.28" fill="#d2c6ae"/><ellipse cx="1644.8" cy="718" rx="34" ry="17.0" fill="#f3ede1"/><g transform="translate(1644.8 718) scale(1 0.62)"><text y="13.600000000000001" text-anchor="middle" font-size="37.400000000000006" font-weight="700" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" fill="#2a2622">謀</text></g>
+  <text x="1694.8" y="722" font-family="'Noto Sans', sans-serif" font-size="23" fill="#e8e6e3">Tactician</text>
+  <text x="1694.8" y="764" font-family="'Noto Sans', sans-serif" font-size="22" fill="#d8443f">×1</text>
+  <text x="96" y="846" font-family="'Noto Sans', sans-serif" font-size="30" fill="#e8e6e3">Four modes, from first steps to the full game</text>
+  <rect x="96" y="868" width="414" height="164" rx="12" fill="#262421" stroke="#3a3632"/>
+  <text x="120" y="910" font-family="'Noto Sans', sans-serif" font-size="27" fill="#e8e6e3">1. Introductory</text>
+  <text x="120" y="948" font-family="'Noto Sans', sans-serif" font-size="22" fill="#bdb8b0">Fixed setup, no special pieces,</text>
+  <text x="120" y="978" font-family="'Noto Sans', sans-serif" font-size="22" fill="#bdb8b0">towers up to 2.</text>
+  <rect x="534" y="868" width="414" height="164" rx="12" fill="#262421" stroke="#3a3632"/>
+  <text x="558" y="910" font-family="'Noto Sans', sans-serif" font-size="27" fill="#e8e6e3">2. Beginner</text>
+  <text x="558" y="948" font-family="'Noto Sans', sans-serif" font-size="22" fill="#bdb8b0">Fixed setup, archers are the only</text>
+  <text x="558" y="978" font-family="'Noto Sans', sans-serif" font-size="22" fill="#bdb8b0">special pieces, towers up to 2.</text>
+  <rect x="972" y="868" width="414" height="164" rx="12" fill="#262421" stroke="#3a3632"/>
+  <text x="996" y="910" font-family="'Noto Sans', sans-serif" font-size="27" fill="#e8e6e3">3. Intermediate</text>
+  <text x="996" y="948" font-family="'Noto Sans', sans-serif" font-size="22" fill="#bdb8b0">Free setup through the draft, all</text>
+  <text x="996" y="978" font-family="'Noto Sans', sans-serif" font-size="22" fill="#bdb8b0">pieces, towers up to 2.</text>
+  <rect x="1410" y="868" width="414" height="164" rx="12" fill="#262421" stroke="#3a3632"/>
+  <text x="1434" y="910" font-family="'Noto Sans', sans-serif" font-size="27" fill="#e8e6e3">4. Advanced</text>
+  <text x="1434" y="948" font-family="'Noto Sans', sans-serif" font-size="22" fill="#bdb8b0">Free setup through the draft, all</text>
+  <text x="1434" y="978" font-family="'Noto Sans', sans-serif" font-size="22" fill="#bdb8b0">pieces, towers up to 3. The full</text>
+  <text x="1434" y="1008" font-family="'Noto Sans', sans-serif" font-size="22" fill="#bdb8b0">game.</text>
+  <text x="1824" y="132" text-anchor="end" font-family="'Noto Sans', sans-serif" font-size="40" fill="#e8e6e3">ligungi<tspan fill="#8f8a83">.org</tspan></text>
+  <text x="1824" y="176" text-anchor="end" font-family="'Noto Sans', sans-serif" font-size="22" fill="#8f8a83">play free, no account needed</text>
+</svg>

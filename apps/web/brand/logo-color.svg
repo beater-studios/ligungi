@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 480" width="1600" height="480">
+  <g transform="translate(40 -4) scale(7.4)">
+    <ellipse cx="32" cy="50" rx="26" ry="9" fill="#0d0d0d"/><rect x="6" y="41" width="52" height="9" fill="#0d0d0d"/><ellipse cx="32" cy="41" rx="26" ry="9" fill="#3a3a3a"/>
+      <ellipse cx="32" cy="38" rx="26" ry="9" fill="#efe8da"/><rect x="6" y="29" width="52" height="9" fill="#efe8da"/><ellipse cx="32" cy="29" rx="26" ry="9" fill="#d9cfbd"/>
+      <ellipse cx="32" cy="26" rx="26" ry="9" fill="#b8322f"/><rect x="6" y="17" width="52" height="9" fill="#b8322f"/><ellipse cx="32" cy="17" rx="26" ry="9" fill="#d8443f"/>
+      <text x="32" y="22" font-size="13" text-anchor="middle" fill="#fff7ee" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-weight="700">軍</text>
+  </g>
+  <text x="560" y="318" font-family="'Noto Sans', sans-serif" font-size="250" letter-spacing="-6" fill="#2b2723">ligungi</text>
+</svg>

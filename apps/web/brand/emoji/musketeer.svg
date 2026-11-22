@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+<defs>
+  <radialGradient id="w" cx="50%" cy="42%" r="58%"><stop offset="0" stop-color="#fff"/><stop offset=".62" stop-color="#f6f1e7"/><stop offset="1" stop-color="#cfc6b5"/></radialGradient>
+  <radialGradient id="b" cx="50%" cy="42%" r="58%"><stop offset="0" stop-color="#3a3a3a"/><stop offset=".62" stop-color="#232323"/><stop offset="1" stop-color="#000"/></radialGradient>
+  <radialGradient id="check" cx="50%" cy="50%" r="50%"><stop offset=".72" stop-color="#d62828"/><stop offset=".86" stop-color="#d62828" stop-opacity=".75"/><stop offset="1" stop-color="#d62828" stop-opacity="0"/></radialGradient>
+</defs>
+<circle cx="64" cy="64" r="61" fill="url(#w)" stroke="rgba(0,0,0,.45)" stroke-width="2.5"/><text x="64" y="67.1" font-family="'ligungi kanji serif','Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-weight="700" font-size="78" fill="#1b1b1b" text-anchor="middle" dominant-baseline="central">筒</text>
+</svg>

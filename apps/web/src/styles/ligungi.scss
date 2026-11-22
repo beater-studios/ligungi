@@ -5621,6 +5621,15 @@ $lesson-star: #e8a800;
   }
 }
 
+.ligungi-home__newcomer {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid $c-primary;
+  border-radius: 4px;
+  background: color-mix(in srgb, #{$c-primary} 8%, #{$c-bg-zebra});
+  color: $c-font;
+}
+
 .ligungi-pools {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

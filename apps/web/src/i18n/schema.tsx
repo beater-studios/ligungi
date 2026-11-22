@@ -1,5 +1,6 @@
 import type { Color } from '@ligungi/engine';
 import type { ComponentChildren, VNode } from 'preact';
+import { LESSON_STAGE_IDS } from '@ligungi/protocol';
 import { STUDIO } from './content/shared.tsx';
 
 /**
@@ -84,6 +85,7 @@ export const SCHEMA = {
   'home.waiting': text<[n: number]>('n'),
   'home.online': text<[n: number]>('n'),
   'home.lessonsDone': text<[done: number, total: number]>('done', 'total'),
+  'home.newcomer': rich<[]>({ lesson: internal(`/lessons/${LESSON_STAGE_IDS[0]}`), computer: internal('/computer') }),
 
   'create.incrementText': text<[minutes: number, seconds: number]>('minutes', 'seconds'),
   'create.byoyomiText': text<[minutes: number, seconds: number, periods: number]>('minutes', 'seconds', 'periods'),

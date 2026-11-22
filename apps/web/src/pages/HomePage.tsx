@@ -78,6 +78,14 @@ const Waiting = ({ seeks, onCancel }: { seeks: readonly SeekView[]; onCancel: (s
   );
 };
 
+/** Points a signed-out visitor who has not started the lessons to them and to the computer, before the human queue. */
+const NewcomerHint = () => {
+  const t = useT();
+  const { progress } = useLessonProgress();
+  if (!progress || Object.keys(progress).length > 0) return null;
+  return <p class="ligungi-home__newcomer">{t.home.newcomer}</p>;
+};
+
 const QuickGame = ({
   mode,
   rated,
@@ -112,6 +120,7 @@ const QuickGame = ({
         <Waiting seeks={mine} onCancel={onCancel} />
       ) : (
         <>
+          {!rated && <NewcomerHint />}
           <div class="ligungi-pools">
             {TIME_PRESETS.map((timeControl) => {
               const waiting = waitingFor(lobby?.seeks ?? [], { mode, rated, timeControl });

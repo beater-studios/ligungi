@@ -447,6 +447,7 @@
     "noTv": "Nenhuma partida ao vivo agora.",
     "waiting": "{n, plural, =0 {ninguém esperando} other {# esperando}}",
     "quickHint": "Você entra na fila e a partida começa quando alguém escolher o mesmo ritmo e modo.",
+    "newcomer": "Nunca jogou Gungi? Comece pela <lesson>primeira lição</lesson> ou jogue <computer>contra o computador no modo Iniciante</computer>.",
     "newTitle": "Novo no Gungi?",
     "openTitle": "Partidas abertas",
     "openHint": "entre numa partida criada por outro jogador",

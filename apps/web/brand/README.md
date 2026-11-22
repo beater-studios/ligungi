@@ -31,6 +31,9 @@ Images for listings outside the site are rendered to the git-ignored `/media` fo
 | `discord-home-banner.svg` (kanji font as for the emojis) | `discord/home-banner-1920x1080.png` | 1920×1080 | Discord Server Home banner (shown cropped to a wide strip, so the pieces sit above the middle) |
 | `animated/frames.py` (one SVG per frame, rendered like the emojis above) | `discord/emoji-animated/<name>.gif` (20 fps, 1-bit transparency) and `discord/stickers/<name>.png` (APNG, 15 fps, one shared 256-color palette) | 128×128 (emojis), 320×320 (stickers) | Discord animated emojis (up to 256 KB) and stickers (up to 512 KB) |
 | `keyart-logo.svg` (rendered at 1280×720, cropped 40 px at the top and bottom) | `github/social-preview-1280x640.png` | 1280×640 | GitHub social preview (Settings > General > Social preview, uploaded by hand) |
+| `keyart-logo.svg` (rendered at 1351×760, cropped 40 px at the left and right) | `producthunt/gallery-1-cover-1270x760.png` | 1270×760 | Product Hunt gallery cover |
+| `igdb/screenshot-*.png` cropped, with a title and subtitle over lila's dark background (rendered from HTML) | `producthunt/gallery-2-towers` to `gallery-6-pieces` (`-1270x760.png`) | 1270×760 | Product Hunt gallery |
+| `../src/assets/logo.svg` (at 75% on `#2b2723`) | `producthunt/thumbnail-240x240.png` | 240×240 | Product Hunt thumbnail |
 | screenshot of the ligungi.org home (English, cookie notice dismissed) | `listings/ligungi-home-1280x800.png` | 1280×800 | websitelaunches.com |
 
 Text uses Noto Sans (SIL Open Font License, bundled in `src/assets/font`).

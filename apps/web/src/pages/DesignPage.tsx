@@ -139,6 +139,11 @@ export const DesignPage = () => {
           <Example label="Secondary (.ligungi-notice)">
             <p class="ligungi-notice">Preferences are saved in this browser.</p>
           </Example>
+          <Example label="Pointer for newcomers (.ligungi-home__newcomer)">
+            <p class="ligungi-home__newcomer">
+              New to Gungi? Start with <a href="/lessons/pieces">the first lesson</a>, or play <a href="/computer">the computer in Beginner mode</a>.
+            </p>
+          </Example>
           <Example label="Error (.error)">
             <div class="form3">
               <p class="error">That username is already taken.</p>

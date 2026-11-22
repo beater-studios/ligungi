@@ -327,6 +327,7 @@ Every public post by the bot goes first to #mod-previews: a short note saying wh
 
 | Date | Message | Content |
 |---|---|---|
+| 2026-11-22 | `1573883869130661899` | Code infrastructure (no ping): CodeQL and vet scans, CodeRabbit reviews, protected main branch and version tags, the code of conduct, 0.9.1 with a server security update; asks for stars on the GitHub repository (they help discovery, and at 10 CodeRabbit reviews every pull request on its own). |
 | 2026-11-21 | `1573850228920946830` | Server makeover (no ping): emojis, animated emojis, stickers, soundboard, player profile roles, a tidier channel list and the Server Home; tells members to pick their profile in Channels & Roles. |
 | 2026-11-21 | `1573835375187591270` | Listed on AlternativeTo and Website Launches (no ping): asks players who enjoy the site for a like, an upvote or a comment there. |
 | 2026-11-20 | `1573448207281946675` | Release 0.9.0 (pinging Updates): the server, spoken moves, sound sets, translations by volunteers, settings and menus, friendly sites, accessibility. |

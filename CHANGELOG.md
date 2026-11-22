@@ -4,6 +4,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Changed
+
+- Home: visitors who are not signed in and have not started the lessons see, in the quick game above the time controls, a line pointing to the first lesson and to the computer in Beginner mode, so they find them before joining a queue of the full game.
+
 ## [0.9.1] - 2026-11-21
 
 ### Security

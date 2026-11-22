@@ -447,6 +447,7 @@
     "noTv": "No live games right now.",
     "waiting": "{n, plural, =0 {nobody waiting} other {# waiting}}",
     "quickHint": "You join the queue and the game starts when someone picks the same time and mode.",
+    "newcomer": "New to Gungi? Start with <lesson>the first lesson</lesson>, or play <computer>the computer in Beginner mode</computer>.",
     "newTitle": "New to Gungi?",
     "openTitle": "Open games",
     "openHint": "join a game created by another player",

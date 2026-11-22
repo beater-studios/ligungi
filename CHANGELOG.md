@@ -6,6 +6,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [0.9.1] - 2026-11-21
 
+### Security
+
+- The server uses ws 8.23.0, which fixes a denial of service where a client could exhaust the server's memory by flooding it with pings.
+
 ### Changed
 
 - The FAQ says where to talk with other players (the Discord server), and bug reports and help can now go through the Discord too.

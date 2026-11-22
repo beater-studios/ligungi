@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-11-21
+
 ### Changed
 
 - The FAQ says where to talk with other players (the Discord server), and bug reports and help can now go through the Discord too.
@@ -276,7 +278,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/beater-studios/ligungi/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/beater-studios/ligungi/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/beater-studios/ligungi/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/beater-studios/ligungi/compare/v0.6.0...v0.7.0

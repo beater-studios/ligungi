@@ -2,6 +2,8 @@
 
 Thanks for wanting to help. Bug reports, rule corrections, translations and code are all welcome.
 
+Everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Before you start
 
 - **Bugs and ideas:** open an issue using one of the templates. For anything larger than a small fix, open an issue first so we can agree on the approach before you write code.
@@ -17,7 +19,7 @@ npm install
 npm run dev        # server on :4000 and site on http://localhost:5173
 ```
 
-Before opening a pull request, make sure these pass. CI runs the same checks:
+Before opening a pull request, make sure these pass. CI runs the same checks, plus CodeQL and a scan of the dependencies with [vet](https://github.com/safedep/vet), and CodeRabbit may leave review comments:
 
 ```sh
 npm run typecheck
@@ -71,6 +73,8 @@ docs: explain the free draft option
 ```
 
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+
+Pull requests are squash merged, and the commit takes the pull request title, so write the title in the same format.
 
 In the pull request:
 

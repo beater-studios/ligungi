@@ -30,7 +30,7 @@ npm run build                    # builds apps/web/dist
 
 Node and npm versions are enforced (`.nvmrc`, `engines`, `devEngines`, `engine-strict`). Never use `--force`, `--ignore-engines`, `--dangerously-allow-all-scripts` or similar flags to get past an install error.
 
-A change is not done until `npm run typecheck`, `npm test` and `npm run build` pass. CI runs the same checks plus `npm audit --omit=dev --audit-level=high`.
+A change is not done until `npm run typecheck`, `npm test` and `npm run build` pass. CI runs the same checks plus `npm audit --omit=dev --audit-level=high`, CodeQL (`.github/workflows/codeql.yml`) and vet, which flags malicious packages, serious vulnerabilities and licenses that cannot be combined with the AGPL (`.github/workflows/vet.yml`, policy in `.github/vet/policy.yml`). CodeRabbit reviews pull requests with the instructions in `.coderabbit.yaml`; keep them in line with this file.
 
 ## Game rules
 

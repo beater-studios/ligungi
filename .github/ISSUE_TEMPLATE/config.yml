@@ -6,3 +6,6 @@ contact_links:
   - name: Rules specification
     url: https://github.com/beater-studios/ligungi/blob/main/docs/rules.md
     about: How ligungi interprets the official rules, with sources.
+  - name: Ask a question or chat
+    url: https://ligungi.org/discord
+    about: Questions about the rules or the site, and talk with other players, on the Discord server (#help).

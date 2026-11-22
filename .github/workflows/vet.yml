@@ -1,0 +1,43 @@
+name: vet
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vet-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  vet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      # The pull request comment with the findings.
+      issues: write
+      pull-requests: write
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: vet
+        uses: safedep/vet-action@6247cccd1b6683a27946ea3a0d45d3865346918b # v1.1.12
+        with:
+          policy: .github/vet/policy.yml
+          # .npmrc only allows the public registry, so the lockfile must resolve there.
+          trusted-registries: https://registry.npmjs.org
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: ${{ steps.vet.outputs.report != '' }}
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: ${{ steps.vet.outputs.report }}
+          category: vet

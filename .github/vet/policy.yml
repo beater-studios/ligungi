@@ -1,0 +1,27 @@
+name: ligungi dependency policy
+description: |
+  What vet flags in the npm dependencies: known malicious packages, serious vulnerabilities and licenses that
+  cannot be combined with AGPL-3.0-or-later.
+tags:
+  - ligungi
+filters:
+  - name: malware
+    check_type: CheckTypeMalware
+    summary: A known malicious package (OSV MAL advisory)
+    value: |
+      vulns.all.exists(v, v.id.startsWith("MAL-"))
+  - name: critical-or-high-vulns
+    check_type: CheckTypeVulnerability
+    summary: A critical or high vulnerability
+    value: |
+      vulns.critical.exists(p, true) || vulns.high.exists(p, true)
+  - name: agpl-incompatible-license
+    check_type: CheckTypeLicense
+    summary: A license that cannot be combined with AGPL-3.0-or-later
+    value: |
+      licenses.exists(p, p == "GPL-2.0-only") ||
+      licenses.exists(p, p == "LGPL-2.1-only") ||
+      licenses.exists(p, p == "SSPL-1.0") ||
+      licenses.exists(p, p == "BUSL-1.1") ||
+      licenses.exists(p, p == "CC-BY-NC-4.0") ||
+      licenses.exists(p, p == "CC-BY-NC-SA-4.0")

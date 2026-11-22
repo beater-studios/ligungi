@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  # The summary goes in CodeRabbit's own comment, never into the author's pull request description.
+  high_level_summary_in_walkthrough: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+  path_filters:
+    - '!package-lock.json'
+    - '!apps/web/vendor/**'
+  path_instructions:
+    - path: '**/*'
+      instructions: |
+        Follow AGENTS.md and CONTRIBUTING.md. Code, identifiers, logs and repository docs are in English; only
+        user-facing text is translated. Comments only for a why the code does not make clear. Markdown has no hard
+        wraps and no em or en dashes.
+    - path: 'packages/engine/**'
+      instructions: |
+        The rules engine follows docs/rules.md, which follows the official 2022 rulebook, then the official
+        Universal Music FAQ. Flag any rule change without a cited source or without tests in packages/engine/test.
+        Never suggest pre-2022 fan rules, gungi.io or Komugi behavior as a source.
+    - path: 'apps/server/**'
+      instructions: |
+        Node runs the TypeScript directly, so only erasable syntax (no enum, namespace or parameter properties).
+        SQL always uses bound parameters. Errors are codes from packages/protocol/src/errors.ts. Schema changes are
+        new entries appended to MIGRATIONS in db.ts, never edits of an existing one. Do not weaken the checks in
+        app.ts (JSON content type and same origin for writes, WebSocket origin, rate limits, CSP).
+    - path: 'apps/web/src/**'
+      instructions: |
+        User-facing text comes from useT() and the locale files (en.json is the source; pt and es must follow).
+        Forms use the components in src/components/ui.tsx. Styles use lila's theme variables so light and dark
+        themes both work. lila's custom tags are lowercase and declared in src/lila-elements.d.ts.
+    - path: '**/package.json'
+      instructions: |
+        Dependencies are pinned to exact versions and new ones need the maintainer's approval. Flag ranges and any
+        new runtime dependency of apps/server besides ws.
+    - path: '.github/workflows/**'
+      instructions: |
+        Actions are pinned by commit SHA with the version in a comment. Permissions stay minimal and checkout uses
+        persist-credentials: false.
+  auto_review:
+    enabled: true
+    drafts: false
+chat:
+  auto_reply: true

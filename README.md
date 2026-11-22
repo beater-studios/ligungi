@@ -79,7 +79,7 @@ The site and the server share one version, following semver; see [CHANGELOG.md](
 
 ## Contributing
 
-Contributions are welcome: bug reports, rule corrections backed by a source, translations and code. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. To report a security issue, follow [SECURITY.md](SECURITY.md) instead of opening a public issue.
+Contributions are welcome: bug reports, rule corrections backed by a source, translations and code. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request, and follow the [Code of Conduct](CODE_OF_CONDUCT.md). To report a security issue, follow [SECURITY.md](SECURITY.md) instead of opening a public issue.
 
 ## License
 

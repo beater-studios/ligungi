@@ -5,8 +5,8 @@ The record of the ligungi Discord server: its structure, settings and the texts 
 - Server: `ligungi`, id `1573431103035940956`
 - Permanent invite: https://discord.gg/RgtNN7yXU5 (to #welcome, never expires, no use limit)
 - Created: 2026-11-20
-- Short addresses to share: https://ligungi.org/discord (a temporary redirect by the server, `SHORT_LINKS` in `packages/protocol/src/links.ts`) and https://discord.ligungi.org (a Cloudflare redirect rule to `ligungi.org/discord`, set by `deploy/cloudflare.py redirects`).
-- The invite lives in `DISCORD_INVITE` (`packages/protocol/src/links.ts`), used by the server redirect, the footer and the contact page. A new invite means changing it there and in the AutoMod allow list of the invites rule.
+- Short addresses to share: https://ligungi.org/discord (a temporary redirect by the server, `SHORT_LINKS` in `packages/protocol/src/links.ts`) and https://discord.ligungi.org (a Cloudflare redirect rule straight to the invite, set by `deploy/cloudflare.py redirects`, which reads `DISCORD_INVITE` from the code). Both go to the invite in one step; neither redirects to the other.
+- The invite lives in `DISCORD_INVITE` (`packages/protocol/src/links.ts`), used only by the server redirect; the site (footer, contact page, FAQ, account page) and the repository documents link to `discord.ligungi.org` (`DISCORD_LINK`), so links already copied keep working. A new invite means changing it there, deploying, running `deploy/cloudflare.py redirects` again, and updating the AutoMod allow list of the invites rule.
 
 ## Settings
 
@@ -77,7 +77,7 @@ Players who link their ligungi account (Account > Profile, or the Linked Roles m
 | 兵 Soldier | below 1500 | the bot (`DISCORD_ROLE_SOLDIER`) |
 | Verified player | linked account (Links tab: ligungi) | Discord's Linked Roles |
 
-The six roles exist (ids in the roles table above) and the Linked Roles fields are registered (`node src/cli.ts discord metadata`, run again only if `DISCORD_METADATA` changes). Still to do after the deploy: set the Links tab of Verified player in the app, and post a "Ranks" message in #rules explaining each rank, through #mod-previews.
+The six roles exist (ids in the roles table above) and the Linked Roles fields are registered (`node src/cli.ts discord metadata`, run again only if `DISCORD_METADATA` changes). Verified player's Links tab has ligungi with no extra requirement, so any linked account qualifies (a provisional rating is sent as 0, so a rating requirement would leave those players out). The "Ranks" message in #rules (`1574473933816729613`, an embed below the rules) explains each rank and how to link.
 
 No role but Moderator can be mentioned by members: the profile roles are not mentionable, so no one pings a whole mode or interest. A "Looking for a game" opt-in role can come later if players ask.
 
@@ -330,6 +330,12 @@ One embed each, color `#d8443f`, posted without a ping and pinned in its channel
 
 **#off-topic** (message `1573850843759910924`), "Off-topic": Anything that is not about Gungi or ligungi: other games, anime and manga, music, your day. Keep in mind: the server rules still apply here (#rules); mark HUNTER×HUNTER spoilers; no self-promotion, other servers, sites and products need a moderator's OK first; English here, Portuguese and Spanish have their own channels (#português and #español). Gungi talk is welcome too, but it finds more people in #general and #strategy.
 
+**#general** (message `1574477530084286600`), "General": Chat about Gungi and ligungi.org in English: how your games went, questions about the site, ideas, or just saying hello. Find the right place: questions about the rules in #help, positions and how to play better in #strategy, your games and studies in #share-games, suggestions and bugs in #feedback, anything else in #off-topic. Other languages have their own channels: #português and #español. Looking for a game? Post a challenge link (Play with a friend on ligungi.org), or join 🇺🇸 Lounge or Play together 1. Get a rank: link your ligungi account, see #rules. Be kind, and never ask for help in a game still being played (rule 3).
+
+**#português** (message `1574477532408057970`), "Português": the same guide in Portuguese, saying the other channels are in English, pointing to 🇧🇷 Bate-papo for a game and calling the rank "patente".
+
+**#español** (message `1574477534438096897`), "Español": the same guide in Spanish, saying the other channels are in English, pointing to 🇪🇸 Charla for a game and calling the rank "rango".
+
 **#translations** (message `1573851555608793261`), "Translations": Help bring ligungi to your language. English is the source, and Portuguese and Spanish are done. How to translate today: copy `apps/web/src/i18n/locales/en.json` to a file named after your language (`fr.json`, `pt-PT.json`), translate it and open a pull request; leave what you did not translate empty, it shows in English; a language appears on the site once 80% of it is translated. Coming in 2027: Weblate, to translate in the browser without Git, around February 2027. Full guide: Translations in CONTRIBUTING.md (linked). Starting a language? Say so here, so two people do not translate the same one; ask here too about a word, the piece names or a message you are not sure about.
 
 **#development** (message `1573851558914031626`), "Development": Talk about ligungi's code and its rules engine. Start here: the code on GitHub (AGPL-3.0-or-later), CONTRIBUTING.md (setup, checks and conventions), docs/architecture.md, docs/rules.md (from the official 2022 rulebook and FAQ), all linked. Before writing code: for anything bigger than a small fix, open an issue first, so we agree on the approach. Rule changes need a source: the rulebook page or the FAQ question. Security problems never go here: follow SECURITY.md.
@@ -348,6 +354,7 @@ Every public post by the bot goes first to #mod-previews: a short note saying wh
 
 | Date | Message | Content |
 |---|---|---|
+| 2026-11-23 | `1574473938002776114` | Release 0.9.2 (pinging Updates): rank roles and Linked Roles for linked accounts, the opponent's pieces option (thanking the #feedback suggestion), the pointer for new visitors, and the fixes (secondary buttons, tower strip, libaduk links). |
 | 2026-11-22 | `1573883869130661899` | Code infrastructure (no ping): CodeQL and vet scans, CodeRabbit reviews, protected main branch and version tags, the code of conduct, 0.9.1 with a server security update; asks for stars on the GitHub repository (they help discovery, and at 10 CodeRabbit reviews every pull request on its own). |
 | 2026-11-21 | `1573850228920946830` | Server makeover (no ping): emojis, animated emojis, stickers, soundboard, player profile roles, a tidier channel list and the Server Home; tells members to pick their profile in Channels & Roles. |
 | 2026-11-21 | `1573835375187591270` | Listed on AlternativeTo and Website Launches (no ping): asks players who enjoy the site for a like, an upvote or a comment there. |
@@ -358,6 +365,7 @@ Every public post by the bot goes first to #mod-previews: a short note saying wh
 | Date | Change |
 |---|---|
 | 2026-11-21 | Player profile roles (mode played most and what they enjoy) and their onboarding questions; default channels cut to 10, the language and project channels shown by the answers. |
+| 2026-11-23 | Pinned channel guides in #general, #português and #español (see Messages posted by the bot). No guide in the text chat of the voice channels: only people in the room see it. |
 | 2026-11-23 | Rank roles 大 General, 中 Lieutenant General, 小 Major General, 侍 Samurai, 兵 Soldier and Verified player, shown apart below Contributor; Linked Roles fields registered for the app. |
 | 2026-11-22 | Language flags in front of the language voice channels (🇺🇸 Lounge, 🇧🇷 Bate-papo, 🇪🇸 Charla). |
 | 2026-11-22 | VOICE category below COMMUNITY: Lounge, Bate-papo, Charla, Play together 1 (the old Play together) and Play together 2; the Portuguese and Spanish ones shown by the language answers. System messages found in #mod-chat and kept there. |

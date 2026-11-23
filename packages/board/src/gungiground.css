@@ -563,6 +563,16 @@
 }
 
 /*
+ * Raised by its edge, the top of a koma would cross into the square behind it, where a disc's round top barely shows:
+ * the face starts 12% lower, so the lowest piece stays inside its square.
+ */
+.gg-3d.gg-shape-koma :is(.gg-board, .gg-stage) .gg-piece::before,
+.gg-3d .gg-shape-koma :is(.gg-board, .gg-stage) .gg-piece::before,
+.gg-shape-koma .gg-3d :is(.gg-board, .gg-stage) .gg-piece::before {
+  inset: 12% 8% 0;
+}
+
+/*
  * Koma shape: a pentagon of wood pointing at the opponent, as in shogi. Put `gg-shape-koma` on an ancestor. A clipped
  * pseudo-element draws the face, so the drop shadow on the piece follows the shape; the glyph moves down into the wide
  * part and shrinks a little. Meant without the movement guides, which are laid out for a disc.

@@ -36,7 +36,7 @@ Não. É um projeto de fãs, sem afiliação oficial.
 
 ## Onde converso com outros jogadores?
 
-No nosso [servidor do Discord](discord), também em ligungi.org/discord: encontre adversários, compartilhe partidas, converse sobre estratégia e tire dúvidas das regras. Tem canais em português, inglês e espanhol.
+No nosso [servidor do Discord](discord), também em discord.ligungi.org: encontre adversários, compartilhe partidas, converse sobre estratégia e tire dúvidas das regras. Tem canais em português, inglês e espanhol.
 
 ## Encontrei um erro. Como aviso?
 

@@ -2,7 +2,7 @@
 
 ligungi is a place to play, learn and build Gungi together. We want everyone to feel welcome here, whatever their age, body, ability, ethnicity, gender identity and expression, experience, education, nationality, appearance, race, religion, sexual identity and orientation, or the language they speak.
 
-This code applies to the repository (issues, pull requests, reviews and commit comments), to the [Discord server](https://ligungi.org/discord) and to anyone speaking for ligungi elsewhere. The Discord server also has its own channel rules, which follow this code. Play on ligungi.org is covered by the site's [terms](https://ligungi.org/terms).
+This code applies to the repository (issues, pull requests, reviews and commit comments), to the [Discord server](https://discord.ligungi.org) and to anyone speaking for ligungi elsewhere. The Discord server also has its own channel rules, which follow this code. Play on ligungi.org is covered by the site's [terms](https://ligungi.org/terms).
 
 ## What we expect
 

@@ -1,4 +1,4 @@
-import { DISCORD_INVITE } from '@ligungi/protocol';
+import { DISCORD_LINK } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
 import { SOURCE_URL } from '../../source.ts';
 
@@ -25,7 +25,7 @@ export const LINKS = {
   lidraughts: 'https://lidraughts.org/',
   playstrategy: 'https://playstrategy.org/',
   libaduk: 'https://libaduk.com/',
-  discord: DISCORD_INVITE,
+  discord: DISCORD_LINK,
   alternativeTo: 'https://alternativeto.net/software/ligungi/about/',
 } as const;
 

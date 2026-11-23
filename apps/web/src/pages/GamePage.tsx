@@ -2,6 +2,7 @@ import { applyMove, legalMoves, moveToString, opposite, type Color, type Move } 
 import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type GameView } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useActivity } from '../activity.ts';
 import { api } from '../api.ts';
 import { turnNotice } from '../challenges.ts';
 import { BookmarkPanel } from '../components/BookmarkPanel.tsx';
@@ -134,6 +135,20 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
   const you = view?.you ?? null;
   const position = replay ? (live ? replay.game.position : (replay.positions[ply] ?? replay.game.position)) : null;
   const myTurn = Boolean(view && you && view.status === 'started' && position?.turn === you && live);
+  useActivity(
+    view && {
+      kind: 'game',
+      mode: view.mode,
+      status: view.status,
+      role: you ? 'player' : 'spectator',
+      ...(you ? { color: you } : {}),
+      // Anonymous players have no name to show.
+      white: view.players.white.user ? view.players.white.name : '',
+      black: view.players.black.user ? view.players.black.name : '',
+      rated: String(view.rated),
+      correspondence: String(view.daysPerMove !== null),
+    },
+  );
 
   const moves = useMemo(() => (replay && myTurn ? legalMoves(replay.game.position) : []), [replay, myTurn]);
   const premoveMoves = useMemo(() => {

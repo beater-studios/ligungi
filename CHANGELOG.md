@@ -4,6 +4,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Fixed
+
+- In the 3D view, wooden koma pieces stay inside their square: the point of your pieces and the top edge of the opponent's no longer cross into the square behind, and the far row is no longer cut by the edge of the board.
+
 ## [0.9.2] - 2026-11-23
 
 ### Added

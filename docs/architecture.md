@@ -117,6 +117,17 @@ The site is a single-page app, so `scripts/prerender.ts` runs after `vite build`
 
 The server picks the file for each request (`serveStatic` in `apps/server/src/http.ts`): `?lang=<code>` fixes the language (the version search engines index, declared by hreflang), and the plain URL follows `Accept-Language`, as the app follows the browser languages. The server offers the languages the build prerendered (the folders of `dist/pages/`). Page titles and descriptions are in the `seo` section of the locale files; a new public page goes in `PAGES` and gets its texts there.
 
+### Browser integrations
+
+Pages tell browser integrations what the player is doing through `data-activity-*` attributes on `<html>` (`src/activity.ts`), so an integration such as a PreMiD activity, which shows it on the player's Discord profile, reads machine values instead of the translated text or the layout. Other pages leave them out and are told apart by their address.
+
+| Page | Attributes |
+|---|---|
+| A game (`/<id>`) | `kind` `game`, `mode`, `status` (`started`, `ended`, `aborted`), `role` (`player` or `spectator`), `color` (the player's own, only for a player), `white` and `black` (names, empty for an anonymous player), `rated` and `correspondence` (`true` or `false`). |
+| The computer (`/computer`, once a game is set up) | `kind` `computer`, `mode`, `level` (1 to 5), `color`, `status` (`started` or `ended`). |
+
+Changing a key or a value breaks the integrations that read it.
+
 ### Languages
 
 Texts live in `src/i18n/locales/`, one nested JSON file per language, named by its language code (`pt.json` is Brazilian Portuguese). Every message is [ICU MessageFormat](https://unicode-org.github.io/icu/userguide/format_parse/messages/): plain text, `{name}` arguments, `plural` (Intl plural rules of the language) and `select`, and `<tag>…</tag>` around a part of the text that the code turns into markup (a link, bold). `src/i18n/icu.ts` is a small interpreter for that subset, with no dependency; numbers are written as the code passes them.

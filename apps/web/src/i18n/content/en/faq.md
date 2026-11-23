@@ -36,7 +36,7 @@ No. It is a fan project, not officially affiliated.
 
 ## Where can I talk with other players?
 
-On our [Discord server](discord), also at ligungi.org/discord: find opponents, share games, talk strategy and ask about the rules. It has channels in English, Portuguese and Spanish.
+On our [Discord server](discord), also at discord.ligungi.org: find opponents, share games, talk strategy and ask about the rules. It has channels in English, Portuguese and Spanish.
 
 ## I found a bug. How do I report it?
 

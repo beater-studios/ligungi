@@ -2,6 +2,7 @@ import { BOT_LEVELS, type BotLevel } from '@ligungi/bot';
 import { MODES, MODE_RULES, initialPosition, legalMoves, moveToString, opposite, parseFen, parseMove, positionProblems, repetitionKey, toFen, type Color, type Mode, type Position } from '@ligungi/engine';
 import type { ColorChoice } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useActivity } from '../activity.ts';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
 import { Checkbox, OptionCards, SubmitButton } from '../components/ui.tsx';
@@ -53,6 +54,7 @@ export const ComputerPage = () => {
   const outcome = replay.game.outcome ?? null;
   const botColor = me ? opposite(me) : null;
   const botTurn = Boolean(me && !outcome && local.ply === null && position.turn === botColor);
+  useActivity(me && { kind: 'computer', mode: local.start.mode, level: String(level), color: me, status: outcome ? 'ended' : 'started' });
 
   useEffect(() => {
     if (!botTurn || !worker.current) return;

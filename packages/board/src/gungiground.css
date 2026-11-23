@@ -925,3 +925,30 @@
 .gg-sq.gg-draw-origin {
   box-shadow: inset 0 0 0 0.2rem var(--gg-selected);
 }
+
+/*
+ * `gg-upright-opponent` on an ancestor keeps the opponent's kanji and letters upright, since the colors already tell
+ * the sides apart. What shows direction still turns: the movement guides (forward is the opponent's) and a koma's
+ * shape. Icons already stand upright. The tower panel keeps drawing every piece upright, as before.
+ */
+.gg-upright-opponent .gg-piece.gg-flipped:not(.gg-illustrated) span {
+  transform: none;
+}
+
+.gg-upright-opponent .gg-piece.gg-flipped .gg-guides {
+  transform: rotate(180deg);
+}
+
+.gg-upright-opponent .gg-shape-koma .gg-piece.gg-flipped:not(.gg-illustrated) > span,
+.gg-upright-opponent.gg-shape-koma .gg-piece.gg-flipped:not(.gg-illustrated) > span {
+  transform: translateY(-7%) scale(0.84);
+}
+
+.gg-upright-opponent .gg-inspector .gg-flipped .gg-guides {
+  transform: none;
+}
+
+.gg-upright-opponent .gg-shape-koma .gg-inspector .gg-piece.gg-flipped > span,
+.gg-upright-opponent.gg-shape-koma .gg-inspector .gg-piece.gg-flipped > span {
+  transform: translateY(7%) scale(0.84);
+}

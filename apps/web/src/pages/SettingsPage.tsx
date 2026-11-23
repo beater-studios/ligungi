@@ -9,7 +9,7 @@ import { Checkbox, ColorField, FieldRow, OptionCards, SettingRow, Toggle } from 
 import { setLanguage, themeLabel, useT, type Messages } from '../i18n/index.ts';
 import { languageName } from '../i18n/languages.ts';
 import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../looks.tsx';
-import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, BYOYOMI_COUNTS, CONFIRM_MOVES, KANJI_FONTS, LANGS, PIECE_PALETTES, PIECE_SHAPES, SOUND_SETS, SPEECH_PLACES, SPEECH_STYLES, SPOKEN_MOVES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs, type SpeechPlace } from '../prefs.ts';
+import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, BYOYOMI_COUNTS, CONFIRM_MOVES, KANJI_FONTS, LANGS, OPPONENT_PIECES, PIECE_PALETTES, PIECE_SHAPES, SOUND_SETS, SPEECH_PLACES, SPEECH_STYLES, SPOKEN_MOVES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs, type SpeechPlace } from '../prefs.ts';
 import { enableNotifications, notifyPermission } from '../notify.ts';
 import { playSound } from '../sound.ts';
 import { speakSample } from '../speech.ts';
@@ -239,6 +239,13 @@ export const SettingsPage = () => {
                 />
               </div>
             )}
+            {(current.pieceStyle === 'kanji' || current.pieceStyle === 'letters') &&
+              choice(
+                'opponentPieces',
+                s.opponentPieces,
+                OPPONENT_PIECES.map((value) => [value, value === 'turned' ? s.opponentPiecesTurned : s.opponentPiecesUpright]),
+                { help: s.opponentPiecesHelp },
+              )}
             <div class="ligungi-setting">
               {current.pieceShape === 'koma' ? (
                 <OptionCards

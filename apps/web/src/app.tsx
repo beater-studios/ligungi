@@ -45,7 +45,7 @@ import { TvPage } from './pages/TvPage.tsx';
 import { MODES, type Mode } from '@ligungi/engine';
 import { LESSON_STAGE_IDS, SHORT_LINKS, TV_CHANNELS, type TvChannel } from '@ligungi/protocol';
 import { Swatch, boardFaces, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from './looks.tsx';
-import { BOARD_THEMES, LANGS, PIECE_PALETTES, PIECE_SHAPES, THEMES, prefs, resolveLang, updatePrefs } from './prefs.ts';
+import { BOARD_THEMES, LANGS, OPPONENT_PIECES, PIECE_PALETTES, PIECE_SHAPES, THEMES, prefs, resolveLang, updatePrefs } from './prefs.ts';
 import { matchRoute, navigate, useLocation, type Route } from './router.ts';
 import { logout, session } from './session.ts';
 import { LINKS } from './i18n/content/shared.tsx';
@@ -324,6 +324,23 @@ const Dasher = () => {
                     <DasherChoice key={option} current={current.pieceStyle === option} label={styleLabel(s, option)} onPick={() => updatePrefs({ pieceStyle: option })} />
                   ))}
                 </div>
+                {(current.pieceStyle === 'kanji' || current.pieceStyle === 'letters') && (
+                  <>
+                    <p class="ligungi-dasher__group" id="dasher-opponent">
+                      {s.opponentPieces}
+                    </p>
+                    <div role="group" aria-labelledby="dasher-opponent">
+                      {OPPONENT_PIECES.map((option) => (
+                        <DasherChoice
+                          key={option}
+                          current={current.opponentPieces === option}
+                          label={option === 'turned' ? s.opponentPiecesTurned : s.opponentPiecesUpright}
+                          onPick={() => updatePrefs({ opponentPieces: option })}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
                 <p class="ligungi-dasher__group" id="dasher-colors">
                   {s.pieceColors}
                 </p>

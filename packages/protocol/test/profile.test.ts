@@ -9,6 +9,8 @@ describe('profile details', () => {
     expect(profileLinkName('bluesky', 'gon.bsky.social')).toBe('gon.bsky.social');
     expect(profileLinkUrl('lishogi', 'Killua')).toBe('https://lishogi.org/@/Killua');
     expect(profileLinkUrl('tiktok', 'gon')).toBe('https://tiktok.com/@gon');
+    expect(profileLinkUrl('libaduk', 'Killua')).toBe('https://libaduk.com/profile/Killua');
+    expect(profileLinkName('libaduk', 'https://libaduk.com/profile/Killua')).toBe('Killua');
     // Another site's address, a path or a query never gets through as a name.
     expect(profileLinkName('youtube', 'https://evil.example/@gon')).toBeNull();
     expect(profileLinkName('x', 'gon/status/1')).toBeNull();

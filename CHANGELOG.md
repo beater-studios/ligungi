@@ -4,9 +4,18 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Opponent's pieces (Settings > Preferences > Display and the Pieces menu of the quick settings, with the kanji or letters styles): turned toward the opponent, as before, or in the same direction as your own, so their kanji and letters are easier to read. The movement guides and the koma's point still turn toward the opponent, since they show where a piece moves and whose it is.
+
 ### Changed
 
 - Home: visitors who are not signed in and have not started the lessons see, in the quick game above the time controls, a line pointing to the first lesson and to the computer in Beginner mode, so they find them before joining a queue of the full game.
+
+### Fixed
+
+- Profile links to libaduk now open the player's profile (`libaduk.com/profile/<name>`); the old address led nowhere.
+- The tower strip on phones (Tower on tap: strip) no longer shows a scroll bar when a tall tower does not fit: the row still scrolls and fades at the edge.
 
 ## [0.9.1] - 2026-11-21
 

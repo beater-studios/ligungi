@@ -43,6 +43,7 @@ export interface Prefs {
   readonly pieceStyle: PieceStyle;
   readonly pieceShape: PieceShape;
   readonly kanjiFont: KanjiFont;
+  readonly opponentPieces: OpponentPieces;
   /** Piece colors, one choice per shape so switching shapes keeps each. */
   readonly discPalette: DiscPalette;
   readonly komaPalette: KomaPalette;
@@ -104,6 +105,10 @@ export type SpeechStyle = (typeof SPEECH_STYLES)[number];
 export const SPEECH_PLACES = ['online', 'computer', 'watching', 'training', 'review'] as const;
 export type SpeechPlace = (typeof SPEECH_PLACES)[number];
 
+/** The opponent's kanji and letters: turned toward them, as at a real board, or upright like the player's own. */
+export const OPPONENT_PIECES = ['turned', 'upright'] as const;
+export type OpponentPieces = (typeof OPPONENT_PIECES)[number];
+
 export const TOWER_TAPS = ['balloon', 'strip', 'panel'] as const;
 export type TowerTap = (typeof TOWER_TAPS)[number];
 
@@ -115,6 +120,7 @@ const DEFAULTS: Prefs = {
   pieceStyle: 'illustrated',
   pieceShape: 'disc',
   kanjiFont: 'system',
+  opponentPieces: 'turned',
   discPalette: 'ivory',
   komaPalette: 'wood',
   customPieces: DEFAULT_CUSTOM_PIECES,
@@ -174,6 +180,7 @@ const load = (): Prefs => {
       pieceStyle: oneOf(PIECE_STYLES, stored.pieceStyle, returning ? 'kanji' : DEFAULTS.pieceStyle),
       pieceShape: oneOf(PIECE_SHAPES, stored.pieceShape, DEFAULTS.pieceShape),
       kanjiFont: oneOf(KANJI_FONTS, stored.kanjiFont, DEFAULTS.kanjiFont),
+      opponentPieces: oneOf(OPPONENT_PIECES, stored.opponentPieces, DEFAULTS.opponentPieces),
       discPalette: oneOf(PIECE_PALETTES.disc, stored.discPalette, DEFAULTS.discPalette),
       komaPalette: oneOf(PIECE_PALETTES.koma, stored.komaPalette, DEFAULTS.komaPalette),
       customPieces: validCustomPieces(stored.customPieces),
@@ -246,7 +253,7 @@ const systemLight = window.matchMedia?.('(prefers-color-scheme: light)');
 
 /** lila themes: the default (dark) theme lives on :root, `html.light` switches to the light one. */
 const apply = () => {
-  const { theme, zoom, lang, boardTheme, boardView, customBoard, pieceShape, kanjiFont, discPalette, komaPalette, customPieces } = prefs.get();
+  const { theme, zoom, lang, boardTheme, boardView, customBoard, pieceShape, kanjiFont, opponentPieces, discPalette, komaPalette, customPieces } = prefs.get();
   const light = theme === 'light' || (theme === 'auto' && Boolean(systemLight?.matches));
   const root = document.documentElement;
   root.classList.toggle('light', light);
@@ -257,6 +264,7 @@ const apply = () => {
   for (const [property, value] of Object.entries(customBoardStyle(customBoard).vars)) root.style.setProperty(property, value);
   root.classList.toggle('gg-3d', boardView === '3d');
   root.classList.toggle('gg-shape-koma', pieceShape === 'koma');
+  root.classList.toggle('gg-upright-opponent', opponentPieces === 'upright');
   const palette = pieceShape === 'koma' ? komaPalette : discPalette;
   for (const name of ALL_PALETTES) root.classList.toggle(`gg-pieces-${name}`, name === palette);
   for (const property of Object.entries(customPieceStyle(customPieces).vars)) root.style.setProperty(...property);

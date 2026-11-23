@@ -19,6 +19,7 @@ Posted:
 | 2026-11 | r/HunterXHunter | https://www.reddit.com/r/HunterXHunter/comments/1xuyjqn/gungi_now_has_its_own_lichess_ligungiorg_free_and/ |
 | 2026-11-20 | r/abstractgames | https://www.reddit.com/r/abstractgames/comments/1y1j16l/gungi_the_stacking_strategy_game_from/ |
 | 2026-11-21 | r/WebGames | https://www.reddit.com/r/WebGames/comments/1y2e33f/ligungi_play_gungi_the_towerstacking_strategy/ |
+| 2026-11-23 | r/playmygame | https://www.reddit.com/r/playmygame/comments/1y3fe60/ligungi_an_online_version_of_gungi_the/ |
 
 The shared texts, in English:
 
@@ -36,7 +37,7 @@ Ideas to do when convenient, roughly by reach for the effort.
 | BoardGameGeek | The largest board game database. If the physical Gungi (2022) has a page, ligungi can be added as its online implementation, so people looking for the game find the site | low | Check first whether the game page exists and how BGG takes online implementations |
 | Show HN (Hacker News) | "A lichess-style site for the HUNTER×HUNTER board game, open source" suits it, and it reaches people who contribute code | low | Tried on 2026-11-20: HN is restricting Show HN from new accounts, so the account needs a few weeks of real participation first. Then post on a weekday morning (US time) and answer comments the same day |
 | itch.io | A large showcase of independent and browser games | low | A free page with the screenshots and a link to the site; the game needs the server, so no upload |
-| Reddit | r/playmygame (r/HunterXHunter, r/abstractgames and r/WebGames are done) | low | A full text post for each community, one a day, following each one's rules. Not r/opensource: since October 2026 it bars projects made with AI help, younger than a year or with a single contributor |
+| Reddit | candidates to check: r/BrowserGames, r/freegames, r/opensourcegames, r/SideProject, r/IndieGaming (r/HunterXHunter, r/abstractgames, r/WebGames and r/playmygame are done) | low | A full text post for each community, one a day, following each one's rules (r/playmygame requires its own template: title, link, platform flair after posting, a description of 100 words or more, free to play status and involvement). Not r/opensource: since October 2026 it bars projects made with AI help, younger than a year or with a single contributor |
 | Google Play, as the site wrapped in an app (Trusted Web Activity) | Reach on phones, and the store gives the age ratings (IARC) that IGDB and others ask for | medium | USD 25 one-time developer fee, plus the app wrapper and its listing |
 
 Not recommended:

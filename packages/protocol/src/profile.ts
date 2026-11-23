@@ -40,7 +40,7 @@ export const PROFILE_LINKS = {
   lichess: { group: 'games', prefix: 'lichess.org/@/', pattern: LILA_NAME },
   lishogi: { group: 'games', prefix: 'lishogi.org/@/', pattern: LILA_NAME },
   lidraughts: { group: 'games', prefix: 'lidraughts.org/@/', pattern: LILA_NAME },
-  libaduk: { group: 'games', prefix: 'libaduk.com/@/', pattern: LILA_NAME },
+  libaduk: { group: 'games', prefix: 'libaduk.com/profile/', pattern: LILA_NAME },
 } as const satisfies Record<string, { readonly group: 'social' | 'games'; readonly prefix: string; readonly pattern: RegExp }>;
 export type ProfileSite = keyof typeof PROFILE_LINKS;
 export const PROFILE_SITES = Object.keys(PROFILE_LINKS) as ProfileSite[];

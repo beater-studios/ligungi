@@ -153,6 +153,19 @@ $kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif C
   }
 }
 
+// The opponent's kanji and letters upright, as on the board (gungiground.css, gg-upright-opponent).
+.gg-upright-opponent .gg-mini-piece.flipped > span:not(:has(.gg-icon)) {
+  transform: none;
+
+  .gg-guides {
+    transform: rotate(180deg);
+  }
+}
+
+.gg-upright-opponent.gg-shape-koma .gg-mini-piece.flipped > span:not(:has(.gg-icon)) {
+  transform: translateY(-7%) scale(0.84);
+}
+
 /* Gungi board inside lila's square .main-board (round and analysis pages). */
 .main-board {
   .board-view {
@@ -8965,6 +8978,14 @@ $lesson-star: #e8a800;
     padding: 0;
     list-style: none;
     overflow-x: auto;
+    // A tower of three is wider than a phone: the row scrolls without a bar (a phone hides it anyway) and fades at the
+    // right edge to show there is more.
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   li {
@@ -8972,6 +8993,10 @@ $lesson-star: #e8a800;
     align-items: center;
     gap: 0.4rem;
     flex: none;
+
+    &:last-child {
+      padding-right: 1.5rem;
+    }
   }
 
   // The kanji follows the piece's own size, not the width of whatever container is around the strip.

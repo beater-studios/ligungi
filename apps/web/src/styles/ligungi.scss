@@ -2199,11 +2199,6 @@ body:has(main.ligungi-auth) #clinput {
     align-items: center;
     min-height: 2.75rem;
   }
-
-  .button-empty {
-    box-shadow: inset 0 0 0 1px $c-border;
-    color: $c-font-clear;
-  }
 }
 
 .ligungi-players__body {
@@ -5724,11 +5719,6 @@ $lesson-star: #e8a800;
     justify-content: center;
     min-height: 3.5rem;
   }
-
-  .button-empty {
-    box-shadow: inset 0 0 0 1px $c-border;
-    color: $c-font-clear;
-  }
 }
 
 .ligungi-home__account {
@@ -5746,10 +5736,6 @@ $lesson-star: #e8a800;
   .button {
     flex: 1 1 auto;
     text-align: center;
-  }
-
-  .button-empty {
-    box-shadow: inset 0 0 0 1px $c-border;
   }
 }
 
@@ -6743,6 +6729,15 @@ $lesson-star: #e8a800;
   background: $c-good;
 }
 
+// lila's empty button reads as plain text, worse on touch screens where there is no hover; an outline keeps it a button.
+.button.button-empty:not(.signin) {
+  box-shadow: inset 0 0 0 1px $c-border;
+}
+
+.button.button-empty:not(.signin, .button-red) {
+  color: $c-font-clear;
+}
+
 // lila's hover on an empty button is a near-white gradient, which in the light theme looks like the button vanished.
 // The selectors match lila's specificity so these rules, loaded later, win.
 .button.button-empty:not(.disabled, :disabled, [disabled]):not(.disabled):hover,
@@ -6980,12 +6975,6 @@ $lesson-star: #e8a800;
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
-  }
-
-  // lila's empty button reads as a link next to a filled one; an outline keeps it a button.
-  .button-empty {
-    box-shadow: inset 0 0 0 1px $c-border;
-    color: $c-font-clear;
   }
 }
 
@@ -9036,4 +9025,55 @@ $lesson-star: #e8a800;
     grid-template-rows: repeat(6, auto) minmax(20em, 30vh);
     grid-template-areas: 'pocket-top' 'board' 'tower' 'pocket-bot' 'kb-move' 'controls' 'tools' 'side' 'round-training' 'under' 'chat' 'uchat';
   }
+}
+
+/* ===== Discord link, on the account page ===== */
+.ligungi-discord-link {
+  h2 {
+    margin-top: 0;
+  }
+
+  h3 {
+    margin: 1.4rem 0 0.4rem;
+    font-size: 1.1em;
+    font-weight: 600;
+  }
+
+  table {
+    max-width: 36rem;
+  }
+}
+
+.ligungi-discord-link__paused {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin: 0.6rem 0;
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid $c-warn;
+  border-radius: 4px;
+  background: color-mix(in srgb, #{$c-warn} 10%, #{$c-bg-zebra});
+
+  p {
+    flex: 1 1 16rem;
+    margin: 0;
+  }
+}
+
+.ligungi-discord-link__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.6rem 0;
+}
+
+.ligungi-discord-link__help {
+  color: $c-font-dim;
+  font-size: 0.9em;
+}
+
+.ligungi-discord-link__current td {
+  font-weight: 600;
+  background: color-mix(in srgb, #{$c-primary} 10%, transparent);
 }

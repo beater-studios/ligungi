@@ -18,6 +18,7 @@ export const LINKS = {
   ofl: 'https://openfontlicense.org/',
   agpl: `${REPO}/blob/main/LICENSE`,
   cloudflarePrivacy: 'https://www.cloudflare.com/privacypolicy/',
+  discordPrivacy: 'https://discord.com/privacy',
   status: 'https://beaterstudios.betteruptime.com/',
   lichess: 'https://lichess.org/',
   lishogi: 'https://lishogi.org/',

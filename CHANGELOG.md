@@ -4,13 +4,17 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-11-23
+
 ### Added
 
+- Link your account to the community Discord server (Account > Profile): a rank role named after a piece, from your best established rating across the modes (大 General 2000+, 中 Lieutenant General 1800+, 小 Major General 1650+, 侍 Samurai 1500+, 兵 Soldier below), given and moved by the bot after each rated game, and the Verified player role through Discord's Linked Roles, which also shows your ligungi profile on Discord. A provisional rating gives no rank yet. Leaving the server puts the link on hold until you check again from the account page; unlinking removes the roles. The privacy policy explains what is shared.
 - Opponent's pieces (Settings > Preferences > Display and the Pieces menu of the quick settings, with the kanji or letters styles): turned toward the opponent, as before, or in the same direction as your own, so their kanji and letters are easier to read. The movement guides and the koma's point still turn toward the opponent, since they show where a piece moves and whose it is.
 
 ### Changed
 
 - Home: visitors who are not signed in and have not started the lessons see, in the quick game above the time controls, a line pointing to the first lesson and to the computer in Beginner mode, so they find them before joining a queue of the full game.
+- Secondary buttons (Hint, Start over, Cancel and the like) now have an outline everywhere, so they read as buttons on touch screens too instead of looking like plain text. In the lessons, Hint sits next to Start over.
 
 ### Fixed
 
@@ -295,7 +299,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/beater-studios/ligungi/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/beater-studios/ligungi/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/beater-studios/ligungi/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/beater-studios/ligungi/compare/v0.7.0...v0.8.0

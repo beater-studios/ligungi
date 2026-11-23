@@ -40,9 +40,15 @@ From the top. The bot role `ligungi` (managed, Administrator) must stay above ev
 
 | Position | Role | Id | Color | Shown apart | Permissions | Who |
 |---|---|---|---|---|---|---|
-| 17 | ligungi (bot) | `1573431786871197726` | none | no | Administrator | the bot |
-| 16 | Moderator | `1573434311749796002` | `#d8443f` | yes | manage messages and threads, timeout, kick, ban, nicknames, audit log, voice moderation, events, pin, mention everyone | moderators (the maintainer) |
-| 15 | Contributor | `1573434313847087237` | `#d9a441` | yes | none | people who contributed code, rules or translations |
+| 23 | ligungi (bot) | `1573431786871197726` | none | no | Administrator | the bot |
+| 22 | Moderator | `1573434311749796002` | `#d8443f` | yes | manage messages and threads, timeout, kick, ban, nicknames, audit log, voice moderation, events, pin, mention everyone | moderators (the maintainer) |
+| 21 | Contributor | `1573434313847087237` | `#d9a441` | yes | none | people who contributed code, rules or translations |
+| 20 | 大 General | `1574465452812406926` | `#b57edc` | yes | none | rank: best established rating 2000 or more (the bot) |
+| 19 | 中 Lieutenant General | `1574465454775476295` | `#4aa3df` | yes | none | rank: 1800 to 1999 (the bot) |
+| 18 | 小 Major General | `1574465456419639367` | `#3fb4a2` | yes | none | rank: 1650 to 1799 (the bot) |
+| 17 | 侍 Samurai | `1574465458730434640` | `#8bc34a` | yes | none | rank: 1500 to 1649 (the bot) |
+| 16 | 兵 Soldier | `1574465460299235369` | `#c27c4e` | yes | none | rank: below 1500 (the bot) |
+| 15 | Verified player | `1574465463218471055` | `#7d8590` | yes | none | linked account (Discord's Linked Roles) |
 | 14 | 🇺🇸 EN | `1573434315784851621` | none | no | none | chosen in onboarding (language) |
 | 13 | 🇧🇷 BR | `1573434318204964874` | none | no | none | chosen in onboarding (language) |
 | 12 | 🇪🇸 ES | `1573434319702204457` | none | no | none | chosen in onboarding (language) |
@@ -57,6 +63,21 @@ From the top. The bot role `ligungi` (managed, Administrator) must stay above ev
 | 3 | 🛠️ Builder | `1573845898495262760` | none | no | none | chosen in onboarding (what they enjoy): wants to help build the site |
 | 2 | 📢 Updates | `1573434321446903969` | `#3692e7` | no | none | opt in: pinged for new versions |
 | 1 | 🏆 Events | `1573434322986213519` | `#629924` | no | none | opt in: pinged for events and tournaments |
+
+### Ranks and Linked Roles
+
+Players who link their ligungi account (Account > Profile, or the Linked Roles menu of the server) get one rank role, given and moved by the bot from their best established rating across the modes (`DISCORD_TIERS` in `packages/protocol/src/discord.ts`, synced by `apps/server/src/discord.ts`). The ranks are shown apart, below Contributor, highest first; a provisional rating gives only Verified player.
+
+| Role | Rating | Given by |
+|---|---|---|
+| 大 General | 2000 or more | the bot (`DISCORD_ROLE_GENERAL`) |
+| 中 Lieutenant General | 1800 to 1999 | the bot (`DISCORD_ROLE_LIEUTENANT_GENERAL`) |
+| 小 Major General | 1650 to 1799 | the bot (`DISCORD_ROLE_MAJOR_GENERAL`) |
+| 侍 Samurai | 1500 to 1649 | the bot (`DISCORD_ROLE_SAMURAI`) |
+| 兵 Soldier | below 1500 | the bot (`DISCORD_ROLE_SOLDIER`) |
+| Verified player | linked account (Links tab: ligungi) | Discord's Linked Roles |
+
+The six roles exist (ids in the roles table above) and the Linked Roles fields are registered (`node src/cli.ts discord metadata`, run again only if `DISCORD_METADATA` changes). Still to do after the deploy: set the Links tab of Verified player in the app, and post a "Ranks" message in #rules explaining each rank, through #mod-previews.
 
 No role but Moderator can be mentioned by members: the profile roles are not mentionable, so no one pings a whole mode or interest. A "Looking for a game" opt-in role can come later if players ask.
 
@@ -337,6 +358,7 @@ Every public post by the bot goes first to #mod-previews: a short note saying wh
 | Date | Change |
 |---|---|
 | 2026-11-21 | Player profile roles (mode played most and what they enjoy) and their onboarding questions; default channels cut to 10, the language and project channels shown by the answers. |
+| 2026-11-23 | Rank roles 大 General, 中 Lieutenant General, 小 Major General, 侍 Samurai, 兵 Soldier and Verified player, shown apart below Contributor; Linked Roles fields registered for the app. |
 | 2026-11-22 | Language flags in front of the language voice channels (🇺🇸 Lounge, 🇧🇷 Bate-papo, 🇪🇸 Charla). |
 | 2026-11-22 | VOICE category below COMMUNITY: Lounge, Bate-papo, Charla, Play together 1 (the old Play together) and Play together 2; the Portuguese and Spanish ones shown by the language answers. System messages found in #mod-chat and kept there. |
 | 2026-11-22 | Guides pinned in #translations and #development, and a pinned guide post in each forum; forum tags got emojis and a moderated 📌 guide tag, and both forums 👍 as the default reaction. |

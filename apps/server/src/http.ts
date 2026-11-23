@@ -89,6 +89,12 @@ export const sendJson = (res: ServerResponse, status: number, data: unknown): vo
   res.end(body);
 };
 
+/** A temporary redirect that is never cached, for the sign-in steps that bounce between the site and another one. */
+export const redirect = (res: ServerResponse, location: string): void => {
+  res.writeHead(302, { location, 'cache-control': 'no-store' });
+  res.end();
+};
+
 export const sendText = (res: ServerResponse, status: number, text: string, type = 'text/plain'): void => {
   res.writeHead(status, { 'content-type': `${type}; charset=utf-8` });
   res.end(text);

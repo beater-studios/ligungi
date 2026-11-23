@@ -3,12 +3,24 @@ import { ApiError } from '../api.ts';
 import { Field, SubmitButton } from '../components/ui.tsx';
 import { asSentence, formatDate, useT } from '../i18n/index.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
-import { navigate } from '../router.ts';
+import { navigate, useLocation } from '../router.ts';
 import { login } from '../session.ts';
 import { useStore } from '../store.ts';
 
+/**
+ * Where to go after signing in, from `?next=`: only a path on this site, never another origin (`//host`). A server
+ * route (the Discord link) is loaded by the browser, the rest by the router.
+ */
+const nextPath = (search: string): string | null => {
+  const next = new URLSearchParams(search).get('next');
+  return next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : null;
+};
+
 export const AuthPage = ({ signup }: { signup: boolean }) => {
   const t = useT();
+  const { search } = useLocation();
+  const next = nextPath(search);
+  const keep = next ? `?next=${encodeURIComponent(next)}` : '';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   // Asked only after the password, for accounts with two-step verification on.
@@ -27,7 +39,8 @@ export const AuthPage = ({ signup }: { signup: boolean }) => {
     setError(null);
     try {
       await login(username.trim(), password, signup, needCode && !signup ? code.trim() : undefined);
-      navigate('/');
+      if (next?.startsWith('/api/')) window.location.assign(next);
+      else navigate(next ?? '/');
     } catch (err) {
       if (err instanceof ApiError && err.code === 'twoFactorRequired') setNeedCode(true);
       else if (err instanceof ApiError && err.code === 'accountSuspended') {
@@ -67,10 +80,10 @@ export const AuthPage = ({ signup }: { signup: boolean }) => {
       {pitch}
       <section class="ligungi-card ligungi-auth__card">
         <nav class="ligungi-segmented ligungi-auth__tabs" aria-label={t.auth.tabs}>
-          <a href="/login" class={signup ? '' : 'active'} aria-current={signup ? undefined : 'page'}>
+          <a href={`/login${keep}`} class={signup ? '' : 'active'} aria-current={signup ? undefined : 'page'}>
             {t.nav.signIn}
           </a>
-          <a href="/signup" class={signup ? 'active' : ''} aria-current={signup ? 'page' : undefined}>
+          <a href={`/signup${keep}`} class={signup ? 'active' : ''} aria-current={signup ? 'page' : undefined}>
             {t.nav.signUp}
           </a>
         </nav>

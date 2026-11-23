@@ -15,6 +15,7 @@ export * from './search.ts';
 export * from './activity.ts';
 export * from './notices.ts';
 export * from './links.ts';
+export * from './discord.ts';
 
 /**
  * Seconds. A Fischer clock adds `increment` after every move. A byo-yomi clock has no increment: once the main time

@@ -1,3 +1,5 @@
+import { DISCORD_TIERS, type DiscordTier } from '@ligungi/protocol';
+
 /**
  * Where the client IP comes from, for rate limiting:
  * - `none`: the TCP connection (the server faces the internet directly).
@@ -8,6 +10,25 @@
 export type TrustProxy = 'none' | 'cloudflare' | 'proxy';
 
 const TRUST_PROXY_VALUES: readonly TrustProxy[] = ['none', 'cloudflare', 'proxy'];
+
+/** Ranks given by the bot, one Discord role id per tier (see `DISCORD_TIERS`). */
+export interface DiscordBotConfig {
+  readonly token: string;
+  readonly guildId: string;
+  readonly tierRoles: Readonly<Record<DiscordTier, string>>;
+}
+
+/** The Discord link (Linked Roles), on when the app's OAuth settings and the token key are set. */
+export interface DiscordConfig {
+  readonly clientId: string;
+  readonly clientSecret: string;
+  /** Where Discord sends the player back: `https://<site>/api/discord/callback`, registered in the app. */
+  readonly redirectUri: string;
+  /** 32 bytes that encrypt the stored tokens (AES-256-GCM). */
+  readonly tokenKey: Buffer;
+  /** Without it, players still get the Linked Roles connection but no rank roles. */
+  readonly bot: DiscordBotConfig | null;
+}
 
 export interface ServerConfig {
   readonly port: number;
@@ -25,12 +46,34 @@ export interface ServerConfig {
   /** A player may claim victory once the opponent has been away this long. */
   readonly claimAfterMs: number;
   readonly now: () => number;
+  readonly discord: DiscordConfig | null;
+  /** How the server reaches Discord; tests replace it. */
+  readonly fetch: typeof fetch;
 }
 
 const parseTrustProxy = (value: string | undefined): TrustProxy => {
   const mode = (value ?? 'none') as TrustProxy;
   if (!TRUST_PROXY_VALUES.includes(mode)) throw new Error(`TRUST_PROXY must be one of: ${TRUST_PROXY_VALUES.join(', ')}`);
   return mode;
+};
+
+const TIER_ENV: Readonly<Record<DiscordTier, string>> = {
+  general: 'DISCORD_ROLE_GENERAL',
+  lieutenantGeneral: 'DISCORD_ROLE_LIEUTENANT_GENERAL',
+  majorGeneral: 'DISCORD_ROLE_MAJOR_GENERAL',
+  samurai: 'DISCORD_ROLE_SAMURAI',
+  soldier: 'DISCORD_ROLE_SOLDIER',
+};
+
+const parseDiscord = (env: NodeJS.ProcessEnv): DiscordConfig | null => {
+  const { DISCORD_CLIENT_ID: clientId, DISCORD_CLIENT_SECRET: clientSecret, DISCORD_REDIRECT_URI: redirectUri, DISCORD_TOKEN_KEY: key } = env;
+  if (!clientId || !clientSecret || !redirectUri || !key) return null;
+  const tokenKey = Buffer.from(key, 'base64');
+  if (tokenKey.length !== 32) throw new Error('DISCORD_TOKEN_KEY must be 32 bytes in base64 (openssl rand -base64 32)');
+  const roles = Object.fromEntries(DISCORD_TIERS.map((tier) => [tier.id, env[TIER_ENV[tier.id]] ?? ''])) as Record<DiscordTier, string>;
+  const { DISCORD_BOT_TOKEN: token, DISCORD_GUILD_ID: guildId } = env;
+  const bot = token && guildId && Object.values(roles).every(Boolean) ? { token, guildId, tierRoles: roles } : null;
+  return { clientId, clientSecret, redirectUri, tokenKey, bot };
 };
 
 export const loadConfig = (env: NodeJS.ProcessEnv = process.env): ServerConfig => ({
@@ -44,4 +87,6 @@ export const loadConfig = (env: NodeJS.ProcessEnv = process.env): ServerConfig =
   abortAfterMs: Number(env.ABORT_AFTER_MS ?? 60_000),
   claimAfterMs: Number(env.CLAIM_AFTER_MS ?? 30_000),
   now: Date.now,
+  discord: parseDiscord(env),
+  fetch: (input, init) => fetch(input, init),
 });

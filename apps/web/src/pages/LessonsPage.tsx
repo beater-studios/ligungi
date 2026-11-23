@@ -236,15 +236,7 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
             ))}
           </ol>
           <p class="ligungi-lesson__instruction">{text?.instruction}</p>
-          {hint ? (
-            <p class="ligungi-lesson__hint">{text?.hint}</p>
-          ) : (
-            !finished && (
-              <button type="button" class="button button-empty text" data-icon={icons.InfoCircle} onClick={() => setHint(true)}>
-                {t.lessons.hint}
-              </button>
-            )
-          )}
+          {hint && <p class="ligungi-lesson__hint">{text?.hint}</p>}
           <p class="ligungi-lesson__goal">
             {goal.kind === 'mate' ? t.lessons.mateStars : t.lessons.par(exercise.par)} · {t.lessons.moves(state.moves)}
           </p>
@@ -270,6 +262,11 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
                   <a href="/puzzles">{t.lessons.allDone}</a>
                 </p>
               ))}
+            {!hint && !finished && (
+              <button type="button" class="button button-empty text" data-icon={icons.InfoCircle} onClick={() => setHint(true)}>
+                {t.lessons.hint}
+              </button>
+            )}
             <button type="button" class="button button-empty" onClick={restart}>
               {t.lessons.restart}
             </button>

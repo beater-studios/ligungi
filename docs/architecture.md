@@ -41,9 +41,10 @@ Colors live in CSS variables (`--gg-board`, `--gg-line`, the piece faces and eve
 | `clock.ts` | Fischer or byo-yomi clock. During the draft the same player may move several times in a row, so the clock goes to "whoever is to move" instead of simply alternating. A byo-yomi clock keeps one number per side, the time until the flag falls (main time plus the periods left), resets the current period after each move, and `byoyomiState` (protocol) splits it back for display. |
 | `glicko.ts` | Glicko-2, one rating per game mode. |
 | `auth.ts`, `users.ts` | Passwords with scrypt, session cookie `HttpOnly; SameSite=Lax`, session rotation on login. Follows and leaderboard queries. |
-| `moderation.ts`, `cli.ts` | Moderators, suspensions, reports and the moderation log; the server command that grants the role (see [moderation.md](moderation.md)). |
+| `moderation.ts`, `cli.ts` | Moderators, suspensions, reports and the moderation log; the server commands that grant the role (see [moderation.md](moderation.md)) and register the Discord Linked Roles fields. |
 | `studies.ts` | Studies and their chapters. A chapter's tree is stored as JSON, checked first by `parseStudyRoot` (protocol), which replays every move with the rules and enforces the limits. |
 | `totp.ts`, `two-factor.ts` | Opt-in two-step verification: TOTP codes (RFC 6238 with Node's crypto), the stored secret and the hashed recovery codes. |
+| `discord.ts` | The optional link to the community Discord server: the OAuth sign-in, the Linked Roles connection (Verified player and the connection on the Discord profile) and the rank role the bot gives from the best established rating (`DISCORD_TIERS`). Tokens are stored encrypted (AES-256-GCM). It calls Discord only when something changed, after a rated game ends or is voided, never in the game's path; a failure is logged and the next game tries again. A player who left the Discord server (code 10007) is paused until they check again; a revoked authorization deletes the link. `cli.ts discord metadata` registers the Linked Roles fields. |
 
 ### Flow of an online game
 

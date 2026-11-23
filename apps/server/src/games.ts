@@ -56,6 +56,8 @@ export interface GamesOptions {
   readonly claimAfterMs: number;
   /** Pushes the new state of a room to its subscribers. */
   readonly broadcast: (room: GameRoom) => void;
+  /** Called after players' ratings change: a rated game ended or one was voided. */
+  readonly ratingsChanged?: (userIds: readonly string[]) => void;
 }
 
 interface GameRow {
@@ -293,6 +295,7 @@ export class Games {
     }
     room.voided = true;
     this.#db.prepare('update games set voided = 1 where id = ?').run(id);
+    this.#options.ratingsChanged?.(Object.values(room.seats).flatMap((seat) => (seat.userId ? [seat.userId] : [])));
     return room;
   }
 
@@ -903,6 +906,7 @@ export class Games {
       this.#users.saveRating(seat.userId!, room.mode, { ...updated, games: before[color].games + 1 }, true);
       seat.ratingDiff = Math.round(updated.rating) - Math.round(before[color].rating);
     }
+    this.#options.ratingsChanged?.([white.userId, black.userId]);
   }
 
   #roomFrom(row: GameRow): GameRoom {

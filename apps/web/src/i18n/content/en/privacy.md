@@ -17,6 +17,7 @@ This policy explains what data ligungi.org processes and why, in line with Brazi
 - **Profile:** the bio, the country and the usernames on other sites that you choose to fill in on the Account page. They show on your public profile, are part of your data copy and are deleted with the account. Moderators may delete a bio and links that break the terms of use.
 - **Lessons, puzzles and practice:** the stars of each lesson exercise, your puzzle rating and your tries, with the date and the result, your Puzzle Streak and Puzzle Storm results, the practice positions you finished, and the games you bookmarked with your private notes, kept on the account so your progress shows on any device. Without an account they stay in your browser only. They are part of your data copy and are deleted with the account.
 - **Studies:** the studies you create, with their title, description, visibility, chapters, moves, comments and drawings. A public study shows in the study list and an unlisted one opens for anyone with the link; a private one opens only for you, not even for the moderators. They are part of your data copy and are deleted with the account.
+- **Discord link (optional):** if you link your account to Discord on the Account page, we store your Discord id and username, the access tokens Discord gives us (encrypted) and your current rank. We send Discord your ligungi username, your best established rating, your number of rated games and your account creation date, so it can show the connection on your Discord profile and give you the matching roles on our server. The tokens only allow reading who you are on Discord and writing those fields: they give no access to your messages, servers or email. Unlinking or deleting your account removes the roles and deletes the link at once; if you revoke ligungi on Discord instead, that happens the next time we update your data there. The link is part of your data copy, never the tokens.
 - **Preferences:** language, theme, sound and board size stay in your browser (local storage) and are not sent to us.
 
 ## Why we process it (legal bases)
@@ -25,10 +26,11 @@ This policy explains what data ligungi.org processes and why, in line with Brazi
 - IP and protections: legitimate interest in keeping the site safe and running.
 - Reports and moderation: legitimate interest in keeping games fair and the site free of abuse, as the terms of use say.
 - Visit statistics: your consent, which you can withdraw at any time.
+- Discord link: your consent, given when you link the account, which you can withdraw by unlinking it.
 
 ## Who we share it with
 
-The site's traffic goes through Cloudflare, which provides a content delivery network (CDN), protection against attacks and the visit statistics, and may process technical data such as IP addresses, including outside Brazil (see [Cloudflare's policy](cloudflarePrivacy)). The site runs on a hosting provider contracted by Beater Studios. Otherwise, we only share data when the law requires it.
+The site's traffic goes through Cloudflare, which provides a content delivery network (CDN), protection against attacks and the visit statistics, and may process technical data such as IP addresses, including outside Brazil (see [Cloudflare's policy](cloudflarePrivacy)). The site runs on a hosting provider contracted by Beater Studios. Discord receives the fields described above only if you link your account to it (see [Discord's privacy policy](discordPrivacy)). Otherwise, we only share data when the law requires it.
 
 ## How long
 

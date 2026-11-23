@@ -33,6 +33,7 @@ import {
   parseSettings,
   type ClientMessage,
   type LobbyView,
+  type DiscordLinkResult,
   type Me,
   type PuzzleRun,
   type Topic,
@@ -103,6 +104,7 @@ import { ChallengeStore } from './challenges.ts';
 import type { ServerConfig } from './config.ts';
 import { openDatabase, type Db } from './db.ts';
 import { exportGame } from './export.ts';
+import { DiscordLinks } from './discord.ts';
 import { DraftExplorer } from './explorer.ts';
 import { Games, type Player } from './games.ts';
 import { randomId } from './ids.ts';
@@ -112,6 +114,7 @@ import {
   Router,
   clientIp,
   readJson,
+  redirect,
   sendError,
   sendJson,
   sendText,
@@ -171,6 +174,7 @@ export interface App {
   readonly server: Server;
   readonly db: Db;
   readonly games: Games;
+  readonly discord: DiscordLinks;
   close(): Promise<void>;
 }
 
@@ -233,11 +237,16 @@ export const createApp = (config: ServerConfig): App => {
     } else publishTv();
   };
 
+  const discord = new DiscordLinks(db, users, config.discord, config.fetch, config.now);
+  /** Discord sign-ins and checks per player and minute: each one calls Discord. */
+  const discordLimiter = new RateLimiter(10, 60_000, config.now);
+
   const games = new Games(db, users, {
     now: config.now,
     abortAfterMs: config.abortAfterMs,
     claimAfterMs: config.claimAfterMs,
     broadcast: publishGame,
+    ratingsChanged: (userIds) => discord.ratingsChanged(userIds),
   });
 
   const tv = new Tv(games, config.now);
@@ -655,10 +664,49 @@ export const createApp = (config: ServerConfig): App => {
       if (games.hasOngoing(userId)) throw new HttpError(409, 'activeGame');
       lobby.removeUser(userId);
       games.anonymizeUser(userId, ANONYMOUS_NAME);
+      discord.forget(userId);
       users.delete(userId);
       closeUserSockets(userId);
       rotateSession(ctx, null);
       sendJson(ctx.res, 200, { user: null });
+    })
+    .add('GET', '/api/discord/link', (ctx) => {
+      if (!discord.enabled) return redirect(ctx.res, '/account?discord=disabled');
+      // Discord's Linked Roles page sends people here, signed in or not.
+      if (!ctx.session.userId) return redirect(ctx.res, `/login?next=${encodeURIComponent('/api/discord/link')}`);
+      // A page visit, not a fetch: a refusal goes back to the account page instead of showing raw JSON.
+      if (!discordLimiter.allow(ctx.session.userId)) return redirect(ctx.res, '/account?discord=failed');
+      redirect(ctx.res, discord.authorizeUrl(ctx.session.userId));
+    })
+    .add('GET', '/api/discord/callback', async (ctx) => {
+      if (!discord.enabled) return redirect(ctx.res, '/account?discord=disabled');
+      const code = ctx.url.searchParams.get('code');
+      const state = ctx.url.searchParams.get('state');
+      if (!ctx.session.userId) {
+        if (state) discord.dropState(state);
+        return redirect(ctx.res, '/account?discord=failed');
+      }
+      let result: DiscordLinkResult;
+      if (code && state) result = await discord.complete(ctx.session.userId, state, code);
+      else {
+        if (state) discord.dropState(state);
+        result = ctx.url.searchParams.get('error') === 'access_denied' ? 'denied' : 'failed';
+      }
+      redirect(ctx.res, `/account?discord=${result}`);
+    })
+    .add('GET', '/api/account/discord', (ctx) => sendJson(ctx.res, 200, discord.view(requireUser(ctx))))
+    .add('POST', '/api/account/discord/check', async (ctx) => {
+      const userId = requireUser(ctx);
+      if (!discord.enabled) throw new HttpError(404, 'discordDisabled');
+      if (!discord.view(userId).link) throw new HttpError(404, 'discordNotLinked');
+      if (!discordLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
+      await discord.check(userId);
+      sendJson(ctx.res, 200, discord.view(userId));
+    })
+    .add('DELETE', '/api/account/discord', async (ctx) => {
+      const userId = requireUser(ctx);
+      await discord.unlink(userId);
+      sendJson(ctx.res, 200, discord.view(userId));
     })
     .add('GET', '/api/account/two-factor', (ctx) => {
       const userId = requireUser(ctx);
@@ -1000,6 +1048,7 @@ export const createApp = (config: ServerConfig): App => {
           recoveryCodesLeft,
         }))(twoFactor.state(userId)),
         ratings: users.ratings(userId),
+        discord: discord.exportFor(userId),
         following: users.following(userId).map((entry) => entry.name),
         followers: users.followers(userId).map((entry) => entry.name),
         notices: notices.list(userId, NOTICES_KEPT).map(({ kind, actor, subject, ref, createdAt, read }) => ({ kind, player: actor, subject, ref, date: iso(createdAt), read })),
@@ -1668,6 +1717,7 @@ export const createApp = (config: ServerConfig): App => {
     server,
     db,
     games,
+    discord,
     close: () =>
       new Promise<void>((resolve) => {
         closing = true;
@@ -1678,8 +1728,11 @@ export const createApp = (config: ServerConfig): App => {
         wss.close();
         server.close(() => {
           games.close();
-          db.close();
-          resolve();
+          // A sync still talking to Discord writes its result before the database closes.
+          void discord.idle().then(() => {
+            db.close();
+            resolve();
+          });
         });
         server.closeAllConnections();
       }),

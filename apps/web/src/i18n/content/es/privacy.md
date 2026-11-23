@@ -17,6 +17,7 @@ Esta política explica qué datos trata ligungi.org y por qué, de acuerdo con l
 - **Perfil:** la bio, el país y los nombres de usuario en otros sitios que elijas completar en la página de la Cuenta. Aparecen en tu perfil público, forman parte de la copia de tus datos y se borran con la cuenta. La moderación puede borrar la bio y los enlaces que incumplan los términos de uso.
 - **Lecciones, puzzles y práctica:** las estrellas de cada ejercicio de las lecciones, tu puntuación de puzzles y tus intentos, con la fecha y el resultado, tus resultados de Puzzle Streak y Puzzle Storm, las posiciones de práctica que terminaste y las partidas que marcaste como favoritas, con tus notas privadas, guardados en la cuenta para que el progreso aparezca en cualquier dispositivo. Sin cuenta, quedan solo en tu navegador. Forman parte de la copia de tus datos y se borran con la cuenta.
 - **Estudios:** los estudios que creas, con el título, la descripción, la visibilidad, los capítulos, las jugadas, los comentarios y los dibujos. Un estudio público aparece en la lista de estudios y uno no listado se abre para quien tenga el enlace; uno privado solo se abre para ti, ni la moderación lo ve. Forman parte de la copia de tus datos y se borran con la cuenta.
+- **Conexión con Discord (opcional):** si conectas tu cuenta a Discord en la página de la cuenta, guardamos tu id y nombre de usuario en Discord, los tokens de acceso que Discord nos da (cifrados) y tu rango actual. Enviamos a Discord tu nombre de usuario en ligungi, tu mejor rating establecido, tu número de partidas rated y la fecha de creación de la cuenta, para que muestre la conexión en tu perfil de Discord y te dé los roles correspondientes en nuestro servidor. Los tokens solo permiten leer quién eres en Discord y escribir esos datos: no dan acceso a tus mensajes, servidores ni correo. Desconectar o eliminar tu cuenta quita los roles y borra la conexión en el momento; si en cambio revocas ligungi en Discord, eso ocurre la próxima vez que actualicemos tus datos allí. La conexión es parte de tu copia de los datos, nunca los tokens.
 - **Preferencias:** idioma, tema, sonido y tamaño del tablero quedan solo en tu navegador (almacenamiento local) y no se nos envían.
 
 ## Por qué los tratamos (bases legales)
@@ -25,10 +26,11 @@ Esta política explica qué datos trata ligungi.org y por qué, de acuerdo con l
 - IP y protecciones: interés legítimo en mantener el sitio seguro y en funcionamiento.
 - Denuncias y moderación: interés legítimo en mantener las partidas justas y el sitio libre de abusos, como dicen los términos de uso.
 - Estadísticas de visitas: tu consentimiento, que puedes retirar en cualquier momento.
+- Conexión con Discord: tu consentimiento, dado al conectar la cuenta, que puedes retirar desconectándola.
 
 ## Con quién los compartimos
 
-El tráfico del sitio pasa por Cloudflare, que ofrece una red de distribución de contenido (CDN), protección contra ataques y las estadísticas de visitas, y puede tratar datos técnicos, como la IP, incluso fuera de Brasil (mira la [política de Cloudflare](cloudflarePrivacy)). El sitio funciona en un proveedor de alojamiento contratado por Beater Studios. Fuera de eso, solo compartimos datos si la ley lo exige.
+El tráfico del sitio pasa por Cloudflare, que ofrece una red de distribución de contenido (CDN), protección contra ataques y las estadísticas de visitas, y puede tratar datos técnicos, como la IP, incluso fuera de Brasil (mira la [política de Cloudflare](cloudflarePrivacy)). El sitio funciona en un proveedor de alojamiento contratado por Beater Studios. Discord recibe los datos descritos arriba solo si conectas tu cuenta a él (consulta la [política de privacidad de Discord](discordPrivacy)). Fuera de eso, solo compartimos datos si la ley lo exige.
 
 ## Por cuánto tiempo
 

@@ -108,6 +108,8 @@ export const ERROR_MESSAGES = {
   invalidFollowPolicy: 'Opção de seguidores inválida.',
   invalidFilter: 'Filtro inválido.',
   invalidSearch: 'Busca inválida: confira os campos.',
+  discordDisabled: 'A ligação com o Discord não está disponível neste site.',
+  discordNotLinked: 'Sua conta não está ligada ao Discord.',
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

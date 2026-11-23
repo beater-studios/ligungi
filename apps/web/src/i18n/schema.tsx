@@ -73,6 +73,13 @@ export const SCHEMA = {
   'consent.text': rich<[]>({ privacy: internal('/privacy') }),
 
   'account.bioHelp': text<[used: number, max: number]>('used', 'max'),
+  'account.discord.linked': text<[name: string]>('name'),
+  'account.discord.rank': text<[rank: string]>('rank'),
+  'account.discord.verified': text<[role: string]>('role'),
+  'account.discord.ranksHelp': text<[role: string]>('role'),
+  'account.discord.rangeFrom': text<[min: string]>('min'),
+  'account.discord.rangeBetween': text<[min: string, max: string]>('min', 'max'),
+  'account.discord.rangeBelow': text<[max: string]>('max'),
   'account.sessionDates': text<[since: string, active: string]>('since', 'active'),
   'account.twoFactorOn': text<[left: number]>('left'),
   'account.twoFactorSignedOut': text<[n: number]>('n'),

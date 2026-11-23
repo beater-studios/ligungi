@@ -299,6 +299,21 @@ const MIGRATIONS = [
   );
   create index notices_user on notices(user_id, id);
   `,
+  `
+  create table discord_links (
+    user_id text primary key references users(id) on delete cascade,
+    discord_id text not null unique,
+    discord_name text not null,
+    access_token text not null,
+    refresh_token text not null,
+    expires_at integer not null,
+    tier text,
+    metadata text,
+    paused integer not null default 0,
+    linked_at integer not null,
+    synced_at integer
+  );
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

@@ -62,6 +62,13 @@ Server environment variables:
 | `CLOUDFLARE_WEB_ANALYTICS` | `false` | `true` lets Cloudflare Web Analytics' beacon through the CSP. |
 | `ABORT_AFTER_MS` | `60000` | Time for the first move before the game is aborted. |
 | `CLAIM_AFTER_MS` | `30000` | Time the opponent must be away before victory can be claimed. |
+| `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | (none) | The Discord application's OAuth2 credentials, for linking accounts to Discord. Without them (or the two below) the feature is off. |
+| `DISCORD_REDIRECT_URI` | (none) | `https://<site>/api/discord/callback`, registered as a redirect in the Discord application. |
+| `DISCORD_TOKEN_KEY` | (none) | 32 random bytes in base64 (`openssl rand -base64 32`) that encrypt the stored Discord tokens. Changing it drops every link's tokens. |
+| `DISCORD_BOT_TOKEN`, `DISCORD_GUILD_ID` | (none) | The bot and the server where it gives the rank roles. Optional: without them players still get the Linked Roles connection. |
+| `DISCORD_ROLE_GENERAL`, `DISCORD_ROLE_LIEUTENANT_GENERAL`, `DISCORD_ROLE_MAJOR_GENERAL`, `DISCORD_ROLE_SAMURAI`, `DISCORD_ROLE_SOLDIER` | (none) | The role id of each rank (`DISCORD_TIERS`). All five are needed for the bot to give ranks. |
+
+Linking accounts to Discord is optional: set the Discord variables above, add the redirect URI and the Linked Roles verification URL (`https://<site>/api/discord/link`) in the Discord application, then register the Linked Roles fields once with `node src/cli.ts discord metadata` (run in `apps/server`, with the same variables). The bot's role must sit above the rank roles. See [docs/community/discord.md](docs/community/discord.md).
 
 Visit statistics are optional: build the site with `VITE_CF_ANALYTICS_TOKEN` (the public token of a Cloudflare Web Analytics site set up for manual install) and run the server with `CLOUDFLARE_WEB_ANALYTICS=true`. The site then asks for consent and only loads the beacon after the visitor accepts; without the token there is no notice and no analytics.
 

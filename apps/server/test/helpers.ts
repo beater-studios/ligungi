@@ -24,6 +24,8 @@ export const startServer = async (overrides: Partial<ServerConfig> = {}): Promis
     abortAfterMs: 60_000,
     claimAfterMs: 30_000,
     now: Date.now,
+    discord: null,
+    fetch: () => Promise.reject(new Error('no network in tests')),
     ...overrides,
   });
   await new Promise<void>((resolve) => app.server.listen(0, '127.0.0.1', resolve));

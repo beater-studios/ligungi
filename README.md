@@ -68,7 +68,7 @@ Server environment variables:
 | `DISCORD_BOT_TOKEN`, `DISCORD_GUILD_ID` | (none) | The bot and the server where it gives the rank roles. Optional: without them players still get the Linked Roles connection. |
 | `DISCORD_ROLE_GENERAL`, `DISCORD_ROLE_LIEUTENANT_GENERAL`, `DISCORD_ROLE_MAJOR_GENERAL`, `DISCORD_ROLE_SAMURAI`, `DISCORD_ROLE_SOLDIER` | (none) | The role id of each rank (`DISCORD_TIERS`). All five are needed for the bot to give ranks. |
 
-Linking accounts to Discord is optional: set the Discord variables above, add the redirect URI and the Linked Roles verification URL (`https://<site>/api/discord/link`) in the Discord application, then register the Linked Roles fields once with `node src/cli.ts discord metadata` (run in `apps/server`, with the same variables). The bot's role must sit above the rank roles. See [docs/community/discord.md](docs/community/discord.md).
+Linking accounts to Discord is optional: set the Discord variables above, add the redirect URI and the Linked Roles verification URL (`https://<site>/api/discord/link`) in the Discord application, then register the Linked Roles fields once with `node src/cli.ts discord metadata` (run in `apps/server`, with the same variables). The bot's role must sit above the rank roles. See Discord ranks in [docs/architecture.md](docs/architecture.md#discord-ranks).
 
 Visit statistics are optional: build the site with `VITE_CF_ANALYTICS_TOKEN` (the public token of a Cloudflare Web Analytics site set up for manual install) and run the server with `CLOUDFLARE_WEB_ANALYTICS=true`. The site then asks for consent and only loads the beacon after the visitor accepts; without the token there is no notice and no analytics.
 
@@ -92,6 +92,8 @@ Contributions are welcome: bug reports, rule corrections backed by a source, tra
 
 ligungi is made by [Beater Studios](https://beaterstudios.com/).
 
-Copyright (C) 2026 Beater Studios. Open source under the [GNU AGPL-3.0](LICENSE) (or any later version), like lichess and its derivatives. The files in `apps/web/vendor/lila` remain copyright of the lila authors, under the same license (see their [NOTICE](apps/web/vendor/lila/NOTICE.md)).
+Copyright (C) 2026 Beater Studios. Open source under the [GNU AGPL-3.0](LICENSE) (or any later version), like lichess and its derivatives. The files in `apps/web/vendor/lila` remain copyright of the lila authors, under the same license (see their [NOTICE](apps/web/vendor/lila/NOTICE.md)). The documentation (this README, `docs/` and the other guides) and the texts of the site (`apps/web/src/i18n`) are under the same license, except the [code of conduct](CODE_OF_CONDUCT.md), adapted from the Contributor Covenant under CC BY 4.0.
+
+The sounds, fonts and images have their own free licenses, listed next to them: [sounds](apps/web/src/assets/sound/README.md), [fonts](apps/web/src/assets/font/README.md), [kanji fonts](apps/web/src/assets/font/kanji/README.md), [flags](apps/web/src/assets/flags/README.md) and [brand images](apps/web/brand/README.md).
 
 Gungi and HUNTER×HUNTER belong to their owners (Yoshihiro Togashi, Shueisha, Universal Music). ligungi is not affiliated with them and uses no characters, artwork or logos from the series.

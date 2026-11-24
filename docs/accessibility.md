@@ -1,6 +1,6 @@
 # Accessibility and blind mode
 
-ligungi should be playable without seeing the board, as lichess is. The blind mode below (the screen reader mode) is built on every screen of the map. What is left is on the [roadmap](roadmap.md): a test with a player who uses a screen reader every day, and an automated check. This document keeps it from falling behind: it holds the design, a map of every screen with what blind mode needs there, and the checklist for anyone adding or changing a screen.
+ligungi should be playable without seeing the board, as lichess is. The blind mode below (the screen reader mode) is built on every screen of the map. An automated check (axe) runs on every screen in the tests. What is left is on the [roadmap](roadmap.md): a test with a player who uses a screen reader every day, and the fixes it brings. This document keeps it from falling behind: it holds the design, a map of every screen with what blind mode needs there, and the checklist for anyone adding or changing a screen.
 
 **Rule:** a change that adds a screen, or changes how one is played or read, updates the screen map below in the same change (see AGENTS.md).
 

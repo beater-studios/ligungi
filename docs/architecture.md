@@ -75,6 +75,20 @@ Sending the full view on every change is simpler than sending diffs and solves r
 - Moderation: moderators are set only with the server command, never from the site, and cannot act on each other. Every moderator action is logged with its reason. Suspended accounts cannot sign in and lose their sessions at once. Details in [moderation.md](moderation.md).
 - Strict CSP on the site: `default-src 'self'`, `connect-src 'self'` (no WebSocket to other hosts), no plugins, no framing.
 
+### Discord ranks
+
+Linking a Discord account is optional and off unless the Discord variables of the README are set. A linked player gets one rank role from their best established rating across the modes (`DISCORD_TIERS` in `packages/protocol/src/discord.ts`), given and moved by the bot after each rated game; a provisional rating gives no rank.
+
+| Role | Rating | Variable with its role id |
+|---|---|---|
+| 大 General | 2000 or more | `DISCORD_ROLE_GENERAL` |
+| 中 Lieutenant General | 1800 to 1999 | `DISCORD_ROLE_LIEUTENANT_GENERAL` |
+| 小 Major General | 1650 to 1799 | `DISCORD_ROLE_MAJOR_GENERAL` |
+| 侍 Samurai | 1500 to 1649 | `DISCORD_ROLE_SAMURAI` |
+| 兵 Soldier | below 1500 | `DISCORD_ROLE_SOLDIER` |
+
+The five roles are created by hand on the server, below the bot's own role (Discord only lets a bot manage roles under its own). A sixth role, for every linked account, comes from Discord's Linked Roles: register the fields once with `node src/cli.ts discord metadata` (again only if `DISCORD_METADATA` changes), then give that role a Links requirement on the application with no extra condition, since a provisional rating is sent as 0 and a rating condition would leave those players out.
+
 ## Site (`apps/web`)
 
 Preact with its own router and a minimal store (`store.ts`). A single WebSocket with reconnection and per-topic subscription counting (`socket.ts`). The computer opponent runs in a Web Worker so it does not freeze the interface; levels 4 and 5 search with a time budget per move (`SEARCH_LIMITS` in `packages/bot`), using pseudo-legal moves inside the tree, where a move that exposes the own Marshal loses to the capture that follows. Preferences (language, piece names, theme, board theme and custom board colors, piece shape, style, kanji typeface and colors, sound, coordinates, animation) are kept in `localStorage`. The four kanji typefaces are OFL fonts cut down to the 14 piece kanji (a few KB each, in `src/assets/font/kanji`, credited in its README), so the pieces look the same on every device.

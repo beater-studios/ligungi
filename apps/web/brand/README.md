@@ -36,4 +36,8 @@ Images for listings outside the site are rendered to the git-ignored `/media` fo
 | `../src/assets/logo.svg` (at 75% on `#2b2723`) | `producthunt/thumbnail-240x240.png` | 240×240 | Product Hunt thumbnail |
 | screenshot of the ligungi.org home (English, cookie notice dismissed) | `listings/ligungi-home-1280x800.png` | 1280×800 | websitelaunches.com |
 
-Text uses Noto Sans (SIL Open Font License, bundled in `src/assets/font`).
+Text uses Noto Sans, bundled in `src/assets/font` (license in its [README](../src/assets/font/README.md)).
+
+## License
+
+The images in this folder, the logo (`../src/assets/logo.svg`), the PNGs rendered from them and the screenshots of the site in `../public/screenshots` are original work by Beater Studios, under the license of ligungi (AGPL-3.0-or-later, see [LICENSE](../../../LICENSE)).

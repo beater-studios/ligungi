@@ -1,4 +1,4 @@
-/** The invite to the community Discord server (see docs/community/discord.md). */
+/** The invite to the community Discord server. */
 export const DISCORD_INVITE = 'https://discord.gg/RgtNN7yXU5';
 
 /**

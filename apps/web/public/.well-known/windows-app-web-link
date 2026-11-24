@@ -1,0 +1,7 @@
+[
+  {
+    "packageFamilyName": "BeaterStudios.ligungi_8j5hcs6k7sn16",
+    "paths": ["*"],
+    "excludePaths": ["/api/*", "/discord", "/offline/*"]
+  }
+]

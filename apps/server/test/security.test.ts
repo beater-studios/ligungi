@@ -197,6 +197,8 @@ describe('static files', () => {
     writeFileSync(join(staticDir, 'favicon.svg'), '<svg/>');
     writeFileSync(join(staticDir, 'sw.js'), 'x');
     writeFileSync(join(staticDir, 'shot.webp'), 'x');
+    mkdirSync(join(staticDir, '.well-known'));
+    writeFileSync(join(staticDir, '.well-known', 'windows-app-web-link'), '[]');
     writeFileSync(join(staticDir, 'assets', 'Move-abc123.ogg'), 'x');
     writeFileSync(join(staticDir, 'assets', 'index-abc123.js'), 'x');
     server = await startServer({ staticDir });
@@ -211,6 +213,7 @@ describe('static files', () => {
     expect((await head('/favicon.svg'))[0]).toBe('public, max-age=604800, stale-while-revalidate=2592000');
     expect(await head('/sw.js')).toEqual(['no-cache', 'text/javascript; charset=utf-8']);
     expect((await head('/shot.webp'))[1]).toBe('image/webp');
+    expect(await head('/.well-known/windows-app-web-link')).toEqual(['public, max-age=86400', 'application/json']);
   });
 });
 

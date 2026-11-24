@@ -10,6 +10,7 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 |---|---|---|---|---|
 | Password recovery by email | Needs an outgoing email service | M | Medium | lichess, internal, lishogi |
 | Captcha instead of the per-username login lockout | Today 20 wrong passwords lock an account for 15 minutes, which an attacker can abuse | M | Low | internal |
+| Block a player: no challenges, follows, pairing in the lobby or (once they exist) messages and chat from them, managed from their profile and a list in the account | Reports reach the moderators, but a player has no way to stop one person on their own; the privacy settings only limit everyone at once. Close to required once chat or messages come, and it would change the Microsoft Store age rating answers (IARC), so the questionnaire is answered again | M | Medium | lichess |
 
 ## Operations
 

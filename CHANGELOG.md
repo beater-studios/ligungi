@@ -4,6 +4,12 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.4] - 2026-11-24
+
+### Added
+
+- The site is ready for the ligungi app for Windows, coming to the Microsoft Store: once it is installed, links to ligungi.org open in the app.
+
 ## [0.9.3] - 2026-11-24
 
 ### Added
@@ -314,7 +320,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.3...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.4...HEAD
+[0.9.4]: https://github.com/beater-studios/ligungi/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/beater-studios/ligungi/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/beater-studios/ligungi/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/beater-studios/ligungi/compare/v0.9.0...v0.9.1

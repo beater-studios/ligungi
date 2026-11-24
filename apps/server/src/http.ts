@@ -143,6 +143,11 @@ const MIME: Record<string, string> = {
   '.xml': 'application/xml; charset=utf-8',
 };
 
+/** Files whose fixed name has no extension. */
+const NAMED_MIME: Record<string, string> = {
+  '/.well-known/windows-app-web-link': 'application/json',
+};
+
 /** A language code of the web app: the name of its locale file and of its folder of prerendered pages. */
 type Lang = string;
 
@@ -234,7 +239,7 @@ export const serveStatic = (
     if (!fixed) headers['vary'] = 'Accept-Language';
   }
   res.writeHead(200, {
-    'content-type': MIME[extname(file)] ?? 'application/octet-stream',
+    'content-type': NAMED_MIME[pathname] ?? MIME[extname(file)] ?? 'application/octet-stream',
     'content-length': stats.size,
     'cache-control': cacheControl(pathname, file),
     ...headers,
@@ -256,6 +261,7 @@ const cacheControl = (pathname: string, file: string): string => {
   if (extname(file) === '.html') return 'no-cache, no-transform';
   // Generated on every build under fixed names, so a deploy must show up within a day.
   if (['.txt', '.xml', '.webmanifest'].includes(extname(file))) return 'public, max-age=86400';
+  if (pathname in NAMED_MIME) return 'public, max-age=86400';
   return 'public, max-age=604800, stale-while-revalidate=2592000';
 };
 

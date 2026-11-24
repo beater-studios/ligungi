@@ -1501,7 +1501,7 @@ export const createApp = (config: ServerConfig): App => {
    * the WebSocket. Other reads get a throwaway session, so crawlers and scripts do not fill the database.
    */
   const resolveSession = (req: IncomingMessage, res: ServerResponse, url: URL, ip: string): Session => {
-    const existing = sessions.get(parseCookies(req.headers.cookie)[SESSION_COOKIE]);
+    const existing = sessions.get(parseCookies(req.headers.cookie).get(SESSION_COOKIE));
     if (existing) return existing;
     if (req.method === 'GET' && url.pathname !== '/api/me') return { id: `ephemeral:${randomId(24)}`, userId: null };
     if (!sessionLimiter.allow(ip)) throw new HttpError(429, 'tooManyAttempts');
@@ -1568,7 +1568,7 @@ export const createApp = (config: ServerConfig): App => {
   server.on('upgrade', (req, socket, head) => {
     try {
       const url = new URL(req.url ?? '/', 'http://localhost');
-      const session = sessions.get(parseCookies(req.headers.cookie)[SESSION_COOKIE]);
+      const session = sessions.get(parseCookies(req.headers.cookie).get(SESSION_COOKIE));
       if (url.pathname !== '/ws' || !session || !sameOrigin(req)) {
         socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
         socket.destroy();

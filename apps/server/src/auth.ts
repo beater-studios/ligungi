@@ -55,14 +55,14 @@ export const verifyPassword = async (password: string, stored: string): Promise<
 export const needsRehash = (stored: string): boolean => stored.split('$')[1] !== formatParams(SCRYPT_PARAMS);
 
 /** Malformed values are skipped instead of throwing. */
-export const parseCookies = (header: string | undefined): Record<string, string> => {
-  // No prototype, so a cookie named like `__proto__` is only a key.
-  const cookies: Record<string, string> = Object.create(null) as Record<string, string>;
+export const parseCookies = (header: string | undefined): ReadonlyMap<string, string> => {
+  // A Map, so a cookie named like `__proto__` is only a key.
+  const cookies = new Map<string, string>();
   for (const part of header?.split(';') ?? []) {
     const index = part.indexOf('=');
     if (index <= 0) continue;
     const value = safeDecode(part.slice(index + 1).trim());
-    if (value !== null) cookies[part.slice(0, index).trim()] = value;
+    if (value !== null) cookies.set(part.slice(0, index).trim(), value);
   }
   return cookies;
 };

@@ -18,9 +18,9 @@ describe('ids and cookies', () => {
 
   it('keeps a cookie named like an object property as a plain key', () => {
     const cookies = parseCookies('__proto__=x; constructor=y; sid=abc');
-    expect(cookies['sid']).toBe('abc');
-    expect(cookies['__proto__']).toBe('x');
-    expect(Object.getPrototypeOf(cookies)).toBeNull();
+    expect(cookies.get('sid')).toBe('abc');
+    expect(cookies.get('__proto__')).toBe('x');
+    expect(cookies.get('constructor')).toBe('y');
   });
 });
 

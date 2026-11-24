@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-11-24
+
 ### Added
 
 - A notice at the bottom of the page when the internet connection drops, which stays until it comes back and then says so; games and other live pages reconnect at once.
@@ -312,7 +314,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.3...HEAD
+[0.9.3]: https://github.com/beater-studios/ligungi/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/beater-studios/ligungi/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/beater-studios/ligungi/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/beater-studios/ligungi/compare/v0.8.0...v0.9.0

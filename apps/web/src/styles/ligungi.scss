@@ -2100,6 +2100,34 @@ body:has(main.ligungi-auth) #clinput {
 }
 
 /* ===== Cookie notice and preferences (components/Consent.tsx) ===== */
+.ligungi-toast {
+  position: fixed;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  z-index: $z-modal-alert-200;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+
+  &__box {
+    max-width: 30rem;
+    padding: 0.7rem 1rem;
+    background: $c-bg-box;
+    border: $border;
+    border-inline-start: 4px solid;
+    border-radius: $box-radius-size;
+    @extend %box-shadow;
+
+    &--bad {
+      border-inline-start-color: $c-bad;
+    }
+
+    &--good {
+      border-inline-start-color: $c-good;
+    }
+  }
+}
+
 .ligungi-consent {
   position: fixed;
   inset-inline: 1rem;

@@ -3,9 +3,11 @@
  * - pages/<lang>/<slug>.html: a public page fixed to one language (served for `?lang=`),
  * - pages/<lang>/<slug>.auto.html: the same page for the plain URL, whose language comes from the browser,
  * - pages/<lang>/shell.html: the head for every other route (profiles, games), with an empty body,
+ * - offline/<lang>.html and sw.js: the "no connection" page and the service worker that shows it,
  * - sitemap.xml, robots.txt, llms.txt and llms-full.txt.
  * The server picks the file (apps/server/src/http.ts); the app takes over the markup when it starts.
  */
+import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -75,6 +77,7 @@ interface Prerender {
   readonly pageUrl: (path: string, lang?: Lang) => string;
   readonly renderPage: (page: Page, lang: Lang, fixedLang: boolean) => Rendered;
   readonly renderShell: (lang: Lang) => Rendered;
+  readonly offlineTexts: (lang: Lang) => { lang: string; pageTitle: string; pageText: string; retry: string };
 }
 
 installBrowserShims();
@@ -105,6 +108,57 @@ for (const lang of app.LANGS) {
   writeFileSync(join(dir, 'shell.html'), fill(app.renderShell(lang)));
 }
 
+const escapeHtml = (text: string): string =>
+  text.replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char] ?? char);
+
+// Self-contained, since nothing else is cached: inline styles and logo, lila's colors, the theme from the system.
+const logo = readFileSync(join(root, 'public', 'favicon.svg'), 'utf8').trim();
+const offlinePage = (lang: Lang): string => {
+  const t = app.offlineTexts(lang);
+  return `<!doctype html>
+<html lang="${t.lang}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>${escapeHtml(t.pageTitle)} · ligungi</title>
+    <style>
+      :root { color-scheme: dark; --bg: #161512; --box: #262421; --text: #bababa; --strong: #e2e2e2; --accent: #3692e7; }
+      @media (prefers-color-scheme: light) { :root { color-scheme: light; --bg: #edebe9; --box: #fff; --text: #4d4d4d; --strong: #222; --accent: #1b78d0; } }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, sans-serif; }
+      main { max-width: 26rem; margin: 1rem; padding: 2rem; background: var(--box); border-radius: 6px; text-align: center; }
+      .logo svg { width: 4rem; height: 4rem; }
+      h1 { margin: 0.5rem 0; color: var(--strong); font-size: 1.5rem; font-weight: 500; }
+      a { display: inline-block; margin-top: 1rem; padding: 0.6rem 1.4rem; border-radius: 4px; background: var(--accent); color: #fff; text-decoration: none; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="logo" aria-hidden="true">${logo}</div>
+      <h1>${escapeHtml(t.pageTitle)}</h1>
+      <p>${escapeHtml(t.pageText)}</p>
+      <a href="">${escapeHtml(t.retry)}</a>
+    </main>
+  </body>
+</html>
+`;
+};
+const offlineDir = join(dist, 'offline');
+rmSync(offlineDir, { recursive: true, force: true });
+mkdirSync(offlineDir, { recursive: true });
+const offlineHash = createHash('sha256');
+for (const lang of app.LANGS) {
+  const html = offlinePage(lang);
+  offlineHash.update(html);
+  writeFileSync(join(offlineDir, `${lang}.html`), html);
+}
+// The cache name follows the pages, so the worker (and its cache) changes only when a page does.
+const BUILD_LINE = /^const BUILD = .*;$/m;
+const worker = readFileSync(join(root, 'scripts', 'sw.js'), 'utf8');
+if (!BUILD_LINE.test(worker)) throw new Error('scripts/sw.js lost its BUILD line');
+const build = { cache: `ligungi-offline-${offlineHash.digest('hex').slice(0, 12)}`, langs: app.LANGS };
+writeFileSync(join(dist, 'sw.js'), worker.replace(BUILD_LINE, () => `const BUILD = ${JSON.stringify(build)};`));
+
 const alternates = (path: string): string =>
   [
     ...app.LANGS.map((lang) => `<xhtml:link rel="alternate" hreflang="${app.localeOf(lang)}" href="${app.pageUrl(path, lang)}"/>`),
@@ -133,6 +187,7 @@ writeFileSync(
     'Disallow: /account',
     'Disallow: /friends',
     'Disallow: /design',
+    'Disallow: /offline/',
     '',
     `Sitemap: ${app.SITE_URL}/sitemap.xml`,
     '',

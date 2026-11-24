@@ -50,6 +50,16 @@ export const renderPage = (page: Page, lang: Lang, fixedLang: boolean): Rendered
   };
 };
 
+/** The texts of the "no connection" page that the service worker shows when a page cannot load. */
+export const offlineTexts = (lang: Lang): OfflineTexts => ({ lang: localeOf(lang), ...messagesFor(lang).connection });
+
+export interface OfflineTexts {
+  readonly lang: string;
+  readonly pageTitle: string;
+  readonly pageText: string;
+  readonly retry: string;
+}
+
 /** Head of routes that are not prerendered (profiles, games): the language is right, the body stays empty. */
 export const renderShell = (lang: Lang): Rendered => ({
   lang: localeOf(lang),

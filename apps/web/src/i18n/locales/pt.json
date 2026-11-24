@@ -156,6 +156,13 @@
   },
   "genericError": "Algo deu errado. Tente de novo.",
   "offline": "Sem conexão. Tentando reconectar...",
+  "connection": {
+    "lost": "Você está sem internet. Esta página continua aberta e reconecta quando a conexão voltar.",
+    "back": "Conexão restabelecida.",
+    "pageTitle": "Sem conexão",
+    "pageText": "Não foi possível abrir o ligungi. Confira a sua conexão com a internet e tente de novo.",
+    "retry": "Tentar de novo"
+  },
   "board": {
     "white": "Branco",
     "black": "Preto",

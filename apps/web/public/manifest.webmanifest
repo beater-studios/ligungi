@@ -1,8 +1,9 @@
 {
   "name": "ligungi · Gungi online",
   "short_name": "ligungi",
-  "description": "Jogue Gungi, o jogo de tabuleiro de HUNTER×HUNTER, online e de graça, com as regras oficiais.",
-  "lang": "pt-BR",
+  "description": "Play Gungi, the HUNTER×HUNTER board game, free online with the official rules.",
+  "lang": "en",
+  "dir": "ltr",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -17,8 +18,12 @@
     { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
     { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ],
+  "screenshots": [
+    { "src": "/screenshots/puzzle-wide.webp", "sizes": "1280x800", "type": "image/webp", "form_factor": "wide", "label": "The puzzle of the day on a computer" },
+    { "src": "/screenshots/puzzle-narrow.webp", "sizes": "824x1830", "type": "image/webp", "form_factor": "narrow", "label": "The puzzle of the day on a phone" }
+  ],
   "shortcuts": [
-    { "name": "Jogar contra o computador", "short_name": "Computador", "url": "/computer", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Aprender a jogar", "short_name": "Aprender", "url": "/learn", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Play the computer", "short_name": "Computer", "url": "/computer", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Learn to play", "short_name": "Learn", "url": "/learn", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
   ]
 }

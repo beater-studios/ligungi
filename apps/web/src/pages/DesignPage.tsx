@@ -342,6 +342,12 @@ export const DesignPage = () => {
               <p class="ligungi-waiting__hint">Your game is in the lobby and starts as soon as someone accepts it.</p>
             </div>
           </Example>
+          <Example label="Connection notice (ConnectionToast, fixed at the bottom): stays while offline, a few seconds when back">
+            <div class="ligungi-ds__row">
+              <div class="ligungi-toast__box ligungi-toast__box--bad">You are offline. This page stays open and reconnects when the internet is back.</div>
+              <div class="ligungi-toast__box ligungi-toast__box--good">Back online.</div>
+            </div>
+          </Example>
           <Example label="Confirmation (Modal + .ligungi-modal__actions): secondary first, then the action">
             <div>
               <p>It leaves the lobby and nobody else can accept it.</p>

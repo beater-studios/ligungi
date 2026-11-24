@@ -195,6 +195,8 @@ describe('static files', () => {
     mkdirSync(join(staticDir, 'assets'));
     writeFileSync(join(staticDir, 'index.html'), '<!doctype html>');
     writeFileSync(join(staticDir, 'favicon.svg'), '<svg/>');
+    writeFileSync(join(staticDir, 'sw.js'), 'x');
+    writeFileSync(join(staticDir, 'shot.webp'), 'x');
     writeFileSync(join(staticDir, 'assets', 'Move-abc123.ogg'), 'x');
     writeFileSync(join(staticDir, 'assets', 'index-abc123.js'), 'x');
     server = await startServer({ staticDir });
@@ -207,6 +209,8 @@ describe('static files', () => {
     expect((await head('/'))[0]).toBe('no-cache, no-transform');
     expect((await head('/ranking'))[0]).toBe('no-cache, no-transform');
     expect((await head('/favicon.svg'))[0]).toBe('public, max-age=604800, stale-while-revalidate=2592000');
+    expect(await head('/sw.js')).toEqual(['no-cache', 'text/javascript; charset=utf-8']);
+    expect((await head('/shot.webp'))[1]).toBe('image/webp');
   });
 });
 

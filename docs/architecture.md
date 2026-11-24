@@ -128,6 +128,14 @@ Pages tell browser integrations what the player is doing through `data-activity-
 
 Changing a key or a value breaks the integrations that read it.
 
+### Installing and losing the connection
+
+The site can be installed as an app (`public/manifest.webmanifest`: English name and description, icons, two shortcuts and a wide and a narrow screenshot for the install dialog), and PWABuilder packages it for the Microsoft Store from that manifest.
+
+A service worker (`/sw.js`) does one thing: when loading a page fails for lack of a connection, it answers with a "no connection" page instead of the browser's error. Nothing else is cached and every other request goes to the network untouched, so a deploy shows up as before. `scripts/prerender.ts` writes the page in each language (`dist/offline/<lang>.html`, self-contained, with the texts of `connection` in the locale files) and builds `dist/sw.js` from `scripts/sw.js`, naming its cache after a hash of the pages, so the worker changes only when a page does. The worker cannot read the preferences, so the app leaves the chosen language in the `ligungi-lang` cache (`src/offline.ts`); without it the worker uses `?lang=` and then the browser languages. The worker is registered only in production builds, and the server serves `/sw.js` with `no-cache`.
+
+A page already open learns about the connection from the browser's `online` and `offline` events (`src/connection.ts`): a notice at the bottom (`ConnectionToast`) stays while offline and says so briefly when the connection returns, and the WebSocket reconnects at once instead of waiting for its next retry. The reconnecting icon in the header is separate: it shows whenever the WebSocket is down, including when the server, not the internet, is the problem.
+
 ### Languages
 
 Texts live in `src/i18n/locales/`, one nested JSON file per language, named by its language code (`pt.json` is Brazilian Portuguese). Every message is [ICU MessageFormat](https://unicode-org.github.io/icu/userguide/format_parse/messages/): plain text, `{name}` arguments, `plural` (Intl plural rules of the language) and `select`, and `<tag>…</tag>` around a part of the text that the code turns into markup (a link, bold). `src/i18n/icu.ts` is a small interpreter for that subset, with no dependency; numbers are written as the code passes them.

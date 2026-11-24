@@ -4,6 +4,15 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- A notice at the bottom of the page when the internet connection drops, which stays until it comes back and then says so; games and other live pages reconnect at once.
+- A "no connection" page, in your language, when a page of the site is opened or reloaded without internet, instead of the browser's error.
+
+### Changed
+
+- The installed app's name, description and shortcuts are now in English, and the install dialog shows screenshots of the site.
+
 ### Fixed
 
 - In the 3D view, wooden koma pieces stay inside their square: the point of your pieces and the top edge of the opponent's no longer cross into the square behind, and the far row is no longer cut by the edge of the board.

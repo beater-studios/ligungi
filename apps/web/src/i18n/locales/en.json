@@ -156,6 +156,13 @@
   },
   "genericError": "Something went wrong. Try again.",
   "offline": "No connection. Trying to reconnect...",
+  "connection": {
+    "lost": "You are offline. This page stays open and reconnects when the internet is back.",
+    "back": "Back online.",
+    "pageTitle": "No connection",
+    "pageText": "ligungi could not be reached. Check your internet connection and try again.",
+    "retry": "Try again"
+  },
   "board": {
     "white": "White",
     "black": "Black",

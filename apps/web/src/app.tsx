@@ -38,6 +38,7 @@ import { ModPage } from './pages/ModPage.tsx';
 import { EditorPage } from './pages/EditorPage.tsx';
 import { ExplorerPage } from './pages/ExplorerPage.tsx';
 import { ChallengeBell } from './components/ChallengeBell.tsx';
+import { ConnectionToast } from './components/ConnectionToast.tsx';
 import { HeaderSearch } from './components/HeaderSearch.tsx';
 import { useDropdown } from './components/useDropdown.ts';
 import { TvChannelPage } from './pages/TvChannelPage.tsx';
@@ -615,6 +616,7 @@ export const App = () => {
       </div>
       <SiteFooter />
       <CookieBanner />
+      <ConnectionToast />
     </>
   );
 };

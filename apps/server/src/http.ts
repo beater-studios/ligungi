@@ -134,6 +134,7 @@ const MIME: Record<string, string> = {
   '.ogg': 'audio/ogg',
   '.mp3': 'audio/mpeg',
   '.png': 'image/png',
+  '.webp': 'image/webp',
   '.ico': 'image/x-icon',
   '.json': 'application/json',
   '.webmanifest': 'application/manifest+json',
@@ -249,6 +250,8 @@ export const serveStatic = (
  */
 const cacheControl = (pathname: string, file: string): string => {
   if (pathname.startsWith('/assets/')) return 'public, max-age=31536000, immutable';
+  // The service worker has a fixed name and changes with a deploy; a cached copy would keep the old one installed.
+  if (pathname === '/sw.js') return 'no-cache';
   // no-transform: CDNs must not rewrite the page (Cloudflare would inject its analytics beacon before consent).
   if (extname(file) === '.html') return 'no-cache, no-transform';
   // Generated on every build under fixed names, so a deploy must show up within a day.

@@ -94,6 +94,8 @@ What each screen shows only visually, and what blind mode needs there. Status: *
 | Insights | `/@/<name>/insights` | the result bars | each bar has its wins, draws and losses in words beside it | ok |
 | Rules page | `/learn` | piece movement diagrams | each diagram described in text | built (diagrams and piece trainer) |
 | Bell (header) | every page, signed in | none: lists of links and buttons | the count is in the button's label; an unread notice starts with "Unread" for screen readers | ok |
+| Connection notice | every page, at the bottom | none: a line of text | it is a `role="status"` region that stays in the page, so losing the connection and getting it back are both announced | ok |
+| No connection page | any address loaded without internet (from the service worker) | the logo | a heading, a sentence and a "Try again" link; no script, nothing else to read | ok |
 | Settings, account, sign in, info pages | `/settings`, `/account` (profile), `/account/privacy`, `/account/security`, `/account/data`, `/login`, `/about`... | swatches, previews | forms from `ui.tsx` with labels; previews are decoration | ok |
 
 ## Checklist for a new or changed screen

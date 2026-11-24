@@ -4,6 +4,13 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.6] - 2026-11-24
+
+### Changed
+
+- The goal stars of the lessons and exercises are larger and have a dark outline, so they stand out on every board theme and custom color.
+- How to play: a tower's tier extends a piece's reach only in the directions it already moves, and directions that already reach the edge stay as they are.
+
 ## [0.9.5] - 2026-11-24
 
 ### Security
@@ -326,7 +333,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.5...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.6...HEAD
+[0.9.6]: https://github.com/beater-studios/ligungi/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/beater-studios/ligungi/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/beater-studios/ligungi/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/beater-studios/ligungi/compare/v0.9.2...v0.9.3

@@ -21,7 +21,7 @@ The record of the ligungi Discord server: its structure, settings and the texts 
 | Preferred locale | en-US |
 | Rules channel | #rules |
 | Community updates and safety alerts | #mod-log |
-| System messages | #mod-chat (moved there by a settings screen on 2026-11-21 and kept by the maintainer: joins stay among moderators for now): join and boost notices and setup tips on, the sticker reply button off |
+| System messages | #general since 2026-11-24, so members see who joins and can wave with Discord's own button: join and boost notices on; the Server Guide notices and the setup tips off; the sticker reply button off |
 | Description | The community of ligungi.org, the free and open source site to play Gungi online with the official 2022 rules. Games, strategy, puzzles, help and feedback, in English, Portuguese and Spanish. |
 
 Server page (Server Settings, set by hand since the API does not cover it):
@@ -342,7 +342,7 @@ One embed each, color `#d8443f`, posted without a ping and pinned in its channel
 
 ### Forum guide posts (pinned)
 
-Plain text, tagged 📌 guide and pinned at the top of the forum.
+Plain text, tagged 📌 guide, pinned at the top of the forum and locked, so only moderators can reply to them.
 
 **#help**, post "How to get help" (`1573851602387865611`): One post per question, with a tag: 📖 rules, 🌐 site or 👤 account. Any language is fine. Before posting: how to play (ligungi.org/learn), lessons (ligungi.org/lessons), FAQ (ligungi.org/faq). A good question has a clear title, like "Can the Spy capture a tower?"; for a position, a link from the board editor or the analysis board, or its FEN; for a problem with the site, what you did, what you expected and what happened, with your browser and device. When it is answered, a moderator marks the post ✅ solved. Never ask about a game that is still being played.
 
@@ -354,6 +354,7 @@ Every public post by the bot goes first to #mod-previews: a short note saying wh
 
 | Date | Message | Content |
 |---|---|---|
+| 2026-11-24 | `1574789160575967353` | Release 0.9.3 (pinging Updates): the notice when the internet drops, the "no connection" page, screenshots in the install dialog, and the 3D koma fix. |
 | 2026-11-23 | `1574473938002776114` | Release 0.9.2 (pinging Updates): rank roles and Linked Roles for linked accounts, the opponent's pieces option (thanking the #feedback suggestion), the pointer for new visitors, and the fixes (secondary buttons, tower strip, libaduk links). |
 | 2026-11-22 | `1573883869130661899` | Code infrastructure (no ping): CodeQL and vet scans, CodeRabbit reviews, protected main branch and version tags, the code of conduct, 0.9.1 with a server security update; asks for stars on the GitHub repository (they help discovery, and at 10 CodeRabbit reviews every pull request on its own). |
 | 2026-11-21 | `1573850228920946830` | Server makeover (no ping): emojis, animated emojis, stickers, soundboard, player profile roles, a tidier channel list and the Server Home; tells members to pick their profile in Channels & Roles. |
@@ -364,6 +365,8 @@ Every public post by the bot goes first to #mod-previews: a short note saying wh
 
 | Date | Change |
 |---|---|
+| 2026-11-24 | Forum guide posts in #help and #feedback locked by the maintainer, so nobody replies to them. |
+| 2026-11-24 | System messages moved from #mod-chat to #general by the maintainer, so new members are welcomed in the open; Server Guide notices and setup tips turned off. |
 | 2026-11-21 | Player profile roles (mode played most and what they enjoy) and their onboarding questions; default channels cut to 10, the language and project channels shown by the answers. |
 | 2026-11-23 | Pinned channel guides in #general, #português and #español (see Messages posted by the bot). No guide in the text chat of the voice channels: only people in the room see it. |
 | 2026-11-23 | Rank roles 大 General, 中 Lieutenant General, 小 Major General, 侍 Samurai, 兵 Soldier and Verified player, shown apart below Contributor; Linked Roles fields registered for the app. |

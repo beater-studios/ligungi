@@ -72,6 +72,11 @@ const sameSelection = (a: Selection | null, b: Selection | null): boolean =>
     ? b.kind === 'square' && a.square === b.square
     : b.kind === 'hand' && a.color === b.color && a.role === b.role);
 
+/** A goal star: gold with a dark outline, so it stands out on any board color, light or dark. */
+const GOAL_STAR =
+  '<svg class="gg-goal" viewBox="-8 -12.5 116 116" aria-hidden="true" focusable="false">' +
+  '<path d="M50 0 61 35H98L68 57 79 91 50 70 21 91 32 57 2 35H39Z"/></svg>';
+
 export class Board implements Api {
   #config: Config;
   #selection: Selection | null = null;
@@ -631,7 +636,7 @@ export class Board implements Api {
       node.innerHTML =
         (mark ? `<span class="gg-mark gg-brush-${mark}" aria-hidden="true"></span>` : '') +
         this.#towerHtml(square) +
-        (targets.has(square) ? '<span class="gg-goal" aria-hidden="true"></span>' : '');
+        (targets.has(square) ? GOAL_STAR : '');
       node.title = this.#squareTitle(square);
     }
 

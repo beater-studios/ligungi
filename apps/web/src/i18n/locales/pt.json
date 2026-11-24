@@ -1618,7 +1618,7 @@
     "boardTitle": "Tabuleiro e peças",
     "board": "Tabuleiro 9×9, 25 peças por jogador. As três fileiras mais próximas de você são o seu território inicial. Peças capturadas saem do jogo para sempre.",
     "towersTitle": "Torres (ツケ)",
-    "towers": "Em vez de capturar, você pode empilhar sua peça sobre outra, sua ou do adversário. Torres têm até 3 peças (2 nos modos mais simples).\nSó a peça do topo se move, e o nível dela (altura da torre) aumenta o alcance: +1 casa em cada direção no nível 2, +2 no nível 3.\nPara capturar ou empilhar, sua peça precisa estar num nível igual ou maior que a altura da torre de destino.\nAo capturar uma torre, todas as peças adversárias dela saem do jogo; as suas ficam, com a peça que capturou no topo.\nNada pode ser empilhado sobre o Marechal.",
+    "towers": "Em vez de capturar, você pode empilhar sua peça sobre outra, sua ou do adversário. Torres têm até 3 peças (2 nos modos mais simples).\nSó a peça do topo se move, e o nível dela (altura da torre) aumenta o alcance nas direções em que ela já se move: +1 casa no nível 2, +2 no nível 3 (direções que já vão até a borda não mudam).\nPara capturar ou empilhar, sua peça precisa estar num nível igual ou maior que a altura da torre de destino.\nAo capturar uma torre, todas as peças adversárias dela saem do jogo; as suas ficam, com a peça que capturou no topo.\nNada pode ser empilhado sobre o Marechal.",
     "handTitle": "Peças da mão (新)",
     "hand": "Peças que você não colocou no draft ficam na mão. Na sua vez, em vez de mover, você pode colocar uma delas numa casa vazia ou sobre uma peça sua, em qualquer fileira até a da sua peça mais avançada.",
     "setupTitle": "Preparação",

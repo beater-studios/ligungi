@@ -1618,7 +1618,7 @@
     "boardTitle": "Board and pieces",
     "board": "9×9 board, 25 pieces per player. The three rows closest to you are your starting territory. Captured pieces leave the game for good.",
     "towersTitle": "Towers (ツケ)",
-    "towers": "Instead of capturing, you can stack your piece on top of another one, yours or your opponent’s. Towers hold up to 3 pieces (2 in the simpler modes).\nOnly the top piece moves, and its tier (the tower height) extends its reach: +1 square in each direction at tier 2, +2 at tier 3.\nTo capture or stack, your piece must be on a tier equal to or higher than the height of the target tower.\nWhen you capture a tower, all of its enemy pieces leave the game; yours stay, with the capturing piece on top.\nNothing can be stacked on the Marshal.",
+    "towers": "Instead of capturing, you can stack your piece on top of another one, yours or your opponent’s. Towers hold up to 3 pieces (2 in the simpler modes).\nOnly the top piece moves, and its tier (the tower height) extends its reach in the directions it already moves: +1 square at tier 2, +2 at tier 3 (directions that already reach the edge stay as they are).\nTo capture or stack, your piece must be on a tier equal to or higher than the height of the target tower.\nWhen you capture a tower, all of its enemy pieces leave the game; yours stay, with the capturing piece on top.\nNothing can be stacked on the Marshal.",
     "handTitle": "Pieces in hand (新)",
     "hand": "Pieces you did not place during the draft stay in your hand. On your turn, instead of moving, you can drop one of them on an empty square or on one of your pieces, on any row up to the row of your most advanced piece.",
     "setupTitle": "Setup",

@@ -8,6 +8,21 @@ import { base32Decode, base32Encode, hotp, matchStep, newRecoveryCodes, normaliz
 import { TV_LINGER_MS, Tv } from '../src/tv.ts';
 import { TwoFactor } from '../src/two-factor.ts';
 import { Users } from '../src/users.ts';
+import { parseCookies } from '../src/auth.ts';
+import { randomId } from '../src/ids.ts';
+
+describe('ids and cookies', () => {
+  it('draws ids of the asked length from the alphabet only', () => {
+    for (const length of [1, 8, 24, 200]) expect(randomId(length)).toMatch(new RegExp(`^[a-km-zA-HJ-NP-Z2-9]{${length}}$`));
+  });
+
+  it('keeps a cookie named like an object property as a plain key', () => {
+    const cookies = parseCookies('__proto__=x; constructor=y; sid=abc');
+    expect(cookies['sid']).toBe('abc');
+    expect(cookies['__proto__']).toBe('x');
+    expect(Object.getPrototypeOf(cookies)).toBeNull();
+  });
+});
 
 describe('clock', () => {
   it('charges the mover, adds the increment and keeps running for consecutive draft moves', () => {

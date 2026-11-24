@@ -65,7 +65,10 @@ export const profileLinkName = (site: ProfileSite, typed: string): string | null
   const { prefix, pattern } = PROFILE_LINKS[site];
   let name = typed.trim().replace(/^https?:\/\//i, '').replace(/^www\./i, '');
   if (name.toLowerCase().startsWith(prefix.toLowerCase())) name = name.slice(prefix.length);
-  name = name.replace(/^@/, '').replace(/\/+$/, '');
+  name = name.replace(/^@/, '');
+  let end = name.length;
+  while (end > 0 && name[end - 1] === '/') end--;
+  name = name.slice(0, end);
   return pattern.test(name) ? name : null;
 };
 

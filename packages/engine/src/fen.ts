@@ -117,7 +117,9 @@ export const parseFen = (fen: string): Position => {
   if (turnText !== 'w' && turnText !== 'b') throw new FenError('Bad turn');
   const hands: Record<Color, Record<Role, number>> = { white: emptyHand(), black: emptyHand() };
   if (handText !== '-') {
-    for (const [, count, letter] of handText.matchAll(/(\d*)([A-Za-z])/g)) {
+    // Counts are bounded so a long run of digits cannot make the match quadratic.
+    if (!/^(?:\d{0,2}[A-Za-z])+$/.test(handText)) throw new FenError('Bad hand');
+    for (const [, count, letter] of handText.matchAll(/(\d{0,2})([A-Za-z])/g)) {
       const piece = parsePiece(letter!);
       if (!piece) throw new FenError(`Unknown piece ${letter}`);
       hands[piece.color][piece.role] += count ? Number(count) : 1;

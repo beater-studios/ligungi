@@ -61,6 +61,9 @@ describe('game records', () => {
     expect(parseGameRecord('[Mode "chess"]\n1. e2e4')).toEqual({ kind: 'badMode', line: 1, text: 'chess' });
     expect(parseGameRecord('1. hello there', 'intro')).toEqual({ kind: 'unreadable', line: 1, text: 'hello there' });
     expect(parseGameRecord('   \n')).toEqual({ kind: 'empty', line: 1, text: '' });
+    const started = performance.now();
+    expect(parseGameRecord(`1. ${'{'.repeat(50_000)}`, 'intro')).toMatchObject({ kind: 'unreadable', line: 1 });
+    expect(performance.now() - started).toBeLessThan(1000);
   });
 
   it('refuses rulebook moves two pieces could make, which only machine notation tells apart', () => {

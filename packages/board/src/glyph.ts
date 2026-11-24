@@ -11,6 +11,9 @@ export type PieceStyle = 'kanji' | 'illustrated' | 'trace' | 'letters';
 
 export const PIECE_STYLES: readonly PieceStyle[] = ['illustrated', 'trace', 'kanji', 'letters'];
 
+/** The letters come from translations, so they are escaped before going into markup. */
+const escapeText = (text: string): string => text.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
+
 /** Without the movement guides around it, the icon can grow to fill the disc. */
 const ICON_ALONE_SCALE = 1.45;
 
@@ -28,7 +31,7 @@ const iconSvg = (role: Role, trace: boolean, guides: boolean): string => {
  */
 export const pieceGlyph = (role: Role, style: PieceStyle, guides: boolean, names: PieceNames = ENGLISH_PIECE_NAMES): string => {
   if (style === 'illustrated' || style === 'trace') return iconSvg(role, style === 'trace', guides);
-  const text = style === 'letters' ? `<b class="gg-letters">${pieceLetters(role, names)}</b>` : ROLE_INFO[role].kanji;
+  const text = style === 'letters' ? `<b class="gg-letters">${escapeText(pieceLetters(role, names))}</b>` : ROLE_INFO[role].kanji;
   return guides ? `${guidesSvg(role)}${text}` : text;
 };
 

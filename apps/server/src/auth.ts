@@ -56,7 +56,8 @@ export const needsRehash = (stored: string): boolean => stored.split('$')[1] !==
 
 /** Malformed values are skipped instead of throwing. */
 export const parseCookies = (header: string | undefined): Record<string, string> => {
-  const cookies: Record<string, string> = {};
+  // No prototype, so a cookie named like `__proto__` is only a key.
+  const cookies: Record<string, string> = Object.create(null) as Record<string, string>;
   for (const part of header?.split(';') ?? []) {
     const index = part.indexOf('=');
     if (index <= 0) continue;

@@ -29,6 +29,16 @@ describe('FEN', () => {
     expect(toFen(free)).toContain(' intermediate d+ b');
     expect(parseFen(toFen(free))).toEqual(free);
   });
+
+  it('refuses a malformed hand at once, even a long run of digits', () => {
+    const fields = toFen(initialPosition('intro')).split(' ');
+    const withHand = (hand: string): string => [...fields.slice(0, 2), hand, ...fields.slice(3)].join(' ');
+    expect(() => parseFen(withHand('2J-c'))).toThrow();
+    expect(() => parseFen(withHand('123J'))).toThrow();
+    const started = performance.now();
+    expect(() => parseFen(withHand('1'.repeat(50_000)))).toThrow();
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
 });
 
 describe('move notation', () => {

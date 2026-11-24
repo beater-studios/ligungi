@@ -4,6 +4,12 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.5] - 2026-11-24
+
+### Security
+
+- Fixes from GitHub code scanning (CodeQL): a position, game record or profile link built to be slow to read can no longer tie up the server (a hand in a position with a long run of digits is now refused, and braces and trailing slashes are read in linear time); the random ids of sessions, games and studies no longer favor some letters; a cookie named `__proto__` is read as a plain name; and the letters piece style escapes the translated letters it shows.
+
 ## [0.9.4] - 2026-11-24
 
 ### Added
@@ -320,7 +326,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.4...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.5...HEAD
+[0.9.5]: https://github.com/beater-studios/ligungi/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/beater-studios/ligungi/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/beater-studios/ligungi/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/beater-studios/ligungi/compare/v0.9.1...v0.9.2

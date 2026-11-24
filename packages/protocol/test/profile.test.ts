@@ -5,6 +5,10 @@ describe('profile details', () => {
   it('takes only the name on each site, forgiving pasted addresses, and builds the address itself', () => {
     expect(profileLinkName('youtube', '@gon')).toBe('gon');
     expect(profileLinkName('youtube', 'https://www.youtube.com/@gon/')).toBe('gon');
+    const started = performance.now();
+    expect(profileLinkName('youtube', `gon${'/'.repeat(50_000)}`)).toBe('gon');
+    expect(profileLinkName('youtube', `${'/'.repeat(50_000)}x`)).toBeNull();
+    expect(performance.now() - started).toBeLessThan(1000);
     expect(profileLinkName('lichess', 'lichess.org/@/Killua_Z')).toBe('Killua_Z');
     expect(profileLinkName('bluesky', 'gon.bsky.social')).toBe('gon.bsky.social');
     expect(profileLinkUrl('lishogi', 'Killua')).toBe('https://lishogi.org/@/Killua');

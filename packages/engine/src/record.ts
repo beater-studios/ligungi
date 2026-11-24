@@ -57,7 +57,7 @@ export const parseGameRecord = (text: string, fallbackMode: Mode = 'advanced'): 
       if (RESULT.test(entry)) continue;
       if (game.outcome) return { kind: 'afterEnd', line: lineNumber, text: entry };
       const legal = game.legalMoves();
-      const machine = /\{([^}]*)\}/.exec(entry)?.[1]?.trim();
+      const machine = /\{([^{}]*)\}/.exec(entry)?.[1]?.trim();
       const written = machine ?? entry;
       const parsed = parseMove(written);
       let move: Move | undefined;

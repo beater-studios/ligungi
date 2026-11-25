@@ -18,7 +18,6 @@ import {
   type TwoFactorSetup,
   type TwoFactorView,
 } from '@ligungi/protocol';
-import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { QrCode } from '../components/QrCode.tsx';
@@ -33,57 +32,9 @@ import { navigate, useLocation } from '../router.ts';
 import { loadSession, session } from '../session.ts';
 import { socket } from '../socket.ts';
 import { useStore } from '../store.ts';
+import { useCopy } from '../hooks.ts';
+import { SettingsShell, type SettingsSection } from '../components/SettingsShell.tsx';
 
-export type SettingsSection = 'profile' | 'settings' | 'privacy' | 'security' | 'data';
-
-/**
- * The settings pages: a menu of the five sections beside (on phones above) the page's cards. Visitors have only the
- * preferences, kept in the browser; the other sections belong to an account.
- */
-export const SettingsShell = ({
-  active,
-  title,
-  aside,
-  children,
-}: {
-  active: SettingsSection;
-  title: string;
-  aside?: ComponentChildren;
-  children: ComponentChildren;
-}) => {
-  const t = useT();
-  const m = t.account.menu;
-  const { user } = useStore(session);
-  const menu = useRef<HTMLElement>(null);
-  // On phones the menu is a row that scrolls sideways: bring the current section into view.
-  useEffect(() => {
-    menu.current?.querySelector('.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-  }, [active, user]);
-  const link = (key: SettingsSection, href: string, label: string, hint: string) => (
-    <a class={active === key ? 'active' : ''} href={href} aria-current={active === key ? 'page' : undefined}>
-      <span class="ligungi-settings__label">{label}</span>
-      <small class="ligungi-settings__hint">{hint}</small>
-    </a>
-  );
-  return (
-    <main class="ligungi-page ligungi-settings">
-      <nav class="ligungi-card ligungi-settings__menu" aria-label={t.settings.menu} ref={menu}>
-        {user && link('profile', '/account', m.profile, m.profileHint)}
-        {link('settings', '/settings', t.settings.title, m.settingsHint)}
-        {user && link('privacy', '/account/privacy', m.privacy, m.privacyHint)}
-        {user && link('security', '/account/security', m.security, m.securityHint)}
-        {user && link('data', '/account/data', m.data, m.dataHint)}
-      </nav>
-      <div class="ligungi-settings__body">
-        <div class="ligungi-settings__head">
-          <h1>{title}</h1>
-          {aside}
-        </div>
-        {children}
-      </div>
-    </main>
-  );
-};
 
 const PasswordForm = () => {
   const t = useT();
@@ -545,14 +496,8 @@ const DiscordLink = () => {
 const RecoveryCodes = ({ codes, note, onDone }: { codes: readonly string[]; note?: string; onDone: () => void }) => {
   const t = useT();
   const { user } = useStore(session);
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopy();
   const text = codes.join('\n');
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-    } catch {}
-  };
   const download = () => {
     const url = URL.createObjectURL(new Blob([`${t.account.recoveryFile(user?.name ?? '')}\n\n${text}\n`], { type: 'text/plain' }));
     const link = document.createElement('a');
@@ -574,7 +519,7 @@ const RecoveryCodes = ({ codes, note, onDone }: { codes: readonly string[]; note
         ))}
       </ol>
       <div class="ligungi-recovery__actions">
-        <button type="button" class="button button-empty" onClick={() => void copy()}>
+        <button type="button" class="button button-empty" onClick={() => void copy(text)}>
           {copied ? t.account.recoveryCopied : t.account.recoveryCopy}
         </button>
         <button type="button" class="button button-empty" onClick={download}>

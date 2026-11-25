@@ -1,5 +1,5 @@
-import { applyMove, initialPosition, legalMoves, moveToString, parseMove, toFen, type Move, type Position } from '@ligungi/engine';
-import type { Puzzle, PuzzleInfo } from '@ligungi/protocol';
+import { applyMove, initialPosition, legalMoves, moveToString, parseFen, parseMove, toFen, type Move, type Position } from '@ligungi/engine';
+import { puzzleInfo, type Puzzle, type PuzzleInfo } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { useLocalGame } from './localGame.ts';
 import { moveSound } from './speech.ts';
@@ -9,6 +9,33 @@ export interface PuzzleEntry {
   readonly info: PuzzleInfo;
   readonly start: Position;
 }
+
+export interface PuzzleEntries {
+  readonly list: readonly PuzzleEntry[];
+  readonly byId: ReadonlyMap<string, PuzzleEntry>;
+}
+
+let loading: Promise<PuzzleEntries> | null = null;
+
+/** Every puzzle, read once per visit: the collection loads on demand, as it is too big for the first page load. */
+const loadEntries = (): Promise<PuzzleEntries> =>
+  (loading ??= import('@ligungi/protocol/puzzles').then(({ PUZZLES }) => {
+    const list = PUZZLES.map((puzzle) => ({ puzzle, info: puzzleInfo(puzzle), start: parseFen(puzzle.fen) }));
+    return { list, byId: new Map(list.map((entry) => [entry.puzzle.id, entry])) };
+  }));
+
+/** The puzzles, once loaded. */
+export const usePuzzleEntries = (): PuzzleEntries | null => {
+  const [entries, setEntries] = useState<PuzzleEntries | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void loadEntries().then((loaded) => alive && setEntries(loaded));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return entries;
+};
 
 /** Checking: a mating move off the stored line is being checked in the worker. Answering: the opponent's reply is coming. */
 export type SolveStage = 'solving' | 'checking' | 'answering' | 'wrong' | 'done';

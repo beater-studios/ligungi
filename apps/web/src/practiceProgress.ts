@@ -1,10 +1,9 @@
 import { PRACTICE_BATCH, PRACTICE_POSITIONS } from '@ligungi/protocol';
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useCallback } from 'preact/hooks';
 import { api } from './api.ts';
-import { session } from './session.ts';
-import { useStore } from './store.ts';
+import { localJson, sendOrKeep, useAccountSync } from './syncedProgress.ts';
 
-const KEY = 'ligungi.practice';
+const store = localJson('ligungi.practice');
 const KNOWN: ReadonlySet<string> = new Set(PRACTICE_POSITIONS.map((position) => position.id));
 
 export type PracticeProgress = Readonly<Record<string, number>>;
@@ -12,23 +11,14 @@ export type PracticeProgress = Readonly<Record<string, number>>;
 const valid = (id: string, moves: unknown): moves is number =>
   KNOWN.has(id) && Number.isInteger(moves) && (moves as number) >= 1 && (moves as number) <= 1000;
 
-/** Results kept in the browser without an account; storage may be missing (prerender) or blocked. */
+/** Results kept in the browser without an account. */
 const readLocal = (): Record<string, number> => {
-  try {
-    const value: unknown = JSON.parse(localStorage.getItem(KEY) ?? '{}');
-    if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
-    return Object.fromEntries(Object.entries(value).filter(([id, moves]) => valid(id, moves))) as Record<string, number>;
-  } catch {
-    return {};
-  }
+  const value = store.read();
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).filter(([id, moves]) => valid(id, moves))) as Record<string, number>;
 };
 
-const writeLocal = (progress: PracticeProgress): void => {
-  try {
-    if (Object.keys(progress).length) localStorage.setItem(KEY, JSON.stringify(progress));
-    else localStorage.removeItem(KEY);
-  } catch {}
-};
+const writeLocal = (progress: PracticeProgress): void => store.write(Object.keys(progress).length ? progress : null);
 
 /** The fewest moves each position took. */
 const best = (a: PracticeProgress, b: PracticeProgress): Record<string, number> => {
@@ -42,37 +32,25 @@ const best = (a: PracticeProgress, b: PracticeProgress): Record<string, number> 
  * browser otherwise. Results earned before signing in move to the account the first time a practice page loads with it.
  */
 export const usePracticeProgress = () => {
-  const { user, loaded } = useStore(session);
-  const [progress, setProgress] = useState<PracticeProgress | null>(null);
-
-  useEffect(() => {
-    if (!loaded) return;
-    const local = readLocal();
-    if (!user) {
-      setProgress(local);
-      return;
-    }
-    let alive = true;
-    const pending = Object.entries(local).slice(0, PRACTICE_BATCH);
-    const request = pending.length
-      ? api.post<PracticeProgress>('/api/practice/progress', { results: Object.fromEntries(pending) }).then((saved) => {
-          writeLocal({});
-          return saved;
-        })
-      : api.get<PracticeProgress>('/api/practice/progress');
-    request.then((saved) => alive && setProgress(saved)).catch(() => alive && setProgress(local));
-    return () => {
-      alive = false;
-    };
-  }, [loaded, user?.id]);
+  const { view: progress, setView: setProgress, signedIn } = useAccountSync<Record<string, number>, PracticeProgress>({
+    readLocal,
+    isEmpty: (local) => Object.keys(local).length === 0,
+    guestView: (local) => local,
+    upload: (local) => api.post<PracticeProgress>('/api/practice/progress', { results: Object.fromEntries(Object.entries(local).slice(0, PRACTICE_BATCH)) }),
+    load: () => api.get<PracticeProgress>('/api/practice/progress'),
+    clearLocal: () => writeLocal({}),
+  });
 
   const record = useCallback(
     (id: string, moves: number) => {
       setProgress((current) => best(current ?? {}, { [id]: moves }));
-      if (user) api.post('/api/practice/progress', { results: { [id]: moves } }).catch(() => {});
-      else writeLocal(best(readLocal(), { [id]: moves }));
+      sendOrKeep(
+        signedIn,
+        () => api.post('/api/practice/progress', { results: { [id]: moves } }),
+        () => writeLocal(best(readLocal(), { [id]: moves })),
+      );
     },
-    [user?.id],
+    [signedIn],
   );
 
   return { progress, record };

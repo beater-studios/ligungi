@@ -1,9 +1,10 @@
 import { TV_CHANNELS, type TvChannel, type TvChannelView } from '@ligungi/protocol';
-import { useEffect, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { playerName, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { GamePage } from './GamePage.tsx';
+import { usePolling } from '../hooks.ts';
 
 /** The server keeps a channel on its game until a few seconds after it ends, so polling is enough to follow it. */
 const POLL_MS = 3_000;
@@ -38,24 +39,19 @@ export const TvChannelPage = ({ channel }: { channel: TvChannel }) => {
   const [channels, setChannels] = useState<TvChannelView[] | null>(null);
   const [failed, setFailed] = useState(false);
 
-  useEffect(() => {
-    let alive = true;
-    const load = () =>
+  usePolling(
+    (alive) =>
       api
         .get<TvChannelView[]>('/api/tv/channels')
         .then((list) => {
-          if (!alive) return;
+          if (!alive()) return;
           setChannels(list);
           setFailed(false);
         })
-        .catch(() => alive && setFailed(true));
-    void load();
-    const id = setInterval(load, POLL_MS);
-    return () => {
-      alive = false;
-      clearInterval(id);
-    };
-  }, []);
+        .catch(() => alive() && setFailed(true)),
+    POLL_MS,
+    [],
+  );
 
   const game = channels?.find((view) => view.channel === channel)?.game ?? null;
   const list = <ChannelList channels={channels} active={channel} />;

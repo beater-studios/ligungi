@@ -1,5 +1,5 @@
 import type { BotLevel } from '@ligungi/bot';
-import { legalMoves, moveToString, opposite, parseFen, parseMove, repetitionKey, toFen, type Color } from '@ligungi/engine';
+import { legalMoves, opposite, parseFen, parseMove, repetitionKey, toFen, type Color } from '@ligungi/engine';
 import { PRACTICE_LEVEL, PRACTICE_POSITIONS, PRACTICE_SECTIONS, practiceResult, type PracticeGoal, type PracticePosition } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { MiniBoard } from '../components/MiniBoard.tsx';

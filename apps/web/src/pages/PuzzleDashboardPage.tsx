@@ -4,7 +4,7 @@ import { api } from '../api.ts';
 import { RatingHistoryChart } from '../components/RatingHistoryChart.tsx';
 import { formatDate, useT } from '../i18n/index.ts';
 import { runRecords, usePuzzleRuns } from '../puzzleRuns.ts';
-import { Records } from './PuzzleRunPage.tsx';
+import { Records } from '../components/Records.tsx';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
 

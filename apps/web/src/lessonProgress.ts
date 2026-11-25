@@ -1,10 +1,9 @@
 import { LESSON_EXERCISES, LESSON_PROGRESS_BATCH, LESSON_STARS_MAX } from '@ligungi/protocol';
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useCallback } from 'preact/hooks';
 import { api } from './api.ts';
-import { session } from './session.ts';
-import { useStore } from './store.ts';
+import { localJson, sendOrKeep, useAccountSync } from './syncedProgress.ts';
 
-const KEY = 'ligungi.lessons';
+const store = localJson('ligungi.lessons');
 const KNOWN: ReadonlySet<string> = new Set(LESSON_EXERCISES.map((exercise) => exercise.id));
 
 export type LessonProgress = Readonly<Record<string, number>>;
@@ -12,23 +11,14 @@ export type LessonProgress = Readonly<Record<string, number>>;
 const valid = (id: string, stars: unknown): stars is number =>
   KNOWN.has(id) && Number.isInteger(stars) && (stars as number) >= 1 && (stars as number) <= LESSON_STARS_MAX;
 
-/** Results kept in the browser without an account; storage may be missing (prerender) or blocked. */
+/** Results kept in the browser without an account. */
 const readLocal = (): Record<string, number> => {
-  try {
-    const value: unknown = JSON.parse(localStorage.getItem(KEY) ?? '{}');
-    if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
-    return Object.fromEntries(Object.entries(value).filter(([id, stars]) => valid(id, stars))) as Record<string, number>;
-  } catch {
-    return {};
-  }
+  const value = store.read();
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).filter(([id, stars]) => valid(id, stars))) as Record<string, number>;
 };
 
-const writeLocal = (progress: LessonProgress): void => {
-  try {
-    if (Object.keys(progress).length) localStorage.setItem(KEY, JSON.stringify(progress));
-    else localStorage.removeItem(KEY);
-  } catch {}
-};
+const writeLocal = (progress: LessonProgress): void => store.write(Object.keys(progress).length ? progress : null);
 
 const best = (a: LessonProgress, b: LessonProgress): Record<string, number> => {
   const merged: Record<string, number> = { ...a };
@@ -41,39 +31,25 @@ const best = (a: LessonProgress, b: LessonProgress): Record<string, number> => {
  * before signing in move to the account the first time a lesson page loads with it.
  */
 export const useLessonProgress = () => {
-  const { user, loaded } = useStore(session);
-  const [progress, setProgress] = useState<LessonProgress | null>(null);
-
-  useEffect(() => {
-    if (!loaded) return;
-    const local = readLocal();
-    if (!user) {
-      setProgress(local);
-      return;
-    }
-    let alive = true;
-    const pending = Object.entries(local).slice(0, LESSON_PROGRESS_BATCH);
-    const request = pending.length
-      ? api.post<LessonProgress>('/api/lessons/progress', { results: Object.fromEntries(pending) }).then((saved) => {
-          writeLocal({});
-          return saved;
-        })
-      : api.get<LessonProgress>('/api/lessons/progress');
-    request.then((saved) => alive && setProgress(saved)).catch(() => alive && setProgress(local));
-    return () => {
-      alive = false;
-    };
-  }, [loaded, user?.id]);
+  const { view: progress, setView: setProgress, signedIn } = useAccountSync<Record<string, number>, LessonProgress>({
+    readLocal,
+    isEmpty: (local) => Object.keys(local).length === 0,
+    guestView: (local) => local,
+    upload: (local) => api.post<LessonProgress>('/api/lessons/progress', { results: Object.fromEntries(Object.entries(local).slice(0, LESSON_PROGRESS_BATCH)) }),
+    load: () => api.get<LessonProgress>('/api/lessons/progress'),
+    clearLocal: () => writeLocal({}),
+  });
 
   const record = useCallback(
     (id: string, stars: number) => {
       setProgress((current) => best(current ?? {}, { [id]: stars }));
-      const keep = () => writeLocal(best(readLocal(), { [id]: stars }));
-      // A result that does not reach the account (no connection) waits in the browser and moves there on the next load.
-      if (user) api.post('/api/lessons/progress', { results: { [id]: stars } }).catch(keep);
-      else keep();
+      sendOrKeep(
+        signedIn,
+        () => api.post('/api/lessons/progress', { results: { [id]: stars } }),
+        () => writeLocal(best(readLocal(), { [id]: stars })),
+      );
     },
-    [user?.id],
+    [signedIn],
   );
 
   return { progress, record };

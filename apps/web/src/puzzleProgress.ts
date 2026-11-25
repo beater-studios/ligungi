@@ -1,32 +1,20 @@
 import { PUZZLE_BATCH } from '@ligungi/protocol';
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useCallback } from 'preact/hooks';
 import { api } from './api.ts';
-import { session } from './session.ts';
-import { useStore } from './store.ts';
+import { localJson, useAccountSync } from './syncedProgress.ts';
 
-const KEY = 'ligungi.puzzlesSolved';
+const store = localJson('ligungi.puzzlesSolved');
 /** Where the mate problems kept what was solved, before they became puzzles. */
-const OLD_KEY = 'ligungi.matesSolved';
+const oldStore = localJson('ligungi.matesSolved');
 
-/** Puzzles solved without an account, kept in the browser; storage may be missing (prerender) or blocked. */
-export const readLocalSolved = (): string[] => {
-  try {
-    const ids = [OLD_KEY, KEY].flatMap((key) => {
-      const value: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
-      return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [];
-    });
-    return [...new Set(ids)];
-  } catch {
-    return [];
-  }
-};
+const ids = (value: unknown): string[] => (Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : []);
 
-const writeLocal = (ids: readonly string[]): void => {
-  try {
-    localStorage.removeItem(OLD_KEY);
-    if (ids.length) localStorage.setItem(KEY, JSON.stringify(ids));
-    else localStorage.removeItem(KEY);
-  } catch {}
+/** Puzzles solved without an account, kept in the browser. */
+export const readLocalSolved = (): string[] => [...new Set([...ids(oldStore.read()), ...ids(store.read())])];
+
+const writeLocal = (solved: readonly string[]): void => {
+  oldStore.write(null);
+  store.write(solved.length ? solved : null);
 };
 
 /**
@@ -35,36 +23,26 @@ const writeLocal = (ids: readonly string[]): void => {
  * that no longer exist.
  */
 export const useSolvedPuzzles = (known: ReadonlySet<string> | null) => {
-  const { user, loaded } = useStore(session);
-  const [solved, setSolved] = useState<ReadonlySet<string> | null>(null);
-
-  useEffect(() => {
-    if (!loaded || !known) return;
-    const local = readLocalSolved().filter((id) => known.has(id));
-    if (!user) {
-      setSolved(new Set(local));
-      return;
-    }
-    let alive = true;
-    const request = local.length
-      ? api.post<string[]>('/api/puzzles/solved', { ids: local.slice(0, PUZZLE_BATCH) }).then((ids) => {
-          writeLocal([]);
-          return ids;
-        })
-      : api.get<string[]>('/api/puzzles/solved');
-    request.then((ids) => alive && setSolved(new Set(ids))).catch(() => alive && setSolved(new Set(local)));
-    return () => {
-      alive = false;
-    };
-  }, [loaded, user?.id, known]);
+  const { view: solved, setView: setSolved, signedIn } = useAccountSync<string[], ReadonlySet<string>>(
+    {
+      ready: known !== null,
+      readLocal: () => readLocalSolved().filter((id) => known?.has(id)),
+      isEmpty: (local) => local.length === 0,
+      guestView: (local) => new Set(local),
+      upload: (local) => api.post<string[]>('/api/puzzles/solved', { ids: local.slice(0, PUZZLE_BATCH) }).then((saved) => new Set(saved)),
+      load: () => api.get<string[]>('/api/puzzles/solved').then((saved) => new Set(saved)),
+      clearLocal: () => writeLocal([]),
+    },
+    [known],
+  );
 
   /** Marks a puzzle solved here; with an account the server already recorded it with the try. */
   const markSolved = useCallback(
     (id: string) => {
       setSolved((current) => new Set(current).add(id));
-      if (!user) writeLocal([...new Set([...readLocalSolved(), id])]);
+      if (!signedIn) writeLocal([...new Set([...readLocalSolved(), id])]);
     },
-    [user?.id],
+    [signedIn],
   );
 
   return { solved, markSolved };

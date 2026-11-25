@@ -15,7 +15,7 @@ import {
 } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
-import { FeedList, useFeed } from '../components/Activity.tsx';
+import { FeedList, useFeed } from '../components/ActivityFeed.tsx';
 import { turns } from '../challenges.ts';
 import { CreateGame, type CreateTarget } from '../components/CreateGame.tsx';
 import { LivePlayer } from '../components/LivePlayer.tsx';
@@ -31,7 +31,7 @@ import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
 import { socket } from '../socket.ts';
 import { useStore } from '../store.ts';
-import { useFriends } from './FriendsPage.tsx';
+import { useFriends } from '../friends.ts';
 
 const QUICK_MODE_KEY = 'ligungi.quickMode';
 /** Leaders shown per mode in the home's leaders card. */

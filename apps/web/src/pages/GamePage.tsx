@@ -2,7 +2,7 @@ import { applyMove, legalMoves, moveToString, opposite, type Color, type Move } 
 import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type GameView } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { useActivity } from '../activity.ts';
+import { usePresence } from '../presence.ts';
 import { api } from '../api.ts';
 import { turnNotice } from '../challenges.ts';
 import { ExportGame } from '../components/ExportGame.tsx';
@@ -136,7 +136,7 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
   const you = view?.you ?? null;
   const position = replay ? (live ? replay.game.position : (replay.positions[ply] ?? replay.game.position)) : null;
   const myTurn = Boolean(view && you && view.status === 'started' && position?.turn === you && live);
-  useActivity(
+  usePresence(
     view && {
       kind: 'game',
       mode: view.mode,

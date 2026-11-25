@@ -3,7 +3,7 @@ import type { ActivityHallView } from '@ligungi/protocol';
 import { h, render } from 'preact';
 import { act } from 'preact/test-utils';
 import { describe, expect, it, vi } from 'vitest';
-import { ActivityHubView } from '../src/components/ActivityHub.tsx';
+import { ActivityHubView } from '../src/discord/Hub.tsx';
 
 const settings = { mode: 'beginner', rated: false, timeControl: { initial: 600, increment: 5 }, daysPerMove: null, color: 'white', freeDraft: false } as const;
 

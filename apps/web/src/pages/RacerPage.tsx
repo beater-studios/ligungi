@@ -1,5 +1,5 @@
 import type { RacerLobbyView } from '@ligungi/protocol';
-import { useEffect, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
@@ -7,7 +7,8 @@ import { racerRecords } from '../racer.ts';
 import { navigate } from '../router.ts';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
-import { Records } from './PuzzleRunPage.tsx';
+import { Records } from '../components/Records.tsx';
+import { usePolling } from '../hooks.ts';
 
 /** How often the page refreshes how many players wait for the public race. */
 const LOBBY_POLL_MS = 5_000;
@@ -21,22 +22,15 @@ export const RacerPage = () => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let live = true;
-    const load = () => {
-      if (document.hidden) return;
+  usePolling(
+    (alive) =>
       api
         .get<RacerLobbyView>('/api/racer')
-        .then((view) => live && setLobby(view))
-        .catch(() => undefined);
-    };
-    load();
-    const timer = setInterval(load, LOBBY_POLL_MS);
-    return () => {
-      live = false;
-      clearInterval(timer);
-    };
-  }, [user?.id]);
+        .then((view) => alive() && setLobby(view))
+        .catch(() => undefined),
+    LOBBY_POLL_MS,
+    [user?.id],
+  );
 
   const go = async (path: string) => {
     setBusy(true);

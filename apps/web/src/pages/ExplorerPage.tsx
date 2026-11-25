@@ -1,5 +1,5 @@
 import { initialPosition, legalMoves, parseMove, toFen, type Move, type Position } from '@ligungi/engine';
-import { EXPLORER_BANDS, EXPLORER_MODES, type ExplorerBand, type ExplorerMode, type ExplorerStats, type ExplorerView } from '@ligungi/protocol';
+import { EXPLORER_BANDS, EXPLORER_MODES, type ExplorerBand, type ExplorerMode, type ExplorerView } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { BlindPanel } from '../components/BlindPanel.tsx';
@@ -11,29 +11,9 @@ import { useMoveText } from '../notation.ts';
 import { prefs } from '../prefs.ts';
 import { replayFrom } from '../replay.ts';
 import { useStore } from '../store.ts';
+import { ResultBar } from '../components/ResultBar.tsx';
 
 const percent = (part: number, whole: number) => (whole === 0 ? 0 : Math.round((part / whole) * 100));
-
-/** White wins, draws and Black wins as one bar, with the shares written in it when there is room. */
-export const ResultBar = ({ stats }: { stats: ExplorerStats }) => {
-  const t = useT();
-  const shares = [
-    { key: 'white', value: percent(stats.white, stats.games) },
-    { key: 'draws', value: percent(stats.draws, stats.games) },
-    { key: 'black', value: percent(stats.black, stats.games) },
-  ];
-  return (
-    <span class="ligungi-explorer__bar" role="img" aria-label={t.explorer.resultsLabel(shares[0]!.value, shares[1]!.value, shares[2]!.value)}>
-      {shares.map(({ key, value }) =>
-        value > 0 ? (
-          <span key={key} class={`is-${key}`} style={{ width: `${value}%` }}>
-            {value >= 25 ? `${value}%` : ''}
-          </span>
-        ) : null,
-      )}
-    </span>
-  );
-};
 
 /**
  * Draft explorer: from a draft position, what players placed next in finished games, how often and with what results,

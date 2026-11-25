@@ -1,18 +1,19 @@
-import { moveToString, opposite, parseFen, type Color, type Move } from '@ligungi/engine';
-import { RACE_TIME_MS, puzzleInfo, type RaceView } from '@ligungi/protocol';
+import { moveToString, opposite, type Color, type Move } from '@ligungi/engine';
+import { RACE_TIME_MS, type RaceView } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { RaceTrack } from '../components/RaceTrack.tsx';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
 import { SettingRow, Toggle } from '../components/ui.tsx';
-import { activity, inActivity } from '../discordActivity.ts';
+import { discordActivity, inActivity } from '../discord/activity.ts';
 import { formatClock, useT } from '../i18n/index.ts';
 import { racerName, setShowGhosts, showGhosts } from '../racer.ts';
 import { navigate } from '../router.ts';
-import { usePuzzleSolver, type PuzzleEntry } from '../puzzleSolver.ts';
+import { usePuzzleEntries, usePuzzleSolver } from '../puzzleSolver.ts';
 import { socket } from '../socket.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
+import { useCopy, useTimers } from '../hooks.ts';
 
 /** The opponent's reply and the next puzzle come quickly: the clock is running for everyone. */
 const ANSWER_DELAY_MS = 250;
@@ -35,20 +36,19 @@ interface Clock {
 export const RacePage = ({ id }: { id: string }) => {
   const t = useT();
   const r = t.racer;
-  const state = useStore(activity);
+  const state = useStore(discordActivity);
   const ghostsOn = useStore(showGhosts);
   const [race, setRace] = useState<RaceView | null>(null);
   const [missing, setMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [entries, setEntries] = useState<ReadonlyMap<string, PuzzleEntry> | null>(null);
+  const { copied, copy } = useCopy();
+  const entries = usePuzzleEntries()?.byId ?? null;
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [, setTick] = useState(0);
   const clock = useRef<Clock>({ start: null, end: null });
-  const timers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
-  const later = (fn: () => void, ms: number) => timers.current.push(setTimeout(fn, ms));
+  const { later } = useTimers();
 
   const instanceId = state.status === 'ready' ? state.instanceId : null;
 
@@ -57,15 +57,6 @@ export const RacePage = ({ id }: { id: string }) => {
     clock.current = { start: view.startsIn === null ? null : now + view.startsIn, end: view.endsIn === null ? null : now + view.endsIn };
     setRace(view);
   };
-
-  useEffect(() => {
-    void import('@ligungi/protocol/puzzles').then(({ PUZZLES }) =>
-      setEntries(new Map(PUZZLES.map((puzzle) => [puzzle.id, { puzzle, info: puzzleInfo(puzzle), start: parseFen(puzzle.fen) }]))),
-    );
-    return () => {
-      for (const timer of timers.current) clearTimeout(timer);
-    };
-  }, []);
 
   // Follows the race, and joins it on arrival while it can still be joined.
   useEffect(() => {
@@ -176,14 +167,6 @@ export const RacePage = ({ id }: { id: string }) => {
     }
   };
   const link = typeof window === 'undefined' ? '' : `${window.location.origin}/racer/${id}`;
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  };
 
   if (missing) {
     return (
@@ -231,7 +214,7 @@ export const RacePage = ({ id }: { id: string }) => {
           {race?.kind === 'friends' && phase === 'waiting' && !inActivity && (
             <div class="copy-me">
               <input class="copy-me__target" readOnly spellcheck={false} aria-label={r.linkLabel} value={link} onFocus={(e) => (e.target as HTMLInputElement).select()} />
-              <button type="button" class="copy-me__button button" onClick={() => void copy()}>
+              <button type="button" class="copy-me__button button" onClick={() => void copy(link)}>
                 {copied ? r.copied : r.copy}
               </button>
             </div>

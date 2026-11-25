@@ -102,7 +102,7 @@ import {
   verifyPassword,
   type Session,
 } from './auth.ts';
-import { ActivityHalls } from './activity.ts';
+import { ActivityHalls } from './discordActivity.ts';
 import { Racers } from './racer.ts';
 import { BUILD } from './build.ts';
 import { ChallengeStore } from './challenges.ts';

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { presenceOf } from '../src/discordActivity.ts';
+import { presenceOf } from '../src/discord/activity.ts';
 
 describe('Discord status inside the Activity', () => {
   it('follows what the page says the player is doing', () => {

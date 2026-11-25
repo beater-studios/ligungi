@@ -15,7 +15,7 @@ import { playSound } from '../sound.ts';
 import { speakSample } from '../speech.ts';
 import { useStore } from '../store.ts';
 import { TowerTapPreview } from '../components/TowerTapPreview.tsx';
-import { SettingsShell } from './AccountPage.tsx';
+import { SettingsShell } from '../components/SettingsShell.tsx';
 
 /** A titled group of settings; with a preview, the rows sit on the left and the preview on the right. */
 const Group = ({ id, title, help, preview, children }: { id: string; title: string; help?: string; preview?: ComponentChildren; children: ComponentChildren }) => (

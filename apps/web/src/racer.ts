@@ -1,9 +1,8 @@
 import type { RaceGhostView, RacerRecordsView, RacerRef } from '@ligungi/protocol';
 import type { Messages } from './i18n/index.ts';
-import type { RunRecords } from './puzzleRuns.ts';
+import { bestScores, type RunRecords } from './puzzleRuns.ts';
 import { createStore } from './store.ts';
 
-const WEEK_MS = 7 * 86_400_000;
 const GHOSTS_KEY = 'ligungi.racerGhosts';
 
 /** A racer's name: the account's, or "Guest 1234" for a guest. */
@@ -20,15 +19,7 @@ export const ghostScore = (ghost: RaceGhostView, ms: number): number => {
 };
 
 /** The best race of today and of the last 7 days, in the player's own time zone, and the best ever. */
-export const racerRecords = (view: RacerRecordsView, now = Date.now()): RunRecords => {
-  const day = new Date(now).toDateString();
-  const best = (scores: readonly number[]) => Math.max(0, ...scores);
-  return {
-    today: best(view.recent.filter((race) => new Date(race.at).toDateString() === day).map((race) => race.score)),
-    week: best(view.recent.filter((race) => race.at > now - WEEK_MS).map((race) => race.score)),
-    ever: view.best,
-  };
-};
+export const racerRecords = (view: RacerRecordsView, now = Date.now()): RunRecords => bestScores(view.recent, view.best, now);
 
 const readGhosts = (): boolean => {
   try {

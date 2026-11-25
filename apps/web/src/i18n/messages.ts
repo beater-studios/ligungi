@@ -35,8 +35,6 @@ export type Json = { readonly [key: string]: string | Json };
 
 const SPECS: Readonly<Record<string, Spec | undefined>> = SCHEMA;
 
-const sameItems = (a: readonly string[], b: readonly string[]) => a.length === b.length && a.every((item) => b.includes(item));
-
 /** A translation is used only when it is valid ICU, uses the English text's arguments and tags, and keeps list lengths. */
 export const usable = (path: string, translation: unknown, english: string): translation is string => {
   if (typeof translation !== 'string' || translation.trim() === '') return false;

@@ -8,7 +8,7 @@ import { Checkbox } from '../components/ui.tsx';
 import { useT } from '../i18n/index.ts';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
-import { CommunityNav } from './PlayersPage.tsx';
+import { CommunityNav } from '../components/CommunityNav.tsx';
 
 const SEARCH_DELAY_MS = 250;
 

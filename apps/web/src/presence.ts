@@ -6,20 +6,20 @@ import { useEffect } from 'preact/hooks';
  * so an integration does not depend on the language or the layout. Pages with nothing beyond their address leave it
  * empty. See "Browser integrations" in docs/architecture.md for the keys.
  */
-export type PageActivity = Readonly<Record<string, string>>;
+export type PagePresence = Readonly<Record<string, string>>;
 
-export const ACTIVITY_PREFIX = 'data-activity-';
+export const PRESENCE_PREFIX = 'data-activity-';
 
 /** Sets the attributes and returns what removes them. */
-export const applyActivity = (root: HTMLElement, activity: PageActivity): (() => void) => {
-  const names = Object.keys(activity).map((key) => ACTIVITY_PREFIX + key);
-  for (const [key, value] of Object.entries(activity)) root.setAttribute(ACTIVITY_PREFIX + key, value);
+export const applyPresence = (root: HTMLElement, presence: PagePresence): (() => void) => {
+  const names = Object.keys(presence).map((key) => PRESENCE_PREFIX + key);
+  for (const [key, value] of Object.entries(presence)) root.setAttribute(PRESENCE_PREFIX + key, value);
   return () => {
     for (const name of names) root.removeAttribute(name);
   };
 };
 
-export const useActivity = (activity: PageActivity | null): void => {
-  const key = activity ? JSON.stringify(activity) : '';
-  useEffect(() => (activity ? applyActivity(document.documentElement, activity) : undefined), [key]);
+export const usePresence = (presence: PagePresence | null): void => {
+  const key = presence ? JSON.stringify(presence) : '';
+  useEffect(() => (presence ? applyPresence(document.documentElement, presence) : undefined), [key]);
 };

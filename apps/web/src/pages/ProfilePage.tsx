@@ -18,7 +18,7 @@ import { Flag } from '../components/Flag.tsx';
 import { ModPanel } from '../components/ModPanel.tsx';
 import { Crosstable } from '../components/Crosstable.tsx';
 import { ProfileAbout } from '../components/ProfileAbout.tsx';
-import { ActivityTimeline } from '../components/Activity.tsx';
+import { ActivityTimeline } from '../components/ActivityFeed.tsx';
 import { RatingHistory } from '../components/RatingHistory.tsx';
 import { ReportButton } from '../components/ReportButton.tsx';
 import { Select } from '../components/ui.tsx';

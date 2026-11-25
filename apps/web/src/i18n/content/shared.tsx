@@ -27,6 +27,8 @@ export const LINKS = {
   libaduk: 'https://libaduk.com/',
   discord: DISCORD_LINK,
   alternativeTo: 'https://alternativeto.net/software/ligungi/about/',
+  indieDb: 'https://www.indiedb.com/games/ligungi',
+  twitch: 'https://www.twitch.tv/ligungi',
 } as const;
 
 /** External link, opened in a new tab. */

@@ -1,8 +1,8 @@
 import { initialPosition, legalMoves, parseFen, parseSquare } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
-import { FeedList } from '../components/Activity.tsx';
-import { ActivityHubView } from '../components/ActivityHub.tsx';
+import { FeedList } from '../components/ActivityFeed.tsx';
+import { ActivityHubView } from '../discord/Hub.tsx';
 import { TowerStrip } from '../components/Panels.tsx';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
@@ -21,8 +21,8 @@ import { Checkbox, ColorField, Field, FieldRow, OptionCards, RadioGroup, Select,
 import { icons } from '../icons.ts';
 import { prefs, updatePrefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
-import { ResultBar } from './ExplorerPage.tsx';
-import { Records } from './PuzzleRunPage.tsx';
+import { ResultBar } from '../components/ResultBar.tsx';
+import { Records } from '../components/Records.tsx';
 
 /**
  * Living reference of ligungi's UI: real components rendered with the real styles. Developer-facing, so it is in

@@ -1,7 +1,6 @@
-import { MODES, opposite, parseFen, parseMove, type Color, type Mode } from '@ligungi/engine';
+import { MODES, opposite, parseMove, type Color, type Mode } from '@ligungi/engine';
 import {
   PUZZLE_THEMES,
-  puzzleInfo,
   type DailyPuzzle,
   type PuzzleAttemptResult,
   type PuzzleTheme,
@@ -14,7 +13,7 @@ import { Field, Select } from '../components/ui.tsx';
 import { errorText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { readLocalSolved, useSolvedPuzzles } from '../puzzleProgress.ts';
-import { usePuzzleSolver, type PuzzleEntry } from '../puzzleSolver.ts';
+import { usePuzzleEntries, usePuzzleSolver, type PuzzleEntry } from '../puzzleSolver.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
 import { playSound } from '../sound.ts';
@@ -51,7 +50,7 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
   const { user, loaded } = useStore(session);
   const { search } = useLocation();
   const filter = readFilter(search);
-  const [entries, setEntries] = useState<readonly PuzzleEntry[] | null>(null);
+  const entries = usePuzzleEntries()?.list ?? null;
   const [dailyPuzzle, setDailyPuzzle] = useState<DailyPuzzle | null>(null);
   const [view, setView] = useState<PuzzleView | null>(null);
   const [none, setNone] = useState(false);
@@ -79,14 +78,12 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
   });
   const local = solver.local;
 
-  useEffect(() => {
-    void import('@ligungi/protocol/puzzles').then(({ PUZZLES }) =>
-      setEntries(PUZZLES.map((puzzle) => ({ puzzle, info: puzzleInfo(puzzle), start: parseFen(puzzle.fen) }))),
-    );
-    return () => {
+  useEffect(
+    () => () => {
       if (timer.current) clearTimeout(timer.current);
-    };
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (daily) api.get<DailyPuzzle>('/api/puzzles/daily').then(setDailyPuzzle).catch(() => setNone(true));

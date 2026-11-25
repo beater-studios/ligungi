@@ -1,5 +1,5 @@
-import { opposite, parseFen, type Color, type Move } from '@ligungi/engine';
-import { STORM_PENALTY_MS, STORM_TIME_MS, puzzleInfo, stormBonus, type PuzzleRunKind } from '@ligungi/protocol';
+import { opposite, type Color, type Move } from '@ligungi/engine';
+import { STORM_PENALTY_MS, STORM_TIME_MS, stormBonus, type PuzzleRunKind } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { MiniBoard } from '../components/MiniBoard.tsx';
@@ -7,10 +7,12 @@ import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
 import { formatClock, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { runRecords, usePuzzleRuns, type RunRecords } from '../puzzleRuns.ts';
-import { usePuzzleSolver, type PuzzleEntry } from '../puzzleSolver.ts';
+import { usePuzzleEntries, usePuzzleSolver, type PuzzleEntry } from '../puzzleSolver.ts';
 import { session } from '../session.ts';
 import { playSound } from '../sound.ts';
 import { useStore } from '../store.ts';
+import { useTimers } from '../hooks.ts';
+import { Records } from '../components/Records.tsx';
 
 type Outcome = 'won' | 'lost' | 'skipped';
 
@@ -50,26 +52,6 @@ const comboSteps = (combo: number): { from: number; to: number } => {
   return { from, to: from + 10 };
 };
 
-export const Records = ({ records }: { records: RunRecords }) => {
-  const t = useT();
-  return (
-    <dl class="ligungi-run__records" aria-label={t.puzzleRuns.records}>
-      <div>
-        <dt>{t.puzzleRuns.today}</dt>
-        <dd>{records.today}</dd>
-      </div>
-      <div>
-        <dt>{t.puzzleRuns.week}</dt>
-        <dd>{records.week}</dd>
-      </div>
-      <div>
-        <dt>{t.puzzleRuns.ever}</dt>
-        <dd>{records.ever}</dd>
-      </div>
-    </dl>
-  );
-};
-
 /**
  * Puzzle Streak and Puzzle Storm. Streak: harder and harder puzzles, no clock, until the first wrong move, with one skip.
  * Storm: as many as possible in 3 minutes from the first move; a wrong move costs 10 seconds and moves on, and combos of
@@ -79,7 +61,7 @@ export const PuzzleRunPage = ({ kind }: { kind: PuzzleRunKind }) => {
   const t = useT();
   const { user, loaded } = useStore(session);
   const { view, record } = usePuzzleRuns();
-  const [entries, setEntries] = useState<ReadonlyMap<string, PuzzleEntry> | null>(null);
+  const entries = usePuzzleEntries()?.byId ?? null;
   const [sequence, setSequence] = useState<readonly PuzzleEntry[] | null>(null);
   const [index, setIndex] = useState(0);
   const [clockOn, setClockOn] = useState(false);
@@ -89,13 +71,8 @@ export const PuzzleRunPage = ({ kind }: { kind: PuzzleRunKind }) => {
   const [error, setError] = useState(false);
   const [, setTick] = useState(0);
   const run = useRef<RunState>(fresh());
-  const timers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const { later, clear: clearTimers } = useTimers();
   const refresh = () => setTick((n) => n + 1);
-  const later = (fn: () => void, ms: number) => timers.current.push(setTimeout(fn, ms));
-  const clearTimers = () => {
-    for (const id of timers.current) clearTimeout(id);
-    timers.current = [];
-  };
 
   const showFlash = (text: string, good: boolean) => {
     setFlash({ text, good });
@@ -179,13 +156,6 @@ export const PuzzleRunPage = ({ kind }: { kind: PuzzleRunKind }) => {
     setIndex(0);
     setError(false);
   };
-
-  useEffect(() => {
-    void import('@ligungi/protocol/puzzles').then(({ PUZZLES }) =>
-      setEntries(new Map(PUZZLES.map((puzzle) => [puzzle.id, { puzzle, info: puzzleInfo(puzzle), start: parseFen(puzzle.fen) }]))),
-    );
-    return clearTimers;
-  }, []);
 
   // A new run asks the server for its puzzles.
   useEffect(() => {

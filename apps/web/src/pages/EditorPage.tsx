@@ -32,6 +32,7 @@ import { icons } from '../icons.ts';
 import { prefs } from '../prefs.ts';
 import { navigate, useLocation } from '../router.ts';
 import { useStore } from '../store.ts';
+import { useCopy } from '../hooks.ts';
 
 type Tool = { readonly kind: 'piece'; readonly piece: Piece } | { readonly kind: 'erase' };
 
@@ -167,13 +168,10 @@ export const EditorPage = () => {
   const onBoard = (color: Color, role: Role) =>
     position.board.reduce((sum, tower) => sum + tower.filter((piece) => piece.color === color && piece.role === role).length, 0);
 
+  const { copy } = useCopy();
   const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(`${window.location.origin}/editor?fen=${encodeURIComponent(fen)}`);
-      setMessage({ ok: true, text: t.editor.copied });
-    } catch {
-      setMessage({ ok: false, text: t.genericError });
-    }
+    const ok = await copy(`${window.location.origin}/editor?fen=${encodeURIComponent(fen)}`);
+    setMessage(ok ? { ok: true, text: t.editor.copied } : { ok: false, text: t.genericError });
   };
   const load = (event: Event) => {
     event.preventDefault();

@@ -1,19 +1,20 @@
 import type { ChallengeView } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
-import { inActivity } from '../discordActivity.ts';
+import { inActivity } from '../discord/activity.ts';
 import { playerName, speedText, useT } from '../i18n/index.ts';
 import { navigate } from '../router.ts';
 import { session } from '../session.ts';
 import { socket } from '../socket.ts';
 import { useStore } from '../store.ts';
+import { useCopy } from '../hooks.ts';
 
 export const ChallengePage = ({ id }: { id: string }) => {
   const t = useT();
   const { user } = useStore(session);
   const [challenge, setChallenge] = useState<ChallengeView | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopy();
 
   useEffect(() => {
     api.get<ChallengeView>(`/api/challenges/${id}`).then(setChallenge).catch((err: Error) => setError(err.message));
@@ -55,14 +56,6 @@ export const ChallengePage = ({ id }: { id: string }) => {
   const decline = () => api.post(`/api/challenges/${id}/decline`).catch((err: Error) => setError(err.message));
   const { destination } = challenge;
   const forMe = Boolean(destination?.user && destination.user.id === user?.id);
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  };
 
   const { settings, challenger } = challenge;
   // Someone looking at a challenge meant for another player: describe it from the outside.
@@ -134,7 +127,7 @@ export const ChallengePage = ({ id }: { id: string }) => {
               value={link}
               onFocus={(e) => (e.target as HTMLInputElement).select()}
             />
-            <button type="button" class="copy-me__button button" onClick={copy}>
+            <button type="button" class="copy-me__button button" onClick={() => void copy(link)}>
               {copied ? t.challenge.copied : t.challenge.copy}
             </button>
           </div>

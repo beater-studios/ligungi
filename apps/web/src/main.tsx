@@ -7,7 +7,7 @@ import { render } from 'preact';
 import { App } from './app.tsx';
 import { watchIncoming } from './challenges.ts';
 import { watchConnection } from './connection.ts';
-import { inActivity, startActivity } from './discordActivity.ts';
+import { inActivity, startActivity } from './discord/activity.ts';
 import { loadPages } from './i18n/content/index.ts';
 import { loadLanguage } from './i18n/index.ts';
 import { registerServiceWorker, rememberOfflineLang } from './offline.ts';

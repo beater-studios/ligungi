@@ -1,6 +1,6 @@
 import { MODES, type Mode } from '@ligungi/engine';
 import { RATING_BAND, type OnlinePlayer, type PlayersView } from '@ligungi/protocol';
-import { useEffect, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { CreateGame } from '../components/CreateGame.tsx';
 import { Flag } from '../components/Flag.tsx';
@@ -10,6 +10,8 @@ import { playerName, timeAgo, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
+import { usePolling } from '../hooks.ts';
+import { CommunityNav } from '../components/CommunityNav.tsx';
 
 const REFRESH_MS = 30_000;
 
@@ -21,23 +23,6 @@ const percentBelow = (view: PlayersView, mode: Mode, rating: number): number => 
   const own = Math.floor(rating / RATING_BAND) * RATING_BAND;
   const below = view.distribution[mode].filter((band) => band.from < own).reduce((sum, band) => sum + band.players, 0);
   return all === 0 ? 0 : Math.round((below / all) * 100);
-};
-
-/** The community tabs shared by the players, ranking and friends pages. */
-export const CommunityNav = ({ active }: { active: 'players' | 'ranking' | 'friends' }) => {
-  const t = useT();
-  const link = (key: typeof active, href: string, label: string) => (
-    <a class={active === key ? 'active' : ''} href={href} aria-current={active === key ? 'page' : undefined}>
-      {label}
-    </a>
-  );
-  return (
-    <nav class="ligungi-segmented ligungi-community-nav" aria-label={t.nav.community}>
-      {link('players', '/players', t.nav.playerList)}
-      {link('ranking', '/ranking', t.nav.players)}
-      {link('friends', '/friends', t.nav.friends)}
-    </nav>
-  );
 };
 
 const OnlineRow = ({ player, mode, me, onChallenge }: { player: OnlinePlayer; mode: Mode; me: string | null; onChallenge: (name: string) => void }) => {
@@ -139,20 +124,15 @@ export const PlayersPage = () => {
   const [query, setQuery] = useState('');
   const [challenging, setChallenging] = useState<string | null>(null);
 
-  useEffect(() => {
-    let alive = true;
-    const load = () =>
+  usePolling(
+    (alive) =>
       api
         .get<PlayersView>('/api/players')
-        .then((next) => alive && setView(next))
-        .catch((err: Error) => alive && setError(err.message));
-    void load();
-    const timer = setInterval(load, REFRESH_MS);
-    return () => {
-      alive = false;
-      clearInterval(timer);
-    };
-  }, [user?.id]);
+        .then((next) => alive() && setView(next))
+        .catch((err: Error) => alive() && setError(err.message)),
+    REFRESH_MS,
+    [user?.id],
+  );
 
   // The viewer's own mode first; otherwise the mode with the most rated players.
   const shown: Mode =

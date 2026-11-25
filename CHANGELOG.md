@@ -13,6 +13,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 - Studies: each move can have up to 8 arrows and 8 painted squares (2 and 4 before), enough to show every direction of any piece.
 
+### Fixed
+
+- A practice result or a Puzzle Streak or Storm run that cannot reach your account (the connection dropped) is no longer lost: it waits in the browser and moves to your account on the next visit, as lesson stars already did.
+
 ## [0.9.11] - 2026-11-25
 
 ### Fixed

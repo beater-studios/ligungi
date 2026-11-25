@@ -1,11 +1,11 @@
 import type { DiscordSDK } from '@discord/embedded-app-sdk';
 import { MODES, type Mode } from '@ligungi/engine';
 import type { ActivityHallView, ColorChoice, TimeControl, UserRef } from '@ligungi/protocol';
-import { ACTIVITY_PREFIX } from './activity.ts';
-import { api } from './api.ts';
-import { getT } from './i18n/index.ts';
-import { SITE_URL } from './source.ts';
-import { createStore } from './store.ts';
+import { PRESENCE_PREFIX } from '../presence.ts';
+import { api } from '../api.ts';
+import { getT } from '../i18n/index.ts';
+import { SITE_URL } from '../source.ts';
+import { createStore } from '../store.ts';
 
 const LAUNCH_KEY = 'ligungi.activity';
 
@@ -37,7 +37,7 @@ export type ActivityState =
   | { readonly status: 'off' | 'starting' | 'failed' }
   | { readonly status: 'ready'; readonly instanceId: string; readonly reason: GuestReason | null };
 
-export const activity = createStore<ActivityState>({ status: inActivity ? 'starting' : 'off' });
+export const discordActivity = createStore<ActivityState>({ status: inActivity ? 'starting' : 'off' });
 
 /** Someone in the call, as Discord shows them. */
 export interface CallPerson {
@@ -95,7 +95,7 @@ const watchExternalLinks = () =>
 /** What the page says the player is doing, from the `data-activity-*` attributes the pages set for PreMiD. */
 const pageActivity = (): Readonly<Record<string, string>> =>
   Object.fromEntries(
-    [...document.documentElement.attributes].filter((a) => a.name.startsWith(ACTIVITY_PREFIX)).map((a) => [a.name.slice(ACTIVITY_PREFIX.length), a.value]),
+    [...document.documentElement.attributes].filter((a) => a.name.startsWith(PRESENCE_PREFIX)).map((a) => [a.name.slice(PRESENCE_PREFIX.length), a.value]),
   );
 
 export const presenceOf = (page: Readonly<Record<string, string>>): { details?: string; state: string } => {
@@ -198,17 +198,17 @@ export const startActivity = async (): Promise<void> => {
     const { code } = await client.commands.authorize({ client_id: clientId, response_type: 'code', state: '', prompt: 'none', scope: ['identify', 'rpc.activities.write'] });
     const signed = await api.post<{ user: UserRef | null; reason: GuestReason | null; accessToken: string }>('/api/activity/session', { code });
     await client.commands.authenticate({ access_token: signed.accessToken });
-    activity.set({ status: 'ready', instanceId: client.instanceId, reason: signed.reason });
+    discordActivity.set({ status: 'ready', instanceId: client.instanceId, reason: signed.reason });
     watchPresence(client);
     void watchPeople(client);
     void watchLayout(client);
   } catch {
-    activity.set({ status: 'failed' });
+    discordActivity.set({ status: 'failed' });
   }
 };
 
 const instanceId = (): string => {
-  const state = activity.get();
+  const state = discordActivity.get();
   if (state.status !== 'ready') throw new Error('activity not ready');
   return state.instanceId;
 };

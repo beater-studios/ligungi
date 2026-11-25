@@ -2,7 +2,7 @@ import { MODES, opposite, type Mode } from '@ligungi/engine';
 import { ACTIVITY_TIME_CONTROLS, type ActivityHallView, type ActivityRoomView, type ColorChoice, type GameSummary } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import {
-  activity,
+  discordActivity,
   activityTab,
   callPeople,
   callRooms,
@@ -16,12 +16,13 @@ import {
   type ActivityState,
   type CallPerson,
   type RoomSettings,
-} from '../discordActivity.ts';
+} from './activity.ts';
 import { colorChoiceOptions, playerName, speedText, useT } from '../i18n/index.ts';
 import { navigate, useLocation } from '../router.ts';
 import { SITE_URL, SOURCE_URL } from '../source.ts';
 import { useStore } from '../store.ts';
-import { OptionCards, SubmitButton } from './ui.tsx';
+import { OptionCards, SubmitButton } from '../components/ui.tsx';
+import { usePolling } from '../hooks.ts';
 
 /** How often the hub asks for the call's rooms, while the page is visible. */
 const ROOMS_POLL_MS = 4000;
@@ -311,29 +312,20 @@ export const ActivityHubView = ({ state, hall, people, onOpen, onJoin, onClose, 
 const useCallRooms = (ready: boolean): [ActivityHallView | null, () => void] => {
   const [hall, setHall] = useState<ActivityHallView | null>(null);
   const [tick, setTick] = useState(0);
-  useEffect(() => {
-    if (!ready) return;
-    let live = true;
-    const refresh = () => {
-      if (document.hidden) return;
+  usePolling(
+    (alive) =>
       callRooms()
-        .then((next) => live && setHall(next))
-        .catch(() => undefined);
-    };
-    refresh();
-    const timer = setInterval(refresh, ROOMS_POLL_MS);
-    document.addEventListener('visibilitychange', refresh);
-    return () => {
-      live = false;
-      clearInterval(timer);
-      document.removeEventListener('visibilitychange', refresh);
-    };
-  }, [ready, tick]);
+        .then((next) => alive() && setHall(next))
+        .catch(() => undefined),
+    ROOMS_POLL_MS,
+    [tick],
+    ready,
+  );
   return [hall, () => setTick((n) => n + 1)];
 };
 
 export const ActivityHub = () => {
-  const state = useStore(activity);
+  const state = useStore(discordActivity);
   const people = useStore(callPeople);
   const [hall, refresh] = useCallRooms(state.status === 'ready');
   return (

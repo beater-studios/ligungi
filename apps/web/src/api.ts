@@ -1,5 +1,5 @@
 import type { ErrorCode } from '@ligungi/protocol';
-import { inActivity } from './discordActivity.ts';
+import { inActivity } from './discord/activity.ts';
 import { errorText, getT } from './i18n/index.ts';
 
 export class ApiError extends Error {

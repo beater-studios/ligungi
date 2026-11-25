@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'preact/hooks';
-import { inActivity, openExternal } from '../discordActivity.ts';
+import { inActivity, openExternal } from '../discord/activity.ts';
 import { useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { SITE_URL } from '../source.ts';
 import { Modal } from './Modal.tsx';
+import { useCopy } from '../hooks.ts';
 
 /** The game record in a dialog, to copy or save as a file, instead of a raw text page in a new tab. */
 export const ExportGame = ({ gameId }: { gameId: string }) => {
@@ -12,7 +13,7 @@ export const ExportGame = ({ gameId }: { gameId: string }) => {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const { copied, copy, reset } = useCopy();
   const path = `/api/games/${gameId}/export`;
 
   useEffect(() => {
@@ -20,7 +21,7 @@ export const ExportGame = ({ gameId }: { gameId: string }) => {
     let live = true;
     setText(null);
     setFailed(false);
-    setCopied(false);
+    reset();
     fetch(path)
       .then((res) => (res.ok ? res.text() : Promise.reject(new Error(String(res.status)))))
       .then((record) => live && setText(record))
@@ -30,15 +31,6 @@ export const ExportGame = ({ gameId }: { gameId: string }) => {
     };
   }, [open, path]);
 
-  const copy = async () => {
-    if (text === null) return;
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  };
 
   const download = () => {
     // Discord's frame cannot save files, so inside the Activity the record opens in the player's browser.
@@ -76,7 +68,7 @@ export const ExportGame = ({ gameId }: { gameId: string }) => {
             />
           )}
           <div class="ligungi-export__actions">
-            <button type="button" class="button" disabled={text === null} onClick={() => void copy()}>
+            <button type="button" class="button" disabled={text === null} onClick={() => text !== null && void copy(text)}>
               {copied ? g.exportCopied : g.exportCopy}
             </button>
             <button type="button" class="button button-empty text" disabled={text === null && !inActivity} data-icon={icons.Download} onClick={download}>

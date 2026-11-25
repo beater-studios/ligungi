@@ -9361,7 +9361,7 @@ body.ligungi-zen {
   }
 }
 
-/* ===== Discord Activity (discordActivity.ts): the site inside a voice call ===== */
+/* ===== Discord Activity (discord/activity.ts): the site inside a voice call ===== */
 body.ligungi-discord {
   // Discord's mobile app draws over the edges of the frame and gives the insets as these variables. On desktop they
   // are zero, and the header would touch the top of the frame, so it keeps a small margin.
@@ -9494,7 +9494,7 @@ body.ligungi-discord--call #topnav {
   display: none;
 }
 
-/* ===== Discord hub: the home page inside the Discord Activity (components/ActivityHub.tsx) ===== */
+/* ===== Discord hub: the home page inside the Discord Activity (discord/Hub.tsx) ===== */
 .ligungi-hub-switch {
   display: flex;
   flex-wrap: nowrap;

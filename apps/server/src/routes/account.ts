@@ -75,7 +75,7 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
         about: 'Personal data held by ligungi for this account (LGPD access right). Display preferences live only in your browser.',
         exportedAt: iso(config.now()),
         account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
-        settings: { challengePolicy: users.challengePolicy(userId), followPolicy: users.followPolicy(userId) },
+        settings: { challengePolicy: users.social.challengePolicy(userId), followPolicy: users.social.followPolicy(userId) },
         profile: users.details(userId),
         puzzles: (() => {
           const { rating, history } = puzzles.dashboard(userId);
@@ -92,8 +92,8 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
           updatedAt: iso(study.updatedAt),
           chapters: studies.chapters(study.id),
         })),
-        lessons: users.lessonProgress(userId),
-        practice: users.practiceProgress(userId),
+        lessons: users.training.lessonProgress(userId),
+        practice: users.training.practiceProgress(userId),
         // What moderation holds about the account: the suspension in force, the reports it made and the actions taken on
         // it (without naming the moderator).
         moderation: {
@@ -117,9 +117,9 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
         }))(twoFactor.state(userId)),
         ratings: users.ratings(userId),
         discord: discord.exportFor(userId),
-        following: users.following(userId).map((entry) => entry.name),
-        followers: users.followers(userId).map((entry) => entry.name),
-        blocked: users.blocked(userId).map((entry) => entry.name),
+        following: users.social.following(userId).map((entry) => entry.name),
+        followers: users.social.followers(userId).map((entry) => entry.name),
+        blocked: users.social.blocked(userId).map((entry) => entry.name),
         notices: notices.list(userId, NOTICES_KEPT).map(({ kind, actor, subject, ref, createdAt, read }) => ({ kind, player: actor, subject, ref, date: iso(createdAt), read })),
         sessions: sessions.listForUser(userId).map((session) => ({
           current: session.id === ctx.session.id,
@@ -127,7 +127,7 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
           lastActive: iso(session.seenAt),
           browser: session.userAgent,
         })),
-        games: games.exportFor(userId),
+        games: games.history.exportFor(userId),
         // Only correspondence challenges and seeks are stored; the others live in memory for at most two hours.
         seeks: seekStore.forUser(userId).map((seek) => ({ id: seek.id, createdAt: iso(seek.createdAt), settings: seek.settings })),
         challenges: challengeStore.forUser(userId).map((challenge) => ({
@@ -146,11 +146,11 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
     })
     .add('GET', '/api/account/blocks', (ctx) => {
       const userId = requireUser(ctx);
-      sendJson(ctx.res, 200, users.blocked(userId).map((user) => user.name));
+      sendJson(ctx.res, 200, users.social.blocked(userId).map((user) => user.name));
     })
     .add('GET', '/api/account/settings', (ctx) => {
       const userId = requireUser(ctx);
-      sendJson(ctx.res, 200, { challengePolicy: users.challengePolicy(userId), followPolicy: users.followPolicy(userId) });
+      sendJson(ctx.res, 200, { challengePolicy: users.social.challengePolicy(userId), followPolicy: users.social.followPolicy(userId) });
     })
     .add('POST', '/api/account/settings', async (ctx) => {
       const userId = requireUser(ctx);
@@ -160,9 +160,9 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
       if (challengePolicy !== undefined && !challenge) throw new HttpError(400, 'invalidChallengePolicy');
       if (followPolicy !== undefined && !follow) throw new HttpError(400, 'invalidFollowPolicy');
       if (!challenge && !follow) throw new HttpError(400, 'invalidChallengePolicy');
-      if (challenge) users.setChallengePolicy(userId, challenge);
-      if (follow) users.setFollowPolicy(userId, follow);
-      sendJson(ctx.res, 200, { challengePolicy: users.challengePolicy(userId), followPolicy: users.followPolicy(userId) });
+      if (challenge) users.social.setChallengePolicy(userId, challenge);
+      if (follow) users.social.setFollowPolicy(userId, follow);
+      sendJson(ctx.res, 200, { challengePolicy: users.social.challengePolicy(userId), followPolicy: users.social.followPolicy(userId) });
     })
     .add('POST', '/api/notices/read', (ctx) => {
       const userId = requireUser(ctx);

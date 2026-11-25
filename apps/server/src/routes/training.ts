@@ -11,7 +11,7 @@ const PRACTICE_IDS: ReadonlySet<string> = new Set(PRACTICE_POSITIONS.map((positi
 export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
   const { activityCaller, config, explorer, puzzles, raceLimiter, racers, requireUser, users } = deps;
   router
-    .add('GET', '/api/lessons/progress', (ctx) => sendJson(ctx.res, 200, users.lessonProgress(requireUser(ctx))))
+    .add('GET', '/api/lessons/progress', (ctx) => sendJson(ctx.res, 200, users.training.lessonProgress(requireUser(ctx))))
     .add('POST', '/api/lessons/progress', async (ctx) => {
       const userId = requireUser(ctx);
       const { results } = (await ctx.body()) as { results?: unknown };
@@ -21,8 +21,8 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
         entries.length <= LESSON_PROGRESS_BATCH &&
         entries.every(([id, stars]) => LESSON_IDS.has(id) && Number.isInteger(stars) && (stars as number) >= 1 && (stars as number) <= LESSON_STARS_MAX);
       if (!valid) throw new HttpError(400, 'invalidLessonProgress');
-      users.saveLessonProgress(userId, Object.fromEntries(entries) as Record<string, number>);
-      sendJson(ctx.res, 200, users.lessonProgress(userId));
+      users.training.saveLessonProgress(userId, Object.fromEntries(entries) as Record<string, number>);
+      sendJson(ctx.res, 200, users.training.lessonProgress(userId));
     })
     .add('GET', '/api/explorer', (ctx) => {
       const params = ctx.url.searchParams;
@@ -42,7 +42,7 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
       }
       sendJson(ctx.res, 200, explorer.query(mode, band, params.get('rated') === '1', fen));
     })
-    .add('GET', '/api/practice/progress', (ctx) => sendJson(ctx.res, 200, users.practiceProgress(requireUser(ctx))))
+    .add('GET', '/api/practice/progress', (ctx) => sendJson(ctx.res, 200, users.training.practiceProgress(requireUser(ctx))))
     .add('POST', '/api/practice/progress', async (ctx) => {
       const userId = requireUser(ctx);
       const { results } = (await ctx.body()) as { results?: unknown };
@@ -52,8 +52,8 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
         entries.length <= PRACTICE_BATCH &&
         entries.every(([id, moves]) => PRACTICE_IDS.has(id) && Number.isInteger(moves) && (moves as number) >= 1 && (moves as number) <= 1000);
       if (!valid) throw new HttpError(400, 'invalidPracticeProgress');
-      users.savePracticeProgress(userId, Object.fromEntries(entries) as Record<string, number>);
-      sendJson(ctx.res, 200, users.practiceProgress(userId));
+      users.training.savePracticeProgress(userId, Object.fromEntries(entries) as Record<string, number>);
+      sendJson(ctx.res, 200, users.training.practiceProgress(userId));
     })
     .add('GET', '/api/puzzles/next', (ctx) => {
       const params = ctx.url.searchParams;

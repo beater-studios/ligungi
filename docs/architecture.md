@@ -36,12 +36,14 @@ Colors live in CSS variables (`--gg-board`, `--gg-line`, the piece faces and eve
 | `app.ts` | Wires everything: `createDeps` builds the services and shared helpers (presence, lobby, friends, leaderboards), and `createApp` keeps the security checks (same origin, JSON writes, CSP), the session, the WebSocket and the router. |
 | `routes/` | The HTTP routes by area (`auth`, `account`, `discord`, `discordActivity`, `moderation`, `studies`, `community`, `play`, `training`), each a `register<Area>Routes(router, deps)`. The router takes the first route that matches, so a path's literal routes stay in the same module before its `:id` route. |
 | `room.ts` | `GameRoom`: one ongoing game. Validates moves and handles the clock, abort, draw, rematch, victory claims and deadlines. |
-| `games.ts` | Keeps the rooms, persists to SQLite on every change, updates ratings at the end, reloads ongoing games on restart, and serves the filtered game history. |
+| `games.ts` | Keeps the rooms, persists to SQLite on every change, updates ratings at the end, reloads ongoing games on restart, and keeps the bookmarks. |
+| `game-history.ts` | `GameHistory` (`games.history`): the finished games as stored, for the history lists, counts, search, crosstables, records, rating trends and insights. A game still in memory is read from its room. |
+| `game-export.ts` | Plain-text export of one game in the spirit of PGN (`GET /api/games/:id/export`). |
 | `lobby.ts` | Seeks (with automatic pairing of compatible seeks) and challenge links. |
 | `hub.ts` | WebSocket pub/sub by topic (`lobby`, `game:<id>`, `challenge:<id>`). |
 | `clock.ts` | Fischer or byo-yomi clock. During the draft the same player may move several times in a row, so the clock goes to "whoever is to move" instead of simply alternating. A byo-yomi clock keeps one number per side, the time until the flag falls (main time plus the periods left), resets the current period after each move, and `byoyomiState` (protocol) splits it back for display. |
 | `glicko.ts` | Glicko-2, one rating per game mode. |
-| `auth.ts`, `users.ts` | Passwords with scrypt, session cookie `HttpOnly; SameSite=Lax`, session rotation on login. Follows and leaderboard queries. |
+| `auth.ts`, `users.ts` | Passwords with scrypt, session cookie `HttpOnly; SameSite=Lax`, session rotation on login. Accounts, ratings and profiles; `users.social` (`social.ts`: challenge and follow policies, follows, blocks), `users.rankings` (`rankings.ts`: leaderboards and positions) and `users.training` (`training.ts`: lesson and practice progress). |
 | `moderation.ts`, `cli.ts` | Moderators, suspensions, reports and the moderation log; the server commands that grant the role (see [moderation.md](moderation.md)) and register the Discord Linked Roles fields. |
 | `studies.ts` | Studies and their chapters. A chapter's tree is stored as JSON, checked first by `parseStudyRoot` (protocol), which replays every move with the rules and enforces the limits. |
 | `totp.ts`, `two-factor.ts` | Opt-in two-step verification: TOTP codes (RFC 6238 with Node's crypto), the stored secret and the hashed recovery codes. |

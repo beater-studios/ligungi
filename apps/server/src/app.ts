@@ -396,7 +396,7 @@ const createDeps = (config: ServerConfig) => {
   /** A finished game between two players where one blocked the other: no rematch between them. */
   const seatsBlocked = (room: { readonly seats: Readonly<Record<'white' | 'black', { readonly userId: string | null }>> }): boolean => {
     const { white, black } = room.seats;
-    return white.userId !== null && black.userId !== null && users.isBlocked(white.userId, black.userId);
+    return white.userId !== null && black.userId !== null && users.social.isBlocked(white.userId, black.userId);
   };
 
   const findUser = (name: string) => {
@@ -416,14 +416,14 @@ const createDeps = (config: ServerConfig) => {
   const RANKING_PAGE_LIMIT = 100_000;
 
   const rankingView = (requested: Mode | null, params: URLSearchParams, viewerId: string | null): RankingView => {
-    const counts = users.rankedCounts();
+    const counts = users.rankings.rankedCounts();
     const standings = viewerId ? users.ratings(viewerId) : null;
     const modes = Object.fromEntries(
       MODES.map((m) => {
         const own = standings?.[m];
         const you: ModeStanding | null =
           viewerId && own && own.games > 0
-            ? { rating: own.rating, provisional: own.provisional, games: own.games, rank: users.rank(viewerId, m) }
+            ? { rating: own.rating, provisional: own.provisional, games: own.games, rank: users.rankings.rank(viewerId, m) }
             : null;
         return [m, { players: counts[m], you }];
       }),
@@ -436,12 +436,12 @@ const createDeps = (config: ServerConfig) => {
     const page = Math.min(RANKING_PAGE_LIMIT, Math.max(1, Math.trunc(Number(params.get('page'))) || 1));
     const query = (params.get('q') ?? '').trim().slice(0, RANKING_QUERY_MAX);
     const followerId = viewerId && params.get('followed') === '1' ? viewerId : null;
-    const { rows, total } = users.rankingPage(mode, { query, followerId }, (page - 1) * RANKING_PAGE_SIZE, RANKING_PAGE_SIZE);
-    const records = games.recordsIn(mode, rows.map((row) => row.user.id));
-    const trends = games.ratingTrends(mode, rows.map((row) => row.user.id), trendSince());
+    const { rows, total } = users.rankings.rankingPage(mode, { query, followerId }, (page - 1) * RANKING_PAGE_SIZE, RANKING_PAGE_SIZE);
+    const records = games.history.recordsIn(mode, rows.map((row) => row.user.id));
+    const trends = games.history.ratingTrends(mode, rows.map((row) => row.user.id), trendSince());
     const online = onlineUsers(viewerId);
-    const followed = new Set(viewerId ? users.following(viewerId).map((user) => user.id) : []);
-    const place = viewerId ? users.rankingPlace(viewerId, mode) : null;
+    const followed = new Set(viewerId ? users.social.following(viewerId).map((user) => user.id) : []);
+    const place = viewerId ? users.rankings.rankingPlace(viewerId, mode) : null;
     return {
       mode,
       rows: rows.map((row) => ({
@@ -462,14 +462,14 @@ const createDeps = (config: ServerConfig) => {
   const playersView = (viewerId: string | null, sessionId: string): PlayersView => {
     const now = config.now();
     if (!playersCache || now - playersCache.at >= PLAYERS_CACHE_MS) {
-      const { recent, finished } = games.activity(now - 24 * 3_600_000);
-      const bands = (mode: Mode) => users.ratingDistribution(mode, RATING_BAND);
+      const { recent, finished } = games.history.gameCounts(now - 24 * 3_600_000);
+      const bands = (mode: Mode) => users.rankings.ratingDistribution(mode, RATING_BAND);
       playersCache = {
         at: now,
         stats: { gamesLastDay: recent, gamesTotal: finished, players: users.count() },
         distribution: { intro: bands('intro'), beginner: bands('beginner'), intermediate: bands('intermediate'), advanced: bands('advanced') },
-        ranks: { intro: users.ranks('intro'), beginner: users.ranks('beginner'), intermediate: users.ranks('intermediate'), advanced: users.ranks('advanced') },
-        recent: { games: games.recentlyFinished(RECENT_GAMES), players: users.newest(RECENT_PLAYERS) },
+        ranks: { intro: users.rankings.ranks('intro'), beginner: users.rankings.ranks('beginner'), intermediate: users.rankings.ranks('intermediate'), advanced: users.rankings.ranks('advanced') },
+        recent: { games: games.history.recentlyFinished(RECENT_GAMES), players: users.newest(RECENT_PLAYERS) },
       };
     }
     const cache = playersCache;
@@ -478,8 +478,8 @@ const createDeps = (config: ServerConfig) => {
     for (const room of ongoing) for (const seat of Object.values(room.seats)) if (seat.userId) playingIn.set(seat.userId, room.id);
     const signedIn = [...onlineUsers(viewerId)];
     const ids = signedIn.slice(0, 500);
-    const ratings = users.playedRatings(viewerId ? [...ids, viewerId] : ids);
-    const followed = new Set(viewerId ? users.following(viewerId).map((user) => user.id) : []);
+    const ratings = users.rankings.playedRatings(viewerId ? [...ids, viewerId] : ids);
+    const followed = new Set(viewerId ? users.social.following(viewerId).map((user) => user.id) : []);
     const best = (player: OnlinePlayer) => Math.max(0, ...Object.values(player.ratings).map((standing) => standing.rating));
     const online: OnlinePlayer[] = ids
       .map((id) => users.findById(id))
@@ -495,7 +495,7 @@ const createDeps = (config: ServerConfig) => {
         ),
         playing: playingIn.get(user.id) ?? null,
         followed: followed.has(user.id),
-        canChallenge: viewerId !== null && users.canChallenge(viewerId, user.id),
+        canChallenge: viewerId !== null && users.social.canChallenge(viewerId, user.id),
       }))
       .sort((a, b) => Number(a.playing !== null) - Number(b.playing !== null) || best(b) - best(a) || a.user.name.localeCompare(b.user.name))
       .slice(0, ONLINE_LIST_MAX);
@@ -517,8 +517,8 @@ const createDeps = (config: ServerConfig) => {
 
   const trendSince = () => config.now() - RATING_TREND_DAYS * DAY_MS;
   const leaders = (mode: Mode, limit: number, online: Set<string>): LeaderEntry[] => {
-    const rows = users.leaderboard(mode, limit);
-    const trends = games.ratingTrends(mode, rows.map((row) => row.user.id), trendSince());
+    const rows = users.rankings.leaderboard(mode, limit);
+    const trends = games.history.ratingTrends(mode, rows.map((row) => row.user.id), trendSince());
     return rows.map((row) => ({ ...row, online: online.has(row.user.id), trend: trends.get(row.user.id) ?? 0 }));
   };
 

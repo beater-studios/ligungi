@@ -82,6 +82,9 @@ export const normalizeBio = (bio: string): string =>
 
 const COUNTRY_SET: ReadonlySet<string> = new Set(COUNTRIES);
 
+/** A stored country code read back: one of `COUNTRIES`, or null for none or an unknown one. */
+export const toCountry = (code: string | null): Country | null => COUNTRIES.find((country) => country === code) ?? null;
+
 /** Validates the profile a player saves. Returns an error code when invalid. */
 export const parseProfileDetails = (input: unknown): ProfileDetails | ErrorCode => {
   if (typeof input !== 'object' || input === null) return 'invalidProfile';

@@ -209,10 +209,10 @@ describe('rating trends', () => {
     room.resign('black');
     const [whiteDiff, blackDiff] = [room.seats.white.ratingDiff!, room.seats.black.ratingDiff!];
     expect(whiteDiff).toBeGreaterThan(0);
-    expect(games.ratingTrends('intro', [white.id, black.id], now - 1000)).toEqual(new Map([[white.id, whiteDiff], [black.id, blackDiff]]));
+    expect(games.history.ratingTrends('intro', [white.id, black.id], now - 1000)).toEqual(new Map([[white.id, whiteDiff], [black.id, blackDiff]]));
     // Outside the period, and in another mode, nothing moved.
-    expect(games.ratingTrends('intro', [white.id], now + 1000).get(white.id)).toBe(0);
-    expect(games.ratingTrends('advanced', [white.id], 0).get(white.id)).toBe(0);
+    expect(games.history.ratingTrends('intro', [white.id], now + 1000).get(white.id)).toBe(0);
+    expect(games.history.ratingTrends('advanced', [white.id], 0).get(white.id)).toBe(0);
     const playedAt = (db.prepare("select played_at from ratings where user_id = ? and mode = 'intro'").get(white.id) as { played_at: number }).played_at;
     expect(playedAt).toBe(now);
     // A voided game gives the points back but does not count as playing.
@@ -272,7 +272,7 @@ describe('finished game summaries', () => {
     const expected = room.summary();
     // A new store holds no finished room in memory, so the summary comes from the row.
     const fresh = new Games(db, users, options);
-    expect(fresh.recentlyFinished(1)).toEqual([expected]);
+    expect(fresh.history.recentlyFinished(1)).toEqual([expected]);
     expect(fresh.cachedCount).toBe(0);
     db.close();
   });

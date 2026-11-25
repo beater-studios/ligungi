@@ -1,8 +1,8 @@
 import type { AppDeps } from '../app.ts';
 import { BOOKMARK_NOTE_MAX, DAY_MS, dayStart, isErrorCode, parseGameSearch, parseSettings, type GameSearchResult, type UserRef } from '@ligungi/protocol';
 import { BUILD } from '../build.ts';
-import { exportGame } from '../export.ts';
-import type { SearchCriteria } from '../games.ts';
+import { exportGame } from '../game-export.ts';
+import type { SearchCriteria } from '../game-history.ts';
 import { HttpError, sendJson, sendText, type Router } from '../http.ts';
 
 const SITE_NAME = 'ligungi';
@@ -54,7 +54,7 @@ export const registerPlayRoutes = (router: Router, deps: AppDeps): void => {
         ...(from ? { from: dayStart(from)! } : {}),
         ...(to ? { to: dayStart(to)! + DAY_MS } : {}),
       };
-      sendJson(ctx.res, 200, games.search(criteria, page ?? 1));
+      sendJson(ctx.res, 200, games.history.search(criteria, page ?? 1));
     })
     .add('GET', '/api/games/:id', (ctx) => {
       const room = games.get(ctx.params.id!);
@@ -99,7 +99,7 @@ export const registerPlayRoutes = (router: Router, deps: AppDeps): void => {
         const target = typeof to === 'string' ? users.findByName(to) : undefined;
         if (!target) throw new HttpError(404, 'userNotFound');
         if (target.id === userId) throw new HttpError(400, 'cannotChallengeSelf');
-        if (!users.canChallenge(userId, target.id)) throw new HttpError(403, 'challengeRefused');
+        if (!users.social.canChallenge(userId, target.id)) throw new HttpError(403, 'challengeRefused');
         if (!hub.hasSession(ctx.session.id)) throw new HttpError(409, 'connectionRequired');
         destination = { id: target.id, name: target.name };
       }

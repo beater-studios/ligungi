@@ -317,7 +317,7 @@ export class DiscordLinks {
     const row = this.#row(userId);
     const user = this.#users.findById(userId);
     if (!config || !row || row.paused || !user) return;
-    const ratings = this.#users.playedRatings([userId]).get(userId) ?? [];
+    const ratings = this.#users.rankings.playedRatings([userId]).get(userId) ?? [];
     const established = ratings.filter((entry) => !entry.provisional).map((entry) => entry.rating);
     const best = established.length ? Math.max(...established) : null;
     const metadata = {

@@ -85,7 +85,7 @@ export class Lobby {
 
   /** Two signed-in players where one blocked the other are never put in a game together. */
   #apart(a: Player, b: Player): boolean {
-    return a.userId !== null && b.userId !== null && this.#users.isBlocked(a.userId, b.userId);
+    return a.userId !== null && b.userId !== null && this.#users.social.isBlocked(a.userId, b.userId);
   }
 
   #dropSeek(seek: Seek): void {

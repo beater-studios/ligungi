@@ -218,7 +218,7 @@ describe('playing online', () => {
   it('requires an account for rated games', async () => {
     server = await startServer();
     const res = await client().request<{ error: string }>('POST', '/api/seeks', { ...casual, rated: true });
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(401);
     expect(res.data.error).toContain('Entre na sua conta');
     expect((res.data as { code?: string }).code).toBe('loginForRated');
   });
@@ -513,7 +513,7 @@ describe('community', () => {
     expect(full.data).toHaveLength(2);
     expect((await a.request<LeaderEntry[]>('GET', '/api/leaderboard/advanced?limit=1')).data.map((e) => e.user.name)).toEqual(['Netero']);
     expect((await a.request<LeaderEntry[]>('GET', '/api/leaderboard/advanced?limit=abc')).data).toHaveLength(2);
-    expect((await a.request('GET', '/api/leaderboard/blitz')).status).toBe(404);
+    expect((await a.request('GET', '/api/leaderboard/blitz')).status).toBe(400);
 
     const zeno = (await a.request<UserProfile>('GET', '/api/users/zeno')).data;
     expect(zeno.ranks).toEqual({ intro: null, beginner: null, intermediate: null, advanced: 2 });
@@ -578,7 +578,7 @@ describe('community', () => {
     expect(await view('/advanced?page=2')).toMatchObject({ rows: [], total: 4, page: 2 });
     expect(await view('/advanced?page=abc')).toMatchObject({ page: 1, total: 4 });
     for (const page of ['1e20', 'Infinity']) expect((await a.request('GET', `/api/ranking/advanced?page=${page}`)).status).toBe(200);
-    expect((await a.request('GET', '/api/ranking/blitz')).status).toBe(404);
+    expect((await a.request('GET', '/api/ranking/blitz')).status).toBe(400);
 
     const anonymous = (await client().request<RankingView>('GET', '/api/ranking?followed=1')).data;
     expect(anonymous).toMatchObject({ mode: 'advanced', total: 4, you: null });
@@ -1168,7 +1168,7 @@ describe('rating history', () => {
     expect(stats.byColor).toEqual({ white: { wins: 1, draws: 0, losses: 1 }, black: { wins: 0, draws: 0, losses: 0 } });
     expect(stats.byLength).toEqual([{ wins: 1, draws: 0, losses: 1 }, { wins: 0, draws: 0, losses: 0 }, { wins: 0, draws: 0, losses: 0 }]);
     expect((await a.request<ModeStats>('GET', '/api/users/ponzu/stats/advanced')).data.history).toEqual([]);
-    expect((await a.request('GET', '/api/users/ponzu/stats/nope')).status).toBe(404);
+    expect((await a.request('GET', '/api/users/ponzu/stats/nope')).status).toBe(400);
 
     // A voided game leaves the history and the results.
     expect(makeModerator('pokkle').code).toBe(0);

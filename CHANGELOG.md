@@ -12,6 +12,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 ### Changed
 
 - Studies: each move can have up to 8 arrows and 8 painted squares (2 and 4 before), enough to show every direction of any piece.
+- API: each error code now always comes with the same HTTP status. A few responses changed: an unknown mode in a ranking, leaderboard or stats address is `400 invalidMode` (was 404); an account needed for rated or correspondence play is `401` (was 400 or 409); `tooManyChallenges` is always `429`, `notYourChallenge` and `notInActivity` `403`, and `activitySignInFailed` `401`.
 
 ### Fixed
 

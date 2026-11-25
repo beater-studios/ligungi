@@ -34,9 +34,9 @@ export const registerDiscordRoutes = (router: Router, deps: AppDeps): void => {
     .add('GET', '/api/account/discord', (ctx) => sendJson(ctx.res, 200, discord.view(requireUser(ctx))))
     .add('POST', '/api/account/discord/check', async (ctx) => {
       const userId = requireUser(ctx);
-      if (!discord.enabled) throw new HttpError(404, 'discordDisabled');
-      if (!discord.view(userId).link) throw new HttpError(404, 'discordNotLinked');
-      if (!discordLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
+      if (!discord.enabled) throw new HttpError('discordDisabled');
+      if (!discord.view(userId).link) throw new HttpError('discordNotLinked');
+      if (!discordLimiter.allow(userId)) throw new HttpError('tooManyAttempts');
       await discord.check(userId);
       sendJson(ctx.res, 200, discord.view(userId));
     })

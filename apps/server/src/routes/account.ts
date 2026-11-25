@@ -12,13 +12,13 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
   router
     .add('POST', '/api/account/password', async (ctx) => {
       const userId = requireUser(ctx);
-      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
+      if (!authLimiter.allow(ctx.ip)) throw new HttpError('tooManyAttempts');
       const { current, next } = (await ctx.body()) as { current?: unknown; next?: unknown };
       const user = users.findById(userId);
       if (!user || typeof current !== 'string' || !(await verifyPassword(current, user.passwordHash))) {
-        throw new HttpError(401, 'wrongPassword');
+        throw new HttpError('wrongPassword');
       }
-      if (typeof next !== 'string' || next.length < 8 || next.length > 200) throw new HttpError(400, 'invalidPassword');
+      if (typeof next !== 'string' || next.length < 8 || next.length > 200) throw new HttpError('invalidPassword');
       users.updatePasswordHash(userId, await hashPassword(next));
       // Every other device must sign in again with the new password.
       sessions.deleteOtherSessions(userId, ctx.session.id);
@@ -28,13 +28,13 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
     })
     .add('POST', '/api/account/delete', async (ctx) => {
       const userId = requireUser(ctx);
-      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
+      if (!authLimiter.allow(ctx.ip)) throw new HttpError('tooManyAttempts');
       const { password } = (await ctx.body()) as { password?: unknown };
       const user = users.findById(userId);
       if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
-        throw new HttpError(401, 'wrongPassword');
+        throw new HttpError('wrongPassword');
       }
-      if (games.hasOngoing(userId)) throw new HttpError(409, 'activeGame');
+      if (games.hasOngoing(userId)) throw new HttpError('activeGame');
       lobby.removeUser(userId);
       games.anonymizeUser(userId, ANONYMOUS_NAME);
       discord.forget(userId);
@@ -63,15 +63,15 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
     .add('DELETE', '/api/account/sessions/:id', (ctx) => {
       const userId = requireUser(ctx);
       const removed = sessions.deleteByHandle(userId, ctx.params.id!, ctx.session.id);
-      if (!removed) throw new HttpError(404, 'sessionNotFound');
+      if (!removed) throw new HttpError('sessionNotFound');
       closeSessionSockets([removed]);
       sendJson(ctx.res, 200, { revoked: 1 });
     })
     .add('GET', '/api/account/export', (ctx) => {
       const userId = requireUser(ctx);
-      if (!exportLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
+      if (!exportLimiter.allow(userId)) throw new HttpError('tooManyAttempts');
       const user = users.findById(userId);
-      if (!user) throw new HttpError(401, 'loginRequired');
+      if (!user) throw new HttpError('loginRequired');
       const data = accountExport(deps, user, ctx.session.id);
       ctx.res.setHeader('content-disposition', `attachment; filename="ligungi-${user.name}.json"`);
       ctx.res.setHeader('cache-control', 'no-store');
@@ -90,9 +90,9 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
       const { challengePolicy, followPolicy } = (await ctx.body()) as { challengePolicy?: unknown; followPolicy?: unknown };
       const challenge = CHALLENGE_POLICIES.find((value) => value === challengePolicy);
       const follow = FOLLOW_POLICIES.find((value) => value === followPolicy);
-      if (challengePolicy !== undefined && !challenge) throw new HttpError(400, 'invalidChallengePolicy');
-      if (followPolicy !== undefined && !follow) throw new HttpError(400, 'invalidFollowPolicy');
-      if (!challenge && !follow) throw new HttpError(400, 'invalidChallengePolicy');
+      if (challengePolicy !== undefined && !challenge) throw new HttpError('invalidChallengePolicy');
+      if (followPolicy !== undefined && !follow) throw new HttpError('invalidFollowPolicy');
+      if (!challenge && !follow) throw new HttpError('invalidChallengePolicy');
       if (challenge) users.social.setChallengePolicy(userId, challenge);
       if (follow) users.social.setFollowPolicy(userId, follow);
       sendJson(ctx.res, 200, { challengePolicy: users.social.challengePolicy(userId), followPolicy: users.social.followPolicy(userId) });
@@ -106,7 +106,7 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
     .add('POST', '/api/account/profile', async (ctx) => {
       const userId = requireUser(ctx);
       const details = parseProfileDetails(await ctx.body());
-      if (isErrorCode(details)) throw new HttpError(400, details);
+      if (isErrorCode(details)) throw new HttpError(details);
       users.setDetails(userId, details);
       sendJson(ctx.res, 200, details);
     });

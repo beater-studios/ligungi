@@ -6,17 +6,17 @@ import type { ChapterInput, StudyRecord } from '../studies.ts';
 
 const checkedRoot = (start: Parameters<typeof parseStudyRoot>[0], value: unknown): StudyRoot => {
   const root = value === undefined ? emptyRoot() : parseStudyRoot(start, value);
-  if (root === 'tooLarge') throw new HttpError(400, 'chapterTooLarge');
-  if (!root) throw new HttpError(400, 'invalidChapter');
+  if (root === 'tooLarge') throw new HttpError('chapterTooLarge');
+  if (!root) throw new HttpError('invalidChapter');
   return root;
 };
 
 const chapterInput = (value: unknown): ChapterInput => {
-  if (typeof value !== 'object' || value === null) throw new HttpError(400, 'invalidChapter');
+  if (typeof value !== 'object' || value === null) throw new HttpError('invalidChapter');
   const { name, fen, orientation, root } = value as Record<string, unknown>;
   const text = studyText(name, STUDY_CHAPTER_NAME_MAX, true);
   const start = studyStart(fen);
-  if (text === null || !start || !isOrientation(orientation)) throw new HttpError(400, 'invalidChapter');
+  if (text === null || !start || !isOrientation(orientation)) throw new HttpError('invalidChapter');
   return { name: text, fen: fen as string, orientation, root: checkedRoot(start, root) };
 };
 
@@ -27,16 +27,16 @@ export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
   /** A study the viewer may open; one they may not is reported as missing, so its existence does not leak. */
   const readableStudy = (ctx: Context): StudyRecord => {
     const study = studies.get(ctx.params.id!);
-    if (!study || !studies.canRead(study, ctx.session.userId, moderation.isModerator(ctx.session.userId))) throw new HttpError(404, 'studyNotFound');
+    if (!study || !studies.canRead(study, ctx.session.userId, moderation.isModerator(ctx.session.userId))) throw new HttpError('studyNotFound');
     return study;
   };
 
   /** A study the signed-in user wrote and is about to change. */
   const ownStudy = (ctx: Context): StudyRecord => {
     const userId = requireUser(ctx);
-    if (!studyLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
+    if (!studyLimiter.allow(userId)) throw new HttpError('tooManyAttempts');
     const study = readableStudy(ctx);
-    if (study.ownerId !== userId) throw new HttpError(403, 'notStudyOwner');
+    if (study.ownerId !== userId) throw new HttpError('notStudyOwner');
     return study;
   };
 
@@ -45,10 +45,10 @@ export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
     const title = studyText(body.title, STUDY_TITLE_MAX, true);
     const description = studyText(body.description ?? '', STUDY_DESCRIPTION_MAX, false);
     const { visibility } = body;
-    if (title === null || description === null || !isStudyVisibility(visibility)) throw new HttpError(400, 'invalidStudy');
+    if (title === null || description === null || !isStudyVisibility(visibility)) throw new HttpError('invalidStudy');
     const user = users.findById(userId);
     if (visibility === 'public' && (!user || config.now() - user.createdAt < STUDY_PUBLIC_MIN_DAYS * DAY_MS)) {
-      throw new HttpError(403, 'studyPublicTooSoon');
+      throw new HttpError('studyPublicTooSoon');
     }
     return { title, description, visibility };
   };
@@ -68,11 +68,11 @@ export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
     })
     .add('POST', '/api/studies', async (ctx) => {
       const userId = requireUser(ctx);
-      if (!studyLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
+      if (!studyLimiter.allow(userId)) throw new HttpError('tooManyAttempts');
       const body = (await ctx.body()) as Record<string, unknown>;
       const fields = studyFields(body, userId);
       const chapter = chapterInput(body.chapter);
-      if (studies.count(userId) >= STUDIES_MAX) throw new HttpError(409, 'tooManyStudies');
+      if (studies.count(userId) >= STUDIES_MAX) throw new HttpError('tooManyStudies');
       const id = studies.create(userId, fields.title, fields.description, fields.visibility, chapter);
       sendJson(ctx.res, 200, studies.view(studies.get(id)!, userId));
     })
@@ -91,39 +91,39 @@ export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
     })
     .add('GET', '/api/studies/:id/chapters/:chapter', (ctx) => {
       const chapter = studies.chapter(readableStudy(ctx).id, ctx.params.chapter!);
-      if (!chapter) throw new HttpError(404, 'chapterNotFound');
+      if (!chapter) throw new HttpError('chapterNotFound');
       sendJson(ctx.res, 200, chapter);
     })
     .add('POST', '/api/studies/:id/chapters', async (ctx) => {
       const study = ownStudy(ctx);
       const chapter = chapterInput(await ctx.body());
-      if (study.chapters >= STUDY_CHAPTERS_MAX) throw new HttpError(409, 'tooManyChapters');
+      if (study.chapters >= STUDY_CHAPTERS_MAX) throw new HttpError('tooManyChapters');
       sendJson(ctx.res, 200, studies.addChapter(study.id, chapter));
     })
     .add('POST', '/api/studies/:id/chapters/:chapter', async (ctx) => {
       const study = ownStudy(ctx);
       const current = studies.chapter(study.id, ctx.params.chapter!);
-      if (!current) throw new HttpError(404, 'chapterNotFound');
+      if (!current) throw new HttpError('chapterNotFound');
       const { name, orientation, root } = (await ctx.body()) as Record<string, unknown>;
       const text = name === undefined ? current.name : studyText(name, STUDY_CHAPTER_NAME_MAX, true);
       const side = orientation === undefined ? current.orientation : orientation;
-      if (text === null || !isOrientation(side)) throw new HttpError(400, 'invalidChapter');
+      if (text === null || !isOrientation(side)) throw new HttpError('invalidChapter');
       const tree = root === undefined ? current.root : checkedRoot(studyStart(current.fen)!, root);
       studies.updateChapter(study.id, current.id, { name: text, orientation: side, root: tree });
       sendJson(ctx.res, 200, { ok: true });
     })
     .add('POST', '/api/studies/:id/chapters/:chapter/move', async (ctx) => {
       const study = ownStudy(ctx);
-      if (!studies.chapter(study.id, ctx.params.chapter!)) throw new HttpError(404, 'chapterNotFound');
+      if (!studies.chapter(study.id, ctx.params.chapter!)) throw new HttpError('chapterNotFound');
       const { index } = (await ctx.body()) as { index?: unknown };
-      if (!Number.isInteger(index)) throw new HttpError(400, 'invalidChapter');
+      if (!Number.isInteger(index)) throw new HttpError('invalidChapter');
       studies.moveChapter(study.id, ctx.params.chapter!, index as number);
       sendJson(ctx.res, 200, studies.view(studies.get(study.id)!, study.ownerId));
     })
     .add('DELETE', '/api/studies/:id/chapters/:chapter', (ctx) => {
       const study = ownStudy(ctx);
-      if (!studies.chapter(study.id, ctx.params.chapter!)) throw new HttpError(404, 'chapterNotFound');
-      if (study.chapters <= 1) throw new HttpError(409, 'lastChapter');
+      if (!studies.chapter(study.id, ctx.params.chapter!)) throw new HttpError('chapterNotFound');
+      if (study.chapters <= 1) throw new HttpError('lastChapter');
       studies.deleteChapter(study.id, ctx.params.chapter!);
       sendJson(ctx.res, 200, studies.view(studies.get(study.id)!, study.ownerId));
     });

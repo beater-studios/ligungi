@@ -55,13 +55,13 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
     .add('GET', '/api/users/:name/stats/:mode', (ctx) => {
       const user = findUser(ctx.params.name!);
       const mode = ctx.params.mode as Mode;
-      if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
+      if (!MODES.includes(mode)) throw new HttpError('invalidMode');
       sendJson(ctx.res, 200, games.history.modeStats(user.id, mode));
     })
     .add('GET', '/api/users/:name/games', (ctx) => {
       const user = findUser(ctx.params.name!);
       const filters = parseGameFilters(ctx.url.searchParams);
-      if (isErrorCode(filters)) throw new HttpError(400, filters);
+      if (isErrorCode(filters)) throw new HttpError(filters);
       const { vs, ...rest } = filters;
       let vsId: string | undefined;
       if (vs) {
@@ -75,7 +75,7 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
     .add('GET', '/api/crosstable/:a/:b', (ctx) => {
       // Only id and name leave the server: the stored user also holds the password hash.
       const [a, b] = [findUser(ctx.params.a!), findUser(ctx.params.b!)].map((user) => ({ id: user.id, name: user.name })) as [UserRef, UserRef];
-      if (a.id === b.id) throw new HttpError(400, 'invalidFilter');
+      if (a.id === b.id) throw new HttpError('invalidFilter');
       sendJson(ctx.res, 200, games.history.crosstable(a, b));
     })
     .add('GET', '/api/users/:name/activity', (ctx) => {
@@ -84,10 +84,10 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
       sendJson(ctx.res, 200, profileActivity(deps, user, mine));
     })
     .add('GET', '/api/users/:name/insights/:mode', (ctx) => {
-      if (!searchLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      if (!searchLimiter.allow(ctx.session.id)) throw new HttpError('tooManyAttempts');
       const user = findUser(ctx.params.name!);
       const mode = ctx.params.mode as Mode;
-      if (!(MODES as readonly string[]).includes(mode)) throw new HttpError(400, 'invalidMode');
+      if (!(MODES as readonly string[]).includes(mode)) throw new HttpError('invalidMode');
       sendJson(ctx.res, 200, games.history.insights(user.id, mode));
     })
     .add('GET', '/api/feed', (ctx) => {
@@ -97,7 +97,7 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
     .add('GET', '/api/users/:name/counts', (ctx) => {
       const user = findUser(ctx.params.name!);
       const filters = parseGameFilters(ctx.url.searchParams);
-      if (isErrorCode(filters)) throw new HttpError(400, filters);
+      if (isErrorCode(filters)) throw new HttpError(filters);
       let vsId: string | undefined;
       if (filters.vs) {
         const opponent = users.findByName(filters.vs);
@@ -113,11 +113,11 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
     .add('POST', '/api/users/:name/follow', (ctx) => {
       const userId = requireUser(ctx);
       const target = findUser(ctx.params.name!);
-      if (target.id === userId) throw new HttpError(400, 'cannotFollowSelf');
+      if (target.id === userId) throw new HttpError('cannotFollowSelf');
       if (!users.social.isFollowing(userId, target.id) && users.social.followCounts(userId).following >= MAX_FOLLOWS) {
-        throw new HttpError(400, 'tooManyFollows');
+        throw new HttpError('tooManyFollows');
       }
-      if (!users.social.isFollowing(userId, target.id) && !users.social.canFollow(userId, target.id)) throw new HttpError(403, 'followRefused');
+      if (!users.social.isFollowing(userId, target.id) && !users.social.canFollow(userId, target.id)) throw new HttpError('followRefused');
       if (users.social.follow(userId, target.id)) notice(target.id, 'follow', { actorId: userId });
       sendJson(ctx.res, 200, { followed: true, canFollow: true, ...users.social.followCounts(target.id) });
     })
@@ -130,8 +130,8 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
     .add('POST', '/api/users/:name/block', (ctx) => {
       const userId = requireUser(ctx);
       const target = findUser(ctx.params.name!);
-      if (target.id === userId) throw new HttpError(400, 'cannotBlockSelf');
-      if (!users.social.hasBlocked(userId, target.id) && users.social.blockCount(userId) >= MAX_BLOCKS) throw new HttpError(409, 'tooManyBlocks');
+      if (target.id === userId) throw new HttpError('cannotBlockSelf');
+      if (!users.social.hasBlocked(userId, target.id) && users.social.blockCount(userId) >= MAX_BLOCKS) throw new HttpError('tooManyBlocks');
       users.social.block(userId, target.id);
       lobby.cancelBetween(userId, target.id);
       sendJson(ctx.res, 200, { blocked: true, followed: false, canFollow: false, canChallenge: false, ...users.social.followCounts(target.id) });
@@ -165,7 +165,7 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
     .add('GET', '/api/ranking', (ctx) => sendJson(ctx.res, 200, rankingView(null, ctx.url.searchParams, ctx.session.userId)))
     .add('GET', '/api/ranking/:mode', (ctx) => {
       const mode = ctx.params.mode as Mode;
-      if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
+      if (!MODES.includes(mode)) throw new HttpError('invalidMode');
       sendJson(ctx.res, 200, rankingView(mode, ctx.url.searchParams, ctx.session.userId));
     })
     .add('GET', '/api/leaderboard', (ctx) => {
@@ -175,7 +175,7 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
     })
     .add('GET', '/api/leaderboard/:mode', (ctx) => {
       const mode = ctx.params.mode as Mode;
-      if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
+      if (!MODES.includes(mode)) throw new HttpError('invalidMode');
       const limit = Math.min(LEADERBOARD_MAX, Math.max(1, Math.trunc(Number(ctx.url.searchParams.get('limit'))) || LEADERBOARD_MAX));
       sendJson(ctx.res, 200, leaders(mode, limit, onlineUsers(ctx.session.userId)));
     });

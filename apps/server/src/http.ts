@@ -4,6 +4,7 @@ import { extname, join, normalize, resolve, sep } from 'node:path';
 import { ERROR_MESSAGES, type ErrorCode } from '@ligungi/protocol';
 import type { Session } from './auth.ts';
 import type { TrustProxy } from './config.ts';
+import { ERROR_STATUS } from './errors.ts';
 import type { Player } from './games.ts';
 
 export interface Context {
@@ -33,16 +34,16 @@ export class HttpError extends Error {
   /** Extra fields for the client, sent beside the code (for example when a suspension ends). */
   readonly details: Readonly<Record<string, unknown>>;
 
-  constructor(status: number, code: ErrorCode, details: Readonly<Record<string, unknown>> = {}) {
+  constructor(code: ErrorCode, details: Readonly<Record<string, unknown>> = {}) {
     super(ERROR_MESSAGES[code]);
-    this.status = status;
+    this.status = ERROR_STATUS[code];
     this.code = code;
     this.details = details;
   }
 }
 
-export const sendError = (res: ServerResponse, status: number, code: ErrorCode, details: Readonly<Record<string, unknown>> = {}): void =>
-  sendJson(res, status, { ...details, error: ERROR_MESSAGES[code], code });
+export const sendError = (res: ServerResponse, code: ErrorCode, details: Readonly<Record<string, unknown>> = {}): void =>
+  sendJson(res, ERROR_STATUS[code], { ...details, error: ERROR_MESSAGES[code], code });
 
 /** `decodeURIComponent` that returns null on malformed input instead of throwing. */
 export const safeDecode = (value: string): string | null => {
@@ -109,7 +110,7 @@ export const readJson = (req: IncomingMessage): Promise<unknown> =>
     req.on('data', (chunk: Buffer) => {
       size += chunk.length;
       if (size > BODY_LIMIT) {
-        reject(new HttpError(413, 'requestTooLarge'));
+        reject(new HttpError('requestTooLarge'));
         req.destroy();
         return;
       }
@@ -120,7 +121,7 @@ export const readJson = (req: IncomingMessage): Promise<unknown> =>
       try {
         resolvePromise(JSON.parse(Buffer.concat(chunks).toString('utf8')));
       } catch {
-        reject(new HttpError(400, 'invalidJson'));
+        reject(new HttpError('invalidJson'));
       }
     });
     req.on('error', reject);

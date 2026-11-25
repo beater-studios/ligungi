@@ -266,7 +266,7 @@ const createDeps = (config: ServerConfig) => {
 
   const findUser = (name: string) => {
     const user = users.findByName(name);
-    if (!user) throw new HttpError(404, 'userNotFound');
+    if (!user) throw new HttpError('userNotFound');
     return user;
   };
 
@@ -312,14 +312,14 @@ const createDeps = (config: ServerConfig) => {
   const ACTIVITY_INSTANCE = /^[\w-]{1,100}$/;
   /** Checks that the caller signed in through the Activity and is in the call they act on; returns that call. */
   const activityCaller = async (ctx: Context, instanceId: unknown): Promise<string> => {
-    if (!activityOrigin) throw new HttpError(404, 'activityDisabled');
+    if (!activityOrigin) throw new HttpError('activityDisabled');
     const discordId = activityPlayers.get(ctx.session.id)?.discordId;
-    if (!discordId) throw new HttpError(401, 'activitySignInRequired');
+    if (!discordId) throw new HttpError('activitySignInRequired');
     rememberActivityPlayer(ctx.session.id, discordId);
-    if (!activityLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
-    if (typeof instanceId !== 'string' || !ACTIVITY_INSTANCE.test(instanceId)) throw new HttpError(400, 'notInActivity');
+    if (!activityLimiter.allow(ctx.session.id)) throw new HttpError('tooManyAttempts');
+    if (typeof instanceId !== 'string' || !ACTIVITY_INSTANCE.test(instanceId)) throw new HttpError('notInActivity');
     const members = await discord.instanceUsers(instanceId);
-    if (members && !members.has(discordId)) throw new HttpError(403, 'notInActivity');
+    if (members && !members.has(discordId)) throw new HttpError('notInActivity');
     return instanceId;
   };
 
@@ -444,7 +444,7 @@ export const createApp = (config: ServerConfig): App => {
     const existing = sessions.get(parseCookies(req.headers.cookie).get(SESSION_COOKIE));
     if (existing) return existing;
     if (req.method === 'GET' && url.pathname !== '/api/me') return { id: `ephemeral:${randomId(24)}`, userId: null };
-    if (!sessionLimiter.allow(ip)) throw new HttpError(429, 'tooManyAttempts');
+    if (!sessionLimiter.allow(ip)) throw new HttpError('tooManyAttempts');
     const created = sessions.create();
     res.setHeader('set-cookie', sessionCookie(created.id, config.secureCookies, fromActivity(req)));
     return created;
@@ -470,11 +470,11 @@ export const createApp = (config: ServerConfig): App => {
       return;
     }
     const matched = router.match(req.method ?? 'GET', url.pathname);
-    if (!matched) return sendError(res, 404, 'routeNotFound');
+    if (!matched) return sendError(res, 'routeNotFound');
     if (req.method !== 'GET') {
       const json = req.headers['content-type']?.startsWith('application/json');
       if (!sameOrigin(req) || (!json && req.method !== 'DELETE')) {
-        return sendError(res, 403, 'forbidden');
+        return sendError(res, 'forbidden');
       }
     }
     const ip = clientIp(req, config.trustProxy);
@@ -497,11 +497,11 @@ export const createApp = (config: ServerConfig): App => {
   const server = createServer((req, res) => {
     handleRequest(req, res).catch((error: unknown) => {
       if (error instanceof HttpError) {
-        if (!res.headersSent) sendError(res, error.status, error.code, error.details);
+        if (!res.headersSent) sendError(res, error.code, error.details);
         return;
       }
       console.error(error);
-      if (!res.headersSent) sendError(res, 500, 'internal');
+      if (!res.headersSent) sendError(res, 'internal');
       else res.destroy();
     });
   });

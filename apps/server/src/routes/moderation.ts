@@ -19,7 +19,7 @@ const discordText = (text: string): string => text.replace(/[\\`*_~|>#\[\]()-]/g
 /** A moderator's reason or note: required, at most as long as a report. */
 const reasonOf = (value: unknown): string => {
   const reason = typeof value === 'string' ? value.trim() : '';
-  if (!reason || reason.length > REPORT_DETAILS_MAX) throw new HttpError(400, 'reasonRequired');
+  if (!reason || reason.length > REPORT_DETAILS_MAX) throw new HttpError('reasonRequired');
   return reason;
 };
 
@@ -31,37 +31,37 @@ export const registerModerationRoutes = (router: Router, deps: AppDeps): void =>
   const requireModerator = (ctx: Context): { id: string; name: string } => {
     const userId = requireUser(ctx);
     const user = users.findById(userId);
-    if (!user || !moderation.isModerator(userId)) throw new HttpError(403, 'notModerator');
+    if (!user || !moderation.isModerator(userId)) throw new HttpError('notModerator');
     return { id: user.id, name: user.name };
   };
 
   /** A player a moderator acts on; moderators are out of reach (only the server command changes them). */
   const sanctionable = (name: string) => {
     const user = findUser(name);
-    if (moderation.isModerator(user.id)) throw new HttpError(403, 'cannotModerateModerator');
+    if (moderation.isModerator(user.id)) throw new HttpError('cannotModerateModerator');
     return user;
   };
 
   router
     .add('POST', '/api/reports', async (ctx) => {
       const userId = requireUser(ctx);
-      if (!reportLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
+      if (!reportLimiter.allow(userId)) throw new HttpError('tooManyAttempts');
       const { username, reason, details, gameId, studyId, chapterId, chapterPath } = (await ctx.body()) as Record<string, unknown>;
       const study = typeof studyId === 'string' ? studies.get(studyId) : undefined;
-      if (studyId !== undefined && (!study || !studies.canRead(study, userId, false))) throw new HttpError(404, 'studyNotFound');
+      if (studyId !== undefined && (!study || !studies.canRead(study, userId, false))) throw new HttpError('studyNotFound');
       // The chapter and move the reporter was on, so a moderator lands on the drawing or comment reported.
       const chapter =
         study && typeof chapterId === 'string' && studies.chapter(study.id, chapterId)
           ? { id: chapterId, path: typeof chapterPath === 'string' && /^\d{1,3}(\.\d{1,3}){0,199}$/.test(chapterPath) ? chapterPath : '' }
           : null;
       const target = study ? users.findById(study.ownerId) : typeof username === 'string' ? users.findByName(username) : undefined;
-      if (!target) throw new HttpError(404, 'userNotFound');
-      if (target.id === userId) throw new HttpError(400, 'cannotReportSelf');
+      if (!target) throw new HttpError('userNotFound');
+      if (target.id === userId) throw new HttpError('cannotReportSelf');
       const text = typeof details === 'string' ? details.trim() : '';
-      if (!REPORT_REASONS.includes(reason as ReportReason) || text.length > REPORT_DETAILS_MAX) throw new HttpError(400, 'invalidReport');
+      if (!REPORT_REASONS.includes(reason as ReportReason) || text.length > REPORT_DETAILS_MAX) throw new HttpError('invalidReport');
       const game = typeof gameId === 'string' && games.get(gameId) ? gameId : null;
       const result = moderation.report(userId, target.id, reason as ReportReason, text, game, study?.id ?? null, chapter);
-      if (result === 'alreadyReported') throw new HttpError(409, 'alreadyReported');
+      if (result === 'alreadyReported') throw new HttpError('alreadyReported');
       sendJson(ctx.res, 200, { ok: true });
       // The moderators hear of it on Discord at once, with a link to what was reported.
       const origin = discord.siteOrigin;
@@ -84,7 +84,7 @@ export const registerModerationRoutes = (router: Router, deps: AppDeps): void =>
     .add('POST', '/api/mod/studies/:id/hide', async (ctx) => {
       const moderator = requireModerator(ctx);
       const study = studies.get(ctx.params.id!);
-      if (!study) throw new HttpError(404, 'studyNotFound');
+      if (!study) throw new HttpError('studyNotFound');
       const { hidden, reason } = (await ctx.body()) as { hidden?: unknown; reason?: unknown };
       const text = reasonOf(reason);
       const hide = hidden !== false;
@@ -97,7 +97,7 @@ export const registerModerationRoutes = (router: Router, deps: AppDeps): void =>
       const moderator = requireModerator(ctx);
       const study = studies.get(ctx.params.id!);
       const chapter = study ? studies.chapter(study.id, ctx.params.chapterId!) : undefined;
-      if (!study || !chapter) throw new HttpError(404, 'studyNotFound');
+      if (!study || !chapter) throw new HttpError('studyNotFound');
       const { reason } = (await ctx.body()) as { reason?: unknown };
       const text = reasonOf(reason);
       // Every arrow and painted square of the chapter goes; the moves and comments stay.
@@ -110,7 +110,7 @@ export const registerModerationRoutes = (router: Router, deps: AppDeps): void =>
     .add('POST', '/api/mod/studies/:id/delete', async (ctx) => {
       const moderator = requireModerator(ctx);
       const study = studies.get(ctx.params.id!);
-      if (!study) throw new HttpError(404, 'studyNotFound');
+      if (!study) throw new HttpError('studyNotFound');
       const { reason } = (await ctx.body()) as { reason?: unknown };
       const text = reasonOf(reason);
       studies.delete(study.id);
@@ -126,7 +126,7 @@ export const registerModerationRoutes = (router: Router, deps: AppDeps): void =>
     .add('POST', '/api/mod/reports/:id/close', async (ctx) => {
       const moderator = requireModerator(ctx);
       const report = moderation.reportById(ctx.params.id!);
-      if (!report) throw new HttpError(404, 'reportNotFound');
+      if (!report) throw new HttpError('reportNotFound');
       const { resolution } = (await ctx.body()) as { resolution?: unknown };
       const text = reasonOf(resolution);
       moderation.closeReport(report.id, moderator.name, text);
@@ -154,7 +154,7 @@ export const registerModerationRoutes = (router: Router, deps: AppDeps): void =>
       const moderator = requireModerator(ctx);
       const target = sanctionable(ctx.params.name!);
       const { days, reason } = (await ctx.body()) as { days?: unknown; reason?: unknown };
-      if (!SUSPENSION_DAYS.includes(days as number | null)) throw new HttpError(400, 'invalidSuspension');
+      if (!SUSPENSION_DAYS.includes(days as number | null)) throw new HttpError('invalidSuspension');
       const text = reasonOf(reason);
       moderation.suspend(target.id, days as number | null, text);
       // Out everywhere at once: no session, no socket, nothing left waiting in the lobby, and the games in progress lost.
@@ -168,7 +168,7 @@ export const registerModerationRoutes = (router: Router, deps: AppDeps): void =>
     .add('POST', '/api/mod/users/:name/unsuspend', async (ctx) => {
       const moderator = requireModerator(ctx);
       const target = findUser(ctx.params.name!);
-      if (!moderation.suspension(target.id)) throw new HttpError(409, 'notSuspended');
+      if (!moderation.suspension(target.id)) throw new HttpError('notSuspended');
       const { reason } = (await ctx.body()) as { reason?: unknown };
       const text = reasonOf(reason);
       moderation.unsuspend(target.id);
@@ -180,9 +180,9 @@ export const registerModerationRoutes = (router: Router, deps: AppDeps): void =>
       const moderator = requireModerator(ctx);
       const target = sanctionable(ctx.params.name!);
       const { username, reason } = (await ctx.body()) as { username?: unknown; reason?: unknown };
-      if (typeof username !== 'string' || !USERNAME_PATTERN.test(username)) throw new HttpError(400, 'invalidUsername');
+      if (typeof username !== 'string' || !USERNAME_PATTERN.test(username)) throw new HttpError('invalidUsername');
       const text = reasonOf(reason);
-      if (!users.rename(target.id, username)) throw new HttpError(409, 'usernameTaken');
+      if (!users.rename(target.id, username)) throw new HttpError('usernameTaken');
       games.renameUser(target.id, username);
       lobby.renameUser(target.id, username);
       // Their sockets carry the old name: reconnecting picks up the new one.
@@ -207,8 +207,8 @@ export const registerModerationRoutes = (router: Router, deps: AppDeps): void =>
       const { reason } = (await ctx.body()) as { reason?: unknown };
       const text = reasonOf(reason);
       const room = games.voidGame(ctx.params.id!);
-      if (room === 'gameNotFound') throw new HttpError(404, 'gameNotFound');
-      if (room === 'gameNotVoidable') throw new HttpError(409, 'gameNotVoidable');
+      if (room === 'gameNotFound') throw new HttpError('gameNotFound');
+      if (room === 'gameNotVoidable') throw new HttpError('gameNotVoidable');
       moderation.log('void', moderator.name, null, text, room.id);
       for (const seat of Object.values(room.seats)) if (seat.userId) notice(seat.userId, 'gameVoided', { ref: room.id });
       publishGame(room);

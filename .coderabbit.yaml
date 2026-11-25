@@ -26,7 +26,7 @@ reviews:
     - path: 'apps/server/**'
       instructions: |
         Node runs the TypeScript directly, so only erasable syntax (no enum, namespace or parameter properties).
-        SQL always uses bound parameters. Errors are codes from packages/protocol/src/errors.ts. Schema changes are
+        SQL always uses bound parameters. Errors are codes from packages/protocol/src/errors.ts, each with one status in ERROR_STATUS (apps/server/src/errors.ts). Schema changes are
         new entries appended to MIGRATIONS in db.ts, never edits of an existing one. Do not weaken the checks in
         app.ts (JSON content type and same origin for writes, WebSocket origin, CSP) nor the rate limits applied
         in routes/.

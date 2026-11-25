@@ -21,25 +21,25 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
         entries !== null &&
         entries.length <= LESSON_PROGRESS_BATCH &&
         entries.every(([id, stars]) => LESSON_IDS.has(id) && Number.isInteger(stars) && (stars as number) >= 1 && (stars as number) <= LESSON_STARS_MAX);
-      if (!valid) throw new HttpError(400, 'invalidLessonProgress');
+      if (!valid) throw new HttpError('invalidLessonProgress');
       users.training.saveLessonProgress(userId, Object.fromEntries(entries) as Record<string, number>);
       sendJson(ctx.res, 200, users.training.lessonProgress(userId));
     })
     .add('GET', '/api/explorer', (ctx) => {
       const params = ctx.url.searchParams;
       const mode = EXPLORER_MODES.find((value) => value === params.get('mode'));
-      if (!mode) throw new HttpError(400, 'invalidMode');
+      if (!mode) throw new HttpError('invalidMode');
       const band = EXPLORER_BANDS.find((value) => value === (params.get('band') ?? 'all'));
-      if (!band) throw new HttpError(400, 'invalidExplorerQuery');
+      if (!band) throw new HttpError('invalidExplorerQuery');
       const fen = params.get('fen');
       if (fen !== null) {
         let position;
         try {
           position = parseFen(fen);
         } catch {
-          throw new HttpError(400, 'invalidExplorerQuery');
+          throw new HttpError('invalidExplorerQuery');
         }
-        if (position.phase !== 'draft' || position.mode !== mode) throw new HttpError(400, 'invalidExplorerQuery');
+        if (position.phase !== 'draft' || position.mode !== mode) throw new HttpError('invalidExplorerQuery');
       }
       sendJson(ctx.res, 200, explorer.query(mode, band, params.get('rated') === '1', fen));
     })
@@ -52,7 +52,7 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
         entries !== null &&
         entries.length <= PRACTICE_BATCH &&
         entries.every(([id, moves]) => PRACTICE_IDS.has(id) && Number.isInteger(moves) && (moves as number) >= 1 && (moves as number) <= 1000);
-      if (!valid) throw new HttpError(400, 'invalidPracticeProgress');
+      if (!valid) throw new HttpError('invalidPracticeProgress');
       users.training.savePracticeProgress(userId, Object.fromEntries(entries) as Record<string, number>);
       sendJson(ctx.res, 200, users.training.practiceProgress(userId));
     })
@@ -63,7 +63,7 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
       // Without an account, the browser says what it already solved (ids that are not puzzles are ignored).
       const exclude = (params.get('exclude') ?? '').split(',').filter(isPuzzle).slice(0, PUZZLE_BATCH);
       const id = puzzles.next(ctx.session.userId, { theme, mode }, exclude);
-      if (!id) throw new HttpError(404, 'noPuzzleLeft');
+      if (!id) throw new HttpError('noPuzzleLeft');
       sendJson(ctx.res, 200, { id });
     })
     .add('GET', '/api/puzzles/daily', (ctx) => {
@@ -75,7 +75,7 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
       const userId = requireUser(ctx);
       const { ids } = (await ctx.body()) as { ids?: unknown };
       if (!Array.isArray(ids) || ids.length > PUZZLE_BATCH || !ids.every((id) => typeof id === 'string' && isPuzzle(id))) {
-        throw new HttpError(400, 'invalidPuzzle');
+        throw new HttpError('invalidPuzzle');
       }
       puzzles.importSolved(userId, ids as string[]);
       sendJson(ctx.res, 200, puzzles.solved(userId));
@@ -85,35 +85,35 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
       sendJson(ctx.res, 200, { records: userId ? racers.records(userId) : null, waiting: racers.waiting() });
     })
     .add('POST', '/api/racer/public', (ctx) => {
-      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError('tooManyAttempts');
       sendJson(ctx.res, 200, { id: racers.joinPublic(ctx.player) });
     })
     .add('POST', '/api/racer', (ctx) => {
-      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError('tooManyAttempts');
       sendJson(ctx.res, 200, { id: racers.create(ctx.player, 'friends') });
     })
     .add('GET', '/api/racer/:id', (ctx) => {
       const race = racers.view(ctx.params.id!, ctx.player);
-      if (!race) throw new HttpError(404, 'raceNotFound');
+      if (!race) throw new HttpError('raceNotFound');
       sendJson(ctx.res, 200, race);
     })
     .add('POST', '/api/racer/:id/join', async (ctx) => {
-      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError('tooManyAttempts');
       const body = (await ctx.body()) as { instanceId?: unknown };
       // A call's race is only for the people in that call.
       const instanceId = body.instanceId === undefined ? null : await activityCaller(ctx, body.instanceId);
       const joined = racers.join(ctx.params.id!, ctx.player, instanceId);
-      if (joined) throw new HttpError(joined === 'raceNotFound' ? 404 : 409, joined);
+      if (joined) throw new HttpError(joined);
       sendJson(ctx.res, 200, { ok: true });
     })
     .add('POST', '/api/racer/:id/start', (ctx) => {
       const started = racers.start(ctx.params.id!, ctx.player);
-      if (started) throw new HttpError(started === 'raceNotFound' ? 404 : 409, started);
+      if (started) throw new HttpError(started);
       sendJson(ctx.res, 200, { ok: true });
     })
     .add('GET', '/api/puzzles/sequence', (ctx) => {
       const kind = PUZZLE_RUN_KINDS.find((value) => value === ctx.url.searchParams.get('kind'));
-      if (!kind) throw new HttpError(400, 'invalidPuzzleRun');
+      if (!kind) throw new HttpError('invalidPuzzleRun');
       sendJson(ctx.res, 200, { ids: puzzles.sequence(kind) });
     })
     .add('GET', '/api/puzzles/runs', (ctx) => sendJson(ctx.res, 200, puzzles.runs(requireUser(ctx))))
@@ -137,19 +137,19 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
             (at as number) <= latest
           );
         });
-      if (!valid) throw new HttpError(400, 'invalidPuzzleRun');
+      if (!valid) throw new HttpError('invalidPuzzleRun');
       puzzles.saveRuns(userId, runs as PuzzleRun[]);
       sendJson(ctx.res, 200, puzzles.runs(userId));
     })
     .add('GET', '/api/puzzles/:id', (ctx) => {
-      if (!isPuzzle(ctx.params.id!)) throw new HttpError(404, 'puzzleNotFound');
+      if (!isPuzzle(ctx.params.id!)) throw new HttpError('puzzleNotFound');
       sendJson(ctx.res, 200, puzzles.view(ctx.params.id!, ctx.session.userId));
     })
     .add('POST', '/api/puzzles/:id/attempt', async (ctx) => {
       const userId = requireUser(ctx);
-      if (!isPuzzle(ctx.params.id!)) throw new HttpError(404, 'puzzleNotFound');
+      if (!isPuzzle(ctx.params.id!)) throw new HttpError('puzzleNotFound');
       const { win } = (await ctx.body()) as { win?: unknown };
-      if (typeof win !== 'boolean') throw new HttpError(400, 'invalidPuzzle');
+      if (typeof win !== 'boolean') throw new HttpError('invalidPuzzle');
       sendJson(ctx.res, 200, puzzles.attempt(userId, ctx.params.id!, win));
     });
 };

@@ -1,0 +1,89 @@
+/* ===== Design system page (/design) ===== */
+.ligungi-ds {
+  &__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    group.radio {
+      width: auto;
+      min-width: 16rem;
+    }
+  }
+
+  &__section {
+    padding: 1.5rem 0;
+    border-top: $border;
+
+    h2 {
+      font-size: 1.4em;
+      margin: 0 0 0.75rem;
+    }
+  }
+
+  &__list li {
+    margin-bottom: 0.5rem;
+    list-style: disc inside;
+  }
+
+  &__swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+  }
+
+  &__swatch {
+    display: grid;
+    gap: 0.2rem;
+
+    span {
+      height: 3rem;
+      border-radius: $box-radius-size;
+      border: $border;
+    }
+
+    small {
+      color: $c-font-dim;
+    }
+  }
+
+  &__example {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.75rem 0;
+
+    @media (max-width: 700px) {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+    }
+  }
+
+  &__label {
+    color: $c-font-dim;
+    font-size: 0.85em;
+  }
+
+  & &__inline {
+    margin: 0;
+    padding: 0;
+  }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__form {
+    max-width: 36rem;
+  }
+
+  &__board {
+    width: 14rem;
+  }
+}

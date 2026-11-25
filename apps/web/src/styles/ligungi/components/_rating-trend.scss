@@ -1,0 +1,20 @@
+/* ===== Rating trend (components/RatingTrend.tsx): the week's change beside a rating ===== */
+.ligungi-trend {
+  font-size: 0.75em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  &.is-up {
+    color: $c-good;
+  }
+
+  &.is-down {
+    color: $c-bad;
+  }
+}
+
+.ligungi-home__leader-rating {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}

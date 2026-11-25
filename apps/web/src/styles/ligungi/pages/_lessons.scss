@@ -1,0 +1,242 @@
+/* ===== Lessons (pages/LessonsPage.tsx): the map of stages, and each exercise beside its board ===== */
+.ligungi-learn__lessons {
+  align-self: flex-start;
+  margin-top: 0.75rem;
+}
+
+// The gold of the goal stars on the board; the theme's brag color is reddish here.
+$lesson-star: #e8a800;
+
+// Stars drawn as shapes, empty or filled, so they need no font.
+.ligungi-stars {
+  display: inline-flex;
+  gap: 0.15em;
+  vertical-align: middle;
+
+  i {
+    display: block;
+    width: 1.1em;
+    height: 1.1em;
+    background: $c-border;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+
+    &.is-filled {
+      background: $lesson-star;
+    }
+  }
+}
+
+.ligungi-lessons {
+  &__head {
+    h1 {
+      margin: 0;
+      color: $c-font-clear;
+      font-size: 1.9rem;
+      font-weight: 500;
+    }
+
+    p {
+      margin: 0.4rem 0 0;
+      color: $c-font-dim;
+    }
+  }
+
+  &__stages {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+.ligungi-lesson-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  height: 100%;
+  padding: 1.1rem 1.2rem;
+  color: $c-font;
+
+  &:hover {
+    color: $c-font;
+    box-shadow:
+      0 0 0 1px $c-primary,
+      0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+
+  &__number {
+    color: $c-font-dim;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  &__title {
+    color: $c-font-clear;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+
+  &__intro {
+    flex: 1;
+    color: $c-font-dim;
+    font-size: 0.9em;
+  }
+
+  &__dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+
+    i {
+      width: 0.6rem;
+      height: 0.6rem;
+      border-radius: 50%;
+      background: $c-border;
+
+      &.is-1,
+      &.is-2 {
+        background: color-mix(in oklab, $lesson-star 55%, $c-border);
+      }
+
+      &.is-3 {
+        background: $lesson-star;
+      }
+    }
+  }
+
+  &__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    color: $c-font-dim;
+    font-size: 0.9em;
+
+    .button {
+      margin-inline-start: auto;
+    }
+  }
+}
+
+.ligungi-lesson {
+  &__crumbs a {
+    font-size: 0.95em;
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+
+    @media (max-width: at-most($small)) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1.2rem 1.3rem;
+
+    h1 {
+      margin: 0;
+      color: $c-font-clear;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    p {
+      margin: 0;
+    }
+
+  }
+
+  &__stage,
+  &__goal {
+    color: $c-font-dim;
+    font-size: 0.9em;
+  }
+
+  &__steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    a {
+      display: grid;
+      place-items: center;
+      width: 1.9rem;
+      height: 1.9rem;
+      border: 1px solid $c-border;
+      border-radius: 50%;
+      color: $c-font-dim;
+      font-size: 0.85em;
+
+      &.is-1,
+      &.is-2,
+      &.is-3 {
+        border-color: $lesson-star;
+        color: $c-font-clear;
+      }
+
+      &.is-3 {
+        background: color-mix(in oklab, $lesson-star 22%, $c-bg-box);
+      }
+
+      &.is-current {
+        box-shadow: 0 0 0 2px $c-primary;
+        color: $c-font-clear;
+      }
+    }
+  }
+
+  &__instruction {
+    color: $c-font-clear;
+    font-size: 1.1em;
+  }
+
+  &__hint {
+    padding: 0.6rem 0.8rem;
+    border-inline-start: 3px solid $c-primary;
+    background: $c-bg-zebra;
+    color: $c-font;
+  }
+
+  &__message {
+    font-weight: 500;
+
+    &.is-done {
+      color: $c-good;
+      font-size: 1.15em;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  // The board and both hands fit in the window height, as on the game page.
+  &__board {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: min(100%, calc(100svh - 15rem));
+    min-width: min(100%, 20rem);
+  }
+
+  &__hand:empty {
+    display: none;
+  }
+}

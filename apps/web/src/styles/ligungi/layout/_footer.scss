@@ -1,0 +1,101 @@
+/* ===== Site footer: brand, three link columns, then the legal line ===== */
+.ligungi-footer {
+  // lila's dim text is below 4.5:1 on the light theme at this size; halfway to the main text passes on both themes.
+  --ligungi-footer-text: color-mix(in srgb, #{$c-font} 50%, #{$c-font-dim});
+
+  max-width: 1200px;
+  margin: 3rem auto 0;
+  padding: 2.2rem 16px 0;
+  border-top: $border;
+  color: var(--ligungi-footer-text);
+  font-size: 0.9em;
+
+  a {
+    color: var(--ligungi-footer-text);
+
+    &:hover {
+      color: $c-link;
+    }
+  }
+
+  &__main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 1fr));
+    gap: 2rem;
+
+    @media (max-width: at-most($small)) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.6rem 1.2rem;
+    }
+  }
+
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    @media (max-width: at-most($small)) {
+      grid-column: 1 / -1;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+
+  &__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.35em;
+
+    &,
+    &:hover {
+      color: $c-font-clear;
+    }
+  }
+
+  &__tld {
+    color: $c-font-dimmer;
+  }
+
+  &__studio a {
+    font-weight: bold;
+  }
+
+  &__column ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__title {
+    display: block;
+    margin-bottom: 0.7rem;
+    color: var(--ligungi-footer-text);
+    font-size: 0.8em;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  &__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.4rem 1.5rem;
+    margin-top: 2rem;
+    padding: 1rem 0 1.5rem;
+    border-top: $border;
+    color: var(--ligungi-footer-text);
+    font-size: 0.85em;
+  }
+
+  &__version a {
+    font-family: monospace;
+  }
+}

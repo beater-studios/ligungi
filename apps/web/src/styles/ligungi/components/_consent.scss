@@ -1,0 +1,77 @@
+/* ===== Cookie notice and preferences (components/Consent.tsx) ===== */
+.ligungi-toast {
+  position: fixed;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  z-index: $z-modal-alert-200;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+
+  &__box {
+    max-width: 30rem;
+    padding: 0.7rem 1rem;
+    background: $c-bg-box;
+    border: $border;
+    border-inline-start: 4px solid;
+    border-radius: $box-radius-size;
+    @extend %box-shadow;
+
+    &--bad {
+      border-inline-start-color: $c-bad;
+    }
+
+    &--good {
+      border-inline-start-color: $c-good;
+    }
+  }
+}
+
+.ligungi-consent {
+  position: fixed;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  z-index: $z-modal-alert-200;
+  max-width: 46rem;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 1rem 1.2rem;
+  background: $c-bg-box;
+  border: $border;
+  border-radius: $box-radius-size;
+  @extend %box-shadow;
+
+  &__text {
+    flex: 1 1 22rem;
+
+    p {
+      margin: 0.3rem 0 0;
+      color: $c-font-dim;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+.ligungi-consent-prefs {
+  margin-top: 2rem;
+  padding-top: 0.5rem;
+  border-top: $border;
+
+  .ligungi-consent__actions {
+    margin-top: 0.8rem;
+  }
+}
+
+// lila loads each page's stylesheet on its own; with all of them in one bundle, the game layout's
+// `---main-max-width: auto` would reach every page and size menu pages to their content.
+#main-wrap:has(> main.page-menu) {
+  ---main-max-width: #{$main-max-width};
+}

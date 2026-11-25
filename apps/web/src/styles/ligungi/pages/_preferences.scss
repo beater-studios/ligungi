@@ -1,0 +1,207 @@
+/* ===== Preferences page: groups of setting rows, some with a preview on the right ===== */
+.ligungi-prefs-group {
+
+  &__help {
+    margin: 0 0 0.6rem;
+    color: $c-font-dim;
+  }
+
+  &--preview &__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2.5rem;
+    align-items: start;
+
+    @media (max-width: at-most($small)) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.2rem;
+    }
+  }
+
+  &__preview {
+    padding-top: 0.9rem;
+
+    @media (max-width: at-most($small)) {
+      padding-top: 0;
+      justify-self: center;
+    }
+  }
+}
+
+.ligungi-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem 1.5rem;
+  padding: 0.9rem 0;
+
+  & + & {
+    border-top: $border;
+  }
+
+  &--stacked {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  &__title {
+    font-weight: bold;
+  }
+
+  label#{&}__title {
+    cursor: pointer;
+  }
+
+  &__help {
+    color: $c-font-dim;
+    font-size: 0.88em;
+    line-height: 1.45;
+
+  }
+
+  &__control {
+    flex-shrink: 0;
+
+    group.radio {
+      margin: 0;
+    }
+  }
+
+  &__inline {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.ligungi-preview {
+  margin: 0;
+
+  figcaption {
+    margin-top: 0.4rem;
+    color: $c-font-dim;
+    font-size: 0.85em;
+    text-align: center;
+  }
+}
+
+// A 3x3 corner of the board, square, with the board's own wood and lines.
+.ligungi-board-preview {
+  display: grid;
+  grid-template-columns: repeat(3, 5rem);
+  grid-template-rows: repeat(3, 5rem);
+  background-color: var(--gg-board);
+  background-image: var(--gg-board-texture);
+  border: 1px solid var(--gg-board-edge);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+
+  &__sq {
+    position: relative;
+    container-type: inline-size;
+    border-right: 1px solid var(--gg-line);
+    border-bottom: 1px solid var(--gg-line);
+
+    &:nth-child(3n) {
+      border-right: 0;
+    }
+
+    &:nth-child(n + 7) {
+      border-bottom: 0;
+    }
+
+    .gg-piece {
+      font-size: 44cqw;
+    }
+
+    .gg-height {
+      font-size: 20cqw;
+    }
+  }
+
+  // Placed like the board's own coordinates: column numbers in the top left of the first row, row numbers on the right.
+  &__col,
+  &__row {
+    position: absolute;
+    z-index: 6;
+    font-size: 0.7em;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--gg-coord);
+    text-shadow:
+      0 0 2px var(--gg-board),
+      0 0 2px var(--gg-board);
+  }
+
+  &__col {
+    top: 2px;
+    left: 3px;
+  }
+
+  &__row {
+    top: 50%;
+    right: 3px;
+    transform: translateY(-50%);
+  }
+}
+
+// The 3D view, as on the board (see the board package): squares 82% as tall as wide, the front edge below, and the
+// disc's thickness and kanji size measured on a square here (100cqw), where the board measures them on itself.
+.gg-3d .ligungi-board-preview {
+  grid-template-rows: repeat(3, 4.1rem);
+  margin-bottom: 0.3rem;
+  box-shadow:
+    0 0.3rem 0 color-mix(in srgb, var(--gg-board-edge) 70%, #000),
+    0 calc(0.3rem + 2px) 6px rgba(0, 0, 0, 0.3);
+  --gg-thick: 12cqw;
+  --gg-side: 14.63cqw;
+  --gg-3d-font: 42cqw;
+}
+
+// Same proportions as the move list beside the board: move number, then white and black.
+.ligungi-moves-preview {
+  display: grid;
+  grid-template-columns: 2.4em max-content max-content;
+  background: $c-bg-box;
+  border: $border;
+  border-radius: $box-radius-size;
+  overflow: hidden;
+  font-size: 0.95em;
+
+  &__index {
+    padding: 0.35em 0;
+    background: $c-bg-zebra;
+    color: $c-font-dim;
+    text-align: center;
+  }
+
+  &__move {
+    display: grid;
+    padding: 0.35em 0.9em 0.35em 0.6em;
+    white-space: nowrap;
+
+    > span {
+      grid-area: 1 / 1;
+    }
+
+    &.active {
+      background: color-mix(in srgb, #{$c-primary} 25%, transparent);
+      font-weight: bold;
+    }
+  }
+
+  // Invisible copies of the move in the other notations: they only hold the width (see MoveListPreview).
+  &__sizer {
+    visibility: hidden;
+  }
+
+  @media (max-width: at-most($small)) {
+    grid-template-columns: 2.4em minmax(0, 1fr) minmax(0, 1fr);
+  }
+}

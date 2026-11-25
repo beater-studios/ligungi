@@ -1,0 +1,85 @@
+/* Dialog (create game) */
+.ligungi-modal {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal-alert-200;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: $c-page-mask;
+}
+
+.ligungi-modal__box {
+  position: relative;
+  width: min(32rem, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+
+  .dialog-content {
+    padding: 1.5em 2em 2em;
+  }
+
+  h2 {
+    margin-bottom: 1em;
+  }
+
+  .close-button-anchor {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+  }
+
+  .close-button {
+    background: none;
+    border: 0;
+    color: $c-font-dim;
+    font-size: 1.2em;
+    cursor: pointer;
+  }
+}
+
+.form3 .radio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+/*
+ * lila loads each page's CSS separately; ligungi bundles them, so the analysis pocket rules would
+ * override the round ones. Scope pocket placement per page, with lila's breakpoints.
+ */
+.round__app {
+  .pocket-top {
+    grid-area: mat-top;
+  }
+
+  .pocket-bottom {
+    grid-area: mat-bot;
+  }
+
+  @include mq-is-col1 {
+    .pocket-top {
+      grid-area: pocket-top;
+    }
+
+    .pocket-bottom {
+      grid-area: pocket-bot;
+    }
+  }
+}
+
+.analyse {
+  .pocket-top {
+    grid-area: pocket-top;
+  }
+
+  .pocket-bottom {
+    grid-area: pocket-bot;
+  }
+}
+
+
+// Without this, a short menu page stretches its rows to the page height (a tall empty band above the content on mobile).
+main.page-menu {
+  align-content: start;
+}

@@ -1,0 +1,32 @@
+$kanji-font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif CJK JP', serif;
+
+// The kanji typeface picked in Preferences, as a class on the page root. The board package reads it as --gg-font,
+// which every board and small piece uses; the fonts themselves are declared in fonts.css.
+@each $name in brush, serif, gothic, pop {
+  .ligungi-kanji-#{$name} .gg-wrap,
+  .ligungi-kanji-#{$name} .gg-palette {
+    --gg-font: 'ligungi kanji #{$name}', #{$kanji-font};
+  }
+}
+
+#top .ligungi-mark {
+  font-family: $kanji-font;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ligungi-reconnecting {
+  color: $c-bad;
+  animation: ligungi-spin 1.5s linear infinite;
+}
+
+@keyframes ligungi-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ligungi-error {
+  color: $c-bad;
+  margin: 0.5em 0;
+}

@@ -1,0 +1,132 @@
+/* ===== Discord Activity (discord/activity.ts): the site inside a voice call ===== */
+body.ligungi-discord {
+  // Discord's mobile app draws over the edges of the frame and gives the insets as these variables. On desktop they
+  // are zero, and the header would touch the top of the frame, so it keeps a small margin.
+  padding: max(var(--discord-safe-area-inset-top, env(safe-area-inset-top, 0px)), 8px)
+    var(--discord-safe-area-inset-right, env(safe-area-inset-right, 0px)) var(--discord-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))
+    var(--discord-safe-area-inset-left, env(safe-area-inset-left, 0px));
+
+  // The analytics the consent banner asks about never load inside Discord.
+  .ligungi-consent {
+    display: none;
+  }
+}
+
+// Minimized by Discord to a small floating window: a game shows only its board, the players and their clocks, and any
+// other page only its content.
+body.ligungi-discord--pip {
+  padding: 0;
+
+  #top,
+  .ligungi-hub-footer,
+  .ligungi-zen-exit,
+  .round__side,
+  .round__underboard,
+  .round .rmoves,
+  .round .rcontrols,
+  .round .pocket,
+  .round__app__table,
+  .ligungi-ruser__status,
+  .ligungi-ruser rating,
+  .ligungi-first,
+  .gg-coords,
+  .rclock .moretime {
+    display: none;
+  }
+
+  #main-wrap {
+    display: block;
+    margin: 0;
+  }
+
+  .round {
+    display: block;
+  }
+
+  .round__app {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto 1fr 1fr auto;
+    grid-template-areas: 'board user-top' 'board clock-top' 'board clock-bot' 'board user-bot';
+    gap: 4px 8px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    height: 100vh;
+    margin: 0;
+    padding: 6px;
+  }
+
+  .round__app__board {
+    grid-area: board;
+    width: calc(100vh - 12px);
+    margin: 0;
+  }
+
+  .ruser-top {
+    grid-area: user-top;
+  }
+
+  .ruser-bottom {
+    grid-area: user-bot;
+  }
+
+  .rclock-top {
+    grid-area: clock-top;
+  }
+
+  .rclock-bottom {
+    grid-area: clock-bot;
+  }
+
+  .ruser,
+  .rclock {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .ruser {
+    gap: 6px;
+    padding: 0 0 0 6px;
+  }
+
+  .ligungi-ruser__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ligungi-ruser__name a {
+    flex: 0 1 auto;
+    min-width: 2.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rclock {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    align-self: center;
+  }
+
+  .ligungi-clock__turn {
+    display: block;
+    padding-left: 6px;
+    color: $c-font-clear;
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+}
+
+// The turn beside the clock exists only for the minimized window; elsewhere the player rows say it.
+.ligungi-clock__turn {
+  display: none;
+}
+
+// The call's rooms take the whole page: the site's menu waits behind the switch.
+body.ligungi-discord--call #topnav {
+  display: none;
+}

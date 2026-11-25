@@ -1,0 +1,23 @@
+/* ===== Typed moves (components/KeyboardMove.tsx): a field under the board, with its help and the choices when several moves match ===== */
+.ligungi-keyboard-move {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: $block-gap;
+
+  .form-control {
+    width: 100%;
+    font-family: monospace;
+  }
+}
+
+.ligungi-keyboard-move__help {
+  margin: 0;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-keyboard-move__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}

@@ -1,0 +1,89 @@
+/* Hands (pieces in hand) in lila's pocket areas, above and below the board. */
+.round__app .pocket,
+.analyse .pocket {
+  display: flex;
+  align-items: center;
+  min-height: 3.2rem;
+}
+
+// Hands handed to the board but kept out of sight (the learn trainer): the board's display rule would show them.
+.gg-hand[hidden] {
+  display: none;
+}
+
+.pocket .gg-hand {
+  flex: 1;
+  min-height: 3rem;
+  background: $c-bg-zebra;
+  border-radius: $box-radius-size;
+  @extend %box-shadow;
+}
+
+.ligungi-first {
+  font-size: 0.75em;
+  line-height: 1.4;
+  margin-left: 0.5em;
+  padding: 0 0.3em;
+  border: 1px solid $c-border;
+  border-radius: 3px;
+  color: $c-font-dim;
+}
+
+.rcontrols .ligungi-done {
+  padding: 0 1em;
+}
+
+.ligungi-notice {
+  color: $c-font-dim;
+  font-size: 0.9em;
+}
+
+.ligungi-tools {
+  display: grid;
+  gap: 0.8em;
+  padding: 1em;
+}
+
+.ligungi-row {
+  display: flex;
+  gap: 0.5em;
+
+  .form-control {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.ligungi-fen {
+  display: grid;
+  gap: 0.3em;
+  color: $c-font-dim;
+  font-size: 0.9em;
+}
+
+.ligungi-empty {
+  padding: 1em;
+  color: $c-font-dim;
+}
+
+// In the move lists laid out in columns, a move never wraps: long piece names are abbreviated, and a slightly smaller
+// text with less room on the right lets the named notation fit; what still does not fit is cut, and the full move is in
+// its title. On phones the game's moves run in one scrolling line, which needs none of this.
+@mixin move-cell {
+  min-width: 0;
+  overflow: hidden;
+  padding-inline-end: 0.2em;
+  font-size: 0.95em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tview2-column move {
+  @include move-cell;
+}
+
+@include mq-at-least-col2 {
+  .rmoves z7yx {
+    @include move-cell;
+  }
+}

@@ -1,0 +1,37 @@
+/* ===== Zen mode (RoundLayout): only the board, the hands, the players and the clocks; a button to leave ===== */
+body.ligungi-zen {
+  #top,
+  .ligungi-footer,
+  .round__side,
+  .round .rmoves,
+  .round__underboard > :not(.ligungi-keyboard-move, .ligungi-blind) {
+    display: none;
+  }
+
+  // Without the side column the board would stay where it was: the game sits in a centered middle column, and the
+  // typed move field starts under the board's left edge.
+  @include mq-at-least-col3 {
+    .round {
+      grid-template-columns: 1fr auto 1fr;
+      grid-template-areas: '. app .' '. under .';
+    }
+
+    .round__underboard {
+      justify-self: start;
+      width: var(---col3-uniboard-width);
+    }
+  }
+}
+
+.ligungi-zen-exit {
+  position: fixed;
+  top: 0.6rem;
+  inset-inline-end: 0.8rem;
+  z-index: 20;
+  opacity: 0.7;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+  }
+}

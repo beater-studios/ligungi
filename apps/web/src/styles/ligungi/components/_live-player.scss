@@ -1,0 +1,30 @@
+/* ===== Live game sides (components/LivePlayer.tsx): name, rating and a ticking clock, on the TV and the home page ===== */
+.ligungi-live-player {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+
+  &__name {
+    overflow: hidden;
+    color: $c-font-clear;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__rating {
+    margin-inline-start: 0.35rem;
+    color: $c-font-dim;
+  }
+
+  &__clock {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+
+    &.is-running {
+      color: $c-font-clear;
+      font-weight: 700;
+    }
+  }
+}

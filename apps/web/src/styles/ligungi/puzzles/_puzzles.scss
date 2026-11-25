@@ -1,0 +1,145 @@
+/* ===== Puzzles (pages/PuzzlesPage.tsx, PuzzleDashboardPage.tsx): rating changes, links and the dashboard ===== */
+.ligungi-puzzle {
+  &__change {
+    font-weight: 500;
+
+    &.is-up {
+      color: $c-good;
+    }
+
+    &.is-down {
+      color: $c-bad;
+    }
+  }
+
+  &__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+  }
+}
+
+.ligungi-puzzle-dashboard {
+  &__runs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: $block-gap;
+
+    h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+  }
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    h1 {
+      margin: 0;
+      color: $c-font-clear;
+      font-size: 1.9rem;
+      font-weight: 500;
+    }
+  }
+
+  &__rating {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+    padding: 1.1rem 1.3rem;
+
+    strong {
+      color: $c-font-clear;
+      font-size: 2.4rem;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    span {
+      color: $c-font-dim;
+    }
+  }
+
+  &__chart,
+  &__themes,
+  &__recent {
+    padding: 1.1rem 1.3rem;
+
+    h2 {
+      margin: 0 0 0.75rem;
+      color: $c-font-clear;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+  }
+
+  &__themes table {
+    width: 100%;
+  }
+
+  // The share of solved tries, as a bar behind the number.
+  &__bar {
+    display: block;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    background: linear-gradient(to right, color-mix(in oklab, $c-good 30%, transparent) var(--rate), transparent var(--rate));
+  }
+
+  &__recent ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: grid;
+      grid-template-columns: 6rem 6rem 1fr auto;
+      gap: 0.5rem;
+      color: $c-font-dim;
+    }
+
+    .is-up {
+      color: $c-good;
+    }
+
+    .is-down {
+      color: $c-bad;
+    }
+  }
+}
+
+.ligungi-home__daily {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.1rem;
+
+  p {
+    margin: 0;
+    color: $c-font;
+  }
+}
+
+.ligungi-home__daily-board {
+  display: block;
+  max-width: 20rem;
+}
+
+.ligungi-home__solve {
+  align-self: flex-start;
+}
+
+.ligungi-home__daily-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  font-size: 0.9em;
+}

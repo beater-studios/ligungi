@@ -1,0 +1,261 @@
+/* ===== Preferences and account ===== */
+// Hidden from sight, still read by screen readers.
+.ligungi-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ligungi-page.ligungi-settings {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.ligungi-settings__menu {
+  flex: 0 0 15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0.5rem;
+
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 4px;
+    color: $c-font;
+
+    &:hover {
+      background: $c-bg-zebra;
+      color: $c-font-clear;
+    }
+
+    &.active {
+      background: $c-bg-zebra2;
+      box-shadow: inset 3px 0 0 $c-primary;
+      color: $c-font-clear;
+    }
+  }
+}
+
+// Under each section of the settings menu, what it holds.
+.ligungi-settings__hint {
+  color: $c-font-dim;
+  font-size: 0.8em;
+}
+
+.ligungi-settings__menu a:hover .ligungi-settings__hint,
+.ligungi-settings__menu a.active .ligungi-settings__hint {
+  color: $c-font;
+}
+
+// The page title, with a link beside it on the profile section.
+.ligungi-settings__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.ligungi-settings__aside {
+  font-size: 0.95em;
+}
+
+.ligungi-prefs-index {
+  margin-top: -0.25rem;
+
+  button {
+    background: none;
+    cursor: pointer;
+
+    &:hover {
+      border-color: $c-bg-zebra2;
+      color: $c-font-clear;
+    }
+  }
+}
+
+// Friendly sites: one line per site, a little apart so each name stands out.
+.ligungi-sites li + li {
+  margin-top: 0.6rem;
+}
+
+// Tower on tap: the choices beside a phone that shows what each one does.
+.ligungi-setting.ligungi-tap-setting {
+  align-items: flex-start;
+
+  > .ligungi-choice {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @media (max-width: at-most($small)) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.ligungi-tap-preview {
+  flex: none;
+  margin: 0;
+
+  @media (max-width: at-most($small)) {
+    align-self: center;
+  }
+
+  figcaption {
+    margin-top: 0.4rem;
+    color: $c-font-dim;
+    font-size: 0.85em;
+    text-align: center;
+  }
+}
+
+// Drawn at a phone's real width, so the balloon and the strip look as they do there, then shrunk as a whole.
+.ligungi-tap-preview__phone {
+  width: 22rem;
+  padding: 0.9rem 0.6rem;
+  border: 3px solid $c-border;
+  border-radius: 1.6rem;
+  background: $c-bg-page;
+  zoom: 0.6;
+}
+
+.ligungi-tap-preview__board {
+  position: relative;
+}
+
+.ligungi-tap-preview__tapped {
+  box-shadow: inset 0 0 0 2px var(--gg-selected);
+  background: color-mix(in srgb, var(--gg-selected) 45%, transparent);
+}
+
+.ligungi-tap-preview__note {
+  margin: 0.8rem 0.3rem 0;
+  color: $c-font-dim;
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+// Where spoken moves are said: a column of checkboxes under a legend, its help, then the button to hear a sample.
+.ligungi-speech-places {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  .ligungi-check {
+    margin: 0;
+  }
+
+  .form-help {
+    margin-top: 0.3rem;
+  }
+
+  .button {
+    margin-top: 0.4rem;
+  }
+}
+
+// The index jumps to a group: leave room for the fixed header above it.
+.ligungi-prefs-group {
+  scroll-margin-top: 4rem;
+}
+
+.ligungi-settings__body {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  h1 {
+    margin: 0;
+    color: $c-font-clear;
+  }
+
+  .ligungi-prefs {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  > .ligungi-notice {
+    margin: 0;
+  }
+}
+
+.ligungi-settings__card {
+  padding: 1.25rem 1.5rem;
+
+  h2 {
+    margin: 0 0 0.5rem;
+    color: $c-font-clear;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+
+  > p {
+    margin: 0 0 0.9rem;
+  }
+
+  .form3 .form-group {
+    margin-bottom: 1rem;
+  }
+}
+
+// A choice row on the preferences page: the option cards take the whole width.
+.ligungi-setting > .ligungi-choice {
+  flex: 1;
+}
+
+.button.ligungi-account__download {
+  display: inline-flex;
+  box-shadow: inset 0 0 0 1px $c-border;
+}
+
+@media (max-width: at-most($small)) {
+  .ligungi-page.ligungi-settings {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  // Five sections do not fit side by side: a row that scrolls sideways, without the hints.
+  .ligungi-card.ligungi-settings__menu {
+    flex: none;
+    flex-direction: row;
+    gap: 4px;
+    padding: 4px;
+    overflow-x: auto;
+    background: $c-bg-page;
+    box-shadow: none;
+
+    a {
+      flex: none;
+      text-align: center;
+      white-space: nowrap;
+
+      &.active {
+        box-shadow: none;
+      }
+    }
+
+    .ligungi-settings__hint {
+      display: none;
+    }
+  }
+
+  .ligungi-settings__card {
+    padding: 1rem;
+  }
+}

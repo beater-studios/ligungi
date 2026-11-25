@@ -1,0 +1,90 @@
+/* ===== Tower on tap, on a phone (the towerTap preference) ===== */
+// The strip choice: the tapped tower right under the board, in a row of its own in lila's one column grid.
+.ligungi-tower-strip {
+  grid-area: tower;
+  min-height: 3.6rem;
+  margin: 0.4rem 0;
+  padding: 0.45rem 0.7rem;
+  box-sizing: border-box;
+  border-radius: 6px;
+  background: $c-bg-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+
+  h2 {
+    margin: 0;
+    color: $c-font-dim;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  ol {
+    display: flex;
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    // A tower of three is wider than a phone: the row scrolls without a bar (a phone hides it anyway) and fades at the
+    // right edge to show there is more.
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: none;
+
+    &:last-child {
+      padding-right: 1.5rem;
+    }
+  }
+
+  // The kanji follows the piece's own size, not the width of whatever container is around the strip.
+  .gg-mini-piece {
+    width: 1.8rem;
+    height: 1.8rem;
+    font-size: 1.08rem;
+  }
+}
+
+.ligungi-tower-strip__name {
+  display: flex;
+  flex-direction: column;
+  color: $c-font;
+  font-size: 0.85rem;
+  line-height: 1.15;
+
+  small {
+    color: $c-font-dim;
+    font-size: 0.75rem;
+  }
+}
+
+.ligungi-tower-strip__hint {
+  margin: 0;
+  color: $c-font-dim;
+  font-size: 0.85rem;
+}
+
+@include mq-is-col1 {
+  .round__app.ligungi-has-strip {
+    grid-template-rows: repeat(8, auto);
+    grid-template-areas: 'user-top' 'pocket-top' 'board' 'tower' 'pocket-bot' 'user-bot' 'moves' 'controls';
+  }
+
+  .analyse.variant-crazyhouse.ligungi-has-strip {
+    grid-template-rows: repeat(6, auto) minmax(20em, 30vh);
+    grid-template-areas: 'pocket-top' 'board' 'tower' 'pocket-bot' 'kb-move' 'controls' 'tools' 'side' 'round-training' 'under' 'chat' 'uchat';
+  }
+}

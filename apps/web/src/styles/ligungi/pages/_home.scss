@@ -1,0 +1,587 @@
+/* ===== Home ===== */
+// Three columns: the puzzle of the day and the strongest live game, quick pairing with open games and the leaders, the
+// actions and the account cards. Narrower, the first column goes under the middle one, its two cards side by side.
+.ligungi-home__layout {
+  display: grid;
+  grid-template-columns: 20rem minmax(0, 1fr) 19rem;
+  grid-template-areas: 'aside main side';
+  align-items: start;
+  gap: 1.25rem;
+
+  @media (max-width: at-most($x-large)) {
+    grid-template-columns: minmax(0, 1fr) 19rem;
+    grid-template-areas:
+      'main side'
+      'aside side';
+  }
+}
+
+.ligungi-home__aside {
+  grid-area: aside;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+
+  @media (max-width: at-most($x-large)) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.ligungi-home__main {
+  grid-area: main;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ligungi-home__quick {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.4rem;
+}
+
+.ligungi-home__quick-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+
+  h1 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.6rem;
+    font-weight: 500;
+  }
+}
+
+.ligungi-home__newcomer {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid $c-primary;
+  border-radius: 4px;
+  background: color-mix(in srgb, #{$c-primary} 8%, #{$c-bg-zebra});
+  color: $c-font;
+}
+
+.ligungi-pools {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.ligungi-pool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 7.5rem;
+  padding: 0.5rem;
+  border: 1px solid $c-border;
+  border-radius: 6px;
+  background: $c-bg-zebra;
+  color: $c-font-clear;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $c-primary;
+    background: color-mix(in srgb, #{$c-primary} 10%, #{$c-bg-zebra});
+  }
+
+  &__clock {
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1.2;
+  }
+
+  &__kind {
+    color: $c-font-dim;
+    font-size: 0.9em;
+  }
+
+  &__waiting {
+    color: $c-font-dim;
+    font-size: 0.8em;
+
+    &.is-waiting {
+      color: $c-good;
+      font-weight: 600;
+    }
+  }
+}
+
+.ligungi-home__hint {
+  margin: 0;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-home__error {
+  margin: 0;
+}
+
+.ligungi-home__side {
+  grid-area: side;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.ligungi-home__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.5rem;
+  }
+}
+
+.ligungi-home__account {
+  padding: 1.1rem;
+
+  p {
+    margin: 0 0 0.75rem;
+  }
+}
+
+.ligungi-home__account-actions {
+  display: flex;
+  gap: 0.5rem;
+
+  .button {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}
+
+.ligungi-home__learn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem;
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+.ligungi-home__counters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: $c-font-dim;
+  font-size: 0.9em;
+
+  strong {
+    color: $c-font-clear;
+    font-size: 1.25em;
+  }
+
+  .ligungi-home__online {
+    color: $c-good;
+  }
+}
+
+.ligungi-home__learn-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.ligungi-home__leaders,
+.ligungi-home__training {
+  padding: 1rem 1.1rem;
+
+  ul {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    border-bottom: $border;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  strong {
+    color: $c-font-clear;
+    font-weight: 500;
+  }
+}
+
+// One row per mode, its first and second players side by side; one column on phones.
+.ligungi-home__leaders {
+  ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.75rem;
+
+    @media (max-width: at-most($small)) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+
+    &:last-child {
+      border-bottom: $border;
+    }
+  }
+}
+
+.ligungi-home__leader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+
+  .user-link {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.ligungi-home__leader-mode {
+  flex: none;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-home__training {
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+
+  a {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem 0;
+    color: $c-font;
+
+    &:hover {
+      color: $c-link;
+    }
+  }
+}
+
+.ligungi-home__friends {
+  padding: 1rem 1.1rem;
+
+  ul {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+  }
+}
+
+.ligungi-home__friend-watch {
+  color: $c-font-dim;
+
+  &:hover {
+    color: $c-link;
+  }
+}
+
+.ligungi-home__card-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+
+  h2 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+}
+
+.ligungi-home__card-note {
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-home__open {
+  padding-bottom: 0.5rem;
+
+  .ligungi-home__card-head {
+    align-items: center;
+    gap: 0.75rem 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: $border;
+
+    h2 {
+      display: inline;
+      margin-right: 0.75rem;
+    }
+  }
+
+  > .ligungi-notice {
+    margin: 0;
+    padding: 1rem 1.25rem;
+  }
+}
+
+.ligungi-segmented.ligungi-home__open-tabs > button {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9em;
+}
+
+.ligungi-home__open-count {
+  margin-left: 0.25em;
+  color: $c-font-dim;
+}
+
+.ligungi-seeks {
+  margin: 0;
+  padding: 0.4rem 0.5rem 0;
+  list-style: none;
+}
+
+.ligungi-seek {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.5rem 9rem 7rem auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+
+  &:hover {
+    background: $c-bg-zebra;
+  }
+
+  &--mine {
+    background: color-mix(in srgb, #{$c-primary} 8%, transparent);
+  }
+
+  &__player {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  &__name {
+    overflow: hidden;
+    color: $c-font-clear;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__rating,
+  &__kind {
+    color: $c-font-dim;
+  }
+
+  &__rating {
+    font-size: 0.9em;
+  }
+
+  &__meta {
+    display: none;
+  }
+
+  &__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: 0 0.9rem;
+    font-size: 0.85em;
+  }
+}
+
+.ligungi-home__live {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.1rem;
+
+  > .ligungi-notice {
+    margin: 0;
+  }
+}
+
+.ligungi-home__live-game {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  max-width: 20rem;
+  color: $c-font;
+  font-size: 0.85em;
+
+  &:hover {
+    color: $c-link;
+  }
+}
+
+.ligungi-home__live-mode {
+  color: $c-font-dim;
+  font-size: 0.95em;
+}
+
+// Phones: one column in the mockup's order, quick pairing first and the learning card last.
+@media (max-width: at-most($small)) {
+  .ligungi-home__layout,
+  .ligungi-home__aside,
+  .ligungi-home__main,
+  .ligungi-home__side {
+    display: contents;
+  }
+
+  .ligungi-home__quick {
+    order: 1;
+    padding: 1rem;
+  }
+
+  .ligungi-home__error {
+    order: 2;
+  }
+
+  .ligungi-home__actions {
+    order: 3;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+
+    .button {
+      min-height: 3rem;
+      padding-inline: 0.5rem;
+      font-size: 0.85em;
+    }
+
+    .button:first-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .ligungi-home__account {
+    order: 4;
+  }
+
+  .ligungi-home__open {
+    order: 5;
+  }
+
+  .ligungi-home__daily {
+    order: 6;
+  }
+
+  .ligungi-home__live {
+    order: 7;
+  }
+
+  .ligungi-home__leaders {
+    order: 8;
+  }
+
+  .ligungi-home__friends {
+    order: 9;
+  }
+
+  .ligungi-home__training {
+    order: 10;
+  }
+
+  .ligungi-home__learn {
+    order: 11;
+  }
+
+  .ligungi-segmented.ligungi-home__modes {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .ligungi-pools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .ligungi-pool {
+    min-height: 5.5rem;
+
+    &__clock {
+      font-size: 1.6rem;
+    }
+  }
+
+  .ligungi-seek {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.1rem 0.75rem;
+
+    &__time,
+    &__mode,
+    &__kind {
+      display: none;
+    }
+
+    &__meta {
+      display: block;
+      grid-column: 1;
+      grid-row: 2;
+      color: $c-font-dim;
+      font-size: 0.8em;
+    }
+
+    &__action {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      min-height: 2.5rem;
+    }
+  }
+
+  .ligungi-home__daily-board,
+  .ligungi-home__live-game {
+    max-width: none;
+  }
+}

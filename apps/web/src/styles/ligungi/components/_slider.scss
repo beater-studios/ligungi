@@ -1,0 +1,29 @@
+/* ===== Slider (components/ui.tsx Slider): label, range and the chosen value on one row ===== */
+.ligungi-slider {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr) 3.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+
+  &__label {
+    color: $c-font;
+  }
+
+  &__input {
+    width: 100%;
+    margin: 0;
+    accent-color: $c-primary;
+  }
+
+  &__value {
+    color: $c-font-clear;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  @media (max-width: at-most($small)) {
+    grid-template-columns: 6.5rem minmax(0, 1fr) 3rem;
+    gap: 0.5rem;
+  }
+}

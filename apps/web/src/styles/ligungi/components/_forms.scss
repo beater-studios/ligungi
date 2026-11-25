@@ -1,0 +1,89 @@
+/* ===== Forms: styles of the shared components in components/ui.tsx ===== */
+
+// lila's form-group margin (3rem) suits long account pages; ligungi forms are short and denser.
+.form3 .ligungi-field,
+.form3 .ligungi-check {
+  margin-bottom: 1.6rem;
+}
+
+.ligungi-modal .form3 .ligungi-field,
+.ligungi-modal .form3 .ligungi-check {
+  margin-bottom: 1.1rem;
+}
+
+// lila's label sits 0.5rem above its control, which reads as glued to it under a bold label.
+.ligungi-field > .form-label {
+  display: block;
+  margin-bottom: 0.7rem;
+}
+
+.ligungi-field .form-help {
+  display: block;
+  margin-top: 0.35rem;
+}
+
+.ligungi-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  column-gap: 1rem;
+}
+
+.ligungi-check {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.6rem;
+  row-gap: 0.25rem;
+
+  input[type='checkbox'] {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0.15em 0 0;
+    accent-color: $c-primary;
+    cursor: pointer;
+  }
+
+  // The label keeps its text width, so only the text toggles the box; long text wraps beside it.
+  label {
+    justify-self: start;
+    cursor: pointer;
+  }
+
+  .form-help {
+    grid-column: 2;
+    margin: 0;
+  }
+
+  &.is-disabled {
+    opacity: 0.6;
+
+    input,
+    label {
+      cursor: not-allowed;
+    }
+  }
+}
+
+// The native arrow sits against the border; draw our own with room around it.
+select.ligungi-select {
+  appearance: none;
+  padding-inline-end: 2.4rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23999' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 0.75rem;
+  cursor: pointer;
+}
+
+// lila marks every :invalid control red, so an empty required field is red before the user typed anything.
+.form3 .form-group:not(.is-invalid) .form-control:invalid:not(:user-invalid) {
+  border-color: $c-border;
+}
+
+.ligungi-actions {
+  margin-top: 1.6rem;
+}
+
+.ligungi-submit {
+  width: 100%;
+}

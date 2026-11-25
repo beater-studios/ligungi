@@ -1,0 +1,32 @@
+/* ===== Analysis board: Gungi hands need two rows, lila's crazyhouse pockets assume one (60px) ===== */
+.analyse.variant-crazyhouse {
+  @include mq-at-least-col2 {
+    grid-template-rows: min-content auto min-content;
+  }
+
+  @include mq-at-least-col3 {
+    grid-template-rows: min-content auto auto min-content;
+  }
+}
+
+.analyse__controls {
+  .features,
+  .jumps {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  // The icon is 1.2em with lila's 1.5 line-height, taller than the button's own line, and vertical-align: middle
+  // then drops it below the center. A 1.25 line-height on the icon keeps the button height.
+  .fbt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    padding: 0.45rem 0.9rem;
+
+    &::before {
+      line-height: 1.25;
+    }
+  }
+}

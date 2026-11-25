@@ -1,0 +1,23 @@
+/* ===== Export dialog of a game (components/ExportGame.tsx): the record to copy or save ===== */
+.ligungi-export__help {
+  margin: 0 0 0.8rem;
+  color: $c-font-dim;
+}
+
+.ligungi-export__text {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 14rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  resize: vertical;
+  white-space: pre;
+}
+
+.ligungi-export__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}

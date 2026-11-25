@@ -1,0 +1,54 @@
+/* Bigger hands, easier to tap */
+.pocket .gg-hand {
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.4rem;
+}
+
+.pocket .gg-hand-piece {
+  width: 2.9rem;
+  height: 2.9rem;
+
+  .gg-count {
+    min-width: 1.3rem;
+    line-height: 1.3rem;
+    font-size: 0.8rem;
+    border: 2px solid $c-bg-zebra;
+  }
+}
+
+@include mq-is-col1 {
+  .pocket .gg-hand-piece {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+}
+
+/*
+ * ligungi identity on top of lila: shu (朱) seal red instead of lichess orange, wooden boards and
+ * our own logo (a tower of three stacked pieces).
+ */
+:root {
+  --c-accent: hsl(357 66% 46%);
+  --c-accent-faint: hsl(357 66% 46% / 0.4);
+  --c-brag: hsl(357 60% 48%);
+}
+
+html.light {
+  --c-accent: hsl(357 66% 42%);
+  --c-accent-faint: hsl(357 66% 42% / 0.4);
+  --c-brag: hsl(357 60% 44%);
+}
+
+#top .ligungi-logo {
+  display: block;
+  width: 2.7rem;
+  height: 2.7rem;
+  margin-inline-end: 0.4rem;
+}
+
+@include mq-site-header-tall {
+  #top .site-title .ligungi-logo {
+    display: block;
+  }
+}

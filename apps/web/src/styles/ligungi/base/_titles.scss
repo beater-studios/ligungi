@@ -1,0 +1,11 @@
+/* ===== Page titles ===== */
+
+// Every page has its title at the same size (each page used to set its own, from 21 to 38px). The id beats the
+// per-page rules; the player's name on a profile and the pitch beside the sign in form are not page titles and keep
+// theirs, and the panels beside a board (puzzles, runs) are not pages of this kind.
+#main-wrap main.ligungi-page h1:not(.ligungi-profile__identity h1, .ligungi-auth__pitch h1),
+#main-wrap main.page-small h1.box__top {
+  font-size: 1.9rem;
+  font-weight: 500;
+  line-height: 1.2;
+}

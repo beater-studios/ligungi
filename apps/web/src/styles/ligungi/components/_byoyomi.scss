@@ -1,0 +1,14 @@
+/* ===== Byo-yomi clocks (RoundLayout): the periods beside the time ===== */
+// During the main time it reads "+3×30s"; once in byo-yomi, "×2" for the periods left.
+.ligungi-byoyomi__periods {
+  align-self: center;
+  padding-inline: 0.4rem;
+  color: $c-font-dim;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  .emerg & {
+    color: inherit;
+  }
+}

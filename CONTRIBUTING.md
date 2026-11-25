@@ -48,7 +48,7 @@ npm run build
 - **Text shown to users** goes through the locale files in `apps/web/src/i18n/locales/`, one JSON file per language in [ICU MessageFormat](https://unicode-org.github.io/icu/userguide/format_parse/messages/). `en.json` is the source: a new text is a new key there, and a text that takes arguments (`{name}`, a plural, a select or a `<tag>` around a link) is also declared in `apps/web/src/i18n/schema.tsx`, with its arguments in the order the code passes them. Add the Portuguese and Spanish texts too when you can; otherwise leave them to the translators, and the site shows English until then.
 - **Server errors** are stable codes in `packages/protocol/src/errors.ts`, translated by the site. Never send free-form error text that the client has to display.
 - **UI components:** forms use the shared components in `apps/web/src/components/ui.tsx`. Run the site and open `/design` to see every component, color and pattern before building a screen.
-- **Look and feel:** the site reuses lichess's styles. The SCSS in `apps/web/vendor/lila` is copied unmodified from lila (see its `NOTICE.md`). Our own styles live in `apps/web/src/styles/ligungi.scss`.
+- **Look and feel:** the site reuses lichess's styles. The SCSS in `apps/web/vendor/lila` is copied unmodified from lila (see its `NOTICE.md`). Our own styles live in the partials under `apps/web/src/styles/ligungi/`, one per area, imported in order by `apps/web/src/styles/ligungi.scss`.
 - **Assets:** never add HUNTER×HUNTER characters, artwork or logos, nor the lichess name, logo or favicon. Any new asset (image, font, sound) must have a license compatible with the AGPL.
 
 ## Translations

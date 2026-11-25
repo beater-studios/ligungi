@@ -1,0 +1,11 @@
+/* ===== Piece glyphs outside the board (components/PieceGlyph.tsx) ===== */
+.ligungi-glyph:has(.gg-icon) {
+  position: absolute;
+  inset: 0;
+}
+
+.ligungi-tower__kanji {
+  margin-inline-start: 0.4em;
+  font-family: var(--gg-font, #{$kanji-font});
+  font-weight: bold;
+}

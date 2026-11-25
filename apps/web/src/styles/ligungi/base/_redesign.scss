@@ -1,0 +1,165 @@
+/* ===== Shared pieces of the redesigned pages (profile, players, ranking and the rest) ===== */
+#main-wrap:has(> main.ligungi-page) {
+  ---main-max-width: 1180px;
+}
+
+// The home takes lila's lobby width, so its three columns fit.
+#main-wrap:has(> main.ligungi-home) {
+  ---main-max-width: 1400px;
+}
+
+.ligungi-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  // Without it the grid sizes the page to its widest row, scrolling ones included, and phones scroll sideways.
+  min-width: 0;
+  padding-bottom: 3rem;
+}
+
+.ligungi-card {
+  @extend %box-radius;
+
+  background: $c-bg-box;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+// The player's initial in a circle, standing in for an avatar; a green dot when online.
+.ligungi-avatar {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: $c-bg-zebra2;
+  color: $c-font-clear;
+  font-weight: 600;
+
+  &--large {
+    width: 6rem;
+    height: 6rem;
+    font-size: 2.75rem;
+  }
+
+  &--online::after {
+    content: '';
+    position: absolute;
+    right: 6%;
+    bottom: 6%;
+    width: 22%;
+    height: 22%;
+    border-radius: 50%;
+    background: $c-good;
+    box-shadow: 0 0 0 3px $c-bg-box;
+  }
+}
+
+// Tabs as one segmented control (links or buttons).
+.ligungi-segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 6px;
+  background: $c-bg-page;
+
+  > a,
+  > button {
+    flex: none;
+    white-space: nowrap;
+    padding: 0.5rem 0.9rem;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: $c-font;
+    font: inherit;
+    font-size: 0.95em;
+    cursor: pointer;
+
+    &.active {
+      background: $c-bg-zebra2;
+      color: $c-font-clear;
+
+      // On the light page background zebra2 barely differs; a raised white tab reads as selected.
+      @include if-light {
+        background: $c-bg-box;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+}
+
+.ligungi-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ligungi-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+  border: 1px solid $c-border;
+  border-radius: 1.2rem;
+  color: $c-font;
+  font-size: 0.9em;
+
+  &.active {
+    border-color: $c-bg-zebra2;
+    background: $c-bg-zebra2;
+    color: $c-font-clear;
+  }
+}
+
+.button.ligungi-button-good {
+  background: $c-good;
+}
+
+// lila's empty button reads as plain text, worse on touch screens where there is no hover; an outline keeps it a button.
+.button.button-empty:not(.signin) {
+  box-shadow: inset 0 0 0 1px $c-border;
+}
+
+.button.button-empty:not(.signin, .button-red) {
+  color: $c-font-clear;
+}
+
+// lila's hover on an empty button is a near-white gradient, which in the light theme looks like the button vanished.
+// The selectors match lila's specificity so these rules, loaded later, win.
+.button.button-empty:not(.disabled, :disabled, [disabled]):not(.disabled):hover,
+.button.button-empty:not(.disabled, :disabled, [disabled]):not(.disabled):focus-visible {
+  background: color-mix(in srgb, #{$c-primary} 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #{$c-primary} 45%, transparent);
+  color: $c-primary;
+}
+
+.button.button-empty.button-red:not(.disabled, :disabled, [disabled]):not(.disabled):hover,
+.button.button-empty.button-red:not(.disabled, :disabled, [disabled]):not(.disabled):focus-visible {
+  background: color-mix(in srgb, #{$c-error} 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #{$c-error} 45%, transparent);
+  color: $c-error;
+}
+
+.ligungi-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  color: $c-bad;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &::before {
+    content: '';
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}

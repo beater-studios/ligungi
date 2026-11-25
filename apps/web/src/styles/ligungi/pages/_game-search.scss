@@ -1,0 +1,190 @@
+/* ===== Game search ===== */
+.ligungi-game-search__panel {
+  padding: 1.25rem 1.5rem;
+
+  h1 {
+    margin: 0 0 0.3rem;
+  }
+}
+
+.ligungi-game-search__intro {
+  margin: 0 0 1rem;
+  color: $c-font-dim;
+}
+
+// The four filters most searches need, in one row; the others fold under "More filters".
+.ligungi-game-search__main,
+.ligungi-game-search__more {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 1rem;
+  align-items: start;
+
+  @media (max-width: at-most($small)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.form3 .ligungi-game-search__main .ligungi-field,
+.form3 .ligungi-game-search__more .ligungi-field {
+  margin-bottom: 1.1rem;
+}
+
+.ligungi-game-search__more {
+  padding-top: 1.1rem;
+  border-top: $border;
+
+  // Three rows that keep each pair together: color, type and ending; rating and moves; the dates.
+  > :nth-child(4),
+  > :nth-child(8) {
+    grid-column-start: 1;
+  }
+}
+
+.ligungi-game-search__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+
+  .ligungi-actions {
+    margin: 0;
+  }
+
+  .ligungi-submit {
+    width: auto;
+    min-width: 10rem;
+  }
+}
+
+// Reads as a link beside the buttons: it opens the other filters, it does not search.
+.button.ligungi-game-search__toggle {
+  margin-inline-start: auto;
+  box-shadow: none;
+  text-transform: none;
+}
+
+.ligungi-game-search__results {
+  padding: 0.5rem 0 0;
+  overflow: hidden;
+
+  > .ligungi-notice,
+  > .error {
+    margin: 0.5rem 1.25rem 1rem;
+  }
+}
+
+// The results as a table: each row is a link to the game, every other one shaded.
+.ligungi-search-table__head,
+.ligungi-search-table__row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.3fr) minmax(0, 2fr) 4rem 9.5rem;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.6rem 1.25rem;
+}
+
+.ligungi-search-table__head {
+  color: $c-font-dim;
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ligungi-search-table {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li:nth-child(odd) {
+    background: $c-bg-zebra;
+  }
+}
+
+.ligungi-search-table__row {
+  color: $c-font;
+
+  &:hover {
+    background: $c-bg-zebra2;
+    color: $c-font-clear;
+  }
+}
+
+.ligungi-search-table__players {
+  color: $c-font-clear;
+}
+
+.ligungi-search-table__result small {
+  display: block;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-search-table__mode {
+  font-size: 0.92em;
+}
+
+.ligungi-search-table__moves,
+.ligungi-search-table__date {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.ligungi-search-table__date {
+  color: $c-font-dim;
+  white-space: nowrap;
+}
+
+// Phones: players and date on the first line, the result and the mode under them.
+@media (max-width: at-most($small)) {
+  .ligungi-search-table__head {
+    display: none;
+  }
+
+  .ligungi-search-table__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.2rem 0.75rem;
+    padding: 0.7rem 1rem;
+  }
+
+  .ligungi-search-table__players {
+    grid-column: 1;
+  }
+
+  .ligungi-search-table__date {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .ligungi-search-table__result,
+  .ligungi-search-table__mode {
+    grid-column: 1 / -1;
+    font-size: 0.9em;
+  }
+
+  .ligungi-search-table__moves {
+    display: none;
+  }
+}
+
+.ligungi-game-search__pager {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0.9rem 1.25rem;
+  border-top: $border;
+
+  > :last-child {
+    text-align: end;
+  }
+
+  [aria-current] {
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-profile__search {
+  margin-inline-end: auto;
+  font-size: 0.9rem;
+}

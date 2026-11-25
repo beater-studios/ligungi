@@ -1,0 +1,80 @@
+/* ===== TV channels: the list beside a watched game, or alone while a channel has nothing to show ===== */
+.ligungi-tv-channels {
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem;
+
+  .round__side & {
+    margin-bottom: $block-gap;
+  }
+
+  &__all {
+    margin: 0.4rem 0.75rem 0.3rem;
+    font-size: 0.9em;
+  }
+}
+
+.ligungi-tv-channel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 4px;
+  color: $c-font;
+
+  strong {
+    color: $c-font-clear;
+    font-weight: 500;
+  }
+
+  span {
+    overflow: hidden;
+    color: $c-font-dim;
+    font-size: 0.9em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    background: $c-bg-zebra;
+    color: $c-font;
+  }
+
+  &.active {
+    background: $c-bg-zebra2;
+    box-shadow: inset 3px 0 0 $c-brag;
+  }
+}
+
+.ligungi-page.ligungi-tv-channel-page {
+  display: grid;
+  grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
+  align-items: start;
+
+  @media (max-width: at-most($small)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ligungi-game-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem;
+
+  p {
+    margin: 0;
+  }
+
+  &__setup {
+    color: $c-font-clear;
+    font-weight: 500;
+  }
+
+  &__status {
+    color: $c-font-clear;
+    font-weight: 700;
+  }
+}

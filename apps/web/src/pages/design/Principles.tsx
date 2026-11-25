@@ -3,7 +3,7 @@ import { Section } from './parts.tsx';
 export const PrinciplesSection = () => (
   <Section id="principles" title="Principles">
     <ul class="ligungi-ds__list">
-      <li>Keep the lichess look: lila's markup and SCSS (vendored, never edited) are the base; ligungi only adds what lila lacks, in <code>styles/ligungi.scss</code>.</li>
+      <li>Keep the lichess look: lila's markup and SCSS (vendored, never edited) are the base; ligungi only adds what lila lacks, in the partials of <code>styles/ligungi/</code>.</li>
       <li>Forms use the components in <code>components/ui.tsx</code> (Field, FieldRow, Select, Checkbox, RadioGroup, OptionCards, SubmitButton). Never write raw inputs or selects.</li>
       <li>Colors come from the theme variables below, never hard-coded, so light and dark both work.</li>
       <li>Spacing scale: 0.25, 0.5, 1 and 1.6 rem. Fields are 1.6rem apart on pages and 1.1rem in dialogs.</li>

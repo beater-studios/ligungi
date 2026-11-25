@@ -1,0 +1,131 @@
+/* Static mini board (TV, lists, diagrams) */
+
+.gg-mini {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  aspect-ratio: 1;
+  background-color: var(--gg-board);
+  background-image: var(--gg-board-texture);
+  box-shadow: inset 0 0 0 1px var(--gg-board-edge);
+  container-type: inline-size;
+}
+
+.gg-mini-sq {
+  position: relative;
+  box-shadow: inset 0 0 0 0.5px var(--gg-line);
+  display: grid;
+  place-items: center;
+
+  &.tier-1 {
+    background: #9fd8ea;
+  }
+
+  &.tier-2 {
+    background: #2f8fd8;
+  }
+
+  &.tier-3 {
+    background: #6cc63f;
+  }
+}
+
+.gg-mini-piece {
+  position: relative;
+  width: 84%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--gg-font, #{$kanji-font});
+  font-weight: 700;
+  font-size: calc(100cqw / 9 * 0.48);
+  line-height: 1;
+
+  &.white {
+    background: var(--gg-white-face);
+    color: var(--gg-white-ink);
+    border: 1px solid var(--gg-white-border);
+  }
+
+  &.black {
+    background: var(--gg-black-face);
+    color: var(--gg-black-ink);
+    border: 1px solid var(--gg-black-border);
+  }
+
+  &.flipped > span {
+    transform: rotate(180deg);
+  }
+
+  i {
+    z-index: 2;
+    position: absolute;
+    right: -8%;
+    bottom: -8%;
+    font-style: normal;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 0.55em;
+    background: #3b7a2a;
+    color: #fff;
+    border-radius: 999px;
+    padding: 0 0.25em;
+  }
+}
+
+// Small pieces as koma, like the board package's .gg-shape-koma pieces: a clipped face and a shadow that follows it.
+.gg-shape-koma .gg-mini-piece {
+  &.white,
+  &.black {
+    background: none;
+    border: 0;
+    border-radius: 0;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 8%;
+    clip-path: polygon(50% 0, 86% 14%, 100% 100%, 0 100%, 14% 14%);
+  }
+
+  &.white::before {
+    background: var(--gg-koma-grain), linear-gradient(165deg, var(--gg-white-shine), var(--gg-white-face) 45%, var(--gg-white-rim));
+  }
+
+  &.black::before {
+    background: var(--gg-koma-grain), linear-gradient(165deg, var(--gg-black-shine), var(--gg-black-face) 45%, var(--gg-black-rim));
+  }
+
+  &.flipped::before {
+    transform: rotate(180deg);
+  }
+
+  > span {
+    z-index: 1;
+    transform: translateY(7%) scale(0.84);
+  }
+
+  // Icons are laid over the whole piece (.ligungi-glyph:has(.gg-icon)); text only needs to stack above the face.
+  > span:not(:has(.gg-icon)) {
+    position: relative;
+  }
+
+  &.flipped > span {
+    transform: translateY(-7%) rotate(180deg) scale(0.84);
+  }
+}
+
+// The opponent's kanji and letters upright, as on the board (gungiground.css, gg-upright-opponent).
+.gg-upright-opponent .gg-mini-piece.flipped > span:not(:has(.gg-icon)) {
+  transform: none;
+
+  .gg-guides {
+    transform: rotate(180deg);
+  }
+}
+
+.gg-upright-opponent.gg-shape-koma .gg-mini-piece.flipped > span:not(:has(.gg-icon)) {
+  transform: translateY(-7%) scale(0.84);
+}

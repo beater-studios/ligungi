@@ -1,0 +1,301 @@
+/* ===== Header ===== */
+// lila hides these on its auth pages through a stylesheet loaded only there; ligungi bundles all CSS.
+.site-buttons .signin-or-signup {
+  display: flex;
+  margin-inline-end: 0.5rem;
+}
+
+body:has(main.ligungi-auth) .site-buttons .signin-or-signup,
+body:has(main.ligungi-auth) #clinput {
+  display: none;
+}
+
+.ligungi-dasher {
+  // Wide enough for the longest theme and piece names beside their labels (lila sets 240px on the id).
+  &#dasher_app {
+    width: 270px;
+  }
+
+  .subs .sub {
+    gap: 0.4em;
+
+    &::after {
+      margin-inline-start: 0.5em;
+    }
+  }
+
+  // The value takes the room left and keeps to the right, beside the arrow, so every value lines up there.
+  &__value {
+    flex: 1;
+    min-width: 0;
+    margin-inline-start: 0.5em;
+    overflow: hidden;
+    text-align: end;
+    color: $c-font-dim;
+    font-size: 0.9em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sub:hover &__value {
+    color: inherit;
+  }
+
+  .langs form button {
+    border: 0;
+    background: none;
+    color: $c-header-dropdown;
+    cursor: pointer;
+  }
+
+  // The pieces panel holds three groups: give the list room and keep each swatch beside its label (over lila's
+  // `#dasher_app` rules, hence the id).
+  &#dasher_app .langs form {
+    max-height: min(70vh, 36rem);
+
+    button {
+      justify-content: flex-start;
+      align-items: center;
+      gap: 0.6em;
+      padding-block: 0.55rem;
+    }
+  }
+
+  // Board and pieces show a swatch of their colors where the other submenus show an icon.
+  &__look .ligungi-swatch {
+    flex: none;
+    margin-inline-end: 0.2em;
+  }
+
+  &__group {
+    margin: 0.7em 1rem 0.2em;
+    color: $c-font-dim;
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__more {
+    display: block;
+    padding: 0.6em 1rem;
+    border-top: $border;
+    font-size: 0.9em;
+  }
+}
+
+// Player search: lila's #clinput (the input grows while body.clinput is set) plus our own results list. Like the
+// sign-in buttons above, lila's auth stylesheet hides it everywhere once bundled, so show it again outside auth pages.
+#clinput {
+  display: flex;
+  position: relative;
+
+  button.link {
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  input::-webkit-search-cancel-button {
+    display: none;
+  }
+}
+
+.ligungi-search__results {
+  @extend %dropdown-shadow;
+
+  position: absolute;
+  top: $site-header-height;
+  inset-inline-start: 0;
+  min-width: 100%;
+  margin: 0;
+  padding: 0.3em 0;
+  list-style: none;
+  background: $c-bg-header-dropdown;
+  border-radius: 0 0 $box-radius-size $box-radius-size;
+  z-index: $z-dropdown-109;
+
+  .user-link {
+    display: flex;
+    align-items: center;
+    padding: 0.5em 1em;
+    color: $c-header-dropdown;
+    white-space: nowrap;
+
+    &.active {
+      background: $c-primary;
+      color: $c-over;
+    }
+  }
+}
+
+.ligungi-search__empty {
+  padding: 0.5em 1em;
+  color: $c-font-dim;
+  white-space: nowrap;
+}
+
+// Challenges received from a profile: lila's challenge toggle (icon with a count badge) and its dropdown.
+.ligungi-challenges {
+  position: relative;
+
+  > button.toggle {
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .data-count::after {
+    top: -8px;
+    inset-inline-end: -12px;
+  }
+
+  &__list {
+    width: 20rem;
+    max-width: calc(100vw - 2rem);
+    max-height: 70vh;
+    overflow-y: auto;
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .error {
+      padding: 0 1em 0.8em;
+      margin: 0;
+    }
+  }
+
+  &__empty {
+    padding: 1.5em 1em;
+    margin: 0;
+    color: $c-font-dim;
+    text-align: center;
+  }
+
+  &__heading {
+    margin: 0;
+    padding: 0.8em 1em 0.2em;
+    color: $c-font-dim;
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
+
+// A correspondence game waiting for the viewer's move, in the bell's dropdown.
+.ligungi-turn {
+  & + & {
+    border-top: $border;
+  }
+
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    padding: 0.7em 1em;
+    color: $c-header-dropdown;
+
+    &:hover {
+      background: $c-bg-zebra;
+    }
+  }
+
+  &__name {
+    font-weight: 600;
+  }
+
+  small {
+    color: $c-font-dim;
+  }
+}
+
+// Two choices in one card (who may challenge, who may follow): the second legend needs air after the first help text.
+.ligungi-settings__card .ligungi-choice + .ligungi-choice {
+  margin-top: 1.2em;
+}
+
+// A follower or a moderation decision, in the bell's dropdown.
+.ligungi-bell-notice {
+  & + & {
+    border-top: $border;
+  }
+
+  > a,
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    padding: 0.7em 1em;
+    border-inline-start: 3px solid transparent;
+    color: $c-header-dropdown;
+  }
+
+  > a:hover {
+    background: $c-bg-zebra;
+  }
+
+  &--unread > a,
+  &--unread > div {
+    border-inline-start-color: $c-primary;
+  }
+
+  &--unread &__text {
+    font-weight: 600;
+  }
+
+  small {
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-challenge {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  padding: 0.8em 1em;
+
+  & + & {
+    border-top: $border;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    flex: 1;
+    min-width: 0;
+
+    a {
+      color: $c-header-dropdown;
+    }
+
+    > a:hover {
+      color: $c-link;
+    }
+
+    small {
+      color: $c-font-dim;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.4em;
+
+    .button {
+      padding: 0.5em 0.7em;
+
+      &:not(.button-empty) {
+        color: $c-over;
+      }
+
+      &::before {
+        margin: 0;
+      }
+    }
+  }
+}

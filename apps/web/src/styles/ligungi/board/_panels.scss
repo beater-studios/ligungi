@@ -1,0 +1,171 @@
+/* Side panels: draft progress and fixed tower composition */
+.ligungi-panels {
+  margin-top: $block-gap;
+  padding: 0.8em 1em;
+  display: grid;
+  gap: 1em;
+
+  h2 {
+    font-size: 1em;
+    font-weight: 700;
+    margin: 0 0 0.4em;
+    color: $c-font-dim;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.ligungi-tower ol,
+.ligungi-draft ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35em;
+}
+
+.ligungi-tower li {
+  display: grid;
+  grid-template-columns: 1.9em 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.6em;
+  align-items: center;
+
+  .gg-mini-piece {
+    grid-row: 1 / 3;
+    width: 1.9em;
+    font-size: 1.05em;
+  }
+}
+
+.ligungi-tower__meta {
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-draft li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2em 0.5em;
+  padding: 0.25em 0.4em;
+  border-radius: 4px;
+
+  &.active {
+    background: $c-bg-zebra;
+    outline: 1px solid $c-primary;
+  }
+}
+
+.ligungi-draft__count {
+  color: $c-font-dim;
+  font-size: 0.85em;
+  flex-basis: 100%;
+  padding-left: 1.6em;
+}
+
+.ligungi-draft__done {
+  font-size: 0.8em;
+  color: $c-good;
+  font-weight: 700;
+}
+
+// lila's confirm places its two buttons absolutely around a 60px box (no text); ours has the question beside them,
+// so the buttons go back into the flow.
+.rcontrols .act-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  width: 100%;
+
+  .fbt.yes,
+  .fbt.no {
+    position: static;
+    inset: auto;
+    width: auto;
+    transform: none;
+    border: 0;
+    text-shadow: none;
+    padding: 0.2em 0.8em;
+    border-radius: $box-radius-size;
+  }
+
+  .fbt.yes {
+    background: $c-good;
+    color: $c-over;
+
+    &:hover {
+      filter: brightness(1.1);
+    }
+  }
+
+  .fbt.no {
+    color: $c-font-dim;
+
+    &:hover {
+      background: none;
+      color: $c-bad;
+    }
+  }
+}
+
+// lila styles the answers of a question as links; ours are buttons, so they get the same look.
+.rcontrols .question {
+  button {
+    flex: 1 0 3rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    font-size: 1.5em;
+    line-height: 3em;
+    background: $c-bg-box;
+    cursor: pointer;
+
+    &.yes {
+      color: $c-good;
+    }
+
+    &.no {
+      color: $c-bad;
+    }
+
+    &:hover {
+      color: #fff;
+      background: $c-good;
+    }
+
+    &.no:hover {
+      background: $c-bad;
+    }
+
+    @include mq-is-col1 {
+      flex: 0 0 2.5rem;
+      padding: 0 1.2em;
+      line-height: 1.6em;
+    }
+  }
+}
+
+// The move confirmation answers the player's own click, every move in correspondence: it should not flash like an offer.
+.rcontrols .ligungi-confirm-move {
+  animation: none;
+}
+
+.rcontrols .pending p {
+  color: $c-font-dim;
+  font-size: 0.9em;
+}
+
+.ligungi-declined {
+  margin: 0;
+  padding: 0.5em 3%;
+  color: $c-font-dim;
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+.ligungi-confirm-text {
+  font-weight: 700;
+  margin-inline-end: 0.5em;
+}

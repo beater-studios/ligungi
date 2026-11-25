@@ -1,0 +1,64 @@
+/* ===== Mate problems, now puzzles: the side card of the trainer ===== */
+.ligungi-mates-loading {
+  h1 {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.75rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-mates {
+  &__title {
+    margin: 0;
+    color: $c-font-clear;
+    font-size: 1.4rem;
+    font-weight: 500;
+  }
+
+  &__task {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    color: $c-font-clear;
+    font-size: 1.1em;
+  }
+
+  &__intro,
+  &__login {
+    color: $c-font-dim;
+    font-size: 0.9em;
+  }
+
+  &__filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 0.75rem;
+    width: 100%;
+
+    .form-group {
+      margin-bottom: 0;
+    }
+  }
+
+  &__progress::before {
+    margin-inline-end: 0.4em;
+    color: $c-good;
+  }
+
+  // On phones the move list is one scrolling line without the status under it, so the card says how the move went.
+  &__feedback {
+    display: none;
+    font-weight: 500;
+
+    @include mq-is-col1 {
+      display: block;
+    }
+  }
+}

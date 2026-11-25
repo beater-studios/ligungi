@@ -205,6 +205,7 @@ export const SCHEMA = {
   'tv.move': text<[n: number]>('n'),
 
   'report.title': text<[name: string]>('name'),
+  'report.chapter': text<[name: string]>('name'),
 
   'study.chapterCount': text<[n: number]>('n'),
   'study.by': rich<[name: ComponentChildren]>({}, 'name'),
@@ -244,6 +245,7 @@ export const SCHEMA = {
   'notices.studyHidden': text<[title: string]>('title'),
   'notices.studyRestored': text<[title: string]>('title'),
   'notices.studyDeleted': text<[title: string]>('title'),
+  'notices.studyDrawingsCleared': text<[title: string]>('title'),
 
   'notify.challenge': text<[name: string]>('name'),
   'notify.lastMove': text<[move: string]>('move'),

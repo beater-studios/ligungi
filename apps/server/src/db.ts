@@ -342,6 +342,10 @@ const MIGRATIONS = [
   create index race_results_set on race_results(set_id);
   create index race_results_user on race_results(user_id, created_at);
   `,
+  `
+  alter table reports add column chapter_id text;
+  alter table reports add column chapter_path text;
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

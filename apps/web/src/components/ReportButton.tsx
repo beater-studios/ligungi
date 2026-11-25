@@ -12,9 +12,19 @@ const PLAYER_REASONS = REPORT_REASONS.filter((reason) => reason !== 'content');
 
 /**
  * Reports a player to the moderators, from their profile or from a game against them, or one of their studies
- * (`studyId`).
+ * (`studyId`), at the chapter and move the reporter is on (`chapter`), so a moderator lands on what was reported.
  */
-export const ReportButton = ({ username, gameId, studyId }: { username: string; gameId?: string; studyId?: string }) => {
+export const ReportButton = ({
+  username,
+  gameId,
+  studyId,
+  chapter,
+}: {
+  username: string;
+  gameId?: string;
+  studyId?: string;
+  chapter?: { readonly id: string; readonly name: string; readonly path: string };
+}) => {
   const t = useT();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<ReportReason>(studyId ? 'content' : 'cheating');
@@ -35,7 +45,13 @@ export const ReportButton = ({ username, gameId, studyId }: { username: string; 
     setBusy(true);
     setError(null);
     try {
-      await api.post('/api/reports', { reason, details, ...(studyId ? { studyId } : { username }), ...(gameId ? { gameId } : {}) });
+      await api.post('/api/reports', {
+        reason,
+        details,
+        ...(studyId ? { studyId } : { username }),
+        ...(gameId ? { gameId } : {}),
+        ...(studyId && chapter ? { chapterId: chapter.id, chapterPath: chapter.path } : {}),
+      });
       setSent(true);
     } catch (err) {
       setError((err as Error).message);
@@ -55,6 +71,7 @@ export const ReportButton = ({ username, gameId, studyId }: { username: string; 
             <p class="ligungi-success">{t.report.sent}</p>
           ) : (
             <form class="form3 ligungi-report-form" onSubmit={submit}>
+              {studyId && chapter && <p class="ligungi-report-form__chapter">{t.report.chapter(chapter.name)}</p>}
               <OptionCards
                 name="report-reason"
                 legend={t.report.reason}

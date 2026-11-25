@@ -1312,7 +1312,8 @@
     "button": "Report",
     "title": "Report {name}",
     "studyTitle": "Report study",
-    "studyDetailsHelp": "Optional, up to 500 characters: which chapter and move have the problem.",
+    "studyDetailsHelp": "Optional, up to 500 characters: what is wrong. The report already points to the chapter and move you are on.",
+    "chapter": "Chapter: {name}",
     "reason": "Reason",
     "details": "Details",
     "detailsHelp": "Optional, up to 500 characters: what happened and in which game.",
@@ -1379,6 +1380,7 @@
     "settings": "Edit study",
     "save": "Save",
     "deleteStudy": "Delete study",
+    "clearDrawings": "Clear this chapter's drawings",
     "confirmDeleteStudy": "Click again to delete the whole study",
     "chapterSettings": "Edit chapter",
     "deleteChapter": "Delete chapter",
@@ -1435,6 +1437,7 @@
     "reportedBy": "Reported by {reporter} on {date}",
     "game": "See the game",
     "study": "Open the study",
+    "chapter": "Open the chapter at that move",
     "profile": "See the profile",
     "close": "Close report",
     "resolution": "How it was resolved",
@@ -1474,6 +1477,7 @@
       "closeReport": "Report closed",
       "hideStudy": "Study hidden",
       "unhideStudy": "Study shown again",
+      "clearDrawings": "Study drawings cleared",
       "deleteStudy": "Study deleted"
     }
   },
@@ -1730,6 +1734,7 @@
     "studyHidden": "The moderators hid your study \"{title}\". Other players no longer see it.",
     "studyRestored": "Your study \"{title}\" is visible again.",
     "studyDeleted": "The moderators deleted your study \"{title}\".",
+    "studyDrawingsCleared": "The moderators removed the drawings from a chapter of your study \"{title}\". The moves and comments stay.",
     "suspensionLifted": "The suspension of your account was lifted."
   },
   "notify": {

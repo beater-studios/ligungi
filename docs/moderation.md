@@ -18,7 +18,7 @@ Moderators get a Moderation link in the account menu (the `/mod` page), a modera
 
 ## Reports
 
-Any signed-in player can report another from their profile or from a game against them, with a reason (cheating, offensive name or profile, behavior, other) and up to 500 characters. A study is reported from its page, for offensive content or another reason; the report names its author and links the study. One open report per reporter and player at a time (a report about a study counts apart), and at most 10 reports per hour. Open reports are listed on `/mod`; a moderator closes one with a note on how it was resolved.
+Any signed-in player can report another from their profile or from a game against them, with a reason (cheating, offensive name or profile, behavior, other) and up to 500 characters. A study is reported from its page, for offensive content or another reason; the report names its author and links the study at the chapter and move the reporter was on, since each drawing belongs to a move. One open report per reporter and player at a time (a report about a study counts apart), and at most 10 reports per hour. Open reports are listed on `/mod`; a moderator closes one with a note on how it was resolved. When `DISCORD_REPORTS_CHANNEL_ID` is set, the bot also posts each new report in that Discord channel, with its links, so the moderators hear of it at once; the player's text is shown as typed, without formatting, mentions or link previews.
 
 ## Actions
 
@@ -29,6 +29,7 @@ Every action asks for a reason and goes to the moderation log with the moderator
 - **Rename** an offensive username. The new name replaces the old one everywhere it is stored, game histories included, so the old name does not stay visible.
 - **Clear a profile**: deletes the bio and the linked profiles that offend or point to inappropriate content. The country stays. Links can only name a player on a fixed list of sites, so a profile never points to an arbitrary address, but the page there can still be inappropriate.
 - **Hide a study** that offends: it leaves the list and opens only for its author, who sees that the moderation hid it, and for the moderators. It can be shown again.
+- **Clear the drawings of a chapter**, when the problem is only what was drawn: its arrows and painted squares go, the moves and comments stay, and the author is told.
 - **Delete a study**, with all its chapters.
 - **Void a game** won by cheating (finished and rated only). Each player's rating change from that game is undone on their current rating: the loser gets the points back and the winner loses those gained. The game stays in the history, marked as voided, and leaves the win, draw and loss counts.
 

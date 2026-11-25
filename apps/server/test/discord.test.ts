@@ -56,6 +56,7 @@ class FakeDiscord {
       return json(200, body);
     }
     if (path === '/applications/app/role-connections/metadata') return json(200, body);
+    if (/^\/channels\/[^/]+\/messages$/.test(path)) return json(200, { id: 'm1' });
     const member = path.match(/^\/guilds\/guild\/members\/([^/]+)(?:\/roles\/([^/]+))?$/);
     if (member) {
       const roles = this.members.get(member[1]!);
@@ -150,6 +151,24 @@ const ratedGame = async (winner: Client, loser: Client) => {
 };
 
 describe('Discord link', () => {
+  it('tells the moderators of each new report on Discord, without mentions or link previews', async () => {
+    const fake = new FakeDiscord();
+    server = await startServer({ discord: { ...discordConfig(), reports: { token: 'bot-token', channelId: 'mods' } }, fetch: fake.fetch });
+    const reporter = new Client(server.base);
+    await reporter.request('POST', '/api/signup', { username: 'Palm', password: 'segredo123' });
+    const target = new Client(server.base);
+    await target.request('POST', '/api/signup', { username: 'Kite_2', password: 'segredo123' });
+    expect((await reporter.request('POST', '/api/reports', { username: 'Kite_2', reason: 'name', details: '@everyone look *here*' })).status).toBe(200);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const post = fake.calls.find((call) => call.method === 'POST' && call.path === '/channels/mods/messages');
+    expect(post?.body).toMatchObject({ allowed_mentions: { parse: [] }, flags: 4 });
+    const content = (post!.body as { content: string }).content;
+    expect(content).toContain('**New report** · Offensive name or profile');
+    expect(content).toContain('Kite\\_2, reported by Palm');
+    expect(content).toContain('> @everyone look \\*here\\*');
+    expect(content).toContain('<https://ligungi.test/@/Kite_2> · <https://ligungi.test/mod>');
+  });
+
   it('is off without the Discord settings', async () => {
     server = await startServer();
     const a = client();

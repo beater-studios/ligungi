@@ -23,6 +23,8 @@ interface ReportRow {
   target_name: string;
   game_id: string | null;
   study_id: string | null;
+  chapter_id: string | null;
+  chapter_path: string | null;
   reason: ReportReason;
   details: string;
   created_at: number;
@@ -48,6 +50,8 @@ const toReport = (row: ReportRow): ReportView => ({
   target: { id: row.target_id, name: row.target_name },
   gameId: row.game_id,
   studyId: row.study_id,
+  chapterId: row.chapter_id,
+  chapterPath: row.chapter_path,
   reason: row.reason,
   details: row.details,
   createdAt: row.created_at,
@@ -129,15 +133,19 @@ export class Moderation {
     details: string,
     gameId: string | null,
     studyId: string | null = null,
+    chapter: { readonly id: string; readonly path: string } | null = null,
   ): string | 'alreadyReported' {
+    // One open report per reporter for the same player, study and chapter: another chapter of the same study is a new one.
     const open = this.#db
-      .prepare(`select 1 from reports where reporter_id = ? and target_id = ? and study_id is ? and status = 'open'`)
-      .get(reporterId, targetId, studyId);
+      .prepare(`select 1 from reports where reporter_id = ? and target_id = ? and study_id is ? and chapter_id is ? and status = 'open'`)
+      .get(reporterId, targetId, studyId, chapter?.id ?? null);
     if (open) return 'alreadyReported';
     const id = randomId(10);
     this.#db
-      .prepare('insert into reports (id, reporter_id, target_id, game_id, study_id, reason, details, created_at) values (?, ?, ?, ?, ?, ?, ?, ?)')
-      .run(id, reporterId, targetId, gameId, studyId, reason, details, this.#now());
+      .prepare(
+        'insert into reports (id, reporter_id, target_id, game_id, study_id, chapter_id, chapter_path, reason, details, created_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run(id, reporterId, targetId, gameId, studyId, chapter?.id ?? null, chapter?.path ?? null, reason, details, this.#now());
     return id;
   }
 

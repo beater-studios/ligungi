@@ -66,6 +66,7 @@ Server environment variables:
 | `DISCORD_REDIRECT_URI` | (none) | `https://<site>/api/discord/callback`, registered as a redirect in the Discord application. |
 | `DISCORD_TOKEN_KEY` | (none) | 32 random bytes in base64 (`openssl rand -base64 32`) that encrypt the stored Discord tokens. Changing it drops every link's tokens. |
 | `DISCORD_BOT_TOKEN`, `DISCORD_GUILD_ID` | (none) | The bot and the server where it gives the rank roles. Optional: without them players still get the Linked Roles connection. |
+| `DISCORD_REPORTS_CHANNEL_ID` | (none) | A channel of the server where the bot posts each new report for the moderators, with a link to what was reported. Optional, and needs `DISCORD_BOT_TOKEN`; the bot must be able to send messages there. |
 | `DISCORD_ROLE_GENERAL`, `DISCORD_ROLE_LIEUTENANT_GENERAL`, `DISCORD_ROLE_MAJOR_GENERAL`, `DISCORD_ROLE_SAMURAI`, `DISCORD_ROLE_SOLDIER` | (none) | The role id of each rank (`DISCORD_TIERS`). All five are needed for the bot to give ranks. |
 
 Linking accounts to Discord is optional: set the Discord variables above, add the redirect URI and the Linked Roles verification URL (`https://<site>/api/discord/link`) in the Discord application, then register the Linked Roles fields once with `node src/cli.ts discord metadata` (run in `apps/server`, with the same variables). The bot's role must sit above the rank roles. See Discord ranks in [docs/architecture.md](docs/architecture.md#discord-ranks).

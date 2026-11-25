@@ -936,7 +936,7 @@ export const DesignPage = () => {
               </li>
             </ul>
           </Example>
-          <Example label="Drawings on the board (board shapes), the limit message over the board (.ligungi-study__toast) and the study's drawing tools (.ligungi-study__draw): up to 2 arrows and 4 painted squares per move">
+          <Example label="Drawings on the board (board shapes), the limit message over the board (.ligungi-study__toast) and the study's drawing tools (.ligungi-study__draw): up to 8 arrows and 8 painted squares per move">
             <div class="ligungi-study" style={{ display: 'grid', gap: '0.75rem', width: '100%', maxWidth: '22rem' }}>
               <div style={{ width: '100%', position: 'relative' }}>
                 <BoardView
@@ -949,7 +949,7 @@ export const DesignPage = () => {
                   ]}
                 />
                 <p class="ligungi-study__toast" role="status">
-                  Each move has up to 2 arrows and 4 painted squares. Erase one to draw another.
+                  Each move has up to 8 arrows and 8 painted squares. Erase one to draw another.
                 </p>
               </div>
               <div class="ligungi-study__draw" role="group" aria-label="Draw">

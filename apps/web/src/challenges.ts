@@ -32,6 +32,8 @@ export const noticeText = (t: Messages, notice: NoticeView): string => {
       return n.studyRestored(subject);
     case 'studyDeleted':
       return n.studyDeleted(subject);
+    case 'studyDrawingsCleared':
+      return n.studyDrawingsCleared(subject);
     case 'profileCleared':
     case 'gameVoided':
     case 'suspensionLifted':
@@ -45,7 +47,7 @@ export const noticePath = (notice: NoticeView): string | null => {
   if (notice.kind === 'renamed') return notice.subject ? `/@/${notice.subject}` : null;
   if (notice.kind === 'profileCleared') return '/account';
   if (notice.kind === 'gameVoided') return notice.ref ? `/${notice.ref}` : null;
-  if (notice.kind === 'studyHidden' || notice.kind === 'studyRestored') return notice.ref ? `/study/${notice.ref}` : null;
+  if (notice.kind === 'studyHidden' || notice.kind === 'studyRestored' || notice.kind === 'studyDrawingsCleared') return notice.ref ? `/study/${notice.ref}` : null;
   return null;
 };
 

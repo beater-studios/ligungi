@@ -1312,7 +1312,8 @@
     "button": "Denunciar",
     "title": "Denunciar {name}",
     "studyTitle": "Denunciar estudo",
-    "studyDetailsHelp": "Opcional, até 500 caracteres: em qual capítulo e lance está o problema.",
+    "studyDetailsHelp": "Opcional, até 500 caracteres: o que há de errado. A denúncia já aponta o capítulo e o lance em que você está.",
+    "chapter": "Capítulo: {name}",
     "reason": "Motivo",
     "details": "Detalhes",
     "detailsHelp": "Opcional, até 500 caracteres: o que aconteceu e em qual partida.",
@@ -1379,6 +1380,7 @@
     "settings": "Editar estudo",
     "save": "Salvar",
     "deleteStudy": "Apagar estudo",
+    "clearDrawings": "Apagar os desenhos deste capítulo",
     "confirmDeleteStudy": "Clique de novo para apagar o estudo inteiro",
     "chapterSettings": "Editar capítulo",
     "deleteChapter": "Apagar capítulo",
@@ -1435,6 +1437,7 @@
     "reportedBy": "Denunciado por {reporter} em {date}",
     "game": "Ver a partida",
     "study": "Ver o estudo",
+    "chapter": "Abrir o capítulo nesse lance",
     "profile": "Ver o perfil",
     "close": "Fechar denúncia",
     "resolution": "Como foi resolvida",
@@ -1474,6 +1477,7 @@
       "closeReport": "Denúncia fechada",
       "hideStudy": "Estudo ocultado",
       "unhideStudy": "Estudo mostrado de novo",
+      "clearDrawings": "Desenhos do estudo apagados",
       "deleteStudy": "Estudo apagado"
     }
   },
@@ -1730,6 +1734,7 @@
     "studyHidden": "A moderação ocultou seu estudo \"{title}\". Os outros jogadores não o veem mais.",
     "studyRestored": "Seu estudo \"{title}\" voltou a ficar visível.",
     "studyDeleted": "A moderação apagou seu estudo \"{title}\".",
+    "studyDrawingsCleared": "Os moderadores apagaram os desenhos de um capítulo do seu estudo \"{title}\". Os lances e comentários continuam.",
     "suspensionLifted": "A suspensão da sua conta foi retirada."
   },
   "notify": {

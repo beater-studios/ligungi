@@ -46,7 +46,11 @@ const ReportCard = ({ report, onClosed }: { report: ReportView; onClosed: () => 
         {report.studyId && (
           <>
             {' · '}
-            <a href={`/study/${report.studyId}`}>{t.mod.study}</a>
+            {report.chapterId ? (
+              <a href={`/study/${report.studyId}?chapter=${report.chapterId}${report.chapterPath ? `&move=${report.chapterPath}` : ''}`}>{t.mod.chapter}</a>
+            ) : (
+              <a href={`/study/${report.studyId}`}>{t.mod.study}</a>
+            )}
           </>
         )}
       </p>

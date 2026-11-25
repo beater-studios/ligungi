@@ -28,6 +28,8 @@ export interface DiscordConfig {
   readonly tokenKey: Buffer;
   /** Without it, players still get the Linked Roles connection but no rank roles. */
   readonly bot: DiscordBotConfig | null;
+  /** Where the bot posts each new report for the moderators (`DISCORD_REPORTS_CHANNEL_ID`); off without it. */
+  readonly reports?: { readonly token: string; readonly channelId: string } | null;
 }
 
 export interface ServerConfig {
@@ -73,7 +75,9 @@ const parseDiscord = (env: NodeJS.ProcessEnv): DiscordConfig | null => {
   const roles = Object.fromEntries(DISCORD_TIERS.map((tier) => [tier.id, env[TIER_ENV[tier.id]] ?? ''])) as Record<DiscordTier, string>;
   const { DISCORD_BOT_TOKEN: token, DISCORD_GUILD_ID: guildId } = env;
   const bot = token && guildId && Object.values(roles).every(Boolean) ? { token, guildId, tierRoles: roles } : null;
-  return { clientId, clientSecret, redirectUri, tokenKey, bot };
+  const channelId = env.DISCORD_REPORTS_CHANNEL_ID;
+  const reports = token && channelId ? { token, channelId } : null;
+  return { clientId, clientSecret, redirectUri, tokenKey, bot, reports };
 };
 
 export const loadConfig = (env: NodeJS.ProcessEnv = process.env): ServerConfig => ({

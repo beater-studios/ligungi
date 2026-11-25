@@ -97,7 +97,7 @@ describe('studies', () => {
     expect((await author.request('POST', `/api/studies/${study.id}/chapters`, chapter({ fen: twoMarshals }))).data).toMatchObject({ code: 'invalidChapter' });
   });
 
-  it('allows two arrows and four painted squares per move, checked by the server', async () => {
+  it('allows eight arrows and eight painted squares per move, checked by the server', async () => {
     await start();
     const author = await signup('Kite');
     const study = await createStudy(author);
@@ -105,9 +105,9 @@ describe('studies', () => {
     const squares = (n: number) => Array.from({ length: n }, (_, i) => ({ kind: 'square', square: i, color: 'blue' }));
     const arrows = (n: number) => Array.from({ length: n }, (_, i) => ({ kind: 'arrow', from: i, to: i + 9, color: 'orange' }));
     const save = (shapes: object[]) => author.request('POST', path, { root: { comment: '', shapes, children: [] } });
-    expect((await save([...squares(4), ...arrows(2)])).status).toBe(200);
-    expect((await save(squares(5))).data).toMatchObject({ code: 'invalidChapter' });
-    expect((await save(arrows(3))).data).toMatchObject({ code: 'invalidChapter' });
+    expect((await save([...squares(8), ...arrows(8)])).status).toBe(200);
+    expect((await save(squares(9))).data).toMatchObject({ code: 'invalidChapter' });
+    expect((await save(arrows(9))).data).toMatchObject({ code: 'invalidChapter' });
     expect((await save([{ kind: 'square', square: 3, color: 'pink' }])).data).toMatchObject({ code: 'invalidChapter' });
     expect((await save([{ kind: 'arrow', from: 3, to: 3, color: 'red' }])).data).toMatchObject({ code: 'invalidChapter' });
     expect((await save([{ kind: 'square', square: 81, color: 'red' }])).data).toMatchObject({ code: 'invalidChapter' });
@@ -183,10 +183,21 @@ describe('studies', () => {
     // A report about the study does not block a report about its author, and the other way round.
     expect((await reader.request('POST', '/api/reports', { username: 'Kite', reason: 'behavior', details: '' })).status).toBe(200);
     expect((await reader.request('POST', '/api/reports', { studyId: study.id, reason: 'content', details: '' })).data).toMatchObject({ code: 'alreadyReported' });
+    // A report on a chapter keeps the chapter and the move; a chapter of another study, or a made-up path, is dropped.
+    const chapterId = study.chapters[0]!.id;
+    expect((await reader.request('POST', '/api/reports', { studyId: study.id, chapterId, chapterPath: '0.1', reason: 'content', details: '' })).status).toBe(200);
+    expect((await reader.request('POST', '/api/reports', { studyId: study.id, chapterId, chapterPath: '0.1', reason: 'content', details: '' })).data).toMatchObject({
+      code: 'alreadyReported',
+    });
+    const other = await signup('Gon');
+    const otherStudy = await createStudy(author);
+    expect((await other.request('POST', '/api/reports', { studyId: otherStudy.id, chapterId, chapterPath: 'x;drop', reason: 'content', details: '' })).status).toBe(200);
     const reports = (await mod.request<ReportView[]>('GET', '/api/mod/reports')).data;
-    expect(reports.map((report) => [report.target.name, report.studyId, report.reason])).toEqual([
-      ['Kite', study.id, 'content'],
-      ['Kite', null, 'behavior'],
+    expect(reports.map((report) => [report.target.name, report.studyId, report.chapterId, report.chapterPath, report.reason])).toEqual([
+      ['Kite', study.id, null, null, 'content'],
+      ['Kite', null, null, null, 'behavior'],
+      ['Kite', study.id, chapterId, '0.1', 'content'],
+      ['Kite', otherStudy.id, null, null, 'content'],
     ]);
 
     expect((await reader.request('POST', `/api/mod/studies/${study.id}/hide`, { reason: 'x' })).status).toBe(403);
@@ -201,11 +212,24 @@ describe('studies', () => {
     const own = await createStudy(author, 'private', 'Rascunho');
     expect((await mod.request('GET', `/api/studies/${own.id}`)).status).toBe(404);
 
+    // Clearing a chapter's drawings keeps its moves and comments, tells the author and is logged.
+    const drawn = `/api/studies/${study.id}/chapters/${chapterId}`;
+    const shaped = { comment: 'Veja', shapes: [{ kind: 'square', square: 40, color: 'red' }], children: [node('e3e4', { shapes: [{ kind: 'arrow', from: 22, to: 31, color: 'red' }] })] };
+    expect((await author.request('POST', drawn, { root: shaped })).status).toBe(200);
+    expect((await reader.request('POST', `${drawn.replace('/api/studies', '/api/mod/studies')}/clear-drawings`, { reason: 'x' })).status).toBe(403);
+    expect((await mod.request('POST', `/api/mod/studies/${study.id}/chapters/nothere1/clear-drawings`, { reason: 'x' })).status).toBe(404);
+    expect((await mod.request('POST', `/api/mod/studies/${study.id}/chapters/${chapterId}/clear-drawings`, { reason: '' })).data).toMatchObject({ code: 'reasonRequired' });
+    expect((await mod.request('POST', `/api/mod/studies/${study.id}/chapters/${chapterId}/clear-drawings`, { reason: 'Desenho obsceno' })).status).toBe(200);
+    const cleared = (await reader.request<StudyChapter>('GET', drawn)).data.root;
+    expect(cleared).toMatchObject({ comment: 'Veja', shapes: [], children: [{ move: 'e3e4', shapes: [] }] });
+    expect(server!.app.db.prepare("select subject from notices where kind = 'studyDrawingsCleared'").all()).toEqual([{ subject: study.title }]);
+
     expect((await mod.request('POST', `/api/mod/studies/${study.id}/delete`, { reason: 'Reincidente' })).status).toBe(200);
     expect((await author.request('GET', `/api/studies/${study.id}`)).status).toBe(404);
     const log = (await mod.request<ModLogEntry[]>('GET', '/api/mod/log')).data;
-    expect(log.slice(0, 3).map((entry) => [entry.action, entry.target])).toEqual([
+    expect(log.slice(0, 4).map((entry) => [entry.action, entry.target])).toEqual([
       ['deleteStudy', 'Kite'],
+      ['clearDrawings', 'Kite'],
       ['unhideStudy', 'Kite'],
       ['hideStudy', 'Kite'],
     ]);

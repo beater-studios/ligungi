@@ -16,6 +16,7 @@ export const NOTICE_KINDS = [
   'studyHidden',
   'studyRestored',
   'studyDeleted',
+  'studyDrawingsCleared',
   'suspensionLifted',
 ] as const;
 export type NoticeKind = (typeof NOTICE_KINDS)[number];

@@ -603,6 +603,9 @@ export interface ReportView {
   readonly gameId: string | null;
   /** The study reported, when the report is about one. */
   readonly studyId: string | null;
+  /** The chapter of that study the reporter was on, and the move (its path in the chapter's tree, as `0.1.0`). */
+  readonly chapterId: string | null;
+  readonly chapterPath: string | null;
   readonly reason: ReportReason;
   readonly details: string;
   readonly createdAt: number;
@@ -623,6 +626,7 @@ export type ModAction =
   | 'closeReport'
   | 'hideStudy'
   | 'unhideStudy'
+  | 'clearDrawings'
   | 'deleteStudy';
 
 /** One line of the moderation log. Names are kept as they were when the action was taken. */

@@ -36,8 +36,8 @@ export const STUDY_QUERY_MAX = 50;
  * Drawings per move. Arrows join square centers and squares are painted whole, so nothing is drawn freehand; with
  * this few marks a picture other than an annotation is very hard to make.
  */
-export const STUDY_ARROWS_MAX = 2;
-export const STUDY_SQUARES_MAX = 4;
+export const STUDY_ARROWS_MAX = 8;
+export const STUDY_SQUARES_MAX = 8;
 export const SHAPE_COLORS = ['green', 'red', 'blue', 'orange'] as const;
 export type ShapeColor = (typeof SHAPE_COLORS)[number];
 

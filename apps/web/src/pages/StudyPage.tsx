@@ -51,11 +51,35 @@ interface Pending {
   readonly root: StudyRoot;
 }
 
-/** Hide, show again or delete a study, with the reason the log keeps. */
-const StudyModTools = ({ study, onChange }: { study: StudyView; onChange: (hidden: boolean | null) => void }) => {
+/** The chapter's tree with every drawing removed, as the moderators' clear-drawings leaves it. */
+const withoutShapes = <T extends StudyRoot>(node: T): T => ({ ...node, shapes: [], children: node.children.map(withoutShapes) });
+
+/** Hide, show again or delete a study, or clear the drawings of the chapter open, with the reason the log keeps. */
+const StudyModTools = ({
+  study,
+  chapterId,
+  onChange,
+  onCleared,
+}: {
+  study: StudyView;
+  chapterId: string | null;
+  onChange: (hidden: boolean | null) => void;
+  onCleared: () => void;
+}) => {
   const t = useT();
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const clear = async () => {
+    if (!chapterId) return;
+    setError(null);
+    try {
+      await api.post(`/api/mod/studies/${study.id}/chapters/${chapterId}/clear-drawings`, { reason });
+      setReason('');
+      onCleared();
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
   const act = async (route: 'hide' | 'delete', hidden?: boolean) => {
     setError(null);
     try {
@@ -84,6 +108,11 @@ const StudyModTools = ({ study, onChange }: { study: StudyView; onChange: (hidde
         <button type="button" class="button button-empty" disabled={!reason.trim()} onClick={() => void act('hide', !study.hidden)}>
           {study.hidden ? t.study.unhide : t.study.hide}
         </button>
+        {chapterId && (
+          <button type="button" class="button button-empty" disabled={!reason.trim()} onClick={() => void clear()}>
+            {t.study.clearDrawings}
+          </button>
+        )}
         <button type="button" class="button button-empty button-red" data-icon={icons.Trash} disabled={!reason.trim()} onClick={() => void act('delete')}>
           {t.study.deleteStudy}
         </button>
@@ -178,7 +207,9 @@ export const StudyPage = ({ id }: { id: string }) => {
         if (!current) return;
         setChapter(loaded);
         setRoot(loaded.root);
-        setPath([]);
+        // A link can open the chapter at a move (`?move=0.1.0`), as a moderator's link to a report does.
+        const move = (new URLSearchParams(window.location.search).get('move') ?? '').split('.').filter(Boolean).map(Number);
+        setPath(move.length > 0 && move.every(Number.isInteger) && nodeAt(loaded.root, move) ? move : []);
         setOrientation(loaded.orientation);
         setSaveState('saved');
       })
@@ -546,7 +577,13 @@ export const StudyPage = ({ id }: { id: string }) => {
               <a class="button button-empty text" data-icon={icons.Microscope} href={`/analysis?fen=${encodeURIComponent(toFen(position))}`}>
                 {t.study.openInAnalysis}
               </a>
-              {user && !editable && <ReportButton username={study.owner.name} studyId={study.id} />}
+              {user && !editable && (
+                <ReportButton
+                  username={study.owner.name}
+                  studyId={study.id}
+                  {...(chapter ? { chapter: { id: chapter.id, name: chapter.name, path: path.join('.') } } : {})}
+                />
+              )}
               <span class="ligungi-study__updated">{t.study.updated(timeAgo(t, study.updatedAt))}</span>
             </div>
           </div>
@@ -554,7 +591,9 @@ export const StudyPage = ({ id }: { id: string }) => {
         {study && moderator && !editable && (
           <StudyModTools
             study={study}
+            chapterId={chapter?.id ?? null}
             onChange={(hidden) => (hidden === null ? navigate('/study') : setStudy({ ...study, hidden }))}
+            onCleared={() => root && setRoot(withoutShapes(root))}
           />
         )}
       </div>

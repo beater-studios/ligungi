@@ -1312,7 +1312,8 @@
     "button": "Denunciar",
     "title": "Denunciar a {name}",
     "studyTitle": "Denunciar estudio",
-    "studyDetailsHelp": "Opcional, hasta 500 caracteres: en qué capítulo y jugada está el problema.",
+    "studyDetailsHelp": "Opcional, hasta 500 caracteres: qué está mal. La denuncia ya señala el capítulo y la jugada en que estás.",
+    "chapter": "Capítulo: {name}",
     "reason": "Motivo",
     "details": "Detalles",
     "detailsHelp": "Opcional, hasta 500 caracteres: qué pasó y en qué partida.",
@@ -1379,6 +1380,7 @@
     "settings": "Editar estudio",
     "save": "Guardar",
     "deleteStudy": "Borrar estudio",
+    "clearDrawings": "Borrar los dibujos de este capítulo",
     "confirmDeleteStudy": "Haz clic otra vez para borrar todo el estudio",
     "chapterSettings": "Editar capítulo",
     "deleteChapter": "Borrar capítulo",
@@ -1435,6 +1437,7 @@
     "reportedBy": "Denunciado por {reporter} el {date}",
     "game": "Ver la partida",
     "study": "Ver el estudio",
+    "chapter": "Abrir el capítulo en esa jugada",
     "profile": "Ver el perfil",
     "close": "Cerrar denuncia",
     "resolution": "Cómo se resolvió",
@@ -1474,6 +1477,7 @@
       "closeReport": "Denuncia cerrada",
       "hideStudy": "Estudio ocultado",
       "unhideStudy": "Estudio mostrado de nuevo",
+      "clearDrawings": "Dibujos del estudio borrados",
       "deleteStudy": "Estudio borrado"
     }
   },
@@ -1730,6 +1734,7 @@
     "studyHidden": "La moderación ha ocultado tu estudio \"{title}\". Los demás jugadores ya no lo ven.",
     "studyRestored": "Tu estudio \"{title}\" vuelve a ser visible.",
     "studyDeleted": "La moderación ha eliminado tu estudio \"{title}\".",
+    "studyDrawingsCleared": "Los moderadores borraron los dibujos de un capítulo de tu estudio \"{title}\". Las jugadas y los comentarios siguen.",
     "suspensionLifted": "Se ha retirado la suspensión de tu cuenta."
   },
   "notify": {

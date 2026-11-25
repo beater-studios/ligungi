@@ -142,6 +142,28 @@ export class DiscordLinks {
     return this.#config !== null;
   }
 
+  /** The site's own address, from where Discord sends players back; for links in what the bot posts. */
+  get siteOrigin(): string | null {
+    return this.#config ? new URL(this.#config.redirectUri).origin : null;
+  }
+
+  /**
+   * Posts a message for the moderators in the reports channel, when one is set. Nothing in it can mention anyone
+   * (`allowed_mentions` empty) and links show no preview (flag 4), since part of the text is what a player wrote.
+   */
+  async notifyModerators(content: string): Promise<void> {
+    const reports = this.#config?.reports;
+    if (!reports) return;
+    try {
+      await this.#call('POST', `/channels/${reports.channelId}/messages`, {
+        bot: reports.token,
+        json: { content: content.slice(0, 2000), allowed_mentions: { parse: [] }, flags: 4 },
+      });
+    } catch (error) {
+      console.error('discord: report notice failed', error);
+    }
+  }
+
   view(userId: string): DiscordLinkView {
     const row = this.#config ? this.#row(userId) : undefined;
     return {

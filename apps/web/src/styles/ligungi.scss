@@ -7517,6 +7517,11 @@ $lesson-star: #e8a800;
 }
 
 // Four reasons, two per row, with room before the details field.
+.ligungi-report-form__chapter {
+  margin: 0 0 0.6rem;
+  color: $c-font-dim;
+}
+
 .ligungi-report-form .ligungi-choice {
   margin-bottom: 1.25rem;
 

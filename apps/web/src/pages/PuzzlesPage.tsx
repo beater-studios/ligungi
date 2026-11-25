@@ -276,6 +276,7 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
             {user && <a href="/puzzles/dashboard">{t.puzzles.dashboard}</a>}
             <a href="/streak">{t.puzzleRuns.streak}</a>
             <a href="/storm">{t.puzzleRuns.storm}</a>
+            <a href="/racer">{t.racer.title}</a>
           </p>
           {loaded && !user && (
             <p class="ligungi-mates__login">

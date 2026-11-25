@@ -393,6 +393,7 @@ export const PuzzleRunPage = ({ kind }: { kind: PuzzleRunKind }) => {
           <p class="ligungi-puzzle__links">
             <a href="/puzzles">{t.puzzles.title}</a>
             <a href={kind === 'streak' ? '/storm' : '/streak'}>{kind === 'streak' ? t.puzzleRuns.storm : t.puzzleRuns.streak}</a>
+            <a href="/racer">{t.racer.title}</a>
           </p>
           {loaded && !user && (
             <p class="ligungi-mates__login">

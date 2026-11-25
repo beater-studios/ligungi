@@ -159,7 +159,11 @@
     "invalidPuzzleRun": "Invalid puzzle run result.",
     "puzzleNotFound": "Puzzle not found.",
     "noPuzzleLeft": "No puzzles left with these filters.",
-    "invalidProfileLink": "One of the usernames is not valid on that site."
+    "invalidProfileLink": "One of the usernames is not valid on that site.",
+    "raceNotFound": "This race no longer exists.",
+    "raceFull": "This race is full.",
+    "raceStarted": "This race has already started.",
+    "notRaceOwner": "Only whoever created the race can start it."
   },
   "genericError": "Something went wrong. Try again.",
   "offline": "No connection. Trying to reconnect...",
@@ -245,6 +249,7 @@
     "puzzles": "Puzzles",
     "streak": "Puzzle Streak",
     "storm": "Puzzle Storm",
+    "racer": "Puzzle Racer",
     "puzzleDaily": "Puzzle of the day",
     "puzzleDashboard": "Puzzle dashboard",
     "practice": "Practice",
@@ -1158,6 +1163,36 @@
     },
     "loginToSave": "Sign in to keep your records on your account."
   },
+  "racer": {
+    "title": "Puzzle Racer",
+    "intro": "Race other players on the same puzzles for 90 seconds. Each correct move scores a point, a mistake moves you on to the next puzzle, and long runs of correct moves score extra points.",
+    "raceNow": "Race now",
+    "waitingCount": "{n, plural, =0 {Nobody is waiting for a race right now.} one {# player is waiting for a race.} other {# players are waiting for a race.}}",
+    "friends": "Race with friends",
+    "friendsHint": "Create a race and send its link. It starts when you press Start.",
+    "linkLabel": "Race link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "start": "Start the race",
+    "waitingOwner": "Send the link to your friends and start the race when everyone is in.",
+    "waitingOthers": "Waiting for whoever created the race to start it.",
+    "startsIn": "Starts in {seconds}",
+    "publicWait": "Waiting for more players to join.",
+    "score": "Score",
+    "players": "Players",
+    "ghosts": "Ghosts",
+    "ghostsHelp": "Players of an earlier race over the same puzzles, at the pace they had.",
+    "ghostTag": "ghost",
+    "guest": "Guest {n}",
+    "over": "Race over",
+    "winner": "{name} wins!",
+    "youWon": "You win!",
+    "again": "Race again",
+    "newRace": "New race",
+    "watching": "This race has already started: you are watching it.",
+    "loginToSave": "Sign in to keep your race records on your account.",
+    "notFound": "This race no longer exists."
+  },
   "practice": {
     "title": "Practice",
     "intro": "Positions to train against the computer at its strongest: mate, convert your advantage or hold on, within a move limit.",
@@ -2020,6 +2055,10 @@
         "title": "Gungi Puzzle Storm · ligungi",
         "description": "Solve as many Gungi puzzles as you can in 3 minutes, with time bonuses for combos and records for the day, the week and all time."
       },
+      "racer": {
+        "title": "Gungi Puzzle Racer · ligungi",
+        "description": "Race other players on the same Gungi puzzles for 90 seconds: each correct move scores, and long combos score more."
+      },
       "puzzles": {
         "title": "Gungi puzzles · ligungi",
         "description": "Train Gungi with mate and material puzzles, with a rating, themes, a puzzle of the day and a personal dashboard."
@@ -2076,6 +2115,11 @@
     "youPlay": "{color, select, white {you play White} black {you play Black} other {random colors}}",
     "moves": "{plies, plural, =0 {not started} one {# move} other {# moves}}",
     "openSite": "Open {site} in the browser",
-    "waitingTitle": "Waiting for someone in the call to join this room"
+    "waitingTitle": "Waiting for someone in the call to join this room",
+    "raceTitle": "Puzzle Racer",
+    "raceHint": "Race the people in this call on the same puzzles, for 90 seconds.",
+    "raceStart": "Race with the call",
+    "raceJoin": "{players, plural, one {Join the race (# player)} other {Join the race (# players)}}",
+    "raceWatch": "Watch the race"
   }
 }

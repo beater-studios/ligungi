@@ -82,6 +82,7 @@ What each screen shows only visually, and what blind mode needs there. Status: *
 | Board editor | `/editor` | placing pieces by click | placing and removing pieces by typed commands (`4-7 white samurai`), the position read back | built |
 | Puzzles, puzzle of the day | `/puzzles`, `/puzzles/<id>`, `/puzzles/daily` | board, the task, right and wrong marks | the task read, the position on request, moves typed, feedback announced (already in a `role="status"` element) | built |
 | Puzzle Streak and Storm | `/streak`, `/storm` | board, clock, combo | as puzzles, plus the clock and combo read on request and the bonus or penalty announced | built |
+| Puzzle Racer | `/racer`, `/racer/<id>` | board, clock, the track with every racer's score and the ghosts | as Storm, plus the other racers' scores read on request (the track is a list with each name and score as text) and the winner announced at the end (`role="status"`) | to design |
 | Lessons | `/lessons/...` | board, goal marks on squares | the goal read (including the marked squares), moves typed, the result announced | built |
 | Practice | `/practice/<id>` | board against the computer, moves left | as a game against the computer, plus the goal and the moves left | built |
 | Coordinate trainer | `/coordinates` | a board of square buttons | the squares already are buttons with labels; the "find" mode needs its prompt announced | built |

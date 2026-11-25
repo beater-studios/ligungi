@@ -159,7 +159,11 @@
     "invalidPuzzleRun": "Resultado de partida de puzzles no válido.",
     "puzzleNotFound": "Puzzle no encontrado.",
     "noPuzzleLeft": "No quedan puzzles con estos filtros.",
-    "invalidProfileLink": "Alguno de los nombres de usuario no es válido en ese sitio."
+    "invalidProfileLink": "Alguno de los nombres de usuario no es válido en ese sitio.",
+    "raceNotFound": "Esta carrera ya no existe.",
+    "raceFull": "Esta carrera está llena.",
+    "raceStarted": "Esta carrera ya empezó.",
+    "notRaceOwner": "Solo quien creó la carrera puede iniciarla."
   },
   "genericError": "Algo salió mal. Inténtalo de nuevo.",
   "offline": "Sin conexión. Intentando reconectar...",
@@ -245,6 +249,7 @@
     "puzzles": "Puzzles",
     "streak": "Puzzle Streak",
     "storm": "Puzzle Storm",
+    "racer": "Puzzle Racer",
     "puzzleDaily": "Puzzle del día",
     "puzzleDashboard": "Panel de puzzles",
     "practice": "Práctica",
@@ -1158,6 +1163,36 @@
     },
     "loginToSave": "Entra para guardar tus récords en tu cuenta."
   },
+  "racer": {
+    "title": "Puzzle Racer",
+    "intro": "Compite con otros jugadores en los mismos puzzles durante 90 segundos. Cada jugada correcta vale un punto, un error te lleva al siguiente puzzle, y las rachas largas de aciertos dan puntos extra.",
+    "raceNow": "Correr ahora",
+    "waitingCount": "{n, plural, =0 {Nadie está esperando una carrera ahora.} one {# jugador está esperando una carrera.} other {# jugadores están esperando una carrera.}}",
+    "friends": "Correr con amigos",
+    "friendsHint": "Crea una carrera y envía el enlace. Empieza cuando pulses Iniciar.",
+    "linkLabel": "Enlace de la carrera",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "start": "Iniciar la carrera",
+    "waitingOwner": "Envía el enlace a tus amigos e inicia la carrera cuando todos hayan entrado.",
+    "waitingOthers": "Esperando a que quien creó la carrera la inicie.",
+    "startsIn": "Empieza en {seconds}",
+    "publicWait": "Esperando a que entren más jugadores.",
+    "score": "Puntos",
+    "players": "Jugadores",
+    "ghosts": "Fantasmas",
+    "ghostsHelp": "Jugadores de una carrera anterior con los mismos puzzles, al ritmo que tuvieron.",
+    "ghostTag": "fantasma",
+    "guest": "Invitado {n}",
+    "over": "Fin de la carrera",
+    "winner": "¡{name} gana!",
+    "youWon": "¡Ganaste!",
+    "again": "Correr de nuevo",
+    "newRace": "Nueva carrera",
+    "watching": "Esta carrera ya empezó: la estás viendo.",
+    "loginToSave": "Inicia sesión para guardar tus récords de carrera en tu cuenta.",
+    "notFound": "Esta carrera ya no existe."
+  },
   "practice": {
     "title": "Práctica",
     "intro": "Posiciones para entrenar contra la computadora en su nivel más fuerte: da mate, convierte la ventaja o resiste, dentro de un límite de jugadas.",
@@ -2020,6 +2055,10 @@
         "title": "Puzzle Storm de Gungi · ligungi",
         "description": "Resuelve todos los puzzles de Gungi que puedas en 3 minutos, con bonos de tiempo por combos y récords del día, de la semana y de siempre."
       },
+      "racer": {
+        "title": "Puzzle Racer de Gungi · ligungi",
+        "description": "Compite con otros jugadores en los mismos puzzles de Gungi durante 90 segundos: cada jugada correcta suma, y los combos largos suman más."
+      },
       "puzzles": {
         "title": "Puzzles de Gungi · ligungi",
         "description": "Entrena Gungi con puzzles de mate y de ganar material, con puntuación, temas, puzzle del día y panel personal."
@@ -2076,6 +2115,11 @@
     "youPlay": "{color, select, white {juegas con blancas} black {juegas con negras} other {colores al azar}}",
     "moves": "{plies, plural, =0 {sin jugadas} one {# jugada} other {# jugadas}}",
     "openSite": "Abrir {site} en el navegador",
-    "waitingTitle": "Esperando a que alguien de la llamada entre en esta sala"
+    "waitingTitle": "Esperando a que alguien de la llamada entre en esta sala",
+    "raceTitle": "Puzzle Racer",
+    "raceHint": "Compite con quienes están en esta llamada en los mismos puzzles, durante 90 segundos.",
+    "raceStart": "Correr con la llamada",
+    "raceJoin": "{players, plural, one {Unirse a la carrera (# jugador)} other {Unirse a la carrera (# jugadores)}}",
+    "raceWatch": "Ver la carrera"
   }
 }

@@ -117,6 +117,10 @@ export const ERROR_MESSAGES = {
   invalidSearch: 'Busca inválida: confira os campos.',
   discordDisabled: 'A ligação com o Discord não está disponível neste site.',
   discordNotLinked: 'Sua conta não está ligada ao Discord.',
+  raceNotFound: 'Essa corrida não existe mais.',
+  raceFull: 'Essa corrida está cheia.',
+  raceStarted: 'Essa corrida já começou.',
+  notRaceOwner: 'Só quem criou a corrida pode iniciá-la.',
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

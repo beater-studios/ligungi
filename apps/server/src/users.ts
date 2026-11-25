@@ -144,6 +144,7 @@ export class Users {
       this.#db.prepare('delete from puzzle_attempts where user_id = ?').run(userId);
       this.#db.prepare('delete from puzzle_ratings where user_id = ?').run(userId);
       this.#db.prepare('delete from puzzle_runs where user_id = ?').run(userId);
+      this.#db.prepare('delete from race_results where user_id = ?').run(userId);
       this.#db.prepare('delete from lesson_progress where user_id = ?').run(userId);
       this.#db.prepare('delete from practice_progress where user_id = ?').run(userId);
       this.#db.prepare('delete from game_bookmarks where user_id = ?').run(userId);

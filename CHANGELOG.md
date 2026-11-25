@@ -4,6 +4,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Puzzle Racer (`/racer`): race other players on the same puzzles for 90 seconds. Each correct move scores a point, a mistake moves you on to the next puzzle, long combos score extra points, and you can skip one puzzle. Join the public race, create one to share by link, or race the people of a Discord call from the Activity's hub. A public race can bring back players of an earlier race over the same puzzles as ghosts, at the pace they had; a switch hides them. With an account, your best races of today, the week and all time are kept.
+
 ## [0.9.11] - 2026-11-25
 
 ### Fixed

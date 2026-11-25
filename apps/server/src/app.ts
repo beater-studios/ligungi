@@ -103,6 +103,7 @@ import {
   type Session,
 } from './auth.ts';
 import { ActivityHalls } from './activity.ts';
+import { Racers } from './racer.ts';
 import { BUILD } from './build.ts';
 import { ChallengeStore } from './challenges.ts';
 import type { ServerConfig } from './config.ts';
@@ -261,6 +262,16 @@ export const createApp = (config: ServerConfig): App => {
 
   const tv = new Tv(games, config.now);
   const puzzles = new PuzzleStore(db, config.now);
+  const racers: Racers = new Racers(db, {
+    now: config.now,
+    random: Math.random,
+    sequence: () => puzzles.sequence('racer'),
+    onChange: (raceId) =>
+      hub.publish(`race:${raceId}`, (client) => {
+        const race = racers.view(raceId, client.player);
+        return race ? { t: 'race', race } : { t: 'error', code: 'raceNotFound', message: ERROR_MESSAGES.raceNotFound };
+      }),
+  });
   const explorer = new DraftExplorer(db, config.now);
   const studies = new Studies(db, config.now);
   /** Study writes per author and minute: the editor saves on its own after each change, so this is generous. */
@@ -590,6 +601,8 @@ export const createApp = (config: ServerConfig): App => {
     activityPlayers.set(sessionId, { discordId, at: config.now() });
   };
   const activityLimiter = new RateLimiter(30, 60_000, config.now);
+  /** Races created or joined per session: enough to play race after race, too few to fill the server with them. */
+  const raceLimiter = new RateLimiter(30, 60_000, config.now);
   // The page asks every few seconds what the call has going on, so this one allows more.
   const activityRoomsLimiter = new RateLimiter(120, 60_000, config.now);
   const ACTIVITY_INSTANCE = /^[\w-]{1,100}$/;
@@ -751,7 +764,19 @@ export const createApp = (config: ServerConfig): App => {
       if (!activityRoomsLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
       const instanceId = ctx.url.searchParams.get('instanceId') ?? '';
       if (!ACTIVITY_INSTANCE.test(instanceId)) throw new HttpError(400, 'notInActivity');
-      sendJson(ctx.res, 200, activities.view(instanceId, ctx.player));
+      sendJson(ctx.res, 200, { ...activities.view(instanceId, ctx.player), race: racers.callRace(instanceId) });
+    })
+    .add('POST', '/api/activity/race', async (ctx) => {
+      const body = (await ctx.body()) as { instanceId?: unknown };
+      const instanceId = await activityCaller(ctx, body.instanceId);
+      // The call has one race to join at a time: the one not started yet, else a new one.
+      const open = racers.callRace(instanceId);
+      if (open && open.status !== 'racing') {
+        const joined = racers.join(open.id, ctx.player, instanceId);
+        if (joined) throw new HttpError(409, joined);
+        return sendJson(ctx.res, 200, { id: open.id });
+      }
+      sendJson(ctx.res, 200, { id: racers.create(ctx.player, 'call', instanceId) });
     })
     .add('POST', '/api/activity/rooms', async (ctx) => {
       const body = (await ctx.body()) as { instanceId?: unknown; mode?: unknown; timeControl?: unknown; color?: unknown };
@@ -1117,6 +1142,7 @@ export const createApp = (config: ServerConfig): App => {
           const { best } = puzzles.runs(userId);
           return { rating, tries: history, solved: puzzles.solved(userId), runs: puzzles.allRuns(userId), best };
         })(),
+        racer: racers.allResults(userId).map(({ score, at }) => ({ score, at: iso(at) })),
         bookmarks: games.bookmarks(userId).map((bookmark) => ({ game: bookmark.game.id, note: bookmark.note, bookmarkedAt: iso(bookmark.bookmarkedAt) })),
         studies: studies.byOwner(userId).map((study) => ({
           id: study.id,
@@ -1557,6 +1583,37 @@ export const createApp = (config: ServerConfig): App => {
       puzzles.importSolved(userId, ids as string[]);
       sendJson(ctx.res, 200, puzzles.solved(userId));
     })
+    .add('GET', '/api/racer', (ctx) => {
+      const userId = ctx.session.userId;
+      sendJson(ctx.res, 200, { records: userId ? racers.records(userId) : null, waiting: racers.waiting() });
+    })
+    .add('POST', '/api/racer/public', (ctx) => {
+      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      sendJson(ctx.res, 200, { id: racers.joinPublic(ctx.player) });
+    })
+    .add('POST', '/api/racer', (ctx) => {
+      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      sendJson(ctx.res, 200, { id: racers.create(ctx.player, 'friends') });
+    })
+    .add('GET', '/api/racer/:id', (ctx) => {
+      const race = racers.view(ctx.params.id!, ctx.player);
+      if (!race) throw new HttpError(404, 'raceNotFound');
+      sendJson(ctx.res, 200, race);
+    })
+    .add('POST', '/api/racer/:id/join', async (ctx) => {
+      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      const body = (await ctx.body()) as { instanceId?: unknown };
+      // A call's race is only for the people in that call.
+      const instanceId = body.instanceId === undefined ? null : await activityCaller(ctx, body.instanceId);
+      const joined = racers.join(ctx.params.id!, ctx.player, instanceId);
+      if (joined) throw new HttpError(joined === 'raceNotFound' ? 404 : 409, joined);
+      sendJson(ctx.res, 200, { ok: true });
+    })
+    .add('POST', '/api/racer/:id/start', (ctx) => {
+      const started = racers.start(ctx.params.id!, ctx.player);
+      if (started) throw new HttpError(started === 'raceNotFound' ? 404 : 409, started);
+      sendJson(ctx.res, 200, { ok: true });
+    })
     .add('GET', '/api/puzzles/sequence', (ctx) => {
       const kind = PUZZLE_RUN_KINDS.find((value) => value === ctx.url.searchParams.get('kind'));
       if (!kind) throw new HttpError(400, 'invalidPuzzleRun');
@@ -1715,7 +1772,7 @@ export const createApp = (config: ServerConfig): App => {
   });
 
   const validTopic = (topic: unknown): topic is Topic =>
-    typeof topic === 'string' && (topic === 'lobby' || topic === 'tv' || /^(game|challenge):[A-Za-z0-9]{1,16}$/.test(topic));
+    typeof topic === 'string' && (topic === 'lobby' || topic === 'tv' || /^(game|challenge|race):[A-Za-z0-9]{1,16}$/.test(topic));
 
   const onConnection = (socket: WebSocket, player: Player) => {
     const client: Client = { socket, player, topics: new Set(), alive: true };
@@ -1771,6 +1828,11 @@ export const createApp = (config: ServerConfig): App => {
           hub.subscribe(client, topic);
           updatePresence(room);
           hub.send(client, { t: 'game', game: room.view(client.player.sessionId, client.player.userId) });
+        } else if (kind === 'race' && id) {
+          const race = racers.view(id, client.player);
+          if (!race) return error('raceNotFound');
+          hub.subscribe(client, topic);
+          hub.send(client, { t: 'race', race });
         } else if (kind === 'challenge' && id) {
           const challenge = lobby.challenge(id);
           if (!challenge) return error('challengeNotFound');
@@ -1786,6 +1848,14 @@ export const createApp = (config: ServerConfig): App => {
           const room = games.get(message.topic.slice(5));
           if (room) updatePresence(room);
         }
+        return;
+      }
+      case 'raceMove':
+      case 'raceSkip': {
+        if (typeof message.race !== 'string' || !Number.isInteger(message.puzzle)) return;
+        // Late or stale moves (the race is over, or the player already moved on) are dropped: the next race view corrects the page.
+        if (message.t === 'raceSkip') racers.skip(message.race, client.player, message.puzzle);
+        else if (typeof message.move === 'string') racers.move(message.race, client.player, message.puzzle, message.move);
         return;
       }
       default: {

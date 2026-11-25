@@ -28,6 +28,8 @@ import { LessonsPage } from './pages/LessonsPage.tsx';
 import { PracticePage } from './pages/PracticePage.tsx';
 import { PuzzleDashboardPage } from './pages/PuzzleDashboardPage.tsx';
 import { PuzzleRunPage } from './pages/PuzzleRunPage.tsx';
+import { RacePage } from './pages/RacePage.tsx';
+import { RacerPage } from './pages/RacerPage.tsx';
 import { PuzzlesPage } from './pages/PuzzlesPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { PlayersPage } from './pages/PlayersPage.tsx';
@@ -94,6 +96,8 @@ const ROUTES: Route<VNode>[] = [
   { pattern: /^\/puzzles$/, render: () => <PuzzlesPage /> },
   { pattern: /^\/streak$/, render: () => <PuzzleRunPage key="streak" kind="streak" /> },
   { pattern: /^\/storm$/, render: () => <PuzzleRunPage key="storm" kind="storm" /> },
+  { pattern: /^\/racer$/, render: () => <RacerPage /> },
+  { pattern: /^\/racer\/([A-Za-z0-9]{8})$/, render: ([id]) => <RacePage key={id} id={id!} /> },
   { pattern: /^\/puzzles\/daily$/, render: () => <PuzzlesPage daily /> },
   { pattern: /^\/puzzles\/dashboard$/, render: () => <PuzzleDashboardPage /> },
   { pattern: /^\/puzzles\/([0-9a-f]{8})$/, render: ([id]) => <PuzzlesPage id={id!} /> },
@@ -435,6 +439,7 @@ const Header = () => {
               <a href="/puzzles/daily">{t.nav.puzzleDaily}</a>
               <a href="/streak">{t.nav.streak}</a>
               <a href="/storm">{t.nav.storm}</a>
+              <a href="/racer">{t.nav.racer}</a>
               <a href="/puzzles/dashboard">{t.nav.puzzleDashboard}</a>
             </div>
           </section>

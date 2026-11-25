@@ -30,9 +30,11 @@ const DAILY_RANGE = [1000, 1700] as const;
  * The difficulty curve of a timed run: the target rating of its first puzzle, how much it rises per puzzle, and how
  * many puzzles the run holds. Each puzzle is drawn among the `RUN_POOL` closest to the target that the run has not used.
  */
-const RUN_CURVES: Readonly<Record<PuzzleRunKind, { readonly start: number; readonly step: number; readonly count: number }>> = {
+const RUN_CURVES: Readonly<Record<PuzzleRunKind | 'racer', { readonly start: number; readonly step: number; readonly count: number }>> = {
   streak: { start: 1000, step: 20, count: PUZZLES.length },
   storm: { start: 1000, step: 10, count: 150 },
+  // 90 seconds: more puzzles than anyone solves, rising faster than Storm's.
+  racer: { start: 1000, step: 12, count: 80 },
 };
 const RUN_POOL = 6;
 
@@ -41,6 +43,9 @@ const PUZZLE_BY_ID: ReadonlyMap<string, { readonly puzzle: Puzzle; readonly info
 );
 
 export const isPuzzle = (id: string): boolean => PUZZLE_BY_ID.has(id);
+
+/** A puzzle and what it is, by id. */
+export const puzzleEntry = (id: string): { readonly puzzle: Puzzle; readonly info: PuzzleInfo } | undefined => PUZZLE_BY_ID.get(id);
 
 /** No run can solve more puzzles than there are. */
 export const PUZZLE_COUNT = PUZZLES.length;
@@ -183,8 +188,8 @@ export class PuzzleStore {
     return new Map([...PUZZLE_BY_ID.values()].map(({ puzzle, info }) => [puzzle.id, rated.get(puzzle.id) ?? info.startRating]));
   }
 
-  /** The puzzles of a new timed run, in order, getting harder along its curve; every mode is mixed. */
-  sequence(kind: PuzzleRunKind): string[] {
+  /** The puzzles of a new timed run or race, in order, getting harder along its curve; every mode is mixed. */
+  sequence(kind: PuzzleRunKind | 'racer'): string[] {
     const { start, step, count } = RUN_CURVES[kind];
     const pool = [...this.#liveRatings()].map(([id, rating]) => ({ id, rating, tie: this.#random() }));
     const ids: string[] = [];

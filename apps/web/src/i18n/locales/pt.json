@@ -159,7 +159,11 @@
     "invalidFilter": "Filtro inválido.",
     "invalidSearch": "Busca inválida: confira os campos.",
     "discordDisabled": "A ligação com o Discord não está disponível neste site.",
-    "discordNotLinked": "Sua conta não está ligada ao Discord."
+    "discordNotLinked": "Sua conta não está ligada ao Discord.",
+    "raceNotFound": "Essa corrida não existe mais.",
+    "raceFull": "Essa corrida está cheia.",
+    "raceStarted": "Essa corrida já começou.",
+    "notRaceOwner": "Só quem criou a corrida pode iniciá-la."
   },
   "genericError": "Algo deu errado. Tente de novo.",
   "offline": "Sem conexão. Tentando reconectar...",
@@ -245,6 +249,7 @@
     "puzzles": "Puzzles",
     "streak": "Puzzle Streak",
     "storm": "Puzzle Storm",
+    "racer": "Puzzle Racer",
     "puzzleDaily": "Puzzle do dia",
     "puzzleDashboard": "Painel de puzzles",
     "practice": "Prática",
@@ -1158,6 +1163,36 @@
     },
     "loginToSave": "Entre para guardar os recordes na sua conta."
   },
+  "racer": {
+    "title": "Puzzle Racer",
+    "intro": "Dispute com outros jogadores nos mesmos puzzles por 90 segundos. Cada lance certo vale um ponto, um erro leva ao próximo puzzle, e sequências longas de acertos dão pontos extras.",
+    "raceNow": "Correr agora",
+    "waitingCount": "{n, plural, =0 {Ninguém está esperando uma corrida agora.} one {# jogador está esperando uma corrida.} other {# jogadores estão esperando uma corrida.}}",
+    "friends": "Correr com amigos",
+    "friendsHint": "Crie uma corrida e mande o link. Ela começa quando você apertar Iniciar.",
+    "linkLabel": "Link da corrida",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "start": "Iniciar a corrida",
+    "waitingOwner": "Mande o link para os amigos e inicie a corrida quando todos tiverem entrado.",
+    "waitingOthers": "Esperando quem criou a corrida iniciá-la.",
+    "startsIn": "Começa em {seconds}",
+    "publicWait": "Esperando mais jogadores entrarem.",
+    "score": "Pontos",
+    "players": "Jogadores",
+    "ghosts": "Fantasmas",
+    "ghostsHelp": "Jogadores de uma corrida anterior com os mesmos puzzles, no ritmo que tiveram.",
+    "ghostTag": "fantasma",
+    "guest": "Convidado {n}",
+    "over": "Fim da corrida",
+    "winner": "{name} venceu!",
+    "youWon": "Você venceu!",
+    "again": "Correr de novo",
+    "newRace": "Nova corrida",
+    "watching": "Essa corrida já começou: você está assistindo.",
+    "loginToSave": "Entre na sua conta para guardar seus recordes de corrida.",
+    "notFound": "Essa corrida não existe mais."
+  },
   "practice": {
     "title": "Prática",
     "intro": "Posições para treinar contra o computador no nível mais forte: dê mate, converta a vantagem ou resista, dentro de um limite de lances.",
@@ -2020,6 +2055,10 @@
         "title": "Puzzle Storm de Gungi · ligungi",
         "description": "Resolva o máximo de puzzles de Gungi em 3 minutos, com bônus de tempo por combos e recordes do dia, da semana e de sempre."
       },
+      "racer": {
+        "title": "Puzzle Racer de Gungi · ligungi",
+        "description": "Dispute com outros jogadores nos mesmos puzzles de Gungi por 90 segundos: cada lance certo pontua, e combos longos valem mais."
+      },
       "puzzles": {
         "title": "Puzzles de Gungi · ligungi",
         "description": "Treine Gungi com puzzles de mate e de ganho de material, com rating, temas, puzzle do dia e painel pessoal."
@@ -2076,6 +2115,11 @@
     "youPlay": "{color, select, white {você joga de Brancas} black {você joga de Pretas} other {cores aleatórias}}",
     "moves": "{plies, plural, =0 {sem lances} one {# lance} other {# lances}}",
     "openSite": "Abrir {site} no navegador",
-    "waitingTitle": "Esperando alguém da chamada entrar nesta sala"
+    "waitingTitle": "Esperando alguém da chamada entrar nesta sala",
+    "raceTitle": "Puzzle Racer",
+    "raceHint": "Dispute com quem está nesta chamada nos mesmos puzzles, por 90 segundos.",
+    "raceStart": "Correr com a chamada",
+    "raceJoin": "{players, plural, one {Entrar na corrida (# jogador)} other {Entrar na corrida (# jogadores)}}",
+    "raceWatch": "Assistir à corrida"
   }
 }

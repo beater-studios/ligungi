@@ -120,6 +120,7 @@ export const SCHEMA = {
   'discordActivity.youPlay': text<[color: string]>('color'),
   'discordActivity.moves': text<[plies: number]>('plies'),
   'discordActivity.openSite': text<[site: string]>('site'),
+  'discordActivity.raceJoin': text<[players: number]>('players'),
 
   'analysis.importErrors.badMode': text<[line: number, text: string]>('line', 'text'),
   'analysis.importErrors.unreadable': text<[line: number, text: string]>('line', 'text'),
@@ -181,6 +182,10 @@ export const SCHEMA = {
 
   'puzzleRuns.bonus': text<[seconds: number]>('seconds'),
   'puzzleRuns.penalty': text<[seconds: number]>('seconds'),
+  'racer.waitingCount': text<[n: number]>('n'),
+  'racer.startsIn': text<[seconds: number]>('seconds'),
+  'racer.guest': text<[n: number]>('n'),
+  'racer.winner': text<[name: string]>('name'),
 
   'practice.goalMate': text<[n: number]>('n'),
   'practice.goalWin': text<[n: number]>('n'),

@@ -13,10 +13,11 @@ const hall: ActivityHallView = {
     { challengeId: 'mine', settings: { ...settings, color: 'random' }, challenger: { name: '', user: null, rating: null }, mine: true },
   ],
   games: [],
+  race: null,
 };
 
 const mount = (props: Partial<Parameters<typeof ActivityHubView>[0]> = {}) => {
-  const handlers = { onOpen: vi.fn(async () => undefined), onJoin: vi.fn(async () => undefined), onClose: vi.fn(async () => undefined), onInvite: vi.fn() };
+  const handlers = { onOpen: vi.fn(async () => undefined), onJoin: vi.fn(async () => undefined), onClose: vi.fn(async () => undefined), onInvite: vi.fn(), onRace: vi.fn(async () => undefined) };
   const root = document.body.appendChild(document.createElement('div'));
   act(() =>
     render(h(ActivityHubView, { state: { status: 'ready', instanceId: 'call', reason: null }, hall, people: [{ id: '1', name: 'Ana', avatar: null }], ...handlers, ...props }), root),
@@ -43,7 +44,7 @@ describe('Discord hub', () => {
   });
 
   it('opens a room with the chosen mode, time and color', async () => {
-    const { root, handlers } = mount({ hall: { rooms: [], games: [] } });
+    const { root, handlers } = mount({ hall: { rooms: [], games: [], race: null } });
     expect(root.textContent).toContain('No rooms yet');
     act(() => (root.querySelector('#hub-mode-advanced') as HTMLInputElement).click());
     act(() => (root.querySelector('#hub-time-0') as HTMLInputElement).click());
@@ -52,6 +53,16 @@ describe('Discord hub', () => {
       root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
     });
     expect(handlers.onOpen).toHaveBeenCalledWith({ mode: 'advanced', timeControl: { initial: 180, increment: 2 }, color: 'black' });
+  });
+
+  it('opens the call\'s race, offers to join the waiting one and to watch the one going on', async () => {
+    const empty = mount({ hall: { rooms: [], games: [], race: null } });
+    await act(async () => empty.button('Race with the call').click());
+    expect(empty.handlers.onRace).toHaveBeenCalled();
+    const waiting = mount({ hall: { rooms: [], games: [], race: { id: 'r1', status: 'waiting', players: 3 } } });
+    expect(waiting.button('Join the race (3 players)')).toBeTruthy();
+    const racing = mount({ hall: { rooms: [], games: [], race: { id: 'r1', status: 'racing', players: 3 } } });
+    expect(racing.root.querySelector('a[href="/racer/r1"]')?.textContent).toBe('Watch the race');
   });
 
   it('says when it is still connecting', () => {

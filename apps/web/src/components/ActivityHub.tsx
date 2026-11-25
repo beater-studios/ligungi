@@ -11,6 +11,7 @@ import {
   inviteToCall,
   joinRoom,
   openRoom,
+  raceWithCall,
   setActivityTab,
   type ActivityState,
   type CallPerson,
@@ -105,10 +106,12 @@ interface ActivityHubViewProps {
   readonly onJoin: (challengeId: string) => Promise<void>;
   readonly onClose: (challengeId: string) => Promise<void>;
   readonly onInvite: () => void;
+  /** Opens the call's Puzzle Racer race, or joins the one waiting. */
+  readonly onRace: () => Promise<void>;
 }
 
 /** The home page inside Discord: who is in the call, a form to open a room, and the call's rooms and games. */
-export const ActivityHubView = ({ state, hall, people, onOpen, onJoin, onClose, onInvite }: ActivityHubViewProps) => {
+export const ActivityHubView = ({ state, hall, people, onOpen, onJoin, onClose, onInvite, onRace }: ActivityHubViewProps) => {
   const t = useT();
   const a = t.discordActivity;
   const [mode, setMode] = useState<Mode>('beginner');
@@ -213,56 +216,71 @@ export const ActivityHubView = ({ state, hall, people, onOpen, onJoin, onClose, 
         </button>
       </section>
       <div class="ligungi-hub__cols">
-        <section class="ligungi-card ligungi-hub__card">
-          <h2>{a.createTitle}</h2>
-          <p class="ligungi-hub__hint">{a.createHint}</p>
-          <form
-            class="ligungi-hub__form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void run(() => onOpen({ mode, timeControl: ACTIVITY_TIME_CONTROLS[time]!, color }));
-            }}
-          >
-            <OptionCards
-              name="hub-mode"
-              legend={t.common.mode}
-              layout="segmented"
-              value={mode}
-              options={MODES.map((m) => ({ value: m, label: t.modes[m] }))}
-              onChange={setMode}
-            />
-            <OptionCards
-              name="hub-time"
-              legend={t.challenge.time}
-              layout="segmented"
-              value={time}
-              options={ACTIVITY_TIME_CONTROLS.map((_, i) => ({ value: i, label: timeLabel(i) }))}
-              onChange={setTime}
-            />
-            <OptionCards
-              name="hub-color"
-              legend={t.common.yourColor}
-              layout="segmented"
-              value={color}
-              options={colorChoiceOptions(t).map((option) => ({
-                ...option,
-                icon: <span class={`ligungi-choice__disc ligungi-choice__disc--${option.value}`} aria-hidden="true" />,
-              }))}
-              onChange={setColor}
-            />
-            {state.reason && (
-              <p class="ligungi-notice">
-                {a.guest[state.reason]}{' '}
-                {state.reason === 'unlinked' && (
-                  <a href="/account" target="_blank" rel="noopener">
-                    {a.linkAccount}
-                  </a>
-                )}
-              </p>
+        <div class="ligungi-hub__stack">
+          <section class="ligungi-card ligungi-hub__card">
+            <h2>{a.createTitle}</h2>
+            <p class="ligungi-hub__hint">{a.createHint}</p>
+            <form
+              class="ligungi-hub__form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void run(() => onOpen({ mode, timeControl: ACTIVITY_TIME_CONTROLS[time]!, color }));
+              }}
+            >
+              <OptionCards
+                name="hub-mode"
+                legend={t.common.mode}
+                layout="segmented"
+                value={mode}
+                options={MODES.map((m) => ({ value: m, label: t.modes[m] }))}
+                onChange={setMode}
+              />
+              <OptionCards
+                name="hub-time"
+                legend={t.challenge.time}
+                layout="segmented"
+                value={time}
+                options={ACTIVITY_TIME_CONTROLS.map((_, i) => ({ value: i, label: timeLabel(i) }))}
+                onChange={setTime}
+              />
+              <OptionCards
+                name="hub-color"
+                legend={t.common.yourColor}
+                layout="segmented"
+                value={color}
+                options={colorChoiceOptions(t).map((option) => ({
+                  ...option,
+                  icon: <span class={`ligungi-choice__disc ligungi-choice__disc--${option.value}`} aria-hidden="true" />,
+                }))}
+                onChange={setColor}
+              />
+              {state.reason && (
+                <p class="ligungi-notice">
+                  {a.guest[state.reason]}{' '}
+                  {state.reason === 'unlinked' && (
+                    <a href="/account" target="_blank" rel="noopener">
+                      {a.linkAccount}
+                    </a>
+                  )}
+                </p>
+              )}
+              <SubmitButton disabled={busy}>{a.create}</SubmitButton>
+            </form>
+          </section>
+          <section class="ligungi-card ligungi-hub__card">
+            <h2>{a.raceTitle}</h2>
+            <p class="ligungi-hub__hint">{a.raceHint}</p>
+            {hall?.race?.status === 'racing' ? (
+              <a class="button button-empty" href={`/racer/${hall.race.id}`}>
+                {a.raceWatch}
+              </a>
+            ) : (
+              <button type="button" class="button ligungi-button-good" disabled={busy} onClick={() => void run(onRace)}>
+                {hall?.race ? a.raceJoin(hall.race.players) : a.raceStart}
+              </button>
             )}
-            <SubmitButton disabled={busy}>{a.create}</SubmitButton>
-          </form>
-        </section>
+          </section>
+        </div>
         <section class="ligungi-card ligungi-hub__card" aria-live="polite">
           <h2>{a.roomsTitle}</h2>
           {error && (
@@ -333,6 +351,7 @@ export const ActivityHub = () => {
         refresh();
       }}
       onInvite={inviteToCall}
+      onRace={async () => navigate(`/racer/${(await raceWithCall()).id}`)}
     />
   );
 };

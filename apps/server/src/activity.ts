@@ -32,7 +32,7 @@ export class ActivityHalls {
     this.#now = now;
   }
 
-  view(instanceId: string, viewer: Player): ActivityHallView {
+  view(instanceId: string, viewer: Player): Omit<ActivityHallView, 'race'> {
     const hall = this.#halls.get(instanceId);
     if (!hall) return { rooms: [], games: [] };
     this.#prune(hall);

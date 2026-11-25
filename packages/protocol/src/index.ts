@@ -3,11 +3,13 @@ import type { ErrorCode } from './errors.ts';
 import type { NoticeView } from './notices.ts';
 import type { Country, ProfileDetails } from './profile.ts';
 import type { PuzzleRatingView } from './puzzles.ts';
+import type { RaceStatus, RaceView } from './racer.ts';
 
 export * from './errors.ts';
 export * from './profile.ts';
 export * from './lessons.ts';
 export * from './puzzles.ts';
+export * from './racer.ts';
 export * from './practice.ts';
 export * from './explorer.ts';
 export * from './studies.ts';
@@ -239,6 +241,8 @@ export interface ActivityRoomView {
 export interface ActivityHallView {
   readonly rooms: readonly ActivityRoomView[];
   readonly games: readonly GameSummary[];
+  /** The call's Puzzle Racer race that can still be joined, or the one going on. */
+  readonly race: { readonly id: string; readonly status: RaceStatus; readonly players: number } | null;
 }
 
 /** Who may challenge a player from their profile. */
@@ -646,7 +650,7 @@ export interface ModUserView {
 export const EXTRA_TIME_SECONDS = 15;
 
 /** `tv`: the live games the TV and the home page show, sent on subscribing and again whenever one of them changes. */
-export type Topic = 'lobby' | 'tv' | `game:${string}` | `challenge:${string}`;
+export type Topic = 'lobby' | 'tv' | `game:${string}` | `challenge:${string}` | `race:${string}`;
 
 export type ClientMessage =
   | { readonly t: 'sub'; readonly topic: Topic }
@@ -656,10 +660,14 @@ export type ClientMessage =
   | { readonly t: 'draw' | 'rematch' | 'takeback'; readonly game: string; readonly action: 'offer' | 'accept' | 'decline' }
   /** Adds `EXTRA_TIME_SECONDS` to the opponent's clock. */
   | { readonly t: 'moretime'; readonly game: string }
+  /** A move in a Puzzle Racer race, on the puzzle at `puzzle` in the race's list; `skip` gives up that puzzle once per race. */
+  | { readonly t: 'raceMove'; readonly race: string; readonly puzzle: number; readonly move: string }
+  | { readonly t: 'raceSkip'; readonly race: string; readonly puzzle: number }
   | { readonly t: 'ping' };
 
 export type ServerMessage =
   | { readonly t: 'game'; readonly game: GameView }
+  | { readonly t: 'race'; readonly race: RaceView }
   | { readonly t: 'lobby'; readonly lobby: LobbyView }
   /** Live games with at least one move, strongest first (as `GET /api/tv`). */
   | { readonly t: 'tv'; readonly games: readonly GameSummary[] }

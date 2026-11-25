@@ -323,6 +323,25 @@ const MIGRATIONS = [
   );
   create index blocks_blocked on blocks(blocked_id);
   `,
+  `
+  create table race_sets (
+    id text primary key,
+    puzzles text not null,
+    public integer not null,
+    created_at integer not null
+  );
+  create index race_sets_public on race_sets(public, created_at);
+  create table race_results (
+    set_id text not null references race_sets(id),
+    user_id text references users(id),
+    guest integer,
+    score integer not null,
+    points text not null,
+    created_at integer not null
+  );
+  create index race_results_set on race_results(set_id);
+  create index race_results_user on race_results(user_id, created_at);
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

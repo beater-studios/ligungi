@@ -232,4 +232,7 @@ export const openRoom = (settings: RoomSettings): Promise<{ challengeId: string 
 export const joinRoom = (challengeId: string): Promise<{ gameId: string }> =>
   api.post<{ gameId: string }>(`/api/activity/rooms/${encodeURIComponent(challengeId)}/join`, { instanceId: instanceId() });
 
+/** The call's Puzzle Racer race: the one waiting for players, joined, or a new one. */
+export const raceWithCall = (): Promise<{ id: string }> => api.post<{ id: string }>('/api/activity/race', { instanceId: instanceId() });
+
 export const closeRoom = (challengeId: string): Promise<unknown> => api.delete(`/api/challenges/${encodeURIComponent(challengeId)}`);

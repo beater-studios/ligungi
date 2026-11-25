@@ -99,7 +99,7 @@ describe('Discord Activity', () => {
       activityRequest(client, 'POST', '/api/activity/rooms', { instanceId: 'call', mode: 'intro', timeControl: { initial: 600, increment: 5 }, color: 'random', ...body });
     const join = (client: Client, id: unknown, instanceId = 'call') => activityRequest(client, 'POST', `/api/activity/rooms/${String(id)}/join`, { instanceId });
 
-    expect(await rooms(a!)).toEqual({ rooms: [], games: [] });
+    expect(await rooms(a!)).toEqual({ rooms: [], games: [], race: null });
     const first = (await open(a!)).data.challengeId;
     expect(first).toBeTruthy();
     // A new room replaces the one the player had open in this call.
@@ -109,7 +109,7 @@ describe('Discord Activity', () => {
     expect(listed.rooms.map((room) => room.challengeId)).toEqual([second, third]);
     expect(listed.rooms[0]).toMatchObject({ settings: { mode: 'advanced', color: 'white', rated: false }, mine: false, challenger: { user: null } });
     expect(((await rooms(a!)) as typeof listed).rooms[0]).toMatchObject({ mine: true });
-    expect(await rooms(d!, 'other')).toEqual({ rooms: [], games: [] });
+    expect(await rooms(d!, 'other')).toEqual({ rooms: [], games: [], race: null });
 
     expect((await join(a!, first)).data).toMatchObject({ code: 'challengeUnavailable' });
     expect((await join(d!, second)).data).toMatchObject({ code: 'notInActivity' });
@@ -129,6 +129,15 @@ describe('Discord Activity', () => {
     expect((await open(b!, { rated: true })).data.challengeId).toBeTruthy();
     expect((await activityRequest(new Client(server.base), 'POST', '/api/activity/rooms', { instanceId: 'call' })).data).toMatchObject({ code: 'activitySignInRequired' });
     expect(await rooms(new Client(server.base))).toMatchObject({ code: 'activitySignInRequired' });
+
+    // One Puzzle Racer race per call: the first to ask opens it, the next ones join it, and it shows in the hall.
+    const race = (await activityRequest(a!, 'POST', '/api/activity/race', { instanceId: 'call' })).data.id;
+    expect(race).toBeTruthy();
+    expect((await activityRequest(c!, 'POST', '/api/activity/race', { instanceId: 'call' })).data).toEqual({ id: race });
+    expect(((await rooms(b!)) as { race: unknown }).race).toEqual({ id: race, status: 'waiting', players: 2 });
+    expect((await activityRequest(d!, 'POST', '/api/activity/race', { instanceId: 'call' })).data).toMatchObject({ code: 'notInActivity' });
+    expect((await activityRequest(d!, 'POST', `/api/racer/${String(race)}/join`, { instanceId: 'call' })).data).toMatchObject({ code: 'notInActivity' });
+    expect((await activityRequest(d!, 'POST', `/api/racer/${String(race)}/join`, {})).data).toMatchObject({ code: 'notInActivity' });
   });
 
   it('lets only Discord frame the Activity’s page, and nothing else', async () => {

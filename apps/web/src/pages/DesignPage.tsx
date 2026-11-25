@@ -8,6 +8,7 @@ import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { CrosstableView } from '../components/Crosstable.tsx';
 import { KeyboardMove } from '../components/KeyboardMove.tsx';
+import { RaceTrack } from '../components/RaceTrack.tsx';
 import { RatingTrend } from '../components/RatingTrend.tsx';
 import { Flag } from '../components/Flag.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
@@ -597,16 +598,29 @@ export const DesignPage = () => {
                     voided: false,
                   },
                 ],
+                race: { id: 'design4', status: 'waiting', players: 2 },
               }}
               onOpen={async () => undefined}
               onJoin={async () => undefined}
               onClose={async () => undefined}
               onInvite={() => undefined}
+              onRace={async () => undefined}
             />
           </Example>
         </Section>
 
         <Section id="data" title="Data">
+          <Example label="Race track (RaceTrack): one lane per racer, the marker as far as the score; your lane in green, ghosts faded with a hollow marker">
+            <RaceTrack
+              players={[
+                { name: 'Ana', user: { id: 'ana', name: 'Ana' }, guest: null, score: 18, me: true },
+                { name: '', user: null, guest: 4821, score: 23, me: false },
+              ]}
+              ghosts={[{ name: 'Bruno', user: { id: 'bruno', name: 'Bruno' }, guest: null, points: [[10_000, 6], [40_000, 15]] }]}
+              elapsed={45_000}
+              over={false}
+            />
+          </Example>
           <Example label="Rating history (RatingHistoryChart): one 2px line, a recessive grid, crosshair and tip on hover or touch">
             <RatingHistoryChart
               label="Example rating history"

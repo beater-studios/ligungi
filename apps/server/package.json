@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ligungi/bot": "*",
     "@ligungi/engine": "*",
     "@ligungi/protocol": "*",
     "ws": "8.23.0"

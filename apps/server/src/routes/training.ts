@@ -2,6 +2,7 @@ import type { AppDeps } from '../app.ts';
 import { MODES, parseFen } from '@ligungi/engine';
 import { EXPLORER_BANDS, EXPLORER_MODES, LESSON_EXERCISES, LESSON_PROGRESS_BATCH, LESSON_STARS_MAX, PRACTICE_BATCH, PRACTICE_POSITIONS, PUZZLE_BATCH, PUZZLE_RUN_BATCH, PUZZLE_RUN_KINDS, PUZZLE_THEMES, type PuzzleRun } from '@ligungi/protocol';
 import { HttpError, sendJson, type Router } from '../http.ts';
+import { requireUser } from './guards.ts';
 import { isPuzzle, PUZZLE_COUNT } from '../puzzles.ts';
 
 const LESSON_IDS: ReadonlySet<string> = new Set(LESSON_EXERCISES.map((exercise) => exercise.id));
@@ -9,7 +10,7 @@ const PRACTICE_IDS: ReadonlySet<string> = new Set(PRACTICE_POSITIONS.map((positi
 
 /** Training: lessons, practice, the draft explorer, puzzles, puzzle runs and Puzzle Racer. */
 export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
-  const { activityCaller, config, explorer, puzzles, raceLimiter, racers, requireUser, users } = deps;
+  const { activityCaller, config, explorer, puzzles, raceLimiter, racers, users } = deps;
   router
     .add('GET', '/api/lessons/progress', (ctx) => sendJson(ctx.res, 200, users.training.lessonProgress(requireUser(ctx))))
     .add('POST', '/api/lessons/progress', async (ctx) => {

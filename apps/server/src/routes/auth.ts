@@ -1,13 +1,33 @@
 import type { AppDeps } from '../app.ts';
 import type { Me, TwoFactorSetup, TwoFactorView } from '@ligungi/protocol';
-import { hashPassword, needsRehash, verifyPassword } from '../auth.ts';
+import { hashPassword, needsRehash, verifyPassword, type Session } from '../auth.ts';
 import { HttpError, sendJson, type Router } from '../http.ts';
+import { requireUser } from './guards.ts';
 import { otpauthUri } from '../totp.ts';
 import { USERNAME_PATTERN } from '../users.ts';
 
 /** Signing up, in and out, the session bootstrap (`/api/me`) and two-step verification. */
 export const registerAuthRoutes = (router: Router, deps: AppDeps): void => {
-  const { authLimiter, checkAccountCode, closeSessionSockets, games, loginFailures, moderation, puzzles, requireUser, rotateSession, sessions, twoFactor, userPayload, users } = deps;
+  const { authLimiter, closeSessionSockets, games, loginFailures, moderation, puzzles, rotateSession, sessions, toPlayer, twoFactor, users } = deps;
+
+  /**
+   * A code typed on the account page by a user with two-factor on. Wrong codes count with the failed logins of the
+   * account, so an open session does not give more guesses than the sign-in form.
+   */
+  const checkAccountCode = (userId: string, code: unknown): void => {
+    const key = users.findById(userId)?.name.toLowerCase() ?? userId;
+    if (loginFailures.blocked(key)) throw new HttpError(429, 'tooManyAttempts');
+    if (typeof code !== 'string' || !twoFactor.verify(userId, code)) {
+      loginFailures.allow(key);
+      throw new HttpError(401, 'wrongTwoFactorCode');
+    }
+  };
+
+  const userPayload = (session: Session) => {
+    const player = toPlayer(session);
+    return player.userId ? { id: player.userId, name: player.name } : null;
+  };
+
   router
     .add('GET', '/api/me', (ctx) => {
       const me: Me = {

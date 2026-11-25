@@ -33,8 +33,11 @@ Colors live in CSS variables (`--gg-board`, `--gg-line`, the piece faces and eve
 
 | File | Responsibility |
 |---|---|
-| `app.ts` | Wires everything: `createDeps` builds the services and shared helpers (presence, lobby, friends, leaderboards), and `createApp` keeps the security checks (same origin, JSON writes, CSP), the session, the WebSocket and the router. |
-| `routes/` | The HTTP routes by area (`auth`, `account`, `discord`, `discordActivity`, `moderation`, `studies`, `community`, `play`, `training`), each a `register<Area>Routes(router, deps)`. The router takes the first route that matches, so a path's literal routes stay in the same module before its `:id` route. |
+| `app.ts` | Wires everything: `createDeps` builds the services and the helpers several areas share (presence, lobby, notices, sockets), and `createApp` keeps the security checks (same origin, JSON writes, CSP, the WebSocket origin), the session, the WebSocket upgrade and the router. |
+| `routes/` | The HTTP routes by area (`auth`, `account`, `discord`, `discordActivity`, `moderation`, `studies`, `community`, `play`, `training`), each a `register<Area>Routes(router, deps)`, with the helpers only that area uses; `guards.ts` has `requireUser`. The router takes the first route that matches, so a path's literal routes stay in the same module before its `:id` route. |
+| `ws.ts` | What a WebSocket does once accepted: topic subscriptions, game commands, race moves, and the presence and lobby updates when it closes. |
+| `player-lists.ts` | The players page, the ranking and the leaderboards as their routes send them, with the site-wide counts cached for a minute. |
+| `feed.ts`, `account-export.ts` | A profile's recent activity and the feed of followed players; the account data export (LGPD access right). |
 | `room.ts` | `GameRoom`: one ongoing game. Validates moves and handles the clock, abort, draw, rematch, victory claims and deadlines. |
 | `games.ts` | Keeps the rooms, persists to SQLite on every change, updates ratings at the end, reloads ongoing games on restart, and keeps the bookmarks. |
 | `game-history.ts` | `GameHistory` (`games.history`): the finished games as stored, for the history lists, counts, search, crosstables, records, rating trends and insights. A game still in memory is read from its room. |

@@ -1,43 +1,13 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
-import { MODES, type Color, type Mode } from '@ligungi/engine';
+import type { Color } from '@ligungi/engine';
 import {
   ERROR_MESSAGES,
   SHORT_LINKS,
-  RECENT_GAMES,
-  RECENT_PLAYERS,
-  RATING_TREND_DAYS,
-  DAY_MS,
-  parseClientMessage,
-  type LeaderEntry,
-  type ErrorCode,
-  type ClientMessage,
   type LobbyView,
-  type Topic,
   type NoticeKind,
   type NoticeView,
-  ONLINE_LIST_MAX,
-  RANKING_PAGE_SIZE,
-  RANKING_QUERY_MAX,
-  RATING_BAND,
-  REPORT_DETAILS_MAX,
-  type ReportReason,
-  type ModeStanding,
-  type OnlinePlayer,
-  type PlayersView,
-  type RankingView,
-  STUDY_CHAPTER_NAME_MAX,
-  STUDY_DESCRIPTION_MAX,
-  STUDY_PUBLIC_MIN_DAYS,
-  STUDY_TITLE_MAX,
-  emptyRoot,
-  isOrientation,
-  isStudyVisibility,
-  parseStudyRoot,
-  studyStart,
-  studyText,
-  type StudyRoot,
 } from '@ligungi/protocol';
-import { WebSocketServer, type WebSocket } from 'ws';
+import { WebSocketServer } from 'ws';
 import {
   SESSION_COOKIE,
   Sessions,
@@ -75,25 +45,24 @@ import {
   serveStatic,
   type Context,
 } from './http.ts';
-import { Hub, type Client } from './hub.ts';
+import { Hub } from './hub.ts';
 import { Lobby } from './lobby.ts';
 import { Moderation } from './moderation.ts';
 import { Notices, type NoticeDetails } from './notices.ts';
 import { PuzzleStore } from './puzzles.ts';
 import type { GameRoom } from './room.ts';
 import { SeekStore } from './seeks.ts';
-import { Studies, type ChapterInput, type StudyRecord } from './studies.ts';
+import { Studies } from './studies.ts';
 import { Tv } from './tv.ts';
 import { TwoFactor } from './two-factor.ts';
 import { ANONYMOUS_NAME, Users } from './users.ts';
+import { createPlayerLists } from './player-lists.ts';
+import { createSocketHandler } from './ws.ts';
 
 const HEARTBEAT_MS = 30_000;
 const SESSION_SWEEP_MS = 6 * 3_600_000;
-/** The site-wide counts and rating distribution on the players page are recomputed at most this often. */
-const PLAYERS_CACHE_MS = 60_000;
 /** Expired challenges are canceled within this delay even if nobody opens them (the receiver's list updates). */
 const CHALLENGE_SWEEP_MS = 60_000;
-const MAX_TOPICS_PER_CLIENT = 32;
 /** Live games listed for the TV and the home page. */
 const TV_GAMES = 24;
 const TV_PUBLISH_MS = 500;
@@ -289,110 +258,6 @@ const createDeps = (config: ServerConfig) => {
   /** Connected browsers, counting the one asking even before its socket opens. */
   const onlineCount = (sessionId: string) => hub.onlineCount() + (hub.hasSession(sessionId) ? 0 : 1);
 
-  const playingByUser = () => {
-    const map = new Map<string, string>();
-    for (const room of games.live()) {
-      for (const seat of Object.values(room.seats)) if (seat.userId) map.set(seat.userId, room.id);
-    }
-    return map;
-  };
-
-  const requireUser = (ctx: Context): string => {
-    if (!ctx.session.userId) throw new HttpError(401, 'loginRequired');
-    return ctx.session.userId;
-  };
-
-  /**
-   * A code typed on the account page by a user with two-factor on. Wrong codes count with the failed logins of the
-   * account, so an open session does not give more guesses than the sign-in form.
-   */
-  const checkAccountCode = (userId: string, code: unknown): void => {
-    const key = users.findById(userId)?.name.toLowerCase() ?? userId;
-    if (loginFailures.blocked(key)) throw new HttpError(429, 'tooManyAttempts');
-    if (typeof code !== 'string' || !twoFactor.verify(userId, code)) {
-      loginFailures.allow(key);
-      throw new HttpError(401, 'wrongTwoFactorCode');
-    }
-  };
-
-  /** The signed-in moderator, with their name for the log. */
-  const requireModerator = (ctx: Context): { id: string; name: string } => {
-    const userId = requireUser(ctx);
-    const user = users.findById(userId);
-    if (!user || !moderation.isModerator(userId)) throw new HttpError(403, 'notModerator');
-    return { id: user.id, name: user.name };
-  };
-
-  /** A moderator's reason or note: required, at most as long as a report. */
-  /** Report reasons as the moderators read them on Discord. */
-  const REPORT_LABELS: Readonly<Record<ReportReason, string>> = {
-    cheating: 'Cheating',
-    name: 'Offensive name or profile',
-    behavior: 'Behavior',
-    content: 'Offensive content',
-    other: 'Other',
-  };
-  /** A player's text in a Discord message: shown as typed, never as formatting. */
-  const discordText = (text: string): string => text.replace(/[\\`*_~|>#\[\]()-]/g, '\\$&');
-
-  const reasonOf = (value: unknown): string => {
-    const reason = typeof value === 'string' ? value.trim() : '';
-    if (!reason || reason.length > REPORT_DETAILS_MAX) throw new HttpError(400, 'reasonRequired');
-    return reason;
-  };
-
-  /** A player a moderator acts on; moderators are out of reach (only the server command changes them). */
-  const sanctionable = (name: string) => {
-    const user = findUser(name);
-    if (moderation.isModerator(user.id)) throw new HttpError(403, 'cannotModerateModerator');
-    return user;
-  };
-
-  /** A study the viewer may open; one they may not is reported as missing, so its existence does not leak. */
-  const readableStudy = (ctx: Context): StudyRecord => {
-    const study = studies.get(ctx.params.id!);
-    if (!study || !studies.canRead(study, ctx.session.userId, moderation.isModerator(ctx.session.userId))) throw new HttpError(404, 'studyNotFound');
-    return study;
-  };
-
-  /** A study the signed-in user wrote and is about to change. */
-  const ownStudy = (ctx: Context): StudyRecord => {
-    const userId = requireUser(ctx);
-    if (!studyLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
-    const study = readableStudy(ctx);
-    if (study.ownerId !== userId) throw new HttpError(403, 'notStudyOwner');
-    return study;
-  };
-
-  /** Title, description and visibility of a study; new accounts may not make one public yet. */
-  const studyFields = (body: Record<string, unknown>, userId: string) => {
-    const title = studyText(body.title, STUDY_TITLE_MAX, true);
-    const description = studyText(body.description ?? '', STUDY_DESCRIPTION_MAX, false);
-    const { visibility } = body;
-    if (title === null || description === null || !isStudyVisibility(visibility)) throw new HttpError(400, 'invalidStudy');
-    const user = users.findById(userId);
-    if (visibility === 'public' && (!user || config.now() - user.createdAt < STUDY_PUBLIC_MIN_DAYS * DAY_MS)) {
-      throw new HttpError(403, 'studyPublicTooSoon');
-    }
-    return { title, description, visibility };
-  };
-
-  const checkedRoot = (start: Parameters<typeof parseStudyRoot>[0], value: unknown): StudyRoot => {
-    const root = value === undefined ? emptyRoot() : parseStudyRoot(start, value);
-    if (root === 'tooLarge') throw new HttpError(400, 'chapterTooLarge');
-    if (!root) throw new HttpError(400, 'invalidChapter');
-    return root;
-  };
-
-  const chapterInput = (value: unknown): ChapterInput => {
-    if (typeof value !== 'object' || value === null) throw new HttpError(400, 'invalidChapter');
-    const { name, fen, orientation, root } = value as Record<string, unknown>;
-    const text = studyText(name, STUDY_CHAPTER_NAME_MAX, true);
-    const start = studyStart(fen);
-    if (text === null || !start || !isOrientation(orientation)) throw new HttpError(400, 'invalidChapter');
-    return { name: text, fen: fen as string, orientation, root: checkedRoot(start, root) };
-  };
-
   /** A finished game between two players where one blocked the other: no rematch between them. */
   const seatsBlocked = (room: { readonly seats: Readonly<Record<'white' | 'black', { readonly userId: string | null }>> }): boolean => {
     const { white, black } = room.seats;
@@ -405,122 +270,7 @@ const createDeps = (config: ServerConfig) => {
     return user;
   };
 
-  let playersCache: {
-    at: number;
-    stats: Pick<PlayersView['counts'], 'gamesLastDay' | 'gamesTotal' | 'players'>;
-    distribution: PlayersView['distribution'];
-    ranks: Record<Mode, Map<string, number>>;
-    recent: PlayersView['recent'];
-  } | null = null;
-
-  const RANKING_PAGE_LIMIT = 100_000;
-
-  const rankingView = (requested: Mode | null, params: URLSearchParams, viewerId: string | null): RankingView => {
-    const counts = users.rankings.rankedCounts();
-    const standings = viewerId ? users.ratings(viewerId) : null;
-    const modes = Object.fromEntries(
-      MODES.map((m) => {
-        const own = standings?.[m];
-        const you: ModeStanding | null =
-          viewerId && own && own.games > 0
-            ? { rating: own.rating, provisional: own.provisional, games: own.games, rank: users.rankings.rank(viewerId, m) }
-            : null;
-        return [m, { players: counts[m], you }];
-      }),
-    ) as RankingView['modes'];
-    // Without a mode: the viewer's most played one, otherwise the one with the most ranked players (the hardest on a tie).
-    const fallback = [...MODES].reverse().reduce((best, m) => (counts[m] > counts[best] ? m : best), 'advanced' as Mode);
-    const mine = MODES.filter((m) => modes[m].you).sort((a, b) => modes[b].you!.games - modes[a].you!.games)[0];
-    const mode = requested ?? mine ?? fallback;
-    // Capped so the offset stays an integer SQLite accepts; pages past the end simply come back empty.
-    const page = Math.min(RANKING_PAGE_LIMIT, Math.max(1, Math.trunc(Number(params.get('page'))) || 1));
-    const query = (params.get('q') ?? '').trim().slice(0, RANKING_QUERY_MAX);
-    const followerId = viewerId && params.get('followed') === '1' ? viewerId : null;
-    const { rows, total } = users.rankings.rankingPage(mode, { query, followerId }, (page - 1) * RANKING_PAGE_SIZE, RANKING_PAGE_SIZE);
-    const records = games.history.recordsIn(mode, rows.map((row) => row.user.id));
-    const trends = games.history.ratingTrends(mode, rows.map((row) => row.user.id), trendSince());
-    const online = onlineUsers(viewerId);
-    const followed = new Set(viewerId ? users.social.following(viewerId).map((user) => user.id) : []);
-    const place = viewerId ? users.rankings.rankingPlace(viewerId, mode) : null;
-    return {
-      mode,
-      rows: rows.map((row) => ({
-        ...row,
-        record: records.get(row.user.id) ?? { wins: 0, draws: 0, losses: 0 },
-        online: online.has(row.user.id),
-        followed: followed.has(row.user.id),
-        trend: trends.get(row.user.id) ?? 0,
-      })),
-      total,
-      page,
-      pageSize: RANKING_PAGE_SIZE,
-      modes,
-      you: place ? { rank: place.rank, page: Math.ceil(place.row / RANKING_PAGE_SIZE) } : null,
-    };
-  };
-
-  const playersView = (viewerId: string | null, sessionId: string): PlayersView => {
-    const now = config.now();
-    if (!playersCache || now - playersCache.at >= PLAYERS_CACHE_MS) {
-      const { recent, finished } = games.history.gameCounts(now - 24 * 3_600_000);
-      const bands = (mode: Mode) => users.rankings.ratingDistribution(mode, RATING_BAND);
-      playersCache = {
-        at: now,
-        stats: { gamesLastDay: recent, gamesTotal: finished, players: users.count() },
-        distribution: { intro: bands('intro'), beginner: bands('beginner'), intermediate: bands('intermediate'), advanced: bands('advanced') },
-        ranks: { intro: users.rankings.ranks('intro'), beginner: users.rankings.ranks('beginner'), intermediate: users.rankings.ranks('intermediate'), advanced: users.rankings.ranks('advanced') },
-        recent: { games: games.history.recentlyFinished(RECENT_GAMES), players: users.newest(RECENT_PLAYERS) },
-      };
-    }
-    const cache = playersCache;
-    const ongoing = games.live();
-    const playingIn = new Map<string, string>();
-    for (const room of ongoing) for (const seat of Object.values(room.seats)) if (seat.userId) playingIn.set(seat.userId, room.id);
-    const signedIn = [...onlineUsers(viewerId)];
-    const ids = signedIn.slice(0, 500);
-    const ratings = users.rankings.playedRatings(viewerId ? [...ids, viewerId] : ids);
-    const followed = new Set(viewerId ? users.social.following(viewerId).map((user) => user.id) : []);
-    const best = (player: OnlinePlayer) => Math.max(0, ...Object.values(player.ratings).map((standing) => standing.rating));
-    const online: OnlinePlayer[] = ids
-      .map((id) => users.findById(id))
-      .filter((user) => user !== undefined)
-      .map((user) => ({
-        user: { id: user.id, name: user.name },
-        country: user.country,
-        ratings: Object.fromEntries(
-          (ratings.get(user.id) ?? []).map((entry) => [
-            entry.mode,
-            { rating: entry.rating, provisional: entry.provisional, games: entry.games, rank: cache.ranks[entry.mode].get(user.id) ?? null },
-          ]),
-        ),
-        playing: playingIn.get(user.id) ?? null,
-        followed: followed.has(user.id),
-        canChallenge: viewerId !== null && users.social.canChallenge(viewerId, user.id),
-      }))
-      .sort((a, b) => Number(a.playing !== null) - Number(b.playing !== null) || best(b) - best(a) || a.user.name.localeCompare(b.user.name))
-      .slice(0, ONLINE_LIST_MAX);
-    const you = viewerId ? Object.fromEntries((ratings.get(viewerId) ?? []).map((entry) => [entry.mode, entry.rating])) : null;
-    return {
-      online,
-      counts: {
-        online: onlineCount(sessionId),
-        signedIn: signedIn.length,
-        free: signedIn.filter((id) => !playingIn.has(id)).length,
-        playing: ongoing.length,
-        ...cache.stats,
-      },
-      distribution: cache.distribution,
-      you,
-      recent: cache.recent,
-    };
-  };
-
-  const trendSince = () => config.now() - RATING_TREND_DAYS * DAY_MS;
-  const leaders = (mode: Mode, limit: number, online: Set<string>): LeaderEntry[] => {
-    const rows = users.rankings.leaderboard(mode, limit);
-    const trends = games.history.ratingTrends(mode, rows.map((row) => row.user.id), trendSince());
-    return rows.map((row) => ({ ...row, online: online.has(row.user.id), trend: trends.get(row.user.id) ?? 0 }));
-  };
+  const { rankingView, playersView, leaders } = createPlayerLists({ config, users, games, onlineUsers, onlineCount });
 
   /**
    * Login, signup and logout replace the session id (against session fixation). Anonymous seats, seeks and
@@ -595,11 +345,6 @@ const createDeps = (config: ServerConfig) => {
     }
   };
 
-  const userPayload = (session: Session) => {
-    const player = toPlayer(session);
-    return player.userId ? { id: player.userId, name: player.name } : null;
-  };
-
   return {
     config,
     db,
@@ -632,7 +377,6 @@ const createDeps = (config: ServerConfig) => {
     studyLimiter,
     searchLimiter,
     tvGames,
-    publishTv,
     lobbyView,
     publishLobby,
     challengeStore,
@@ -640,26 +384,10 @@ const createDeps = (config: ServerConfig) => {
     lobby,
     updatePresence,
     onlineUsers,
-    onlineCount,
-    playingByUser,
-    requireUser,
-    checkAccountCode,
-    requireModerator,
-    REPORT_LABELS,
-    discordText,
-    reasonOf,
-    sanctionable,
-    readableStudy,
-    ownStudy,
-    studyFields,
-    checkedRoot,
-    chapterInput,
     seatsBlocked,
     findUser,
-    RANKING_PAGE_LIMIT,
     rankingView,
     playersView,
-    trendSince,
     leaders,
     rotateSession,
     activityOrigin,
@@ -675,7 +403,6 @@ const createDeps = (config: ServerConfig) => {
     sendIncoming,
     closeSessionSockets,
     closeUserSockets,
-    userPayload,
   };
 };
 
@@ -683,7 +410,7 @@ export type AppDeps = ReturnType<typeof createDeps>;
 
 export const createApp = (config: ServerConfig): App => {
   const deps = createDeps(config);
-  const { activityCsp, activityOrigin, csp, db, discord, fromActivity, games, hub, lobby, lobbyView, publishLobby, racers, seatsBlocked, sendIncoming, sendNotices, sendTurns, sessionLimiter, sessions, toPlayer, tvGames, twoFactor, updatePresence } = deps;
+  const { activityCsp, activityOrigin, csp, db, discord, fromActivity, games, hub, lobby, sessionLimiter, sessions, toPlayer, twoFactor } = deps;
   let closing = false;
   const router = new Router();
   registerAuthRoutes(router, deps);
@@ -797,128 +524,7 @@ export const createApp = (config: ServerConfig): App => {
     }
   });
 
-  const validTopic = (topic: unknown): topic is Topic =>
-    typeof topic === 'string' && (topic === 'lobby' || topic === 'tv' || /^(game|challenge|race):[A-Za-z0-9]{1,16}$/.test(topic));
-
-  const onConnection = (socket: WebSocket, player: Player) => {
-    const client: Client = { socket, player, topics: new Set(), alive: true };
-    hub.add(client);
-    socket.on('pong', () => (client.alive = true));
-    socket.on('message', (data) => {
-      const message = parseClientMessage(data.toString());
-      if (message) handleMessage(client, message);
-    });
-    socket.on('close', () => {
-      if (closing) return;
-      const topics = hub.remove(client);
-      for (const topic of topics) {
-        if (topic.startsWith('game:')) {
-          const room = games.get(topic.slice(5));
-          if (room) updatePresence(room);
-        }
-      }
-      if (!hub.hasSession(player.sessionId)) {
-        lobby.removeSeeksOf(player.sessionId);
-        lobby.cancelDirectedOf(player.sessionId);
-      }
-      publishLobby();
-    });
-    if (player.userId) {
-      sendIncoming(player.userId);
-      sendTurns(player.userId);
-      sendNotices(player.userId);
-    }
-    publishLobby();
-  };
-
-  const handleMessage = (client: Client, message: ClientMessage) => {
-    const error = (code: ErrorCode) => hub.send(client, { t: 'error', code, message: ERROR_MESSAGES[code] });
-    switch (message.t) {
-      case 'ping':
-        hub.send(client, { t: 'pong' });
-        return;
-      case 'sub': {
-        const topic = message.topic;
-        if (!validTopic(topic)) return error('invalidTopic');
-        if (!client.topics.has(topic) && client.topics.size >= MAX_TOPICS_PER_CLIENT) return error('tooManySubscriptions');
-        const [kind, id] = topic.split(':') as [string, string | undefined];
-        if (kind === 'lobby') {
-          hub.subscribe(client, topic);
-          hub.send(client, { t: 'lobby', lobby: lobbyView(client.player) });
-        } else if (kind === 'tv') {
-          hub.subscribe(client, topic);
-          hub.send(client, { t: 'tv', games: tvGames() });
-        } else if (kind === 'game' && id) {
-          const room = games.get(id);
-          if (!room) return error('gameNotFound');
-          hub.subscribe(client, topic);
-          updatePresence(room);
-          hub.send(client, { t: 'game', game: room.view(client.player.sessionId, client.player.userId) });
-        } else if (kind === 'race' && id) {
-          const race = racers.view(id, client.player);
-          if (!race) return error('raceNotFound');
-          hub.subscribe(client, topic);
-          hub.send(client, { t: 'race', race });
-        } else if (kind === 'challenge' && id) {
-          const challenge = lobby.challenge(id);
-          if (!challenge) return error('challengeNotFound');
-          hub.subscribe(client, topic);
-          hub.send(client, { t: 'challenge', challenge: lobby.challengeView(challenge, client.player) });
-        }
-        return;
-      }
-      case 'unsub': {
-        if (!validTopic(message.topic)) return;
-        hub.unsubscribe(client, message.topic);
-        if (message.topic.startsWith('game:')) {
-          const room = games.get(message.topic.slice(5));
-          if (room) updatePresence(room);
-        }
-        return;
-      }
-      case 'raceMove':
-      case 'raceSkip': {
-        if (typeof message.race !== 'string' || !Number.isInteger(message.puzzle)) return;
-        // Late or stale moves (the race is over, or the player already moved on) are dropped: the next race view corrects the page.
-        if (message.t === 'raceSkip') racers.skip(message.race, client.player, message.puzzle);
-        else if (typeof message.move === 'string') racers.move(message.race, client.player, message.puzzle, message.move);
-        return;
-      }
-      default: {
-        if (typeof message.game !== 'string') return error('invalidGame');
-        const room = games.get(message.game);
-        if (!room) return error('gameNotFound');
-        const color = room.colorOf(client.player.sessionId, client.player.userId);
-        if (!color) return error('notAPlayer');
-        let result: ErrorCode | null;
-        if (message.t === 'move') {
-          result = typeof message.move === 'string' && Number.isInteger(message.ply)
-            ? room.move(color, message.move, message.ply)
-            : 'invalidMove';
-        } else if (message.t === 'resign') result = room.resign(color);
-        else if (message.t === 'abort') result = room.abort(color);
-        else if (message.t === 'claim') result = room.claim(color);
-        else if (message.t === 'moretime') result = room.giveTime(color);
-        else if (message.t === 'draw' || message.t === 'rematch' || message.t === 'takeback') {
-          const action = message.action;
-          if (action !== 'offer' && action !== 'accept' && action !== 'decline') result = 'invalidAction';
-          else if (message.t === 'draw') result = room.draw(color, action);
-          else if (message.t === 'takeback') result = room.takeback(color, action);
-          else if (action !== 'decline' && seatsBlocked(room)) result = 'blockedPlayer';
-          else result = room.rematch(color, action);
-        } else result = 'unknownMessage';
-        if (result) {
-          error(result);
-          hub.send(client, { t: 'game', game: room.view(client.player.sessionId, client.player.userId) });
-        } else if (message.t === 'rematch' && room.rematchId) {
-          const next = games.get(room.rematchId);
-          if (next) for (const seat of Object.values(next.seats)) {
-            hub.toSession(seat.sessionId, seat.userId, { t: 'redirect', path: `/${next.id}` });
-          }
-        }
-      }
-    }
-  };
+  const onConnection = createSocketHandler(deps, () => closing);
 
   const heartbeat = setInterval(() => {
     for (const client of hub.clients()) {

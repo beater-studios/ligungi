@@ -1,10 +1,11 @@
 import type { AppDeps } from '../app.ts';
 import type { DiscordLinkResult } from '@ligungi/protocol';
 import { HttpError, redirect, sendJson, type Router } from '../http.ts';
+import { requireUser } from './guards.ts';
 
 /** Linking a Discord account, and the rank roles and Linked Roles that follow. */
 export const registerDiscordRoutes = (router: Router, deps: AppDeps): void => {
-  const { discord, discordLimiter, requireUser } = deps;
+  const { discord, discordLimiter } = deps;
   router
     .add('GET', '/api/discord/link', (ctx) => {
       if (!discord.enabled) return redirect(ctx.res, '/account?discord=disabled');

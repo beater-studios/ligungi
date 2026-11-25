@@ -4,12 +4,13 @@ import { BUILD } from '../build.ts';
 import { exportGame } from '../game-export.ts';
 import type { SearchCriteria } from '../game-history.ts';
 import { HttpError, sendJson, sendText, type Router } from '../http.ts';
+import { requireUser } from './guards.ts';
 
 const SITE_NAME = 'ligungi';
 
 /** Games: the lobby, seeks, challenges, game pages, the TV, bookmarks and search; also the health and version checks. */
 export const registerPlayRoutes = (router: Router, deps: AppDeps): void => {
-  const { db, games, hub, lobby, lobbyView, requireUser, searchLimiter, sendIncoming, tv, tvGames, users } = deps;
+  const { db, games, hub, lobby, lobbyView, searchLimiter, sendIncoming, tv, tvGames, users } = deps;
   router
     .add('GET', '/api/health', (ctx) => {
       try {

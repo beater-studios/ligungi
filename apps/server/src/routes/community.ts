@@ -1,14 +1,26 @@
 import type { AppDeps } from '../app.ts';
 import { MODES, type Mode } from '@ligungi/engine';
-import { ACTIVITY_DAYS, ACTIVITY_MAX, DAY_MS, FEED_DAYS, FEED_MAX, isErrorCode, LEADERBOARD_MAX, LEADERBOARD_TOP, MAX_BLOCKS, MAX_FOLLOWS, parseGameFilters, type ActivityEvent, type ActivityView, type FeedItem, type FriendView, type Leaderboard, type UserProfile, type UserRef, type UserSearchResult } from '@ligungi/protocol';
+import { isErrorCode, LEADERBOARD_MAX, LEADERBOARD_TOP, MAX_BLOCKS, MAX_FOLLOWS, parseGameFilters, type FriendView, type Leaderboard, type UserProfile, type UserRef, type UserSearchResult } from '@ligungi/protocol';
 import { HttpError, sendJson, type Router } from '../http.ts';
+import { followingFeed, profileActivity } from '../feed.ts';
+import { requireUser } from './guards.ts';
 
 /** Players found by the name search. */
 const SEARCH_LIMIT = 10;
 
 /** Players: profiles, stats, games, the feed, follows, blocks, the players page, the ranking and the leaderboards. */
 export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => {
-  const { config, findUser, games, leaders, lobby, notice, onlineUsers, playersView, playingByUser, puzzles, rankingView, requireUser, searchLimiter, studies, users } = deps;
+  const { findUser, games, leaders, lobby, notice, onlineUsers, playersView, rankingView, searchLimiter, users } = deps;
+
+  /** The game each signed-in player is playing at the board right now, by user id. */
+  const playingByUser = () => {
+    const map = new Map<string, string>();
+    for (const room of games.live()) {
+      for (const seat of Object.values(room.seats)) if (seat.userId) map.set(seat.userId, room.id);
+    }
+    return map;
+  };
+
   router
     .add('GET', '/api/users', (ctx) => {
       const query = ctx.url.searchParams.get('q')?.trim() ?? '';
@@ -69,15 +81,7 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
     .add('GET', '/api/users/:name/activity', (ctx) => {
       const user = findUser(ctx.params.name!);
       const mine = ctx.session.userId === user.id;
-      const since = config.now() - ACTIVITY_DAYS * DAY_MS;
-      const events: ActivityEvent[] = [
-        ...games.history.activityGames([user.id], since, ACTIVITY_MAX).map(({ at, game }): ActivityEvent => ({ kind: 'game', at, game })),
-        ...studies.createdBy([user.id], since, ACTIVITY_MAX).map(({ id, title, at }): ActivityEvent => ({ kind: 'study', at, study: { id, title } })),
-        ...(user.createdAt >= since ? [{ kind: 'joined', at: user.createdAt } as const] : []),
-        ...(mine ? [...puzzles.activitySince(user.id, since), ...users.training.trainingSince(user.id, since)] : []),
-      ];
-      const view: ActivityView = { events: events.sort((a, b) => b.at - a.at).slice(0, ACTIVITY_MAX), mine };
-      sendJson(ctx.res, 200, view);
+      sendJson(ctx.res, 200, profileActivity(deps, user, mine));
     })
     .add('GET', '/api/users/:name/insights/:mode', (ctx) => {
       if (!searchLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
@@ -88,19 +92,7 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
     })
     .add('GET', '/api/feed', (ctx) => {
       const userId = requireUser(ctx);
-      const names = new Map(users.social.following(userId).map((user) => [user.id, user.name]));
-      const followed = [...names.keys()];
-      const since = config.now() - FEED_DAYS * DAY_MS;
-      // A game between two followed players is told once, from the side of the first one found.
-      const seen = new Set<string>();
-      const played = games.history.activityGames(followed, since, FEED_MAX * 2).filter(({ game }) => !seen.has(game.id) && Boolean(seen.add(game.id)));
-      const items: FeedItem[] = [
-        ...played.map(({ userId: id, at, game }): FeedItem => ({ user: { id, name: names.get(id) ?? '' }, event: { kind: 'game', at, game } })),
-        ...studies
-          .createdBy(followed, since, FEED_MAX)
-          .map(({ ownerId, ownerName, id, title, at }): FeedItem => ({ user: { id: ownerId, name: ownerName }, event: { kind: 'study', at, study: { id, title } } })),
-      ];
-      sendJson(ctx.res, 200, items.sort((a, b) => b.event.at - a.event.at).slice(0, FEED_MAX));
+      sendJson(ctx.res, 200, followingFeed(deps, userId));
     })
     .add('GET', '/api/users/:name/counts', (ctx) => {
       const user = findUser(ctx.params.name!);

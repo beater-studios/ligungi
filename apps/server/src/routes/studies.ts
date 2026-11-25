@@ -1,10 +1,58 @@
 import type { AppDeps } from '../app.ts';
-import { isOrientation, STUDIES_MAX, STUDY_CHAPTER_NAME_MAX, STUDY_CHAPTERS_MAX, STUDY_QUERY_MAX, studyStart, studyText, type StudyList } from '@ligungi/protocol';
-import { HttpError, sendJson, type Router } from '../http.ts';
+import { isOrientation, STUDIES_MAX, STUDY_CHAPTER_NAME_MAX, STUDY_CHAPTERS_MAX, STUDY_QUERY_MAX, studyStart, studyText, DAY_MS, STUDY_DESCRIPTION_MAX, STUDY_PUBLIC_MIN_DAYS, STUDY_TITLE_MAX, emptyRoot, isStudyVisibility, parseStudyRoot, type StudyList, type StudyRoot } from '@ligungi/protocol';
+import { HttpError, sendJson, type Router, type Context } from '../http.ts';
+import { requireUser } from './guards.ts';
+import type { ChapterInput, StudyRecord } from '../studies.ts';
+
+const checkedRoot = (start: Parameters<typeof parseStudyRoot>[0], value: unknown): StudyRoot => {
+  const root = value === undefined ? emptyRoot() : parseStudyRoot(start, value);
+  if (root === 'tooLarge') throw new HttpError(400, 'chapterTooLarge');
+  if (!root) throw new HttpError(400, 'invalidChapter');
+  return root;
+};
+
+const chapterInput = (value: unknown): ChapterInput => {
+  if (typeof value !== 'object' || value === null) throw new HttpError(400, 'invalidChapter');
+  const { name, fen, orientation, root } = value as Record<string, unknown>;
+  const text = studyText(name, STUDY_CHAPTER_NAME_MAX, true);
+  const start = studyStart(fen);
+  if (text === null || !start || !isOrientation(orientation)) throw new HttpError(400, 'invalidChapter');
+  return { name: text, fen: fen as string, orientation, root: checkedRoot(start, root) };
+};
 
 /** Studies and their chapters. */
 export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
-  const { chapterInput, checkedRoot, ownStudy, readableStudy, requireUser, studies, studyFields, studyLimiter } = deps;
+  const { config, moderation, studies, studyLimiter, users } = deps;
+
+  /** A study the viewer may open; one they may not is reported as missing, so its existence does not leak. */
+  const readableStudy = (ctx: Context): StudyRecord => {
+    const study = studies.get(ctx.params.id!);
+    if (!study || !studies.canRead(study, ctx.session.userId, moderation.isModerator(ctx.session.userId))) throw new HttpError(404, 'studyNotFound');
+    return study;
+  };
+
+  /** A study the signed-in user wrote and is about to change. */
+  const ownStudy = (ctx: Context): StudyRecord => {
+    const userId = requireUser(ctx);
+    if (!studyLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
+    const study = readableStudy(ctx);
+    if (study.ownerId !== userId) throw new HttpError(403, 'notStudyOwner');
+    return study;
+  };
+
+  /** Title, description and visibility of a study; new accounts may not make one public yet. */
+  const studyFields = (body: Record<string, unknown>, userId: string) => {
+    const title = studyText(body.title, STUDY_TITLE_MAX, true);
+    const description = studyText(body.description ?? '', STUDY_DESCRIPTION_MAX, false);
+    const { visibility } = body;
+    if (title === null || description === null || !isStudyVisibility(visibility)) throw new HttpError(400, 'invalidStudy');
+    const user = users.findById(userId);
+    if (visibility === 'public' && (!user || config.now() - user.createdAt < STUDY_PUBLIC_MIN_DAYS * DAY_MS)) {
+      throw new HttpError(403, 'studyPublicTooSoon');
+    }
+    return { title, description, visibility };
+  };
+
   router
     .add('GET', '/api/studies', (ctx) => {
       const params = ctx.url.searchParams;

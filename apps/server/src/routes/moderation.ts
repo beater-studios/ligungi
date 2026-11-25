@@ -1,11 +1,47 @@
 import type { AppDeps } from '../app.ts';
 import { REPORT_DETAILS_MAX, REPORT_REASONS, SUSPENSION_DAYS, type ModUserView, type ReportReason, type StudyRoot } from '@ligungi/protocol';
-import { HttpError, sendJson, type Router } from '../http.ts';
+import { HttpError, sendJson, type Router, type Context } from '../http.ts';
+import { requireUser } from './guards.ts';
 import { USERNAME_PATTERN } from '../users.ts';
+
+/** Report reasons as the moderators read them on Discord. */
+const REPORT_LABELS: Readonly<Record<ReportReason, string>> = {
+  cheating: 'Cheating',
+  name: 'Offensive name or profile',
+  behavior: 'Behavior',
+  content: 'Offensive content',
+  other: 'Other',
+};
+
+/** A player's text in a Discord message: shown as typed, never as formatting. */
+const discordText = (text: string): string => text.replace(/[\\`*_~|>#\[\]()-]/g, '\\$&');
+
+/** A moderator's reason or note: required, at most as long as a report. */
+const reasonOf = (value: unknown): string => {
+  const reason = typeof value === 'string' ? value.trim() : '';
+  if (!reason || reason.length > REPORT_DETAILS_MAX) throw new HttpError(400, 'reasonRequired');
+  return reason;
+};
 
 /** Reports, and what moderators do: reports, the log, sanctions, voided games and studies. */
 export const registerModerationRoutes = (router: Router, deps: AppDeps): void => {
-  const { closeSessionSockets, closeUserSockets, discord, discordText, findUser, games, lobby, moderation, notice, publishGame, reasonOf, REPORT_LABELS, reportLimiter, requireModerator, requireUser, sanctionable, sessions, studies, users } = deps;
+  const { closeSessionSockets, closeUserSockets, discord, findUser, games, lobby, moderation, notice, publishGame, reportLimiter, sessions, studies, users } = deps;
+
+  /** The signed-in moderator, with their name for the log. */
+  const requireModerator = (ctx: Context): { id: string; name: string } => {
+    const userId = requireUser(ctx);
+    const user = users.findById(userId);
+    if (!user || !moderation.isModerator(userId)) throw new HttpError(403, 'notModerator');
+    return { id: user.id, name: user.name };
+  };
+
+  /** A player a moderator acts on; moderators are out of reach (only the server command changes them). */
+  const sanctionable = (name: string) => {
+    const user = findUser(name);
+    if (moderation.isModerator(user.id)) throw new HttpError(403, 'cannotModerateModerator');
+    return user;
+  };
+
   router
     .add('POST', '/api/reports', async (ctx) => {
       const userId = requireUser(ctx);

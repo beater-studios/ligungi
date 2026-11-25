@@ -1,12 +1,14 @@
 import type { AppDeps } from '../app.ts';
-import { CHALLENGE_POLICIES, FOLLOW_POLICIES, isErrorCode, NOTICES_KEPT, parseProfileDetails, type SessionView } from '@ligungi/protocol';
+import { CHALLENGE_POLICIES, FOLLOW_POLICIES, isErrorCode, parseProfileDetails, type SessionView } from '@ligungi/protocol';
 import { hashPassword, sessionHandle, verifyPassword } from '../auth.ts';
 import { HttpError, sendJson, type Router } from '../http.ts';
+import { accountExport } from '../account-export.ts';
+import { requireUser } from './guards.ts';
 import { ANONYMOUS_NAME } from '../users.ts';
 
 /** The signed-in player's own account: password, deletion, sessions, data export, settings, profile, blocks and read notices. */
 export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
-  const { authLimiter, challengeStore, closeSessionSockets, closeUserSockets, config, discord, exportLimiter, games, lobby, moderation, notices, puzzles, racers, requireUser, rotateSession, seekStore, sendNotices, sessions, studies, twoFactor, users } = deps;
+  const { authLimiter, closeSessionSockets, closeUserSockets, discord, exportLimiter, games, lobby, notices, rotateSession, sendNotices, sessions, users } = deps;
   router
     .add('POST', '/api/account/password', async (ctx) => {
       const userId = requireUser(ctx);
@@ -70,76 +72,7 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
       if (!exportLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
       const user = users.findById(userId);
       if (!user) throw new HttpError(401, 'loginRequired');
-      const iso = (ms: number) => new Date(ms).toISOString();
-      const data = {
-        about: 'Personal data held by ligungi for this account (LGPD access right). Display preferences live only in your browser.',
-        exportedAt: iso(config.now()),
-        account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
-        settings: { challengePolicy: users.social.challengePolicy(userId), followPolicy: users.social.followPolicy(userId) },
-        profile: users.details(userId),
-        puzzles: (() => {
-          const { rating, history } = puzzles.dashboard(userId);
-          const { best } = puzzles.runs(userId);
-          return { rating, tries: history, solved: puzzles.solved(userId), runs: puzzles.allRuns(userId), best };
-        })(),
-        racer: racers.allResults(userId).map(({ score, at }) => ({ score, at: iso(at) })),
-        bookmarks: games.bookmarks(userId).map((bookmark) => ({ game: bookmark.game.id, note: bookmark.note, bookmarkedAt: iso(bookmark.bookmarkedAt) })),
-        studies: studies.byOwner(userId).map((study) => ({
-          id: study.id,
-          title: study.title,
-          description: study.description,
-          visibility: study.visibility,
-          updatedAt: iso(study.updatedAt),
-          chapters: studies.chapters(study.id),
-        })),
-        lessons: users.training.lessonProgress(userId),
-        practice: users.training.practiceProgress(userId),
-        // What moderation holds about the account: the suspension in force, the reports it made and the actions taken on
-        // it (without naming the moderator).
-        moderation: {
-          suspension: moderation.suspension(userId),
-          reportsMade: moderation.reportsBy(userId).map((report) => ({
-            createdAt: iso(report.createdAt),
-            player: report.target.name,
-            reason: report.reason,
-            details: report.details,
-            gameId: report.gameId,
-            studyId: report.studyId,
-            status: report.status,
-          })),
-          actionsOnAccount: moderation.entries(userId).map((entry) => ({ action: entry.action, date: iso(entry.createdAt), details: entry.details })),
-        },
-        // Whether it is on, never the secret or the recovery codes (stored only as hashes).
-        twoFactor: (({ enabled, enabledAt, recoveryCodesLeft }) => ({
-          enabled,
-          enabledAt: enabledAt === null ? null : iso(enabledAt),
-          recoveryCodesLeft,
-        }))(twoFactor.state(userId)),
-        ratings: users.ratings(userId),
-        discord: discord.exportFor(userId),
-        following: users.social.following(userId).map((entry) => entry.name),
-        followers: users.social.followers(userId).map((entry) => entry.name),
-        blocked: users.social.blocked(userId).map((entry) => entry.name),
-        notices: notices.list(userId, NOTICES_KEPT).map(({ kind, actor, subject, ref, createdAt, read }) => ({ kind, player: actor, subject, ref, date: iso(createdAt), read })),
-        sessions: sessions.listForUser(userId).map((session) => ({
-          current: session.id === ctx.session.id,
-          createdAt: iso(session.createdAt),
-          lastActive: iso(session.seenAt),
-          browser: session.userAgent,
-        })),
-        games: games.history.exportFor(userId),
-        // Only correspondence challenges and seeks are stored; the others live in memory for at most two hours.
-        seeks: seekStore.forUser(userId).map((seek) => ({ id: seek.id, createdAt: iso(seek.createdAt), settings: seek.settings })),
-        challenges: challengeStore.forUser(userId).map((challenge) => ({
-          id: challenge.id,
-          createdAt: iso(challenge.createdAt),
-          sent: challenge.owner.userId === userId,
-          opponent: challenge.owner.userId === userId ? (challenge.destination?.name ?? null) : challenge.owner.name,
-          status: challenge.status,
-          settings: challenge.settings,
-          gameId: challenge.gameId,
-        })),
-      };
+      const data = accountExport(deps, user, ctx.session.id);
       ctx.res.setHeader('content-disposition', `attachment; filename="ligungi-${user.name}.json"`);
       ctx.res.setHeader('cache-control', 'no-store');
       sendJson(ctx.res, 200, data);

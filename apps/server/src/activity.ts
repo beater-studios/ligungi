@@ -1,20 +1,27 @@
-import type { ErrorCode, GameSettings } from '@ligungi/protocol';
+import type { ActivityHallView, ErrorCode, GameSettings } from '@ligungi/protocol';
 import type { Games, Player } from './games.ts';
 import type { Lobby } from './lobby.ts';
 
-/** What "play with this call" gives a player: a challenge to wait on, or a game to play or watch. */
-export type ActivityTurn = { readonly challengeId: string } | { readonly gameId: string };
-
 /** Instances with nothing going on are forgotten after a day. */
 const IDLE_MS = 24 * 60 * 60 * 1000;
+/** Rooms waiting at once in one call; each player keeps at most one. */
+const MAX_ROOMS = 20;
+/** Games of one call kept in its list; the oldest drop out first. */
+const MAX_GAMES = 20;
+
+interface Hall {
+  readonly challengeIds: Set<string>;
+  readonly gameIds: Set<string>;
+  at: number;
+}
 
 /**
- * One table per Discord Activity instance (a voice call running ligungi): the first player to ask opens a challenge,
- * the second accepts it, and anyone after that is sent to the game, to watch it. Once the game ends, the next one to
- * ask opens a new challenge. Kept in memory: an instance lasts only while people are in the call.
+ * The rooms of each Discord Activity instance (a voice call running ligungi): anyone in the call opens a room, which
+ * is a challenge that only people in the same call see, and anyone else there joins it or watches the game it became.
+ * Kept in memory: an instance lasts only while people are in the call.
  */
-export class ActivityTables {
-  readonly #tables = new Map<string, { challengeId: string | null; gameId: string | null; at: number }>();
+export class ActivityHalls {
+  readonly #halls = new Map<string, Hall>();
   readonly #lobby: Lobby;
   readonly #games: Games;
   readonly #now: () => number;
@@ -25,35 +32,67 @@ export class ActivityTables {
     this.#now = now;
   }
 
-  join(instanceId: string, player: Player, settings: GameSettings): ActivityTurn | ErrorCode {
-    this.#sweep();
-    const table = this.#tables.get(instanceId) ?? { challengeId: null, gameId: null, at: this.#now() };
-    table.at = this.#now();
-    this.#tables.set(instanceId, table);
+  view(instanceId: string, viewer: Player): ActivityHallView {
+    const hall = this.#halls.get(instanceId);
+    if (!hall) return { rooms: [], games: [] };
+    this.#prune(hall);
+    return {
+      rooms: [...hall.challengeIds].flatMap((id) => {
+        const challenge = this.#lobby.challenge(id);
+        if (!challenge) return [];
+        const { challenger, mine } = this.#lobby.challengeView(challenge, viewer);
+        return [{ challengeId: id, settings: challenge.settings, challenger, mine }];
+      }),
+      games: [...hall.gameIds].flatMap((id) => this.#games.get(id)?.summary() ?? []),
+    };
+  }
 
-    const game = table.gameId ? this.#games.get(table.gameId) : undefined;
-    if (game && game.status === 'started') return { gameId: game.id };
-
-    const challenge = table.challengeId ? this.#lobby.challenge(table.challengeId) : undefined;
-    if (challenge && challenge.status === 'open') {
-      const mine = challenge.owner.sessionId === player.sessionId || (player.userId !== null && challenge.owner.userId === player.userId);
-      if (mine) return { challengeId: challenge.id };
-      const accepted = this.#lobby.acceptChallenge(challenge.id, player);
-      if (typeof accepted === 'string') return accepted;
-      table.challengeId = null;
-      table.gameId = accepted.gameId;
-      return accepted;
+  /** Opens a room for the player, closing the one they had open in this call. */
+  open(instanceId: string, player: Player, settings: GameSettings): { challengeId: string } | ErrorCode {
+    const hall = this.#hall(instanceId);
+    for (const id of hall.challengeIds) {
+      const challenge = this.#lobby.challenge(id);
+      if (challenge && this.#lobby.challengeView(challenge, player).mine) this.#lobby.cancelChallenge(id, player);
     }
-
+    this.#prune(hall);
+    if (hall.challengeIds.size >= MAX_ROOMS) return 'tooManyChallenges';
     const created = this.#lobby.createChallenge(player, settings);
     if (typeof created === 'string') return created;
-    table.challengeId = created.id;
-    table.gameId = null;
+    hall.challengeIds.add(created.id);
     return { challengeId: created.id };
   }
 
-  #sweep(): void {
+  /** Joins a room of this call, which starts its game. */
+  join(instanceId: string, challengeId: string, player: Player): { gameId: string } | ErrorCode {
+    const hall = this.#hall(instanceId);
+    this.#prune(hall);
+    if (!hall.challengeIds.has(challengeId)) return 'challengeUnavailable';
+    const accepted = this.#lobby.acceptChallenge(challengeId, player);
+    if (typeof accepted === 'string') return accepted;
+    hall.challengeIds.delete(challengeId);
+    // Someone now playing should not be joined into a second game through the room they had open.
+    for (const id of hall.challengeIds) {
+      const challenge = this.#lobby.challenge(id);
+      if (challenge && this.#lobby.challengeView(challenge, player).mine) this.#lobby.cancelChallenge(id, player);
+    }
+    this.#prune(hall);
+    hall.gameIds.add(accepted.gameId);
+    while (hall.gameIds.size > MAX_GAMES) hall.gameIds.delete(hall.gameIds.values().next().value!);
+    return accepted;
+  }
+
+  #hall(instanceId: string): Hall {
     const limit = this.#now() - IDLE_MS;
-    for (const [id, table] of this.#tables) if (table.at < limit) this.#tables.delete(id);
+    for (const [id, hall] of this.#halls) if (hall.at < limit) this.#halls.delete(id);
+    const hall = this.#halls.get(instanceId) ?? { challengeIds: new Set<string>(), gameIds: new Set<string>(), at: 0 };
+    hall.at = this.#now();
+    this.#halls.set(instanceId, hall);
+    return hall;
+  }
+
+  /** Drops rooms no longer open and games no longer in progress. */
+  #prune(hall: Hall): void {
+    for (const id of hall.challengeIds) if (this.#lobby.challenge(id)?.status !== 'open') hall.challengeIds.delete(id);
+    for (const id of hall.gameIds) if (this.#games.get(id)?.status !== 'started') hall.gameIds.delete(id);
   }
 }

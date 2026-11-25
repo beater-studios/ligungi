@@ -2037,11 +2037,8 @@
     }
   },
   "discordActivity": {
-    "title": "Play with this call",
-    "hint": "A casual 10+5 game. The first two in the call to press Play face each other, and everyone else watches.",
     "connecting": "Connecting to Discord…",
     "failed": "Could not connect to Discord. Close the Activity and open it again.",
-    "play": "Play",
     "linkAccount": "Link your account",
     "guest": {
       "unlinked": "You play as a guest. To play with your ligungi account, link this Discord account in your account settings.",
@@ -2053,6 +2050,26 @@
       "watching": "Watching a game",
       "reviewing": "Reviewing a game",
       "browsing": "Browsing the site"
-    }
+    },
+    "tabs": "Where to play",
+    "tabCall": "Call",
+    "tabSite": "Site",
+    "inCall": "In the call",
+    "invite": "Invite to the Activity",
+    "createTitle": "Create a room",
+    "createHint": "Casual games, seen only by the people in this call.",
+    "create": "Create room",
+    "roomsTitle": "Rooms in this call",
+    "waitingGroup": "Waiting for an opponent",
+    "playingGroup": "In progress",
+    "noRooms": "No rooms yet. Create one and everyone in the call sees it here.",
+    "join": "Join",
+    "cancel": "Cancel",
+    "watch": "Watch",
+    "yours": "Your room",
+    "youPlay": "{color, select, white {you play White} black {you play Black} other {random colors}}",
+    "moves": "{plies, plural, =0 {not started} one {# move} other {# moves}}",
+    "openSite": "Open {site} in the browser",
+    "waitingTitle": "Waiting for someone in the call to join this room"
   }
 }

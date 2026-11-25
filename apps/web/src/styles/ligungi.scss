@@ -9189,35 +9189,230 @@ body.ligungi-zen {
 
 /* ===== Discord Activity (discordActivity.ts): the site inside a voice call ===== */
 body.ligungi-discord {
-  // Discord's mobile app draws over the edges of the frame; it gives the insets as these variables.
-  padding: var(--discord-safe-area-inset-top, env(safe-area-inset-top, 0px)) var(--discord-safe-area-inset-right, env(safe-area-inset-right, 0px))
-    var(--discord-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) var(--discord-safe-area-inset-left, env(safe-area-inset-left, 0px));
+  // Discord's mobile app draws over the edges of the frame and gives the insets as these variables. On desktop they
+  // are zero, and the header would touch the top of the frame, so it keeps a small margin.
+  padding: max(var(--discord-safe-area-inset-top, env(safe-area-inset-top, 0px)), 8px)
+    var(--discord-safe-area-inset-right, env(safe-area-inset-right, 0px)) var(--discord-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))
+    var(--discord-safe-area-inset-left, env(safe-area-inset-left, 0px));
 
-  // The page lives only as long as the call: no footer, and the analytics the consent banner asks about never load
-  // inside Discord.
-  .ligungi-footer,
+  // The analytics the consent banner asks about never load inside Discord.
   .ligungi-consent {
     display: none;
   }
 }
 
-/* ===== "Play with this call" card on the home page (components/ActivityCall.tsx) ===== */
-.ligungi-call {
-  margin-bottom: 1rem;
-  padding: 1.4rem;
+// The call's rooms take the whole page: the site's menu waits behind the switch.
+body.ligungi-discord--call #topnav {
+  display: none;
+}
 
-  h2 {
-    margin: 0 0 0.4rem;
+/* ===== Discord hub: the home page inside the Discord Activity (components/ActivityHub.tsx) ===== */
+.ligungi-hub-switch {
+  display: flex;
+  flex-wrap: nowrap;
+  align-self: center;
+  margin-left: 1.2rem;
+  white-space: nowrap;
+
+  button {
+    padding: 0.35rem 1rem;
   }
 
-  .ligungi-notice {
-    margin: 0 0 0.8rem;
+  // With the menu behind the hamburger, the switch takes the title's place beside it.
+  @include mq-topnav-hidden {
+    margin-inline-start: calc(0.3rem + #{$site-header-height});
+
+    button {
+      padding: 0.3rem 0.7rem;
+    }
   }
 }
 
-.ligungi-call__hint {
-  margin: 0 0 0.8rem;
+// On a narrow frame the switch needs the room of the title and of the sign-up button (sign in stays).
+@include mq-topnav-hidden {
+  body.ligungi-discord .site-title,
+  body.ligungi-discord .signin-or-signup .signup {
+    display: none;
+  }
+}
+
+.ligungi-hub {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1rem 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+}
+
+.ligungi-hub__call {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem 1rem;
+  padding: 1rem 1.4rem;
+}
+
+.ligungi-hub__people {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ligungi-hub__face {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: $c-primary;
+  color: $c-over;
+  font-weight: bold;
+  object-fit: cover;
+}
+
+.ligungi-hub__cols {
+  display: grid;
+  grid-template-columns: minmax(18rem, 30rem) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+
+  @media (max-width: at-most($small)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ligungi-hub__card {
+  padding: 1.2rem 1.4rem;
+}
+
+.ligungi-hub__hint {
+  margin: 0.3rem 0 0.9rem;
   color: $c-font-dim;
+}
+
+.ligungi-hub__form {
+  display: grid;
+  gap: 0.9rem;
+
+  .ligungi-choice__legend {
+    margin-bottom: 0.35rem;
+    font-size: 0.95rem;
+  }
+
+  .ligungi-choice--segmented .ligungi-choice__option {
+    min-height: 2.1rem;
+    padding-block: 0.3rem;
+  }
+
+  .ligungi-choice__disc {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .ligungi-choice--segmented .ligungi-choice__option:has(.ligungi-choice__disc) {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .ligungi-notice,
+  .form-group {
+    margin: 0;
+  }
+
+  // Four mode names do not fit a phone in one row: two by two.
+  @media (max-width: at-most($x-small)) {
+    .ligungi-choice:has([name='hub-mode']) .ligungi-choice__options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .submit {
+    width: 100%;
+  }
+}
+
+.ligungi-hub__group {
+  margin: 1rem 0 0.5rem;
+  color: $c-font-dim;
+  font-size: 0.8rem;
+  font-weight: normal;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ligungi-hub__list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ligungi-hub__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 0.7rem 0.8rem;
+  border-radius: 6px;
+  background: $c-bg-zebra;
+
+  &.is-mine {
+    outline: 1px dashed $c-font-dimmer;
+    background: transparent;
+  }
+
+  .button {
+    min-width: 6.5rem;
+  }
+}
+
+.ligungi-hub__who {
+  min-width: 0;
+
+  b {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-hub__pair {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.ligungi-hub__empty {
+  margin: 0.8rem 0 0;
+  color: $c-font-dim;
+}
+
+.ligungi-hub-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.2rem;
+  padding: 0.4rem 1rem 1.2rem;
+  font-size: 0.85rem;
+
+  a {
+    color: $c-font-dim;
+  }
 }
 
 /* ===== Blocked player notice on a profile (pages/ProfilePage.tsx) ===== */

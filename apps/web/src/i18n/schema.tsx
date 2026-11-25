@@ -117,6 +117,9 @@ export const SCHEMA = {
 
   'computer.fromPosition': text<[mode: string, turn: Color]>('mode', 'turn'),
   'computer.bot': text<[level: number]>('level'),
+  'discordActivity.youPlay': text<[color: string]>('color'),
+  'discordActivity.moves': text<[plies: number]>('plies'),
+  'discordActivity.openSite': text<[site: string]>('site'),
 
   'analysis.importErrors.badMode': text<[line: number, text: string]>('line', 'text'),
   'analysis.importErrors.unreadable': text<[line: number, text: string]>('line', 'text'),

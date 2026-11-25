@@ -2,7 +2,7 @@ import { initialPosition, legalMoves, parseFen, parseSquare } from '@ligungi/eng
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { FeedList } from '../components/Activity.tsx';
-import { ActivityCallView } from '../components/ActivityCall.tsx';
+import { ActivityHubView } from '../components/ActivityHub.tsx';
 import { TowerStrip } from '../components/Panels.tsx';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
@@ -541,8 +541,58 @@ export const DesignPage = () => {
               <button type="button" class="ligungi-ranking-pages__step">Next</button>
             </nav>
           </Example>
-          <Example label="Play with this call (ActivityCallView): the home page's first card inside the Discord Activity, here for a guest">
-            <ActivityCallView state={{ status: 'ready', instanceId: 'design', reason: 'unlinked' }} onPlay={async () => undefined} />
+          <Example label="Discord hub (ActivityHubView): the home page inside the Discord Activity, with who is in the call, a form to open a room and the call's rooms and games">
+            <ActivityHubView
+              state={{ status: 'ready', instanceId: 'design', reason: 'unlinked' }}
+              people={[
+                { id: '1', name: 'Ana', avatar: null },
+                { id: '2', name: 'Bruno', avatar: null },
+                { id: '3', name: 'Carla', avatar: null },
+              ]}
+              hall={{
+                rooms: [
+                  {
+                    challengeId: 'design1',
+                    settings: { mode: 'beginner', rated: false, timeControl: { initial: 600, increment: 5 }, daysPerMove: null, color: 'random', freeDraft: false },
+                    challenger: { name: 'Ana', user: { id: 'ana', name: 'Ana' }, rating: 1512 },
+                    mine: false,
+                  },
+                  {
+                    challengeId: 'design2',
+                    settings: { mode: 'advanced', rated: false, timeControl: { initial: 300, increment: 3 }, daysPerMove: null, color: 'white', freeDraft: false },
+                    challenger: { name: '', user: null, rating: null },
+                    mine: true,
+                  },
+                ],
+                games: [
+                  {
+                    id: 'design3',
+                    mode: 'intermediate',
+                    rated: false,
+                    timeControl: { initial: 600, increment: 5 },
+                    players: {
+                      white: { name: 'Bruno', user: { id: 'bruno', name: 'Bruno' }, rating: 1480, ratingDiff: null },
+                      black: { name: 'Carla', user: { id: 'carla', name: 'Carla' }, rating: 1530, ratingDiff: null },
+                    },
+                    status: 'started',
+                    outcome: null,
+                    plies: 14,
+                    fen: '',
+                    createdAt: 0,
+                    endedAt: null,
+                    clock: null,
+                    daysPerMove: null,
+                    deadlineIn: null,
+                    turn: 'white',
+                    voided: false,
+                  },
+                ],
+              }}
+              onOpen={async () => undefined}
+              onJoin={async () => undefined}
+              onClose={async () => undefined}
+              onInvite={() => undefined}
+            />
           </Example>
         </Section>
 

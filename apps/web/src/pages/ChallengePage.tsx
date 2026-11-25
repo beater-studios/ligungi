@@ -1,6 +1,7 @@
 import type { ChallengeView } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api.ts';
+import { inActivity } from '../discordActivity.ts';
 import { playerName, speedText, useT } from '../i18n/index.ts';
 import { navigate } from '../router.ts';
 import { session } from '../session.ts';
@@ -89,7 +90,8 @@ export const ChallengePage = ({ id }: { id: string }) => {
       <section class="ligungi-card ligungi-challenge__card">
         <p class={`ligungi-challenge__label${challenge.mine || bystander ? '' : ' is-received'}`}>{label}</p>
         {challenge.mine && !destination ? (
-          <h1>{t.challenge.linkTitle}</h1>
+          // Inside the Discord Activity the call is the invitation: the opponent is whoever in the call joins this room.
+          <h1>{inActivity ? t.discordActivity.waitingTitle : t.challenge.linkTitle}</h1>
         ) : (
           <div class="ligungi-challenge__who">
             <span class="ligungi-avatar ligungi-avatar--large" aria-hidden="true">
@@ -122,7 +124,7 @@ export const ChallengePage = ({ id }: { id: string }) => {
           <p class="ligungi-challenge__notice">{challenge.mine && destination ? t.challenge.declinedBy(destination.name) : t.challenge.declined}</p>
         )}
 
-        {challenge.status === 'open' && challenge.mine && !destination && (
+        {challenge.status === 'open' && challenge.mine && !destination && !inActivity && (
           <div class="copy-me">
             <input
               class="copy-me__target"

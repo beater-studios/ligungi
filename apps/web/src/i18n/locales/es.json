@@ -2037,11 +2037,8 @@
     }
   },
   "discordActivity": {
-    "title": "Jugar con esta llamada",
-    "hint": "Una partida casual 10+5. Los dos primeros de la llamada en pulsar Jugar se enfrentan, y los demás miran.",
     "connecting": "Conectando con Discord…",
     "failed": "No se pudo conectar con Discord. Cierra la Actividad y ábrela de nuevo.",
-    "play": "Jugar",
     "linkAccount": "Vincular tu cuenta",
     "guest": {
       "unlinked": "Juegas como invitado. Para jugar con tu cuenta de ligungi, vincula este Discord en los ajustes de la cuenta.",
@@ -2053,6 +2050,26 @@
       "watching": "Viendo una partida",
       "reviewing": "Revisando la partida",
       "browsing": "Navegando por el sitio"
-    }
+    },
+    "tabs": "Dónde jugar",
+    "tabCall": "Llamada",
+    "tabSite": "Sitio",
+    "inCall": "En la llamada",
+    "invite": "Invitar a la actividad",
+    "createTitle": "Crear sala",
+    "createHint": "Partidas casuales, visibles solo para quienes están en esta llamada.",
+    "create": "Crear sala",
+    "roomsTitle": "Salas de la llamada",
+    "waitingGroup": "Esperando rival",
+    "playingGroup": "En curso",
+    "noRooms": "Todavía no hay salas. Crea una y todos en la llamada la verán aquí.",
+    "join": "Unirse",
+    "cancel": "Cancelar",
+    "watch": "Ver",
+    "yours": "Tu sala",
+    "youPlay": "{color, select, white {juegas con blancas} black {juegas con negras} other {colores al azar}}",
+    "moves": "{plies, plural, =0 {sin jugadas} one {# jugada} other {# jugadas}}",
+    "openSite": "Abrir {site} en el navegador",
+    "waitingTitle": "Esperando a que alguien de la llamada entre en esta sala"
   }
 }

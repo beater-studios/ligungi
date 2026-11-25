@@ -1,6 +1,6 @@
 import type { DiscordSDK } from '@discord/embedded-app-sdk';
-import { MODES } from '@ligungi/engine';
-import type { UserRef } from '@ligungi/protocol';
+import { MODES, type Mode } from '@ligungi/engine';
+import type { ActivityHallView, ColorChoice, TimeControl, UserRef } from '@ligungi/protocol';
 import { ACTIVITY_PREFIX } from './activity.ts';
 import { api } from './api.ts';
 import { getT } from './i18n/index.ts';
@@ -38,6 +38,41 @@ export type ActivityState =
   | { readonly status: 'ready'; readonly instanceId: string; readonly reason: GuestReason | null };
 
 export const activity = createStore<ActivityState>({ status: inActivity ? 'starting' : 'off' });
+
+/** Someone in the call, as Discord shows them. */
+export interface CallPerson {
+  readonly id: string;
+  readonly name: string;
+  /** Discord's avatar address, or `null` for one without a picture. */
+  readonly avatar: string | null;
+}
+
+/** Who is in the Activity right now, in the order Discord gives. */
+export const callPeople = createStore<readonly CallPerson[]>([]);
+
+const TAB_KEY = 'ligungi.activityTab';
+
+/** Which side the home page shows inside Discord: the call's rooms, or the site's own lobby. */
+export type ActivityTab = 'call' | 'site';
+
+const readTab = (): ActivityTab => {
+  try {
+    return sessionStorage.getItem(TAB_KEY) === 'site' ? 'site' : 'call';
+  } catch {
+    return 'call';
+  }
+};
+
+export const activityTab = createStore<ActivityTab>(inActivity ? readTab() : 'call');
+
+export const setActivityTab = (tab: ActivityTab): void => {
+  activityTab.set(tab);
+  try {
+    sessionStorage.setItem(TAB_KEY, tab);
+  } catch {
+    // The choice then lasts only until the next reload.
+  }
+};
 
 let sdk: DiscordSDK | null = null;
 
@@ -102,6 +137,30 @@ const watchPresence = (client: DiscordSDK) => {
   update();
 };
 
+type Participant = Awaited<ReturnType<DiscordSDK['commands']['getInstanceConnectedParticipants']>>['participants'][number];
+
+const personOf = (p: Participant): CallPerson => ({
+  id: p.id,
+  name: p.nickname || p.global_name || p.username,
+  avatar: p.avatar ? `https://cdn.discordapp.com/avatars/${p.id}/${p.avatar}.png?size=64` : null,
+});
+
+/** Keeps the list of people in the Activity up to date. */
+const watchPeople = async (client: DiscordSDK) => {
+  try {
+    const { participants } = await client.commands.getInstanceConnectedParticipants();
+    callPeople.set(participants.map(personOf));
+    await client.subscribe('ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE', ({ participants }) => callPeople.set(participants.map(personOf)));
+  } catch {
+    // Without the list the hub still works; it just does not show who is there.
+  }
+};
+
+/** Opens Discord's own dialog to invite more people into the Activity. */
+export const inviteToCall = (): void => {
+  void sdk?.commands.openInviteDialog().catch(() => undefined);
+};
+
 /**
  * Connects to Discord and signs the player in: with their ligungi account when it is linked to this Discord account,
  * else as a guest. Resolves once the session cookie is set, so the session can be loaded after it.
@@ -127,15 +186,35 @@ export const startActivity = async (): Promise<void> => {
     await client.commands.authenticate({ access_token: signed.accessToken });
     activity.set({ status: 'ready', instanceId: client.instanceId, reason: signed.reason });
     watchPresence(client);
+    void watchPeople(client);
   } catch {
     activity.set({ status: 'failed' });
   }
 };
 
-/** Where "play with this call" sends the player: the call's open challenge or its game. */
-export const playWithCall = async (mode: string): Promise<string> => {
+const instanceId = (): string => {
   const state = activity.get();
   if (state.status !== 'ready') throw new Error('activity not ready');
-  const turn = await api.post<{ challengeId: string } | { gameId: string }>('/api/activity/play', { instanceId: state.instanceId, mode });
-  return 'gameId' in turn ? `/${turn.gameId}` : `/challenge/${turn.challengeId}`;
+  return state.instanceId;
 };
+
+/** The call's rooms waiting for a second player, and its games in progress. */
+export const callRooms = (): Promise<ActivityHallView> =>
+  api.get<ActivityHallView>(`/api/activity/rooms?instanceId=${encodeURIComponent(instanceId())}`);
+
+/** What a new room in the call is played with. */
+export interface RoomSettings {
+  readonly mode: Mode;
+  readonly timeControl: TimeControl;
+  readonly color: ColorChoice;
+}
+
+/** Opens a room in the call, closing the one the player had open there. */
+export const openRoom = (settings: RoomSettings): Promise<{ challengeId: string }> =>
+  api.post<{ challengeId: string }>('/api/activity/rooms', { instanceId: instanceId(), ...settings });
+
+/** Joins a room of the call; the server then sends both players to the game. */
+export const joinRoom = (challengeId: string): Promise<{ gameId: string }> =>
+  api.post<{ gameId: string }>(`/api/activity/rooms/${encodeURIComponent(challengeId)}/join`, { instanceId: instanceId() });
+
+export const closeRoom = (challengeId: string): Promise<unknown> => api.delete(`/api/challenges/${encodeURIComponent(challengeId)}`);

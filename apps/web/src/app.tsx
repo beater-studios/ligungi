@@ -21,6 +21,8 @@ import { InsightsPage } from './pages/InsightsPage.tsx';
 import { INFO_KINDS, InfoPage, isInfoKind } from './pages/InfoPage.tsx';
 import { GamePage } from './pages/GamePage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
+import { ActivityFooter, ActivityHub, ActivitySwitch, useActivityChrome } from './components/ActivityHub.tsx';
+import { activityTab, inActivity } from './discordActivity.ts';
 import { LearnPage } from './pages/LearnPage.tsx';
 import { LessonsPage } from './pages/LessonsPage.tsx';
 import { PracticePage } from './pages/PracticePage.tsx';
@@ -66,9 +68,15 @@ const ShortLink = ({ to }: { to: string }) => {
   );
 };
 
+/** Inside Discord the home page starts on the call's rooms; the header switch goes back to the site's lobby. */
+const Home = () => {
+  const tab = useStore(activityTab);
+  return inActivity && tab === 'call' ? <ActivityHub /> : <HomePage />;
+};
+
 const ROUTES: Route<VNode>[] = [
   ...Object.entries(SHORT_LINKS).map(([path, to]): Route<VNode> => ({ pattern: new RegExp(`^${path}$`), render: () => <ShortLink to={to} /> })),
-  { pattern: /^\/$/, render: () => <HomePage /> },
+  { pattern: /^\/$/, render: () => <Home /> },
   { pattern: /^\/computer$/, render: () => <ComputerPage /> },
   { pattern: /^\/analysis$/, render: () => <AnalysisPage /> },
   { pattern: /^\/editor$/, render: () => <EditorPage /> },
@@ -407,6 +415,7 @@ const Header = () => {
             ligungi<span>.org</span>
           </div>
         </a>
+        {inActivity && <ActivitySwitch />}
         <nav id="topnav" class="hover" aria-label={t.nav.navigation}>
           <section>
             <a href="/">
@@ -596,6 +605,7 @@ export const App = () => {
   const { path } = useLocation();
   const t = useT();
   const content = matchRoute(ROUTES, path);
+  useActivityChrome(path);
   const found = content !== undefined;
   useEffect(() => applyHead(t, path, found), [t, path, found]);
   useEffect(
@@ -614,7 +624,7 @@ export const App = () => {
       <div id="main-wrap" class={`is2d${FULL_SCREEN.test(path) ? ' full-screen-force' : ''}`}>
         {content ?? <NotFound />}
       </div>
-      <SiteFooter />
+      {inActivity ? <ActivityFooter /> : <SiteFooter />}
       <CookieBanner />
       <ConnectionToast />
     </>

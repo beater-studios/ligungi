@@ -32,6 +32,8 @@ import {
   PUZZLE_THEMES,
   parseProfileDetails,
   parseSettings,
+  ACTIVITY_TIME_CONTROLS,
+  type TimeControl,
   type ClientMessage,
   type LobbyView,
   type DiscordLinkResult,
@@ -100,8 +102,7 @@ import {
   verifyPassword,
   type Session,
 } from './auth.ts';
-import { ActivityTables } from './activity.ts';
-import { probeActivity } from './activityProbe.ts';
+import { ActivityHalls } from './activity.ts';
 import { BUILD } from './build.ts';
 import { ChallengeStore } from './challenges.ts';
 import type { ServerConfig } from './config.ts';
@@ -113,6 +114,7 @@ import { Games, type Player } from './games.ts';
 import { randomId } from './ids.ts';
 import {
   HttpError,
+  DISCORD_PROXY,
   RateLimiter,
   Router,
   clientIp,
@@ -166,7 +168,8 @@ const contentSecurityPolicy = (analytics: boolean, embedded = false): string =>
     "default-src 'self'",
     `script-src 'self'${analytics ? ` ${ANALYTICS_SCRIPT}` : ''}`,
     `connect-src 'self'${analytics ? ` ${ANALYTICS_REPORT}` : ''}`,
-    "img-src 'self' data:",
+    // Inside Discord the call's people show with their Discord avatars.
+    `img-src 'self' data:${embedded ? ' https://cdn.discordapp.com' : ''}`,
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' data:",
     "worker-src 'self' blob:",
@@ -192,11 +195,11 @@ export const createApp = (config: ServerConfig): App => {
   const users = new Users(db, config.now);
   const notices = new Notices(db, config.now);
   const hub = new Hub();
-  const authLimiter = new RateLimiter(10, 60_000, config.now);
+  const authLimiter = new RateLimiter(10, 60_000, config.now, { [DISCORD_PROXY]: 120 });
   /** Failed logins per username, whatever the IP, so a botnet cannot brute-force one account. */
   const loginFailures = new RateLimiter(20, 15 * 60_000, config.now);
   /** New sessions per IP: each one is a database row. */
-  const sessionLimiter = new RateLimiter(30, 60_000, config.now);
+  const sessionLimiter = new RateLimiter(30, 60_000, config.now, { [DISCORD_PROXY]: 600 });
   /** The export reads every game of the account: a few per minute is plenty. */
   const exportLimiter = new RateLimiter(5, 60_000, config.now);
   /** Reports a player can file per hour: enough for real cases, too few to flood the queue. */
@@ -578,7 +581,7 @@ export const createApp = (config: ServerConfig): App => {
   const activityOrigin = discord.clientId ? `https://${discord.clientId}.discordsays.com` : null;
   const fromActivity = (req: IncomingMessage): boolean =>
     activityOrigin !== null && (req.headers.origin === activityOrigin || req.headers['x-ligungi-activity'] === '1');
-  const activities = new ActivityTables(lobby, games, config.now);
+  const activities = new ActivityHalls(lobby, games, config.now);
   /** Who each Activity session is on Discord, to check they are in the call they play from; forgotten after a day unused. */
   const activityPlayers = new Map<string, { discordId: string; at: number }>();
   const rememberActivityPlayer = (sessionId: string, discordId: string) => {
@@ -587,6 +590,21 @@ export const createApp = (config: ServerConfig): App => {
     activityPlayers.set(sessionId, { discordId, at: config.now() });
   };
   const activityLimiter = new RateLimiter(30, 60_000, config.now);
+  // The page asks every few seconds what the call has going on, so this one allows more.
+  const activityRoomsLimiter = new RateLimiter(120, 60_000, config.now);
+  const ACTIVITY_INSTANCE = /^[\w-]{1,100}$/;
+  /** Checks that the caller signed in through the Activity and is in the call they act on; returns that call. */
+  const activityCaller = async (ctx: Context, instanceId: unknown): Promise<string> => {
+    if (!activityOrigin) throw new HttpError(404, 'activityDisabled');
+    const discordId = activityPlayers.get(ctx.session.id)?.discordId;
+    if (!discordId) throw new HttpError(401, 'activitySignInRequired');
+    rememberActivityPlayer(ctx.session.id, discordId);
+    if (!activityLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+    if (typeof instanceId !== 'string' || !ACTIVITY_INSTANCE.test(instanceId)) throw new HttpError(400, 'notInActivity');
+    const members = await discord.instanceUsers(instanceId);
+    if (members && !members.has(discordId)) throw new HttpError(403, 'notInActivity');
+    return instanceId;
+  };
 
   /** Sends a user, on every device, the open challenges they received. */
   const sendIncoming = (userId: string): void => {
@@ -727,26 +745,32 @@ export const createApp = (config: ServerConfig): App => {
       const user = userId ? users.findById(userId) : undefined;
       sendJson(ctx.res, 200, { user: user ? { id: user.id, name: user.name } : null, reason, accessToken: signed.accessToken });
     })
-    .add('POST', '/api/activity/play', async (ctx) => {
+    .add('GET', '/api/activity/rooms', (ctx) => {
       if (!activityOrigin) throw new HttpError(404, 'activityDisabled');
-      const discordId = activityPlayers.get(ctx.session.id)?.discordId;
-      if (!discordId) throw new HttpError(401, 'activitySignInRequired');
-      rememberActivityPlayer(ctx.session.id, discordId);
-      if (!activityLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
-      const { instanceId, mode } = (await ctx.body()) as { instanceId?: unknown; mode?: unknown };
-      if (typeof instanceId !== 'string' || !/^[\w-]{1,100}$/.test(instanceId)) throw new HttpError(400, 'notInActivity');
-      const members = await discord.instanceUsers(instanceId);
-      if (members && !members.has(discordId)) throw new HttpError(403, 'notInActivity');
-      const settings = parseSettings({
-        mode: MODES.find((value) => value === mode) ?? 'beginner',
-        rated: false,
-        timeControl: { initial: 600, increment: 5 },
-        color: 'random',
-      });
+      if (!activityPlayers.has(ctx.session.id)) throw new HttpError(401, 'activitySignInRequired');
+      if (!activityRoomsLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      const instanceId = ctx.url.searchParams.get('instanceId') ?? '';
+      if (!ACTIVITY_INSTANCE.test(instanceId)) throw new HttpError(400, 'notInActivity');
+      sendJson(ctx.res, 200, activities.view(instanceId, ctx.player));
+    })
+    .add('POST', '/api/activity/rooms', async (ctx) => {
+      const body = (await ctx.body()) as { instanceId?: unknown; mode?: unknown; timeControl?: unknown; color?: unknown };
+      const instanceId = await activityCaller(ctx, body.instanceId);
+      const asked = body.timeControl as Partial<TimeControl> | null | undefined;
+      const timeControl = ACTIVITY_TIME_CONTROLS.find((tc) => tc.initial === asked?.initial && tc.increment === asked?.increment);
+      if (!timeControl) throw new HttpError(400, 'invalidInitialTime');
+      const settings = parseSettings({ mode: body.mode, rated: false, timeControl, color: body.color });
       if (isErrorCode(settings)) throw new HttpError(400, settings);
-      const turn = activities.join(instanceId, ctx.player, settings);
-      if (typeof turn === 'string') throw new HttpError(409, turn);
-      sendJson(ctx.res, 200, turn);
+      const opened = activities.open(instanceId, ctx.player, settings);
+      if (typeof opened === 'string') throw new HttpError(409, opened);
+      sendJson(ctx.res, 200, opened);
+    })
+    .add('POST', '/api/activity/rooms/:id/join', async (ctx) => {
+      const body = (await ctx.body()) as { instanceId?: unknown };
+      const instanceId = await activityCaller(ctx, body.instanceId);
+      const joined = activities.join(instanceId, ctx.params.id!, ctx.player);
+      if (typeof joined === 'string') throw new HttpError(409, joined);
+      sendJson(ctx.res, 200, joined);
     })
     .add('GET', '/api/discord/link', (ctx) => {
       if (!discord.enabled) return redirect(ctx.res, '/account?discord=disabled');
@@ -1618,7 +1642,6 @@ export const createApp = (config: ServerConfig): App => {
 
   const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
     const url = new URL(req.url ?? '/', 'http://localhost');
-    if (config.logActivityProbe) probeActivity(req, res, activityOrigin, sessions.get(parseCookies(req.headers.cookie).get(SESSION_COOKIE)) !== undefined);
     res.setHeader('x-content-type-options', 'nosniff');
     res.setHeader('referrer-policy', 'strict-origin-when-cross-origin');
     if (!url.pathname.startsWith('/api/')) {
@@ -1679,7 +1702,6 @@ export const createApp = (config: ServerConfig): App => {
     try {
       const url = new URL(req.url ?? '/', 'http://localhost');
       const session = sessions.get(parseCookies(req.headers.cookie).get(SESSION_COOKIE));
-      if (config.logActivityProbe) probeActivity(req, null, activityOrigin, session !== undefined);
       if (url.pathname !== '/ws' || !session || !sameOrigin(req)) {
         socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
         socket.destroy();

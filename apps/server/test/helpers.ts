@@ -20,7 +20,6 @@ export const startServer = async (overrides: Partial<ServerConfig> = {}): Promis
     staticDir: null,
     secureCookies: false,
     cloudflareWebAnalytics: false,
-    logActivityProbe: false,
     trustProxy: 'none',
     abortAfterMs: 60_000,
     claimAfterMs: 30_000,

@@ -273,6 +273,15 @@ const safeStat = (path: string) => {
   }
 };
 
+/**
+ * The key that stands for the client address of every request from Discord's Activity proxy: it is a Cloudflare Worker
+ * of `discordsays.com`, so Cloudflare gives all its requests the same address, its Workers' one, and the player's is
+ * never sent. Its rate limits are shared by everyone playing inside Discord, so they are larger.
+ */
+export const DISCORD_PROXY = 'discord-proxy';
+/** The address Cloudflare gives every request a Worker makes (`CF-Connecting-IP`). */
+const WORKERS_ADDRESS = '2a06:98c0:3600:';
+
 /** Client IP according to the configured proxy trust (see `TrustProxy`). */
 export const clientIp = (req: IncomingMessage, trust: TrustProxy): string => {
   const direct = req.socket.remoteAddress ?? '';
@@ -280,7 +289,12 @@ export const clientIp = (req: IncomingMessage, trust: TrustProxy): string => {
     const value = req.headers[name];
     return (Array.isArray(value) ? value.join(',') : value)?.trim() || null;
   };
-  if (trust === 'cloudflare') return header('cf-connecting-ip') ?? direct;
+  if (trust === 'cloudflare') {
+    const ip = header('cf-connecting-ip');
+    // Cloudflare sets both headers itself, so a client cannot pass for Discord's proxy.
+    if (header('cf-worker') === 'discordsays.com' && ip?.startsWith(WORKERS_ADDRESS)) return DISCORD_PROXY;
+    return ip ?? direct;
+  }
   if (trust === 'proxy') return header('x-forwarded-for')?.split(',').at(-1)?.trim() || direct;
   return direct;
 };
@@ -293,11 +307,19 @@ export class RateLimiter {
   readonly limit: number;
   readonly windowMs: number;
   readonly now: () => number;
+  /** Larger limits for keys many people share (`DISCORD_PROXY`). */
+  readonly shared: Readonly<Record<string, number>>;
 
-  constructor(limit: number, windowMs: number, now: () => number) {
+  constructor(limit: number, windowMs: number, now: () => number, shared: Readonly<Record<string, number>> = {}) {
     this.limit = limit;
     this.windowMs = windowMs;
     this.now = now;
+    this.shared = shared;
+  }
+
+  #limitOf(key: string): number {
+    // Own keys only: a key such as a username "constructor" must not read the object's prototype.
+    return Object.hasOwn(this.shared, key) ? this.shared[key]! : this.limit;
   }
 
   allow(key: string): boolean {
@@ -309,13 +331,13 @@ export class RateLimiter {
       return true;
     }
     entry.count++;
-    return entry.count <= this.limit;
+    return entry.count <= this.#limitOf(key);
   }
 
   /** Whether the key is over the limit, without counting a new hit. */
   blocked(key: string): boolean {
     const entry = this.#hits.get(key);
-    return Boolean(entry && entry.reset > this.now() && entry.count >= this.limit);
+    return Boolean(entry && entry.reset > this.now() && entry.count >= this.#limitOf(key));
   }
 
   get size(): number {

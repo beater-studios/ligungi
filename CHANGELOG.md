@@ -4,6 +4,16 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.9] - 2026-11-25
+
+### Added
+
+- Discord Activity: a hub for the call. Anyone in the call opens a room (mode, time and color), everyone there sees the call's rooms and games, joins a room or watches a game, so several games can run in the same call. It also shows who is in the call and invites more people. A switch in the header goes back to the site's own lobby.
+
+### Changed
+
+- Discord Activity: the header keeps a margin at the top of Discord's frame, and the footer is back as one line with the terms, privacy, source code and a link to open the site in the browser.
+
 ## [0.9.8] - 2026-11-25
 
 ### Added
@@ -350,7 +360,9 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.7...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.9...HEAD
+[0.9.9]: https://github.com/beater-studios/ligungi/compare/v0.9.8...v0.9.9
+[0.9.8]: https://github.com/beater-studios/ligungi/compare/v0.9.7...v0.9.8
 [0.9.7]: https://github.com/beater-studios/ligungi/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/beater-studios/ligungi/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/beater-studios/ligungi/compare/v0.9.4...v0.9.5

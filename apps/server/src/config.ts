@@ -49,8 +49,6 @@ export interface ServerConfig {
   readonly discord: DiscordConfig | null;
   /** How the server reaches Discord; tests replace it. */
   readonly fetch: typeof fetch;
-  /** Temporary: log the headers of requests from Discord's Activity proxy (`activityProbe.ts`). */
-  readonly logActivityProbe: boolean;
 }
 
 const parseTrustProxy = (value: string | undefined): TrustProxy => {
@@ -91,5 +89,4 @@ export const loadConfig = (env: NodeJS.ProcessEnv = process.env): ServerConfig =
   now: Date.now,
   discord: parseDiscord(env),
   fetch: (input, init) => fetch(input, init),
-  logActivityProbe: env.LOG_ACTIVITY_PROBE === 'true',
 });

@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import type { DiscordConfig } from '../src/config.ts';
 import { Client, startServer, type TestServer } from './helpers.ts';
 
@@ -82,10 +82,10 @@ describe('Discord Activity', () => {
     expect((await activityRequest(new Client(server.base), 'POST', '/api/activity/session', { code: 'nobody' })).data).toMatchObject({ code: 'activitySignInFailed' });
   });
 
-  it('pairs the first two of a call and sends the rest to watch, only for people in the call', async () => {
+  it('lists the rooms of a call, opens and joins them, only for people in the call', async () => {
     server = await startServer({
       discord: config(),
-      fetch: fakeDiscord({ a: 'd-a', b: 'd-b', c: 'd-c', d: 'd-d' }, { call: ['d-a', 'd-b', 'd-c'] }),
+      fetch: fakeDiscord({ a: 'd-a', b: 'd-b', c: 'd-c', d: 'd-d' }, { call: ['d-a', 'd-b', 'd-c'], other: ['d-d'] }),
     });
     const [a, b, c, d] = await Promise.all(
       ['a', 'b', 'c', 'd'].map(async (code) => {
@@ -94,28 +94,41 @@ describe('Discord Activity', () => {
         return client;
       }),
     );
-    const play = (client: Client) => activityRequest(client, 'POST', '/api/activity/play', { instanceId: 'call', mode: 'intro' });
+    const rooms = async (client: Client, instanceId = 'call') => (await activityRequest(client, 'GET', `/api/activity/rooms?instanceId=${instanceId}`)).data;
+    const open = (client: Client, body: Record<string, unknown> = {}) =>
+      activityRequest(client, 'POST', '/api/activity/rooms', { instanceId: 'call', mode: 'intro', timeControl: { initial: 600, increment: 5 }, color: 'random', ...body });
+    const join = (client: Client, id: unknown, instanceId = 'call') => activityRequest(client, 'POST', `/api/activity/rooms/${String(id)}/join`, { instanceId });
 
-    const first = await play(a!);
-    expect(first.data.challengeId).toBeTruthy();
-    expect((await play(a!)).data).toEqual({ challengeId: first.data.challengeId });
-    const second = await play(b!);
-    expect(second.data.gameId).toBeTruthy();
-    expect((await play(c!)).data).toEqual({ gameId: second.data.gameId });
-    expect((await play(d!)).data).toMatchObject({ code: 'notInActivity' });
-    expect((await activityRequest(new Client(server.base), 'POST', '/api/activity/play', { instanceId: 'call' })).data).toMatchObject({ code: 'activitySignInRequired' });
-  });
+    expect(await rooms(a!)).toEqual({ rooms: [], games: [] });
+    const first = (await open(a!)).data.challengeId;
+    expect(first).toBeTruthy();
+    // A new room replaces the one the player had open in this call.
+    const second = (await open(a!, { mode: 'advanced', timeControl: { initial: 300, increment: 3 }, color: 'white' })).data.challengeId;
+    const third = (await open(b!)).data.challengeId;
+    const listed = (await rooms(c!)) as { rooms: Array<Record<string, unknown>> };
+    expect(listed.rooms.map((room) => room.challengeId)).toEqual([second, third]);
+    expect(listed.rooms[0]).toMatchObject({ settings: { mode: 'advanced', color: 'white', rated: false }, mine: false, challenger: { user: null } });
+    expect(((await rooms(a!)) as typeof listed).rooms[0]).toMatchObject({ mine: true });
+    expect(await rooms(d!, 'other')).toEqual({ rooms: [], games: [] });
 
-  it('logs what the proxy sends when asked, without the cookie value or the full address', async () => {
-    server = await startServer({ discord: config(), fetch: fakeDiscord({ gon: 'd-gon' }, {}), logActivityProbe: true });
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-    await fetch(`${server.base}/api/me`, { headers: { 'cf-worker': 'discordsays.com', 'cf-connecting-ip': '2a06:98c0:3600::103', 'x-ligungi-activity': '1' } });
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    const lines = log.mock.calls.filter(([tag]) => tag === '[activity-probe]').map(([, line]) => JSON.parse(String(line)) as Record<string, unknown>);
-    log.mockRestore();
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toMatchObject({ path: '/api/me', cfWorker: 'discordsays.com', cfConnectingIp: '2a06:98c0:3600:…', status: 200, sessionCookie: false });
-    expect(String(lines[0]!.setCookie)).toMatch(/^sid=…; .*Partitioned/);
+    expect((await join(a!, first)).data).toMatchObject({ code: 'challengeUnavailable' });
+    expect((await join(d!, second)).data).toMatchObject({ code: 'notInActivity' });
+    expect((await join(d!, second, 'other')).data).toMatchObject({ code: 'challengeUnavailable' });
+    const game = (await join(c!, second)).data.gameId;
+    expect(game).toBeTruthy();
+    const after = (await rooms(b!)) as { rooms: Array<Record<string, unknown>>; games: Array<Record<string, unknown>> };
+    expect(after.rooms.map((room) => room.challengeId)).toEqual([third]);
+    expect(after.games).toMatchObject([{ id: game, mode: 'advanced', status: 'started' }]);
+
+    // Joining a room closes the joiner's own, so nobody is paired into two games at once.
+    const fourth = (await open(a!)).data.challengeId;
+    expect((await join(b!, fourth)).data.gameId).toBeTruthy();
+    expect(((await rooms(c!)) as typeof after).rooms).toEqual([]);
+
+    expect((await open(b!, { timeControl: { initial: 60, increment: 0 } })).data).toMatchObject({ code: 'invalidInitialTime' });
+    expect((await open(b!, { rated: true })).data.challengeId).toBeTruthy();
+    expect((await activityRequest(new Client(server.base), 'POST', '/api/activity/rooms', { instanceId: 'call' })).data).toMatchObject({ code: 'activitySignInRequired' });
+    expect(await rooms(new Client(server.base))).toMatchObject({ code: 'activitySignInRequired' });
   });
 
   it('lets only Discord frame the Activity’s page, and nothing else', async () => {

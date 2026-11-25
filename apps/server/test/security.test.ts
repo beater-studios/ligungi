@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { DISCORD_INVITE } from '@ligungi/protocol';
 import { afterEach, describe, expect, it } from 'vitest';
 import { hashPassword, needsRehash, verifyPassword } from '../src/auth.ts';
-import { RateLimiter, clientIp } from '../src/http.ts';
+import { DISCORD_PROXY, RateLimiter, clientIp } from '../src/http.ts';
 import { Client, startServer, type TestServer } from './helpers.ts';
 
 let server: TestServer | undefined;
@@ -82,6 +82,25 @@ describe('client IP', () => {
     expect(clientIp(req({}), 'cloudflare')).toBe('203.0.113.9');
     expect(clientIp(req(spoofed), 'proxy')).toBe('198.51.100.7');
     expect(clientIp(req({}), 'proxy')).toBe('203.0.113.9');
+  });
+
+  it('puts every request from Discord\'s Activity proxy under one key with larger limits', () => {
+    const worker = { 'cf-connecting-ip': '2a06:98c0:3600::103' };
+    expect(clientIp(req({ ...worker, 'cf-worker': 'discordsays.com' }), 'cloudflare')).toBe(DISCORD_PROXY);
+    // Another Worker, or a client sending the header itself, keeps its own address.
+    expect(clientIp(req({ ...worker, 'cf-worker': 'someone.workers.dev' }), 'cloudflare')).toBe('2a06:98c0:3600::103');
+    expect(clientIp(req({ 'cf-connecting-ip': '192.0.2.44', 'cf-worker': 'discordsays.com' }), 'cloudflare')).toBe('192.0.2.44');
+    expect(clientIp(req({ ...worker, 'cf-worker': 'discordsays.com' }), 'none')).toBe('203.0.113.9');
+
+    const limiter = new RateLimiter(2, 60_000, () => 0, { [DISCORD_PROXY]: 4 });
+    expect([1, 2, 3].map(() => limiter.allow('192.0.2.44'))).toEqual([true, true, false]);
+    expect([1, 2, 3, 4, 5].map(() => limiter.allow(DISCORD_PROXY))).toEqual([true, true, true, true, false]);
+    expect(limiter.blocked(DISCORD_PROXY)).toBe(true);
+    // Keys come from usernames too: one named like a property of every object keeps the normal limit.
+    for (const key of ['constructor', '__proto__', 'tostring']) {
+      expect([1, 2, 3].map(() => limiter.allow(key))).toEqual([true, true, false]);
+      expect(limiter.blocked(key)).toBe(true);
+    }
   });
 
   it('does not let a forged X-Forwarded-For bypass the login limit', async () => {

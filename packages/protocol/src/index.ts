@@ -219,6 +219,28 @@ export interface ChallengeView {
   readonly gameId: string | null;
 }
 
+/** The clocks a room in a Discord Activity call may use: casual games short enough to finish while the call lasts. */
+export const ACTIVITY_TIME_CONTROLS: readonly TimeControl[] = [
+  { initial: 180, increment: 2 },
+  { initial: 300, increment: 3 },
+  { initial: 600, increment: 5 },
+  { initial: 900, increment: 10 },
+];
+
+/** A room in a Discord Activity call: a challenge waiting for someone in the call to join it. */
+export interface ActivityRoomView {
+  readonly challengeId: string;
+  readonly settings: GameSettings;
+  readonly challenger: Opponent;
+  readonly mine: boolean;
+}
+
+/** What a voice call running the Discord Activity has going on: rooms waiting for a second player, oldest first, and games in progress. */
+export interface ActivityHallView {
+  readonly rooms: readonly ActivityRoomView[];
+  readonly games: readonly GameSummary[];
+}
+
 /** Who may challenge a player from their profile. */
 export const CHALLENGE_POLICIES = ['everyone', 'following', 'nobody'] as const;
 export type ChallengePolicy = (typeof CHALLENGE_POLICIES)[number];

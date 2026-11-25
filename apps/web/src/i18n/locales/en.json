@@ -462,7 +462,8 @@
     "takeback": "Take back",
     "startsGame": "Moves first",
     "firstShort": "1st",
-    "yourTurn": "Your turn"
+    "yourTurn": "Your turn",
+    "theirTurn": "Opponent's turn"
   },
   "panels": {
     "tower": "Tower of {n}",
@@ -645,6 +646,11 @@
     "rematch": "Rematch",
     "premove": "Premove: {move}. Click the board to cancel.",
     "export": "Export",
+    "exportTitle": "Export the game",
+    "exportHelp": "The game in rulebook notation, with its details. Paste it into the analysis (Import a game) or keep it as a file.",
+    "exportCopy": "Copy",
+    "exportCopied": "Copied",
+    "exportDownload": "Download",
     "heading": "{white} against {black}"
   },
   "computer": {

@@ -73,7 +73,7 @@ What each screen shows only visually, and what blind mode needs there. Status: *
 
 | Screen | Path | Visual only today | Blind mode needs | Status |
 |---|---|---|---|---|
-| Online game | `/<id>` | board, hands, last move, clocks, tower inspector | announcements, command field, board by keyboard, clocks on request; moves typed or played on the keyboard board skip the move confirmation, whose bar (a group with labelled buttons, Enter and Escape) is for moves made on the board | built |
+| Online game | `/<id>` | board, hands, last move, clocks, tower inspector | announcements, command field, board by keyboard, clocks on request; moves typed or played on the keyboard board skip the move confirmation, whose bar (a group with labelled buttons, Enter and Escape) is for moves made on the board; Export opens a dialog with the record in a labelled read-only text area and Copy and Download buttons | built |
 | Against the computer | `/computer` | same as an online game, level choice | same as an online game | built |
 | TV and its channels | `/tv`, `/tv/<channel>` | boards of the live games, clocks | announcements of the followed game, position on request | built (a channel is the online game page) |
 | Analysis board | `/analysis` | board, move tree | the command field for moves, the move list as text, stepping through moves with announcements | built |

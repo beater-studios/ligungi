@@ -156,6 +156,20 @@ const watchPeople = async (client: DiscordSDK) => {
   }
 };
 
+/** Discord's layout modes: the Activity in full, minimized to a floating window, or as a tile of the call's grid. */
+const LAYOUT_PIP = 1;
+
+/** Marks the page while Discord shows the Activity minimized, so it shows only the board and the clocks. */
+const watchLayout = async (client: DiscordSDK) => {
+  try {
+    await client.subscribe('ACTIVITY_LAYOUT_MODE_UPDATE', ({ layout_mode }) => {
+      document.body.classList.toggle('ligungi-discord--pip', layout_mode === LAYOUT_PIP);
+    });
+  } catch {
+    // Without the event the minimized window shows the page as it is.
+  }
+};
+
 /** Opens Discord's own dialog to invite more people into the Activity. */
 export const inviteToCall = (): void => {
   void sdk?.commands.openInviteDialog().catch(() => undefined);
@@ -187,6 +201,7 @@ export const startActivity = async (): Promise<void> => {
     activity.set({ status: 'ready', instanceId: client.instanceId, reason: signed.reason });
     watchPresence(client);
     void watchPeople(client);
+    void watchLayout(client);
   } catch {
     activity.set({ status: 'failed' });
   }

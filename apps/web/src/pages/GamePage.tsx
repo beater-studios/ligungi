@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { useActivity } from '../activity.ts';
 import { api } from '../api.ts';
 import { turnNotice } from '../challenges.ts';
+import { ExportGame } from '../components/ExportGame.tsx';
 import { BookmarkPanel } from '../components/BookmarkPanel.tsx';
 import { Crosstable } from '../components/Crosstable.tsx';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
@@ -419,9 +420,7 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
       {notice && <p class="ligungi-notice">{notice}</p>}
       {premove && <p class="ligungi-notice">{t.game.premove(moveToString(premove))}</p>}
       {view.voided && <p class="ligungi-notice ligungi-game-info__voided">{t.mod.voided}</p>}
-      <a class="text" href={`/api/games/${view.id}/export`} target="_blank" rel="noopener" data-icon={icons.Download}>
-        {t.game.export}
-      </a>
+      <ExportGame gameId={view.id} />
       {user && <BookmarkPanel gameId={view.id} />}
       {(() => {
         // A player can report their opponent from the game; a moderator can void a finished rated one.

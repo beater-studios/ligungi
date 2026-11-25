@@ -174,6 +174,16 @@ export const DesignPage = () => {
               Rated
             </button>
           </Example>
+          <Example label="Icon and label (data-icon on .button): the space between them comes by itself, no class needed">
+            <div class="ligungi-ds__row">
+              <button type="button" class="button button-empty" data-icon={icons.Download}>
+                Download
+              </button>
+              <button type="button" class="button" data-icon={icons.Checkmark}>
+                Confirm
+              </button>
+            </div>
+          </Example>
           <Example label="Icon buttons (.fbt with data-icon)">
             <div class="ligungi-ds__row">
               <button type="button" class="fbt" title="Flip board" data-icon={icons.ChasingArrows} />

@@ -106,7 +106,8 @@ const announcePeriod = (period: number, warning: number, spoken: { current: numb
   else if (first) playSound('lowtime');
 };
 
-const ClockBox = ({ color, position, clock }: { color: Color; position: 'top' | 'bottom'; clock: RoundClock }) => {
+/** `turn`: what to say beside the clock of the side to move, for a viewer who plays; null otherwise. */
+const ClockBox = ({ color, position, clock, turn }: { color: Color; position: 'top' | 'bottom'; clock: RoundClock; turn: string | null }) => {
   const t = useT();
   const [, setTick] = useState(0);
   const warned = useRef(false);
@@ -139,6 +140,8 @@ const ClockBox = ({ color, position, clock }: { color: Color; position: 'top' | 
   return (
     <div class={classes.join(' ')}>
       <div class={`time${shown >= 3_600_000 ? ' hour' : ''}`}>{formatClock(shown)}</div>
+      {/* Shown only where the player rows are too small for it: Discord's minimized window. */}
+      {turn && <span class="ligungi-clock__turn">{turn}</span>}
       {byoyomi && clock.byoyomi && byoyomi.periods > 0 && (
         <span class="ligungi-byoyomi__periods" title={t.game.periodsLeft(byoyomi.periods)}>
           {inPeriod ? `×${byoyomi.periods}` : `+${clock.byoyomi.periods > 1 ? `${clock.byoyomi.periods}×` : ''}${clock.byoyomi.byoyomi}s`}
@@ -313,6 +316,11 @@ export const RoundLayout = (props: RoundLayoutProps) => {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  // The turn beside the clocks, for a player: whose move it is, said from their side. A spectator has no turn.
+  const clocks = props.clocks;
+  const turnLabel = (color: Color): string | null =>
+    clocks && props.turn === color && (clocks.white.mine || clocks.black.mine) ? (clocks[color].mine ? t.common.yourTurn : t.common.theirTurn) : null;
+
   return (
     <main class="round">
       {props.heading && <h1 class="ligungi-sr-only">{props.heading}</h1>}
@@ -349,8 +357,8 @@ export const RoundLayout = (props: RoundLayoutProps) => {
         <div class="round__app__table" />
         <UserBox player={props.players[top]} color={top} position="top" />
         <UserBox player={props.players[bottom]} color={bottom} position="bottom" myTurn={props.myTurn ?? false} />
-        {props.clocks && <ClockBox color={top} position="top" clock={props.clocks[top]} />}
-        {props.clocks && <ClockBox color={bottom} position="bottom" clock={props.clocks[bottom]} />}
+        {props.clocks && <ClockBox color={top} position="top" clock={props.clocks[top]} turn={turnLabel(top)} />}
+        {props.clocks && <ClockBox color={bottom} position="bottom" clock={props.clocks[bottom]} turn={turnLabel(bottom)} />}
         <MoveTable
           positions={props.positions}
           moves={props.moves}

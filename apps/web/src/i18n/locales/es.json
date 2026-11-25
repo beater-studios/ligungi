@@ -462,7 +462,8 @@
     "takeback": "Deshacer jugada",
     "startsGame": "Empieza la partida",
     "firstShort": "1.º",
-    "yourTurn": "Tu turno"
+    "yourTurn": "Tu turno",
+    "theirTurn": "Turno del rival"
   },
   "panels": {
     "tower": "Torre de {n}",
@@ -645,6 +646,11 @@
     "rematch": "Revancha",
     "premove": "Prejugada: {move}. Haz clic en el tablero para cancelar.",
     "export": "Exportar",
+    "exportTitle": "Exportar la partida",
+    "exportHelp": "La partida en la notación del reglamento, con sus detalles. Pégala en el análisis (Importar partida) o guárdala como archivo.",
+    "exportCopy": "Copiar",
+    "exportCopied": "Copiado",
+    "exportDownload": "Descargar",
     "heading": "{white} contra {black}"
   },
   "computer": {

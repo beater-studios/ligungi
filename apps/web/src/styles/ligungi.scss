@@ -3897,6 +3897,8 @@ body:has(main.ligungi-auth) #clinput {
 
   &--segmented {
     .ligungi-choice__options {
+      // Equal widths while the labels fit; a longer one ("Intermediário") widens its own option instead of touching its edges.
+      grid-auto-columns: minmax(max-content, 1fr);
       gap: 4px;
       padding: 4px;
       border-radius: 6px;
@@ -3905,9 +3907,14 @@ body:has(main.ligungi-auth) #clinput {
 
     .ligungi-choice__option {
       min-height: 2.5rem;
-      padding: 0.4rem 0.5rem;
+      padding: 0.4rem 0.8rem;
       border: 0;
       background: none;
+
+      // Inside the option: options sit 4px apart, so a ring outside would run into the next one.
+      &:has(:focus-visible) {
+        outline-offset: -2px;
+      }
 
       &.is-checked {
         background: $c-bg-zebra2;
@@ -6856,6 +6863,14 @@ $lesson-star: #e8a800;
 }
 
 /* ===== Profile about (components/ProfileAbout.tsx): bio, social networks and profiles on other game sites ===== */
+/* ===== Buttons with an icon and a label ===== */
+// lila spaces an icon from its label only with `.text`; any button that has both gets the same space, so a missing
+// class never glues them together. Icon-only buttons (no children, such as `.fbt`) are left as they are.
+.button[data-icon]:not(:empty)::before {
+  margin-inline: 0 0.4em;
+  line-height: 1;
+}
+
 .ligungi-site-icon {
   display: inline-block;
   flex: none;
@@ -7517,6 +7532,30 @@ $lesson-star: #e8a800;
   gap: 0.5rem;
 }
 
+/* ===== Export dialog of a game (components/ExportGame.tsx): the record to copy or save ===== */
+.ligungi-export__help {
+  margin: 0 0 0.8rem;
+  color: $c-font-dim;
+}
+
+.ligungi-export__text {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 14rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  resize: vertical;
+  white-space: pre;
+}
+
+.ligungi-export__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
 /* ===== Rating history on the profile (components/RatingHistory.tsx, RatingHistoryChart.tsx) ===== */
 .ligungi-card.ligungi-history {
   display: flex;
@@ -8117,7 +8156,9 @@ $lesson-star: #e8a800;
       text-align: center;
     }
 
-    .button::before {
+    // The flex gap spaces the icon here, so the global icon margin steps aside.
+    .button::before,
+    .button[data-icon]:not(:empty)::before {
       margin: 0;
     }
   }
@@ -9201,6 +9242,120 @@ body.ligungi-discord {
   }
 }
 
+// Minimized by Discord to a small floating window: a game shows only its board, the players and their clocks, and any
+// other page only its content.
+body.ligungi-discord--pip {
+  padding: 0;
+
+  #top,
+  .ligungi-hub-footer,
+  .ligungi-zen-exit,
+  .round__side,
+  .round__underboard,
+  .round .rmoves,
+  .round .rcontrols,
+  .round .pocket,
+  .round__app__table,
+  .ligungi-ruser__status,
+  .ligungi-ruser rating,
+  .ligungi-first,
+  .gg-coords,
+  .rclock .moretime {
+    display: none;
+  }
+
+  #main-wrap {
+    display: block;
+    margin: 0;
+  }
+
+  .round {
+    display: block;
+  }
+
+  .round__app {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto 1fr 1fr auto;
+    grid-template-areas: 'board user-top' 'board clock-top' 'board clock-bot' 'board user-bot';
+    gap: 4px 8px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    height: 100vh;
+    margin: 0;
+    padding: 6px;
+  }
+
+  .round__app__board {
+    grid-area: board;
+    width: calc(100vh - 12px);
+    margin: 0;
+  }
+
+  .ruser-top {
+    grid-area: user-top;
+  }
+
+  .ruser-bottom {
+    grid-area: user-bot;
+  }
+
+  .rclock-top {
+    grid-area: clock-top;
+  }
+
+  .rclock-bottom {
+    grid-area: clock-bot;
+  }
+
+  .ruser,
+  .rclock {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .ruser {
+    gap: 6px;
+    padding: 0 0 0 6px;
+  }
+
+  .ligungi-ruser__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ligungi-ruser__name a {
+    flex: 0 1 auto;
+    min-width: 2.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rclock {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    align-self: center;
+  }
+
+  .ligungi-clock__turn {
+    display: block;
+    padding-left: 6px;
+    color: $c-font-clear;
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+}
+
+// The turn beside the clock exists only for the minimized window; elsewhere the player rows say it.
+.ligungi-clock__turn {
+  display: none;
+}
+
 // The call's rooms take the whole page: the site's menu waits behind the switch.
 body.ligungi-discord--call #topnav {
   display: none;
@@ -9281,7 +9436,7 @@ body.ligungi-discord--call #topnav {
 
 .ligungi-hub__cols {
   display: grid;
-  grid-template-columns: minmax(18rem, 30rem) minmax(0, 1fr);
+  grid-template-columns: minmax(18rem, 36rem) minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
 
@@ -9302,6 +9457,7 @@ body.ligungi-discord--call #topnav {
 .ligungi-hub__form {
   display: grid;
   gap: 0.9rem;
+  container-type: inline-size;
 
   .ligungi-choice__legend {
     margin-bottom: 0.35rem;
@@ -9328,11 +9484,11 @@ body.ligungi-discord--call #topnav {
     margin: 0;
   }
 
-  // Four mode names do not fit a phone in one row: two by two.
-  @media (max-width: at-most($x-small)) {
+  // The four mode names need about 400px in one row (Portuguese and Spanish are the longest); a narrower form shows them two by two.
+  @container (max-width: 440px) {
     .ligungi-choice:has([name='hub-mode']) .ligungi-choice__options {
-      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-flow: row;
     }
   }
 

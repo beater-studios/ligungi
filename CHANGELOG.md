@@ -4,6 +4,18 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.10] - 2026-11-25
+
+### Changed
+
+- Export on the game page opens a dialog with the record, to copy or download, instead of a raw text page in a new tab.
+- Discord Activity: when Discord minimizes the Activity to its floating window, a game shows only the board, the players' names and their clocks, with whose turn it is beside the clock for the players.
+
+### Fixed
+
+- Buttons with an icon and a label always keep a space between them, without depending on a class each button had to remember.
+- Segmented choices (mode, time, color): a long label such as "Intermediário" no longer touches the edges of its option, and the keyboard focus ring stays inside the option instead of running into the next one. In the Discord hub the form is wider, and the modes go two by two when it is narrow.
+
 ## [0.9.9] - 2026-11-25
 
 ### Added
@@ -360,7 +372,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.9...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.10...HEAD
+[0.9.10]: https://github.com/beater-studios/ligungi/compare/v0.9.9...v0.9.10
 [0.9.9]: https://github.com/beater-studios/ligungi/compare/v0.9.8...v0.9.9
 [0.9.8]: https://github.com/beater-studios/ligungi/compare/v0.9.7...v0.9.8
 [0.9.7]: https://github.com/beater-studios/ligungi/compare/v0.9.6...v0.9.7

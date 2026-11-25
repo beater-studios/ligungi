@@ -462,7 +462,8 @@
     "takeback": "Voltar lance",
     "startsGame": "Começa a partida",
     "firstShort": "1º",
-    "yourTurn": "Sua vez"
+    "yourTurn": "Sua vez",
+    "theirTurn": "Vez do adversário"
   },
   "panels": {
     "tower": "Torre de {n}",
@@ -645,6 +646,11 @@
     "rematch": "Revanche",
     "premove": "Pré-lance: {move}. Clique no tabuleiro para cancelar.",
     "export": "Exportar",
+    "exportTitle": "Exportar a partida",
+    "exportHelp": "A partida na notação do livro de regras, com os detalhes. Cole na análise (Importar partida) ou guarde como arquivo.",
+    "exportCopy": "Copiar",
+    "exportCopied": "Copiado",
+    "exportDownload": "Baixar",
     "heading": "{white} contra {black}"
   },
   "computer": {

@@ -7,6 +7,7 @@ import { render } from 'preact';
 import { App } from './app.tsx';
 import { watchIncoming } from './challenges.ts';
 import { watchConnection } from './connection.ts';
+import { inActivity, startActivity } from './discordActivity.ts';
 import { loadPages } from './i18n/content/index.ts';
 import { loadLanguage } from './i18n/index.ts';
 import { registerServiceWorker, rememberOfflineLang } from './offline.ts';
@@ -21,7 +22,9 @@ watchConnection(window, () => {
   socket.connect();
   void loadSession().catch(() => undefined);
 });
-if (import.meta.env.PROD) {
+if (inActivity) document.body.classList.add('ligungi-discord');
+// Inside Discord the page lives only as long as the call, so nothing is kept for offline use.
+if (import.meta.env.PROD && !inActivity) {
   registerServiceWorker();
   rememberOfflineLang(lang);
   prefs.subscribe(() => rememberOfflineLang(resolveLang(prefs.get().lang)));
@@ -34,10 +37,21 @@ const longPage = /^\/(about|faq|contact|sites|terms|privacy|learn)$/.test(window
 const signedOut = () => {
   if (!session.get().loaded) session.set({ loaded: true, user: null, moderator: false });
 };
-Promise.all([loadSession().catch(signedOut), loadLanguage(lang), longPage ? loadPages(lang) : undefined])
+// Inside Discord the page opens at once, signed out, and its card says it is connecting: the sign-in waits for Discord's
+// handshake and, the first time, for the player to authorize the app. The session and the socket follow the sign-in.
+Promise.all([inActivity ? signedOut() : loadSession().catch(signedOut), loadLanguage(lang), longPage ? loadPages(lang) : undefined])
   .catch(() => undefined)
   .finally(() => {
     watchIncoming();
     socket.connect();
     render(<App />, root);
   });
+if (inActivity) {
+  void startActivity()
+    .then(loadSession)
+    .then(() => {
+      socket.reset();
+      socket.connect();
+    })
+    .catch(() => undefined);
+}

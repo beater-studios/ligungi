@@ -74,6 +74,7 @@ Sending the full view on every change is simpler than sending diffs and solves r
 - Two-step verification (opt-in): TOTP with SHA-1, 6 digits and 30 second steps, one step of drift either way. The time step of the last accepted code is stored, so a code works once. Ten single-use recovery codes (50 random bits each) are stored as SHA-256 hashes, which is enough for random codes of that length. Sign-in stays stateless: the client sends the password again with the code. A setup not confirmed is deleted on Cancel and expires after 30 minutes (removed by the six-hourly sweep). Setting it up and turning it off need the password, and codes typed on the account page count with the failed logins of the account. The QR code is drawn in the browser by `apps/web/src/qr.ts`, so the secret never goes to a third party.
 - Moderation: moderators are set only with the server command, never from the site, and cannot act on each other. Every moderator action is logged with its reason. Suspended accounts cannot sign in and lose their sessions at once. Details in [moderation.md](moderation.md).
 - Strict CSP on the site: `default-src 'self'`, `connect-src 'self'` (no WebSocket to other hosts), no plugins, no framing.
+- The Discord Activity is the only exception to the origin and framing rules, and only while the Discord variables are set: writes and the WebSocket also accept `https://<DISCORD_CLIENT_ID>.discordsays.com`, and a page loaded with Discord's `frame_id` (or as an iframe) may be framed by Discord's own domains. See [Discord Activity](#discord-activity).
 
 ### Discord ranks
 
@@ -88,6 +89,16 @@ Linking a Discord account is optional and off unless the Discord variables of th
 | 兵 Soldier | below 1500 | `DISCORD_ROLE_SOLDIER` |
 
 The five roles are created by hand on the server, below the bot's own role (Discord only lets a bot manage roles under its own). A sixth role, for every linked account, comes from Discord's Linked Roles: register the fields once with `node src/cli.ts discord metadata` (again only if `DISCORD_METADATA` changes), then give that role a Links requirement on the application with no extra condition, since a provisional rating is sent as 0 and a rating condition would leave those players out.
+
+### Discord Activity
+
+The site also runs as a Discord Activity: started from a voice call, it opens in Discord's frame at `<DISCORD_CLIENT_ID>.discordsays.com`, and every request (the WebSocket included) goes through Discord's proxy to the site, as set by the application's URL mapping. It needs the Discord variables of the README; the bot token is used to check who is in a call.
+
+- Start (`apps/web/src/discordActivity.ts`): the page knows it runs in Discord by its host and keeps Discord's launch parameters (`frame_id`, `instance_id`, `platform`) in session storage, since the site's own navigation drops them from the address. It loads `@discord/embedded-app-sdk` only there, asks Discord for an authorization code (scope `identify`, no prompt) and sends it to `POST /api/activity/session`, which trades it for the player's Discord id. A Discord account linked to a ligungi account signs in as that account, unless the account is suspended or uses two-step verification (Discord cannot stand in for the second step); anyone else plays as a guest. The page does not wait for this: it opens signed out, with the card saying it is connecting, and reads the session and reconnects the WebSocket once the sign-in is done (the first time, Discord asks the player to authorize the app). The service worker is not registered there.
+- Cookies: Discord's frame is a third-party context, so the session cookie set for the Activity is `SameSite=None; Secure; Partitioned`. The server tells an Activity request by its origin or by the `X-Ligungi-Activity: 1` header the page adds to its requests.
+- Play with this call: the home page shows a card first, with the mode. `POST /api/activity/play` keeps one table per call (`ActivityTables` in `apps/server/src/activity.ts`, in memory, forgotten after a day without use): the first player opens a casual 10+5 challenge, the second accepts it, and anyone after that is sent to the game to watch. The server asks Discord (`GET /applications/<id>/activity-instances/<instance>`, with the bot token) whether the player is in that call before joining them.
+- In the frame: external links open in the player's browser through the SDK (`openExternalLink`), since the frame cannot leave Discord; the footer and the consent banner are hidden (analytics cannot load through Discord's proxy) and the page keeps clear of the insets Discord's mobile app draws over.
+- Until the application is published as an Activity, only its developer team can start it in Discord.
 
 ## Site (`apps/web`)
 

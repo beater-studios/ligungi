@@ -121,6 +121,10 @@
     "cannotBlockSelf": "No puedes bloquearte a ti mismo.",
     "tooManyBlocks": "Llegaste al límite de jugadores bloqueados.",
     "blockedPlayer": "No es posible jugar con este jugador.",
+    "activityDisabled": "La actividad de Discord no está activada en este servidor.",
+    "activitySignInFailed": "No se pudo entrar con Discord.",
+    "activitySignInRequired": "Entra con Discord otra vez para continuar.",
+    "notInActivity": "No estás en esta llamada.",
     "invalidFollowPolicy": "Opción de seguidores no válida.",
     "invalidFilter": "Filtro no válido.",
     "invalidSearch": "Búsqueda no válida: revisa los campos.",
@@ -2030,6 +2034,19 @@
         "title": "Editor de tablero de Gungi · ligungi",
         "description": "Arma cualquier posición de Gungi, con torres y piezas en la mano, comprueba que sigue las reglas y ábrela en el análisis."
       }
+    }
+  },
+  "discordActivity": {
+    "title": "Jugar con esta llamada",
+    "hint": "Una partida casual 10+5. Los dos primeros de la llamada en pulsar Jugar se enfrentan, y los demás miran.",
+    "connecting": "Conectando con Discord…",
+    "failed": "No se pudo conectar con Discord. Cierra la Actividad y ábrela de nuevo.",
+    "play": "Jugar",
+    "linkAccount": "Vincular tu cuenta",
+    "guest": {
+      "unlinked": "Juegas como invitado. Para jugar con tu cuenta de ligungi, vincula este Discord en los ajustes de la cuenta.",
+      "suspended": "Tu cuenta de ligungi está suspendida, así que juegas como invitado.",
+      "twoFactor": "Tu cuenta de ligungi usa verificación en dos pasos, que Discord no puede confirmar, así que juegas como invitado."
     }
   }
 }

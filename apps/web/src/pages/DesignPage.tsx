@@ -2,6 +2,7 @@ import { initialPosition, legalMoves, parseFen, parseSquare } from '@ligungi/eng
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { FeedList } from '../components/Activity.tsx';
+import { ActivityCallView } from '../components/ActivityCall.tsx';
 import { TowerStrip } from '../components/Panels.tsx';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
@@ -539,6 +540,9 @@ export const DesignPage = () => {
               <button type="button" class="ligungi-ranking-pages__number">9</button>
               <button type="button" class="ligungi-ranking-pages__step">Next</button>
             </nav>
+          </Example>
+          <Example label="Play with this call (ActivityCallView): the home page's first card inside the Discord Activity, here for a guest">
+            <ActivityCallView state={{ status: 'ready', instanceId: 'design', reason: 'unlinked' }} onPlay={async () => undefined} />
           </Example>
         </Section>
 

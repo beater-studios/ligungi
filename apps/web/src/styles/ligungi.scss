@@ -9187,6 +9187,39 @@ body.ligungi-zen {
   }
 }
 
+/* ===== Discord Activity (discordActivity.ts): the site inside a voice call ===== */
+body.ligungi-discord {
+  // Discord's mobile app draws over the edges of the frame; it gives the insets as these variables.
+  padding: var(--discord-safe-area-inset-top, env(safe-area-inset-top, 0px)) var(--discord-safe-area-inset-right, env(safe-area-inset-right, 0px))
+    var(--discord-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) var(--discord-safe-area-inset-left, env(safe-area-inset-left, 0px));
+
+  // The page lives only as long as the call: no footer, and the analytics the consent banner asks about never load
+  // inside Discord.
+  .ligungi-footer,
+  .ligungi-consent {
+    display: none;
+  }
+}
+
+/* ===== "Play with this call" card on the home page (components/ActivityCall.tsx) ===== */
+.ligungi-call {
+  margin-bottom: 1rem;
+  padding: 1.4rem;
+
+  h2 {
+    margin: 0 0 0.4rem;
+  }
+
+  .ligungi-notice {
+    margin: 0 0 0.8rem;
+  }
+}
+
+.ligungi-call__hint {
+  margin: 0 0 0.8rem;
+  color: $c-font-dim;
+}
+
 /* ===== Blocked player notice on a profile (pages/ProfilePage.tsx) ===== */
 .ligungi-profile__blocked {
   margin: 0.8rem 0 0;

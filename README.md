@@ -70,6 +70,8 @@ Server environment variables:
 
 Linking accounts to Discord is optional: set the Discord variables above, add the redirect URI and the Linked Roles verification URL (`https://<site>/api/discord/link`) in the Discord application, then register the Linked Roles fields once with `node src/cli.ts discord metadata` (run in `apps/server`, with the same variables). The bot's role must sit above the rank roles. See Discord ranks in [docs/architecture.md](docs/architecture.md#discord-ranks).
 
+The same application can run the site as a Discord Activity, inside a voice call. In the Discord Developer Portal, under Activities: turn Activities on, and add a URL mapping from `/` to the site's host (`ligungi.org`). The Activity's sign-in uses no redirect, but Discord asks for at least one in the application, and the account linking one above already counts. The bot variables are needed too, to check who is in a call. Only the application's team can start the Activity until it is published. See Discord Activity in [docs/architecture.md](docs/architecture.md#discord-activity).
+
 Visit statistics are optional: build the site with `VITE_CF_ANALYTICS_TOKEN` (the public token of a Cloudflare Web Analytics site set up for manual install) and run the server with `CLOUDFLARE_WEB_ANALYTICS=true`. The site then asks for consent and only loads the beacon after the visitor accepts; without the token there is no notice and no analytics.
 
 The site footer links to the source code at https://github.com/beater-studios/ligungi (an AGPL requirement for anyone running the site publicly). If you publish a fork, point to your own code by setting `VITE_SOURCE_URL` at build time.

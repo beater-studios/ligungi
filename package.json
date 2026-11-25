@@ -36,5 +36,8 @@
     "start": "STATIC_DIR=../web/dist npm run start -w @ligungi/server",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "overrides": {
+    "zod": "4.6.6"
   }
 }

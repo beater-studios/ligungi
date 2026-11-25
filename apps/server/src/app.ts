@@ -100,6 +100,8 @@ import {
   verifyPassword,
   type Session,
 } from './auth.ts';
+import { ActivityTables } from './activity.ts';
+import { probeActivity } from './activityProbe.ts';
 import { BUILD } from './build.ts';
 import { ChallengeStore } from './challenges.ts';
 import type { ServerConfig } from './config.ts';
@@ -156,7 +158,10 @@ const SITE_NAME = 'ligungi';
 const ANALYTICS_SCRIPT = 'https://static.cloudflareinsights.com';
 const ANALYTICS_REPORT = 'https://cloudflareinsights.com';
 
-const contentSecurityPolicy = (analytics: boolean): string =>
+/** Where Discord shows an Activity: its clients (web, desktop, mobile) and the Activity frames themselves. */
+const DISCORD_FRAMES = 'https://discord.com https://*.discord.com https://discordapp.com https://*.discordapp.com https://*.discordsays.com';
+
+const contentSecurityPolicy = (analytics: boolean, embedded = false): string =>
   [
     "default-src 'self'",
     `script-src 'self'${analytics ? ` ${ANALYTICS_SCRIPT}` : ''}`,
@@ -168,7 +173,7 @@ const contentSecurityPolicy = (analytics: boolean): string =>
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",
-    "frame-ancestors 'none'",
+    embedded ? `frame-ancestors ${DISCORD_FRAMES}` : "frame-ancestors 'none'",
   ].join('; ');
 
 export interface App {
@@ -197,6 +202,7 @@ export const createApp = (config: ServerConfig): App => {
   /** Reports a player can file per hour: enough for real cases, too few to flood the queue. */
   const reportLimiter = new RateLimiter(10, 60 * 60_000, config.now);
   const csp = contentSecurityPolicy(config.cloudflareWebAnalytics);
+  const activityCsp = contentSecurityPolicy(config.cloudflareWebAnalytics, true);
   let closing = false;
 
   const toPlayer = (session: Session): Player => {
@@ -553,7 +559,7 @@ export const createApp = (config: ServerConfig): App => {
    * challenges follow the browser to the new id, and sockets still holding the old identity are closed so they
    * reconnect with the new cookie.
    */
-  const rotateSession = (ctx: Context, userId: string | null): void => {
+  const rotateSession = (ctx: Context, userId: string | null): Session => {
     const previous = ctx.session.id;
     const next = sessions.rotate(previous, userId, ctx.req.headers['user-agent']);
     games.rebindSession(previous, next.id);
@@ -562,7 +568,25 @@ export const createApp = (config: ServerConfig): App => {
     for (const client of hub.clients()) {
       if (client.player.sessionId === previous) client.socket.close(4001, 'session changed');
     }
+    return next;
   };
+
+  /**
+   * The Discord Activity: the site inside Discord, at `<application id>.discordsays.com`, reached through Discord's
+   * proxy. Its requests come from that origin, and the page marks its own with `x-ligungi-activity`.
+   */
+  const activityOrigin = discord.clientId ? `https://${discord.clientId}.discordsays.com` : null;
+  const fromActivity = (req: IncomingMessage): boolean =>
+    activityOrigin !== null && (req.headers.origin === activityOrigin || req.headers['x-ligungi-activity'] === '1');
+  const activities = new ActivityTables(lobby, games, config.now);
+  /** Who each Activity session is on Discord, to check they are in the call they play from; forgotten after a day unused. */
+  const activityPlayers = new Map<string, { discordId: string; at: number }>();
+  const rememberActivityPlayer = (sessionId: string, discordId: string) => {
+    const limit = config.now() - 24 * 60 * 60 * 1000;
+    for (const [id, entry] of activityPlayers) if (entry.at < limit) activityPlayers.delete(id);
+    activityPlayers.set(sessionId, { discordId, at: config.now() });
+  };
+  const activityLimiter = new RateLimiter(30, 60_000, config.now);
 
   /** Sends a user, on every device, the open challenges they received. */
   const sendIncoming = (userId: string): void => {
@@ -676,6 +700,53 @@ export const createApp = (config: ServerConfig): App => {
       closeUserSockets(userId);
       rotateSession(ctx, null);
       sendJson(ctx.res, 200, { user: null });
+    })
+    .add('GET', '/api/activity/config', (ctx) => {
+      if (!activityOrigin) throw new HttpError(404, 'activityDisabled');
+      sendJson(ctx.res, 200, { clientId: discord.clientId });
+    })
+    .add('POST', '/api/activity/session', async (ctx) => {
+      if (!activityOrigin) throw new HttpError(404, 'activityDisabled');
+      if (!activityLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      const { code } = (await ctx.body()) as { code?: unknown };
+      if (typeof code !== 'string' || code.length === 0 || code.length > 200) throw new HttpError(400, 'activitySignInFailed');
+      const signed = await discord.activitySignIn(code);
+      if (!signed) throw new HttpError(401, 'activitySignInFailed');
+      // A linked account signs in, unless it is suspended or uses two-step verification, which Discord cannot stand in
+      // for; then, as for anyone without a linked account, the player is a guest.
+      const reason = !signed.userId
+        ? 'unlinked'
+        : moderation.suspension(signed.userId)
+          ? 'suspended'
+          : twoFactor.isEnabled(signed.userId)
+            ? 'twoFactor'
+            : null;
+      const userId = reason === null ? signed.userId : null;
+      const next = rotateSession(ctx, userId);
+      rememberActivityPlayer(next.id, signed.discordId);
+      const user = userId ? users.findById(userId) : undefined;
+      sendJson(ctx.res, 200, { user: user ? { id: user.id, name: user.name } : null, reason, accessToken: signed.accessToken });
+    })
+    .add('POST', '/api/activity/play', async (ctx) => {
+      if (!activityOrigin) throw new HttpError(404, 'activityDisabled');
+      const discordId = activityPlayers.get(ctx.session.id)?.discordId;
+      if (!discordId) throw new HttpError(401, 'activitySignInRequired');
+      rememberActivityPlayer(ctx.session.id, discordId);
+      if (!activityLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
+      const { instanceId, mode } = (await ctx.body()) as { instanceId?: unknown; mode?: unknown };
+      if (typeof instanceId !== 'string' || !/^[\w-]{1,100}$/.test(instanceId)) throw new HttpError(400, 'notInActivity');
+      const members = await discord.instanceUsers(instanceId);
+      if (members && !members.has(discordId)) throw new HttpError(403, 'notInActivity');
+      const settings = parseSettings({
+        mode: MODES.find((value) => value === mode) ?? 'beginner',
+        rated: false,
+        timeControl: { initial: 600, increment: 5 },
+        color: 'random',
+      });
+      if (isErrorCode(settings)) throw new HttpError(400, settings);
+      const turn = activities.join(instanceId, ctx.player, settings);
+      if (typeof turn === 'string') throw new HttpError(409, turn);
+      sendJson(ctx.res, 200, turn);
     })
     .add('GET', '/api/discord/link', (ctx) => {
       if (!discord.enabled) return redirect(ctx.res, '/account?discord=disabled');
@@ -1521,6 +1592,7 @@ export const createApp = (config: ServerConfig): App => {
   const sameOrigin = (req: IncomingMessage) => {
     const origin = req.headers.origin;
     if (!origin) return true;
+    if (activityOrigin !== null && origin === activityOrigin) return true;
     try {
       const host = new URL(origin).host;
       const forwarded = (req.headers['x-forwarded-host'] as string | undefined)?.split(',')[0]?.trim();
@@ -1540,12 +1612,13 @@ export const createApp = (config: ServerConfig): App => {
     if (req.method === 'GET' && url.pathname !== '/api/me') return { id: `ephemeral:${randomId(24)}`, userId: null };
     if (!sessionLimiter.allow(ip)) throw new HttpError(429, 'tooManyAttempts');
     const created = sessions.create();
-    res.setHeader('set-cookie', sessionCookie(created.id, config.secureCookies));
+    res.setHeader('set-cookie', sessionCookie(created.id, config.secureCookies, fromActivity(req)));
     return created;
   };
 
   const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
     const url = new URL(req.url ?? '/', 'http://localhost');
+    if (config.logActivityProbe) probeActivity(req, res, activityOrigin, sessions.get(parseCookies(req.headers.cookie).get(SESSION_COOKIE)) !== undefined);
     res.setHeader('x-content-type-options', 'nosniff');
     res.setHeader('referrer-policy', 'strict-origin-when-cross-origin');
     if (!url.pathname.startsWith('/api/')) {
@@ -1555,7 +1628,10 @@ export const createApp = (config: ServerConfig): App => {
         res.end();
         return;
       }
-      res.setHeader('content-security-policy', csp);
+      // The Activity's page may only be framed by Discord: on its first load (Discord adds `frame_id`) and on a reload
+      // inside its iframe. Everywhere else the site still refuses to be framed.
+      const embedded = activityOrigin !== null && (url.searchParams.has('frame_id') || req.headers['sec-fetch-dest'] === 'iframe');
+      res.setHeader('content-security-policy', embedded ? activityCsp : csp);
       if ((req.method === 'GET' || req.method === 'HEAD') && config.staticDir && serveStatic(config.staticDir, url, req.headers['accept-language'], res, req.method === 'HEAD')) return;
       sendText(res, 404, 'Not found');
       return;
@@ -1579,7 +1655,7 @@ export const createApp = (config: ServerConfig): App => {
       player: toPlayer(session),
       ip,
       body: () => readJson(req),
-      setSession: (next) => res.setHeader('set-cookie', sessionCookie(next.id, config.secureCookies)),
+      setSession: (next) => res.setHeader('set-cookie', sessionCookie(next.id, config.secureCookies, fromActivity(req))),
     };
     await matched.handler(ctx);
   };
@@ -1603,6 +1679,7 @@ export const createApp = (config: ServerConfig): App => {
     try {
       const url = new URL(req.url ?? '/', 'http://localhost');
       const session = sessions.get(parseCookies(req.headers.cookie).get(SESSION_COOKIE));
+      if (config.logActivityProbe) probeActivity(req, null, activityOrigin, session !== undefined);
       if (url.pathname !== '/ws' || !session || !sameOrigin(req)) {
         socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
         socket.destroy();

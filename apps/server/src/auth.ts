@@ -74,8 +74,14 @@ const SESSION_MAX_AGE = 60 * 60 * 24 * 365;
 const ANONYMOUS_TTL_MS = 30 * DAY_MS;
 const USER_TTL_MS = 365 * DAY_MS;
 
-export const sessionCookie = (id: string, secure: boolean): string =>
-  `${SESSION_COOKIE}=${id}; Path=/; Max-Age=${SESSION_MAX_AGE}; HttpOnly; SameSite=Lax${secure ? '; Secure' : ''}`;
+/**
+ * `embedded`: for the Discord Activity, whose page runs in Discord's iframe, where only a cross-site cookie kept apart
+ * for that iframe (partitioned) is stored.
+ */
+export const sessionCookie = (id: string, secure: boolean, embedded = false): string =>
+  embedded
+    ? `${SESSION_COOKIE}=${id}; Path=/; Max-Age=${SESSION_MAX_AGE}; HttpOnly; SameSite=None; Secure; Partitioned`
+    : `${SESSION_COOKIE}=${id}; Path=/; Max-Age=${SESSION_MAX_AGE}; HttpOnly; SameSite=Lax${secure ? '; Secure' : ''}`;
 
 export interface Session {
   readonly id: string;

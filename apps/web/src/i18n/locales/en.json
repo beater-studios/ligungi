@@ -121,6 +121,10 @@
     "cannotBlockSelf": "You cannot block yourself.",
     "tooManyBlocks": "You have reached the limit of blocked players.",
     "blockedPlayer": "You cannot play this player.",
+    "activityDisabled": "The Discord Activity is not enabled on this server.",
+    "activitySignInFailed": "Could not sign in through Discord.",
+    "activitySignInRequired": "Sign in through Discord again to continue.",
+    "notInActivity": "You are not in this call.",
     "invalidFollowPolicy": "Invalid followers option.",
     "invalidFilter": "Invalid filter.",
     "invalidSearch": "Invalid search: check the fields.",
@@ -2030,6 +2034,19 @@
         "title": "Gungi board editor · ligungi",
         "description": "Set up any Gungi position, with towers and pieces in hand, check that it follows the rules and open it in the analysis."
       }
+    }
+  },
+  "discordActivity": {
+    "title": "Play with this call",
+    "hint": "A casual 10+5 game. The first two in the call to press Play face each other, and everyone else watches.",
+    "connecting": "Connecting to Discord…",
+    "failed": "Could not connect to Discord. Close the Activity and open it again.",
+    "play": "Play",
+    "linkAccount": "Link your account",
+    "guest": {
+      "unlinked": "You play as a guest. To play with your ligungi account, link this Discord account in your account settings.",
+      "suspended": "Your ligungi account is suspended, so you play as a guest.",
+      "twoFactor": "Your ligungi account uses two-step verification, which Discord cannot confirm, so you play as a guest."
     }
   }
 }

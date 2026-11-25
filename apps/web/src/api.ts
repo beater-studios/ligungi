@@ -1,4 +1,5 @@
 import type { ErrorCode } from '@ligungi/protocol';
+import { inActivity } from './discordActivity.ts';
 import { errorText, getT } from './i18n/index.ts';
 
 export class ApiError extends Error {
@@ -19,7 +20,11 @@ const request = async <T,>(method: string, path: string, body?: unknown): Promis
   const res = await fetch(path, {
     method,
     credentials: 'same-origin',
-    headers: method === 'GET' ? {} : { 'content-type': 'application/json' },
+    headers: {
+      ...(method === 'GET' ? {} : { 'content-type': 'application/json' }),
+      // Inside Discord the session cookie must be the kind a third-party frame keeps; the server tells by this header.
+      ...(inActivity ? { 'x-ligungi-activity': '1' } : {}),
+    },
     ...(method === 'GET' ? {} : { body: JSON.stringify(body ?? {}) }),
   });
   const text = await res.text();

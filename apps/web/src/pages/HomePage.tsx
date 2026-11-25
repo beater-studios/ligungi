@@ -16,6 +16,7 @@ import {
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../api.ts';
 import { FeedList, useFeed } from '../components/Activity.tsx';
+import { ActivityCall } from '../components/ActivityCall.tsx';
 import { turns } from '../challenges.ts';
 import { CreateGame, type CreateTarget } from '../components/CreateGame.tsx';
 import { LivePlayer } from '../components/LivePlayer.tsx';
@@ -433,6 +434,7 @@ export const HomePage = () => {
 
   return (
     <main class="ligungi-page ligungi-home">
+      <ActivityCall />
       {ongoing.map((game) => (
         <section key={game.id} class={`ligungi-card ligungi-live-strip${isMyTurn(game) ? ' is-my-turn' : ''}`}>
           <span class="ligungi-live-badge">{isMyTurn(game) ? t.nav.yourTurn : t.home.yourGame}</span>

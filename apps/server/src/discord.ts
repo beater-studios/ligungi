@@ -102,6 +102,42 @@ export class DiscordLinks {
     this.#now = now;
   }
 
+  /** The application id, which is also the Activity's address (`<id>.discordsays.com`); null when not configured. */
+  get clientId(): string | null {
+    return this.#config?.clientId ?? null;
+  }
+
+  /**
+   * Inside the Activity: who the player is on Discord and the ligungi account linked to them, from the code the
+   * Embedded App SDK got. The access token goes back to the Activity, which needs it to authenticate the SDK.
+   */
+  async activitySignIn(code: string): Promise<{ discordId: string; userId: string | null; accessToken: string } | null> {
+    try {
+      const tokens = await this.#token({ grant_type: 'authorization_code', code });
+      const me = (await this.#call('GET', '/users/@me', { bearer: tokens.access_token })) as { id: string };
+      const owner = this.#db.prepare('select user_id from discord_links where discord_id = ?').get(me.id) as { user_id: string } | undefined;
+      return { discordId: me.id, userId: owner?.user_id ?? null, accessToken: tokens.access_token };
+    } catch (error) {
+      logFailure('activity sign-in', error);
+      return null;
+    }
+  }
+
+  /** The Discord users in an Activity instance (none once it ended), or null when it cannot be checked (no bot). */
+  async instanceUsers(instanceId: string): Promise<ReadonlySet<string> | null> {
+    const config = this.#required();
+    if (!config.bot) return null;
+    try {
+      const path = `/applications/${config.clientId}/activity-instances/${encodeURIComponent(instanceId)}`;
+      const data = (await this.#call('GET', path, { bot: config.bot.token })) as { users?: unknown };
+      return new Set(Array.isArray(data.users) ? data.users.filter((id): id is string => typeof id === 'string') : []);
+    } catch (error) {
+      if (error instanceof DiscordError && error.status === 404) return new Set();
+      logFailure('activity instance', error);
+      return null;
+    }
+  }
+
   get enabled(): boolean {
     return this.#config !== null;
   }

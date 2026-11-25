@@ -21,6 +21,7 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 
 | Item | Why | Size | Priority | Seen on |
 |---|---|---|---|---|
+| Stronger computer through self-play tuning: a script makes the bot play thousands of games against itself on a developer machine, fits the weights of its hand-made evaluation (piece values, tier, hand and position bonuses in `packages/bot/src/search.ts`) to the results (Texel tuning), and keeps a new set only if it beats the current one by a clear margin over hundreds of games | Levels 4 and 5 get stronger without waiting for human games: on 2026-11-25 production had 31 finished games, far too few to tune on, and games against the computer are not stored. Human games can join the data once there are thousands, with a draft opening book | M | Medium | internal |
 | Kyu and dan ranks derived from the rating, shown beside names | Japanese-game flavor; easier to read than a number | S | Medium | lishogi |
 | Speed categories on quick pairing (Bullet, Blitz, Rapid, Classical) | lichess convention, easier to read than raw times | S | Low | lichess, lidraughts, libaduk |
 | Computer presets on quick pairing (play the bot at each level in one click) | Shortcut for the most common solo game | S | Low | lichess, lishogi |

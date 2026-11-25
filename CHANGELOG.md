@@ -4,6 +4,12 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.11] - 2026-11-25
+
+### Fixed
+
+- GIF images are served with their type (`image/gif`), so sites that embed them by address, such as Discord's app directory, accept them.
+
 ## [0.9.10] - 2026-11-25
 
 ### Changed
@@ -372,7 +378,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.10...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.11...HEAD
+[0.9.11]: https://github.com/beater-studios/ligungi/compare/v0.9.10...v0.9.11
 [0.9.10]: https://github.com/beater-studios/ligungi/compare/v0.9.9...v0.9.10
 [0.9.9]: https://github.com/beater-studios/ligungi/compare/v0.9.8...v0.9.9
 [0.9.8]: https://github.com/beater-studios/ligungi/compare/v0.9.7...v0.9.8

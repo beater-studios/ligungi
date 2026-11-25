@@ -135,6 +135,7 @@ const MIME: Record<string, string> = {
   '.mp3': 'audio/mpeg',
   '.png': 'image/png',
   '.webp': 'image/webp',
+  '.gif': 'image/gif',
   '.ico': 'image/x-icon',
   '.json': 'application/json',
   '.webmanifest': 'application/manifest+json',

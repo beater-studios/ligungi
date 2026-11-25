@@ -274,7 +274,7 @@
     "faq": "FAQ",
     "contact": "Contato",
     "discord": "Discord",
-    "sites": "Sites amigos",
+    "sites": "Sites semelhantes",
     "terms": "Condições de uso",
     "account": "Conta",
     "moderation": "Moderação",
@@ -1320,6 +1320,13 @@
     "editChapter": "Editar capítulo",
     "moveUp": "Subir capítulo",
     "moveDown": "Descer capítulo",
+    "previousChapter": "Capítulo anterior",
+    "nextChapter": "Próximo capítulo",
+    "chapterOrder": "Ordem no estudo",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "new": "Novo",
+    "edit": "Editar",
     "backToList": "Voltar aos estudos",
     "hide": "Ocultar estudo",
     "unhide": "Mostrar estudo de novo",
@@ -1926,7 +1933,7 @@
         "description": "Fale com a equipe do ligungi: dúvidas, sugestões e erros nas regras ou no site."
       },
       "sites": {
-        "title": "Sites amigos · ligungi",
+        "title": "Sites semelhantes · ligungi",
         "description": "Outros sites gratuitos de jogos de tabuleiro feitos sobre o lila, como o lichess, o lishogi e o lidraughts, e mais."
       },
       "terms": {

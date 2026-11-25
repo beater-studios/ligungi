@@ -4,6 +4,13 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.9.7] - 2026-11-24
+
+### Changed
+
+- Studies: Previous chapter and Next chapter buttons below the chapter list, for everyone reading a study. The arrows that reorder chapters, which looked like navigation, moved into Edit chapter as Move chapter up and Move chapter down.
+- In Portuguese, the page of friendly sites is now called Sites semelhantes.
+
 ## [0.9.6] - 2026-11-24
 
 ### Changed
@@ -333,7 +340,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.6...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.7...HEAD
+[0.9.7]: https://github.com/beater-studios/ligungi/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/beater-studios/ligungi/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/beater-studios/ligungi/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/beater-studios/ligungi/compare/v0.9.3...v0.9.4

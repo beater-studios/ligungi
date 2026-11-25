@@ -8099,8 +8099,27 @@ $lesson-star: #e8a800;
     }
   }
 
-  .ligungi-study__actions {
+  // Two equal columns under the chapter list: previous and next, then new and edit for the author.
+  .ligungi-study__step {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
     padding: 0.4rem 0.6rem 0;
+
+    // A link (a neighbor exists) and a disabled button (none) must look the same; a long label wraps inside its column.
+    .button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4em;
+      min-width: 0;
+      white-space: normal;
+      text-align: center;
+    }
+
+    .button::before {
+      margin: 0;
+    }
   }
 }
 

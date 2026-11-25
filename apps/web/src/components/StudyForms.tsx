@@ -319,12 +319,14 @@ export const ChapterSettingsModal = ({
   study,
   chapter,
   onClose,
+  onMoved,
   onSaved,
   onDeleted,
 }: {
   study: StudyView;
   chapter: StudyChapter;
   onClose: () => void;
+  onMoved: (study: StudyView) => void;
   onSaved: (name: string, orientation: Color) => void;
   onDeleted: (study: StudyView) => void;
 }) => {
@@ -339,6 +341,16 @@ export const ChapterSettingsModal = ({
     try {
       await api.post(`/api/studies/${study.id}/chapters/${chapter.id}`, { name, orientation });
       onSaved(name.trim(), orientation);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  const index = study.chapters.findIndex((c) => c.id === chapter.id);
+  const move = async (to: number) => {
+    setError(null);
+    try {
+      onMoved(await api.post<StudyView>(`/api/studies/${study.id}/chapters/${chapter.id}/move`, { index: to }));
     } catch (err) {
       setError((err as Error).message);
     }
@@ -373,6 +385,24 @@ export const ChapterSettingsModal = ({
           options={(['white', 'black'] as const).map((color) => ({ value: color, label: t.colors[color] }))}
           onChange={setOrientation}
         />
+        {study.chapters.length > 1 && (
+          <Field label={t.study.chapterOrder}>
+            <div class="ligungi-study__actions">
+              <button type="button" class="button button-empty text" data-icon={icons.UpTriangle} disabled={index <= 0} onClick={() => void move(index - 1)}>
+                {t.study.moveUp}
+              </button>
+              <button
+                type="button"
+                class="button button-empty text"
+                data-icon={icons.DownTriangle}
+                disabled={index < 0 || index >= study.chapters.length - 1}
+                onClick={() => void move(index + 1)}
+              >
+                {t.study.moveDown}
+              </button>
+            </div>
+          </Field>
+        )}
         {error && <p class="error">{error}</p>}
         <SubmitButton disabled={!name.trim()}>{t.study.save}</SubmitButton>
         {study.chapters.length > 1 && (

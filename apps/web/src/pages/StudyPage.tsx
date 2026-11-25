@@ -316,14 +316,18 @@ export const StudyPage = ({ id }: { id: string }) => {
 
   const chapterIndex = study && chapter ? study.chapters.findIndex((c) => c.id === chapter.id) : -1;
   const counts = node ? shapeCounts(node.shapes) : { arrows: 0, squares: 0 };
-  const moveChapter = async (index: number) => {
-    if (!study || !chapter) return;
-    try {
-      setStudy(await api.post<StudyView>(`/api/studies/${study.id}/chapters/${chapter.id}/move`, { index }));
-    } catch (err) {
-      setNotice((err as Error).message);
-    }
-  };
+  const previousChapter = study && chapterIndex > 0 ? study.chapters[chapterIndex - 1] : undefined;
+  const nextChapter = study && chapterIndex >= 0 ? study.chapters[chapterIndex + 1] : undefined;
+  const chapterStep = (target: { id: string } | undefined, label: string, name: string, icon: string) =>
+    study && target ? (
+      <a class="button button-empty text" data-icon={icon} title={name} aria-label={name} href={`/study/${study.id}?chapter=${target.id}`}>
+        {label}
+      </a>
+    ) : (
+      <button type="button" class="button button-empty text" data-icon={icon} title={name} aria-label={name} disabled>
+        {label}
+      </button>
+    );
 
   return (
     <main class={`analyse variant-crazyhouse ligungi-study${tap.strip ? ' ligungi-has-strip' : ''}`}>
@@ -364,24 +368,34 @@ export const StudyPage = ({ id }: { id: string }) => {
                 </li>
               ))}
             </ol>
+            {study.chapters.length > 1 && chapter && (
+              <div class="ligungi-study__step">
+                {chapterStep(previousChapter, t.study.previous, t.study.previousChapter, icons.JumpPrev)}
+                {chapterStep(nextChapter, t.study.next, t.study.nextChapter, icons.JumpNext)}
+              </div>
+            )}
             {editable && chapter && (
-              <div class="ligungi-study__actions">
-                <button type="button" class="button button-empty text" data-icon={icons.PlusButton} onClick={() => setModal('newChapter')}>
-                  {t.study.newChapter}
-                </button>
-                <button type="button" class="button button-empty text" data-icon={icons.Pencil} onClick={() => setModal('chapter')}>
-                  {t.study.editChapter}
-                </button>
-                <button type="button" class="button button-empty" title={t.study.moveUp} aria-label={t.study.moveUp} data-icon={icons.UpTriangle} disabled={chapterIndex <= 0} onClick={() => void moveChapter(chapterIndex - 1)} />
+              <div class="ligungi-study__step">
                 <button
                   type="button"
-                  class="button button-empty"
-                  title={t.study.moveDown}
-                  aria-label={t.study.moveDown}
-                  data-icon={icons.DownTriangle}
-                  disabled={chapterIndex < 0 || chapterIndex >= study.chapters.length - 1}
-                  onClick={() => void moveChapter(chapterIndex + 1)}
-                />
+                  class="button button-empty text"
+                  data-icon={icons.PlusButton}
+                  title={t.study.newChapter}
+                  aria-label={t.study.newChapter}
+                  onClick={() => setModal('newChapter')}
+                >
+                  {t.study.new}
+                </button>
+                <button
+                  type="button"
+                  class="button button-empty text"
+                  data-icon={icons.Pencil}
+                  title={t.study.editChapter}
+                  aria-label={t.study.editChapter}
+                  onClick={() => setModal('chapter')}
+                >
+                  {t.study.edit}
+                </button>
               </div>
             )}
           </nav>
@@ -570,6 +584,7 @@ export const StudyPage = ({ id }: { id: string }) => {
           study={study}
           chapter={chapter}
           onClose={() => setModal(null)}
+          onMoved={setStudy}
           onSaved={(name, side) => {
             setStudy({ ...study, chapters: study.chapters.map((c) => (c.id === chapter.id ? { ...c, name } : c)) });
             setChapter({ ...chapter, name, orientation: side });

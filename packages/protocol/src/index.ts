@@ -322,6 +322,8 @@ export interface UserProfile {
   readonly following: number;
   /** Whether the viewer follows this user. */
   readonly followed: boolean;
+  /** Whether the viewer blocked this user. */
+  readonly blocked: boolean;
   /** Whether the viewer may challenge this user from the profile (signed in, not themselves, allowed by them). */
   readonly canChallenge: boolean;
   /** Whether the viewer may start following this user (signed in, not themselves, allowed by them). */
@@ -492,6 +494,8 @@ export const RANKING_QUERY_MAX = 30;
 export const ONLINE_LIST_MAX = 100;
 export const LEADERBOARD_MAX = 100;
 export const MAX_FOLLOWS = 400;
+/** Players one account may block. */
+export const MAX_BLOCKS = 400;
 
 export type ResultFilter = 'win' | 'loss' | 'draw';
 

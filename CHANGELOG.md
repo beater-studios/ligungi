@@ -6,6 +6,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Block a player, from their profile (a second click confirms): neither of you can challenge or follow the other, you are never paired in the lobby, neither can take the other's open game, challenge link or rematch, and the follows and open challenges between you are removed. They are not told. The list of blocked players, with a button to unblock each, is in Account > Privacy, and it is part of the data download.
+
 - Type moves (Settings > Preferences > Game): a field under the board in games, against the computer, in puzzles and in practice, where you type a move such as `6-6 samurai`, `6-7 6-6` or the rulebook notation, then Enter. Typing anywhere on the page goes to it, and when several moves match it lists them to pick one.
 - Zen mode: press Z during a game, or use the eye button by the move list, to hide everything but the board, the hands, the players and the clocks; Z again, or the button in the corner, brings it all back. It can also be turned on in Settings > Preferences > Game.
 

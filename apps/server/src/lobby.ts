@@ -83,6 +83,11 @@ export class Lobby {
     this.#options.onChallengeChange(challenge);
   }
 
+  /** Two signed-in players where one blocked the other are never put in a game together. */
+  #apart(a: Player, b: Player): boolean {
+    return a.userId !== null && b.userId !== null && this.#users.isBlocked(a.userId, b.userId);
+  }
+
   #dropSeek(seek: Seek): void {
     this.#seeks.delete(seek.id);
     if (seek.settings.daysPerMove) this.#options.seekStore?.delete(seek.id);
@@ -99,7 +104,7 @@ export class Lobby {
     if (settings.rated && !owner.userId) return 'loginForRated';
     this.sweep();
     const match = [...this.#seeks.values()].find(
-      (seek) => !samePerson(seek.owner, owner) && compatible(seek.settings, settings),
+      (seek) => !samePerson(seek.owner, owner) && !this.#apart(seek.owner, owner) && compatible(seek.settings, settings),
     );
     if (match) {
       this.#dropSeek(match);
@@ -126,6 +131,7 @@ export class Lobby {
     const seek = this.#seeks.get(id);
     if (!seek) return 'seekUnavailable';
     if (samePerson(seek.owner, player)) return 'ownSeek';
+    if (this.#apart(seek.owner, player)) return 'blockedPlayer';
     if (seek.settings.daysPerMove && !player.userId) return 'correspondenceNeedsAccount';
     if (seek.settings.rated && !player.userId) return 'loginForRated';
     this.#dropSeek(seek);
@@ -178,6 +184,18 @@ export class Lobby {
     this.#options.onSeeksChange();
   }
 
+  /** A new block: the open challenges sent between the two, either way, are canceled. */
+  cancelBetween(a: string, b: string): void {
+    for (const challenge of this.#challenges.values()) {
+      const owner = challenge.owner.userId;
+      const target = challenge.destination?.id;
+      if (challenge.status === 'open' && ((owner === a && target === b) || (owner === b && target === a))) {
+        challenge.status = 'canceled';
+        this.#changed(challenge);
+      }
+    }
+  }
+
   /** A renamed account, in the seeks and challenges kept in memory (the stored ones are renamed with the account). */
   renameUser(userId: string, name: string): void {
     for (const item of [...this.#seeks.values(), ...this.#challenges.values()]) {
@@ -203,6 +221,7 @@ export class Lobby {
 
   seekViews(viewer: Player): SeekView[] {
     return [...this.#seeks.values()]
+      .filter((seek) => !this.#apart(seek.owner, viewer))
       .sort((a, b) => a.createdAt - b.createdAt)
       .map((seek) => ({
         id: seek.id,
@@ -247,6 +266,7 @@ export class Lobby {
     if (!challenge || challenge.status !== 'open') return 'challengeUnavailable';
     if (samePerson(challenge.owner, player)) return 'ownChallenge';
     if (challenge.destination && challenge.destination.id !== player.userId) return 'notYourChallenge';
+    if (this.#apart(challenge.owner, player)) return 'blockedPlayer';
     if (challenge.settings.daysPerMove && !player.userId) return 'correspondenceNeedsAccount';
     if (challenge.settings.rated && !player.userId) return 'loginForRated';
     const room = this.#start(challenge.settings, challenge.owner, player);

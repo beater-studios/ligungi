@@ -133,6 +133,7 @@ export class Users {
     this.#db.exec('begin');
     try {
       this.#db.prepare('delete from follows where user_id = ? or followed_id = ?').run(userId, userId);
+      this.#db.prepare('delete from blocks where user_id = ? or blocked_id = ?').run(userId, userId);
       this.#db.prepare('delete from notices where user_id = ? or actor_id = ?').run(userId, userId);
       this.#db.prepare('delete from ratings where user_id = ?').run(userId);
       this.#db.prepare('delete from sessions where user_id = ?').run(userId);
@@ -346,16 +347,65 @@ export class Users {
 
   /** Whether `fromId` may challenge `toId` from the profile, by `toId`'s policy. */
   canChallenge(fromId: string, toId: string): boolean {
-    if (fromId === toId) return false;
+    if (fromId === toId || this.isBlocked(fromId, toId)) return false;
     const policy = this.challengePolicy(toId);
     return policy === 'everyone' || (policy === 'following' && this.isFollowing(toId, fromId));
   }
 
   /** Whether `fromId` may start following `toId`, by `toId`'s policy. Followers from before a stricter policy stay. */
   canFollow(fromId: string, toId: string): boolean {
-    if (fromId === toId) return false;
+    if (fromId === toId || this.isBlocked(fromId, toId)) return false;
     const policy = this.followPolicy(toId);
     return policy === 'everyone' || (policy === 'following' && this.isFollowing(toId, fromId));
+  }
+
+  /**
+   * Blocks `targetId` for `userId`: neither can challenge, follow or be paired with the other any more, and the follows
+   * between them, in both directions, are removed. Returns false when the block already existed.
+   */
+  block(userId: string, targetId: string): boolean {
+    this.#db.exec('begin');
+    try {
+      const result = this.#db.prepare('insert or ignore into blocks (user_id, blocked_id, created_at) values (?, ?, ?)').run(userId, targetId, this.#now());
+      this.#db
+        .prepare('delete from follows where (user_id = ?1 and followed_id = ?2) or (user_id = ?2 and followed_id = ?1)')
+        .run(userId, targetId);
+      this.#db.exec('commit');
+      return result.changes > 0;
+    } catch (error) {
+      this.#db.exec('rollback');
+      throw error;
+    }
+  }
+
+  unblock(userId: string, targetId: string): void {
+    this.#db.prepare('delete from blocks where user_id = ? and blocked_id = ?').run(userId, targetId);
+  }
+
+  /** Whether `userId` blocked `targetId` (one direction, for the blocker's own view). */
+  hasBlocked(userId: string, targetId: string): boolean {
+    return Boolean(this.#db.prepare('select 1 from blocks where user_id = ? and blocked_id = ?').get(userId, targetId));
+  }
+
+  /** Whether either of the two blocked the other: what keeps them apart. */
+  isBlocked(a: string, b: string): boolean {
+    return Boolean(
+      this.#db.prepare('select 1 from blocks where (user_id = ?1 and blocked_id = ?2) or (user_id = ?2 and blocked_id = ?1)').get(a, b),
+    );
+  }
+
+  blocked(userId: string): UserRef[] {
+    const rows = this.#db
+      .prepare(
+        `select users.id, users.username from blocks join users on users.id = blocks.blocked_id
+         where blocks.user_id = ? order by users.username_key`,
+      )
+      .all(userId) as Array<{ id: string; username: string }>;
+    return rows.map((row) => ({ id: row.id, name: row.username }));
+  }
+
+  blockCount(userId: string): number {
+    return (this.#db.prepare('select count(*) as n from blocks where user_id = ?').get(userId) as { n: number }).n;
   }
 
   /** Returns false when the follow already existed. */

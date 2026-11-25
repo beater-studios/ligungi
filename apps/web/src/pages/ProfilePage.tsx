@@ -213,6 +213,7 @@ export const ProfilePage = ({ name }: { name: string }) => {
   const [error, setError] = useState<string | null>(null);
   const [more, setMore] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [confirmBlock, setConfirmBlock] = useState(false);
   const [challenging, setChallenging] = useState(false);
 
   useEffect(() => {
@@ -296,6 +297,23 @@ export const ProfilePage = ({ name }: { name: string }) => {
     }
   };
 
+  type BlockResult = { blocked: boolean; followed: boolean; canFollow: boolean; canChallenge: boolean; followers: number };
+  /** Blocking asks for a second click; unblocking does not. */
+  const toggleBlock = async () => {
+    if (!profile.blocked && !confirmBlock) return setConfirmBlock(true);
+    setConfirmBlock(false);
+    setBusy(true);
+    try {
+      const path = `/api/users/${encodeURIComponent(profile.user.name)}/block`;
+      const result = profile.blocked ? await api.delete<BlockResult>(path) : await api.post<BlockResult>(path);
+      setProfile({ ...profile, ...result });
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // While the filtered counts load (a slow connection), the tabs show a dash rather than the unfiltered numbers.
   const counts: GameCounts | null = !countsKey ? profile.counts : filteredCounts?.key === `${name}?${countsKey}` ? filteredCounts.counts : null;
   const isMe = me?.id === profile.user.id;
@@ -365,6 +383,18 @@ export const ProfilePage = ({ name }: { name: string }) => {
               {t.profile.follow}
             </a>
           )}
+          {!isMe && me && (
+            <button
+              type="button"
+              class={`button button-empty text${confirmBlock ? ' button-red' : ''}`}
+              data-icon={icons.Cancel}
+              disabled={busy}
+              onClick={() => void toggleBlock()}
+              onBlur={() => setConfirmBlock(false)}
+            >
+              {profile.blocked ? t.profile.unblock : confirmBlock ? t.profile.blockConfirm : t.profile.block}
+            </button>
+          )}
           {!isMe && me && <ReportButton username={profile.user.name} />}
           {isMe && (
             <a class="button button-empty text" href="/account" data-icon={icons.Pencil}>
@@ -372,6 +402,11 @@ export const ProfilePage = ({ name }: { name: string }) => {
             </a>
           )}
         </div>
+        {!isMe && profile.blocked && (
+          <p class="ligungi-profile__blocked" role="status">
+            {t.profile.blockedNotice}
+          </p>
+        )}
       </section>
 
       <ProfileAbout details={profile.details} />

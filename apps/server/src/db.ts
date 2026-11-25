@@ -314,6 +314,15 @@ const MIGRATIONS = [
     synced_at integer
   );
   `,
+  `
+  create table blocks (
+    user_id text not null references users(id) on delete cascade,
+    blocked_id text not null references users(id) on delete cascade,
+    created_at integer not null,
+    primary key (user_id, blocked_id)
+  );
+  create index blocks_blocked on blocks(blocked_id);
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

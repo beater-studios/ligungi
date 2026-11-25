@@ -10,6 +10,7 @@ import {
   BOOKMARK_NOTE_MAX,
   RATING_TREND_DAYS,
   DAY_MS,
+  MAX_BLOCKS,
   MAX_FOLLOWS,
   isErrorCode,
   parseClientMessage,
@@ -416,6 +417,12 @@ export const createApp = (config: ServerConfig): App => {
     const start = studyStart(fen);
     if (text === null || !start || !isOrientation(orientation)) throw new HttpError(400, 'invalidChapter');
     return { name: text, fen: fen as string, orientation, root: checkedRoot(start, root) };
+  };
+
+  /** A finished game between two players where one blocked the other: no rematch between them. */
+  const seatsBlocked = (room: { readonly seats: Readonly<Record<'white' | 'black', { readonly userId: string | null }>> }): boolean => {
+    const { white, black } = room.seats;
+    return white.userId !== null && black.userId !== null && users.isBlocked(white.userId, black.userId);
   };
 
   const findUser = (name: string) => {
@@ -1051,6 +1058,7 @@ export const createApp = (config: ServerConfig): App => {
         discord: discord.exportFor(userId),
         following: users.following(userId).map((entry) => entry.name),
         followers: users.followers(userId).map((entry) => entry.name),
+        blocked: users.blocked(userId).map((entry) => entry.name),
         notices: notices.list(userId, NOTICES_KEPT).map(({ kind, actor, subject, ref, createdAt, read }) => ({ kind, player: actor, subject, ref, date: iso(createdAt), read })),
         sessions: sessions.listForUser(userId).map((session) => ({
           current: session.id === ctx.session.id,
@@ -1104,6 +1112,7 @@ export const createApp = (config: ServerConfig): App => {
         records: games.records(user.id),
         ...users.followCounts(user.id),
         followed: ctx.session.userId ? users.isFollowing(ctx.session.userId, user.id) : false,
+        blocked: ctx.session.userId ? users.hasBlocked(ctx.session.userId, user.id) : false,
         canChallenge: ctx.session.userId ? users.canChallenge(ctx.session.userId, user.id) : false,
         canFollow: ctx.session.userId ? users.canFollow(ctx.session.userId, user.id) : false,
         details: users.details(user.id),
@@ -1206,6 +1215,31 @@ export const createApp = (config: ServerConfig): App => {
       const target = findUser(ctx.params.name!);
       users.unfollow(userId, target.id);
       sendJson(ctx.res, 200, { followed: false, canFollow: users.canFollow(userId, target.id), ...users.followCounts(target.id) });
+    })
+    .add('POST', '/api/users/:name/block', (ctx) => {
+      const userId = requireUser(ctx);
+      const target = findUser(ctx.params.name!);
+      if (target.id === userId) throw new HttpError(400, 'cannotBlockSelf');
+      if (!users.hasBlocked(userId, target.id) && users.blockCount(userId) >= MAX_BLOCKS) throw new HttpError(409, 'tooManyBlocks');
+      users.block(userId, target.id);
+      lobby.cancelBetween(userId, target.id);
+      sendJson(ctx.res, 200, { blocked: true, followed: false, canFollow: false, canChallenge: false, ...users.followCounts(target.id) });
+    })
+    .add('DELETE', '/api/users/:name/block', (ctx) => {
+      const userId = requireUser(ctx);
+      const target = findUser(ctx.params.name!);
+      users.unblock(userId, target.id);
+      sendJson(ctx.res, 200, {
+        blocked: false,
+        followed: false,
+        canFollow: users.canFollow(userId, target.id),
+        canChallenge: users.canChallenge(userId, target.id),
+        ...users.followCounts(target.id),
+      });
+    })
+    .add('GET', '/api/account/blocks', (ctx) => {
+      const userId = requireUser(ctx);
+      sendJson(ctx.res, 200, users.blocked(userId).map((user) => user.name));
     })
     .add('GET', '/api/following', (ctx) => {
       const userId = requireUser(ctx);
@@ -1675,6 +1709,7 @@ export const createApp = (config: ServerConfig): App => {
           if (action !== 'offer' && action !== 'accept' && action !== 'decline') result = 'invalidAction';
           else if (message.t === 'draw') result = room.draw(color, action);
           else if (message.t === 'takeback') result = room.takeback(color, action);
+          else if (action !== 'decline' && seatsBlocked(room)) result = 'blockedPlayer';
           else result = room.rematch(color, action);
         } else result = 'unknownMessage';
         if (result) {

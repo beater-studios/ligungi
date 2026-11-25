@@ -25,6 +25,7 @@ import { QrCode } from '../components/QrCode.tsx';
 import { SiteIcon } from '../components/ProfileAbout.tsx';
 import { Checkbox, Field, OptionCards, Select, SubmitButton } from '../components/ui.tsx';
 import { countryName, errorText, formatDate, useT } from '../i18n/index.ts';
+import { icons } from '../icons.ts';
 import { SITE_NAMES } from '../profileSites.ts';
 import { describeUserAgent } from '../userAgent.ts';
 import { LINKS } from '../i18n/content/shared.tsx';
@@ -254,6 +255,50 @@ const PrivacySettings = () => {
       )}
       {message && <p class={message.ok ? 'ligungi-success' : 'error'} role="status">{message.text}</p>}
     </form>
+  );
+};
+
+/** The players this account blocked, each with a link to their profile and a button to unblock. */
+const BlockedPlayers = () => {
+  const t = useT();
+  const [names, setNames] = useState<readonly string[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    api
+      .get<string[]>('/api/account/blocks')
+      .then(setNames)
+      .catch((err: Error) => setError(err.message));
+  }, []);
+
+  const unblock = async (name: string) => {
+    setError(null);
+    try {
+      await api.delete(`/api/users/${encodeURIComponent(name)}/block`);
+      setNames((current) => current && current.filter((other) => other !== name));
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  return (
+    <>
+      <h2>{t.account.blockedTitle}</h2>
+      <p>{t.account.blockedText}</p>
+      {names && names.length === 0 && <p>{t.account.blockedEmpty}</p>}
+      {names && names.length > 0 && (
+        <ul class="ligungi-blocked">
+          {names.map((name) => (
+            <li key={name}>
+              <a href={`/@/${encodeURIComponent(name)}`}>{name}</a>
+              <button type="button" class="button button-empty text" data-icon={icons.X} onClick={() => void unblock(name)}>
+                {t.account.unblock}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {error && <p class="error" role="status">{error}</p>}
+    </>
   );
 };
 
@@ -839,9 +884,14 @@ export const AccountPage = ({ section }: { section: AccountSection }) => {
           <DiscordLink />
         </>
       ) : section === 'privacy' ? (
-        <section class="ligungi-card ligungi-settings__card">
-          <PrivacySettings />
-        </section>
+        <>
+          <section class="ligungi-card ligungi-settings__card">
+            <PrivacySettings />
+          </section>
+          <section class="ligungi-card ligungi-settings__card">
+            <BlockedPlayers />
+          </section>
+        </>
       ) : section === 'security' ? (
         <>
           <section class="ligungi-card ligungi-settings__card">

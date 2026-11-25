@@ -9186,3 +9186,29 @@ body.ligungi-zen {
     opacity: 1;
   }
 }
+
+/* ===== Blocked player notice on a profile (pages/ProfilePage.tsx) ===== */
+.ligungi-profile__blocked {
+  margin: 0.8rem 0 0;
+  padding: 0.5rem 0.8rem;
+  border-inline-start: 4px solid $c-bad;
+  background: $c-bg-box;
+  color: $c-font;
+  font-size: 0.9em;
+}
+
+/* ===== Blocked players on the account privacy page (pages/AccountPage.tsx) ===== */
+.ligungi-blocked {
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0;
+    border-top: $border;
+  }
+}

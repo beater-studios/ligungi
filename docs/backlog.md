@@ -10,7 +10,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 |---|---|---|---|---|
 | Password recovery by email | Needs an outgoing email service | M | Medium | lichess, internal, lishogi |
 | Captcha instead of the per-username login lockout | Today 20 wrong passwords lock an account for 15 minutes, which an attacker can abuse | M | Low | internal |
-| Block a player: no challenges, follows, pairing in the lobby or (once they exist) messages and chat from them, managed from their profile and a list in the account | Reports reach the moderators, but a player has no way to stop one person on their own; the privacy settings only limit everyone at once. Close to required once chat or messages come, and it would change the Microsoft Store age rating answers (IARC), so the questionnaire is answered again | M | Medium | lichess |
 
 ## Operations
 
@@ -26,8 +25,6 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Speed categories on quick pairing (Bullet, Blitz, Rapid, Classical) | lichess convention, easier to read than raw times | S | Low | lichess, lidraughts, libaduk |
 | Computer presets on quick pairing (play the bot at each level in one click) | Shortcut for the most common solo game | S | Low | lichess, lishogi |
 | Rating range filter for seeks | Find opponents of similar strength | S | Low | lichess, lishogi |
-| Keyboard move input | Speed and accessibility | M | Low | lichess |
-| Zen mode (hide everything but the board and clocks) | Focus while playing | S | Low | lichess |
 | Bot accounts through a bot API (engines play on the site, list of online bots) | Lets engine authors join, gives players more opponents | L | Low | lichess, lishogi |
 | Simultaneous exhibitions | Strong players against many at once | L | Low | lichess, lidraughts, lishogi |
 | Queued draft placements: during the draft a player programs several placements (and the done declaration), and the server plays the next one the moment their turn comes, even with them away | A correspondence draft can take days, one placement per turn. Within the rulebook: the draft stays alternating and in the open, and a player who queues only gives up reacting to the opponent's next placements (like lichess's conditional premoves in correspondence), so rated games can use it. If the draft ends first (the second player's done), the rest of the queue is dropped. The queue lives on the server so it plays while the player is away | M | Medium | lichess |
@@ -67,6 +64,4 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 |---|---|---|---|---|
 | Public API with personal tokens (and OAuth for third-party apps) | Lets the community build tools, bots and integrations | L | Medium | lichess |
 | Donations or patrons | Funding, if wanted | S | Low | lichess, lidraughts, lishogi |
-| ligungi as a Discord Activity: the site running inside Discord, in a voice channel, with friends playing or watching | Plays where the community already is, and shows "Playing ligungi" by itself. Needs the Discord account link first (the login inside Discord is Discord's OAuth2), every request through Discord's proxy (`<id>.discordsays.com`, WebSocket included, external resources such as analytics blocked), a layout for the iframe and games between the people of the call. The public launch and review rules were not documented where we looked | L | Low | internal |
 | Web push notifications with the site closed (correspondence turns, challenges) | Correspondence games last days, and today the turn notice (in the bell or as a browser notification) needs the site open in some tab. Needs a service worker, VAPID keys, a table of subscriptions and the server sending the messages (with `node:crypto`, or the `web-push` package, which would be a new dependency) | M | Medium | lichess |
-| Play the computer offline: the installed app, or a page opened before, keeps working without internet for games against the computer, the lessons and the analysis board | The engine and the bot already run in the browser, so only the server-backed parts (online games, puzzles, accounts) need the network. Needs the service worker to cache the app's files (the hashed bundles under `/assets/`, the HTML shell, fonts and sounds) and to update them on a deploy without serving stale code, plus a way to show which parts work offline. Today the worker only shows a "no connection" page (see "Installing and losing the connection" in architecture.md) | M | Medium | internal |

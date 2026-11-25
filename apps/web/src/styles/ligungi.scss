@@ -9124,3 +9124,65 @@ $lesson-star: #e8a800;
   font-weight: 600;
   background: color-mix(in srgb, #{$c-primary} 10%, transparent);
 }
+
+/* ===== Typed moves (components/KeyboardMove.tsx): a field under the board, with its help and the choices when several moves match ===== */
+.ligungi-keyboard-move {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: $block-gap;
+
+  .form-control {
+    width: 100%;
+    font-family: monospace;
+  }
+}
+
+.ligungi-keyboard-move__help {
+  margin: 0;
+  color: $c-font-dim;
+  font-size: 0.85em;
+}
+
+.ligungi-keyboard-move__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* ===== Zen mode (RoundLayout): only the board, the hands, the players and the clocks; a button to leave ===== */
+body.ligungi-zen {
+  #top,
+  .ligungi-footer,
+  .round__side,
+  .round .rmoves,
+  .round__underboard > :not(.ligungi-keyboard-move, .ligungi-blind) {
+    display: none;
+  }
+
+  // Without the side column the board would stay where it was: the game sits in a centered middle column, and the
+  // typed move field starts under the board's left edge.
+  @include mq-at-least-col3 {
+    .round {
+      grid-template-columns: 1fr auto 1fr;
+      grid-template-areas: '. app .' '. under .';
+    }
+
+    .round__underboard {
+      justify-self: start;
+      width: var(---col3-uniboard-width);
+    }
+  }
+}
+
+.ligungi-zen-exit {
+  position: fixed;
+  top: 0.6rem;
+  inset-inline-end: 0.8rem;
+  z-index: 20;
+  opacity: 0.7;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+  }
+}

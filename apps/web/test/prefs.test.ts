@@ -43,3 +43,15 @@ describe('opponent pieces preference', () => {
     expect(document.documentElement.classList.contains('gg-upright-opponent')).toBe(false);
   });
 });
+
+describe('typed moves and zen mode preferences', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('are off by default and keep a saved choice', async () => {
+    expect((await loadPrefs()).prefs.get()).toMatchObject({ keyboardMove: false, zen: false });
+    localStorage.setItem(KEY, JSON.stringify({ keyboardMove: true, zen: true }));
+    expect((await loadPrefs()).prefs.get()).toMatchObject({ keyboardMove: true, zen: true });
+    localStorage.setItem(KEY, JSON.stringify({ keyboardMove: 'yes', zen: 1 }));
+    expect((await loadPrefs()).prefs.get()).toMatchObject({ keyboardMove: false, zen: false });
+  });
+});

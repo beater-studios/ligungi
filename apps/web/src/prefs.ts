@@ -72,6 +72,10 @@ export interface Prefs {
   readonly hoverReach: boolean;
   /** Game pages add a text version of the board: announced moves and a field for typed moves and questions. */
   readonly screenReader: boolean;
+  /** Game pages add a field under the board for typed moves. */
+  readonly keyboardMove: boolean;
+  /** Game pages hide everything but the board, the hands, the players and the clocks. */
+  readonly zen: boolean;
   /** On a phone, what tapping a tower shows: a balloon next to it, a strip under the board, or only the side panel. */
   readonly towerTap: TowerTap;
   readonly confirmMove: ConfirmMove;
@@ -139,6 +143,8 @@ const DEFAULTS: Prefs = {
   soundSet: 'sfx',
   byoyomiCount: 'beep',
   screenReader: false,
+  keyboardMove: false,
+  zen: false,
   towerTap: 'balloon',
   confirmMove: 'correspondence',
   spokenMoves: 'off',
@@ -190,6 +196,8 @@ const load = (): Prefs => {
       // The spoken countdown used to be a switch of its own.
       byoyomiCount: oneOf(BYOYOMI_COUNTS, stored.byoyomiCount, (stored as Record<string, unknown>).byoyomiVoice === true ? 'voice' : DEFAULTS.byoyomiCount),
       screenReader: stored.screenReader === true,
+      keyboardMove: stored.keyboardMove === true,
+      zen: stored.zen === true,
       notifications: stored.notifications === true,
       towerTap: oneOf(TOWER_TAPS, stored.towerTap, DEFAULTS.towerTap),
       confirmMove: oneOf(CONFIRM_MOVES, stored.confirmMove, DEFAULTS.confirmMove),

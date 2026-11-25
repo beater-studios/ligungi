@@ -307,6 +307,8 @@ export const SettingsPage = () => {
 
           <Group id="prefs-game" title={s.groupGame} help={s.groupGameHelp}>
             {choice('confirmMove', s.confirmMove, CONFIRM_MOVES.map((value) => [value, s.confirmMoves[value]]), { help: s.confirmMoveHelp })}
+            {toggle('keyboardMove', s.keyboardMove, s.keyboardMoveHelp)}
+            {toggle('zen', s.zen, s.zenHelp)}
             <SettingRow title={s.sound} htmlFor="pref-sound" help={s.soundHelp}>
               <div class="ligungi-setting__inline">
                 <button type="button" class="button button-empty" onClick={() => playSound('move')}>

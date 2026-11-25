@@ -1,4 +1,4 @@
-import { initialPosition, parseFen, parseSquare } from '@ligungi/engine';
+import { initialPosition, legalMoves, parseFen, parseSquare } from '@ligungi/engine';
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { FeedList } from '../components/Activity.tsx';
@@ -6,6 +6,7 @@ import { TowerStrip } from '../components/Panels.tsx';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { CrosstableView } from '../components/Crosstable.tsx';
+import { KeyboardMove } from '../components/KeyboardMove.tsx';
 import { RatingTrend } from '../components/RatingTrend.tsx';
 import { Flag } from '../components/Flag.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
@@ -740,6 +741,11 @@ export const DesignPage = () => {
           <Example label="Goal stars on the board (the board's targets option), on empty squares and above a piece">
             <div class="ligungi-ds__board">
               <BoardView position={lessonPosition} orientation="white" targets={[parseSquare('e5')!, parseSquare('e3')!]} />
+            </div>
+          </Example>
+          <Example label="Typed moves under the board (KeyboardMove, Settings > Preferences > Type moves): here from the Beginner start, try 6-8 general">
+            <div style={{ maxWidth: '24rem' }}>
+              <KeyboardMove position={initialPosition('beginner')} legal={legalMoves(initialPosition('beginner'))} live onMove={() => undefined} onLive={() => undefined} />
             </div>
           </Example>
           <Example label="Home cards: the leaders, one row per mode (.ligungi-home__leaders), and a signed-in player's training links (.ligungi-home__training)">

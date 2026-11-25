@@ -5,12 +5,13 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { formatClock, useT } from '../i18n/index.ts';
 import { useMoveText } from '../notation.ts';
 import { icons } from '../icons.ts';
-import { prefs } from '../prefs.ts';
+import { prefs, updatePrefs } from '../prefs.ts';
 import { useStore } from '../store.ts';
 import { playCountdown, playSound, speak } from '../sound.ts';
 import { BeginnerHint } from './BeginnerHint.tsx';
 import { BlindPanel, type BlindCommands } from './BlindPanel.tsx';
 import { BoardView, type BoardProps } from './BoardView.tsx';
+import { KeyboardMove } from './KeyboardMove.tsx';
 import { DraftPanel, TowerPanel, TowerStrip } from './Panels.tsx';
 import { useTowerTap } from '../towerTap.ts';
 
@@ -264,6 +265,7 @@ const MoveTable = ({ positions, moves, ply, onPly, onFlip, analysisHref, status 
         <button type="button" class="fbt" title={t.common.next} data-icon={icons.JumpNext} disabled={current === moves.length} onClick={() => go(current + 1)} />
         <button type="button" class="fbt" title={t.common.last} data-icon={icons.JumpLast} disabled={current === moves.length} onClick={() => go(moves.length)} />
         {analysisHref && <a class="fbt analysis" title={t.common.analyse} href={analysisHref} data-icon={icons.Microscope} />}
+        <button type="button" class="fbt" title={t.game.zenShortcut} aria-label={t.game.zen} data-icon={icons.Eye} onClick={() => updatePrefs({ zen: true })} />
       </bo3>
       <app class="moves" ref={list}>
         {rows}
@@ -288,9 +290,28 @@ export const RoundLayout = (props: RoundLayoutProps) => {
   }, []);
   const top: Color = props.orientation === 'white' ? 'black' : 'white';
   const bottom: Color = props.orientation;
-  const { screenReader } = useStore(prefs);
+  const { screenReader, keyboardMove, zen } = useStore(prefs);
   const shown = props.board.position;
   const tap = useTowerTap(props.training ?? false);
+  const t = useT();
+
+  // The site header and footer are outside the page, so the zen mode marks the body to hide them too.
+  useEffect(() => {
+    document.body.classList.toggle('ligungi-zen', zen);
+    return () => document.body.classList.remove('ligungi-zen');
+  }, [zen]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable)) return;
+      if (event.key.toLowerCase() !== 'z' || event.ctrlKey || event.metaKey || event.altKey) return;
+      event.preventDefault();
+      updatePrefs({ zen: !prefs.get().zen });
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
     <main class="round">
@@ -341,7 +362,21 @@ export const RoundLayout = (props: RoundLayoutProps) => {
         />
         <div class="rcontrols">{props.controls}</div>
       </div>
+      {zen && (
+        <button type="button" class="button button-empty text ligungi-zen-exit" data-icon={icons.Eye} title={t.game.zenShortcut} onClick={() => updatePrefs({ zen: false })}>
+          {t.game.zenExit}
+        </button>
+      )}
       <div class="round__underboard">
+        {keyboardMove && !screenReader && shown && (
+          <KeyboardMove
+            position={shown}
+            legal={props.board.moves ?? []}
+            live={props.ply === null}
+            onMove={(move) => (props.onTypedMove ?? props.board.onMove)?.(move)}
+            onLive={() => props.onPly(null)}
+          />
+        )}
         {screenReader && shown && (
           <BlindPanel
             key={props.gameKey ?? (props.positions[0] ? toFen(props.positions[0]) : '')}

@@ -4,6 +4,11 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Type moves (Settings > Preferences > Game): a field under the board in games, against the computer, in puzzles and in practice, where you type a move such as `6-6 samurai`, `6-7 6-6` or the rulebook notation, then Enter. Typing anywhere on the page goes to it, and when several moves match it lists them to pick one.
+- Zen mode: press Z during a game, or use the eye button by the move list, to hide everything but the board, the hands, the players and the clocks; Z again, or the button in the corner, brings it all back. It can also be turned on in Settings > Preferences > Game.
+
 ## [0.9.7] - 2026-11-24
 
 ### Changed

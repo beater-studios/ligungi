@@ -98,6 +98,8 @@ What each screen shows only visually, and what blind mode needs there. Status: *
 | No connection page | any address loaded without internet (from the service worker) | the logo | a heading, a sentence and a "Try again" link; no script, nothing else to read | ok |
 | Settings, account, sign in, info pages | `/settings`, `/account` (profile), `/account/privacy`, `/account/security`, `/account/data`, `/login`, `/about`... | swatches, previews | forms from `ui.tsx` with labels; previews are decoration | ok |
 
+Two options of the game screens (online game, computer, puzzles, practice) work the same with a screen reader, outside the screen reader mode: the typed move field (Settings > Preferences > Game) is a labelled input whose help and errors are a polite live region, and the zen mode (Z) only hides the side panel, the move list, what sits under the board and the site header and footer, never the screen reader panel, with a labelled button to leave it.
+
 ## Checklist for a new or changed screen
 
 - Every control is a real `<button>`, `<a>` or form input with a name a screen reader can read (`aria-label` on icon-only buttons).

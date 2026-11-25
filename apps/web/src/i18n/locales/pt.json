@@ -164,6 +164,7 @@
     "back": "Conexão restabelecida.",
     "pageTitle": "Sem conexão",
     "pageText": "Não foi possível abrir o ligungi. Confira a sua conexão com a internet e tente de novo.",
+    "offlineWorks": "Estas páginas continuam funcionando sem internet:",
     "retry": "Tentar de novo"
   },
   "board": {

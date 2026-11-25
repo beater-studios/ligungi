@@ -3,12 +3,14 @@
  * - pages/<lang>/<slug>.html: a public page fixed to one language (served for `?lang=`),
  * - pages/<lang>/<slug>.auto.html: the same page for the plain URL, whose language comes from the browser,
  * - pages/<lang>/shell.html: the head for every other route (profiles, games), with an empty body,
- * - offline/<lang>.html and sw.js: the "no connection" page and the service worker that shows it,
+ * - offline/<lang>.html, offline/<lang>.app.html and sw.js: the "no connection" page (the installed app's version
+ *   also links to the pages kept offline) and the service worker that shows it and, in the installed app, keeps the
+ *   pages that work without a connection (OFFLINE_PAGES),
  * - sitemap.xml, robots.txt, llms.txt and llms-full.txt.
  * The server picks the file (apps/server/src/http.ts); the app takes over the markup when it starts.
  */
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -77,7 +79,15 @@ interface Prerender {
   readonly pageUrl: (path: string, lang?: Lang) => string;
   readonly renderPage: (page: Page, lang: Lang, fixedLang: boolean) => Rendered;
   readonly renderShell: (lang: Lang) => Rendered;
-  readonly offlineTexts: (lang: Lang) => { lang: string; pageTitle: string; pageText: string; retry: string };
+  readonly offlineTexts: (lang: Lang) => {
+    lang: string;
+    pageTitle: string;
+    pageText: string;
+    retry: string;
+    offlineWorks: string;
+    links: ReadonlyArray<{ href: string; label: string }>;
+  };
+  readonly OFFLINE_PAGES: readonly string[];
 }
 
 installBrowserShims();
@@ -113,8 +123,16 @@ const escapeHtml = (text: string): string =>
 
 // Self-contained, since nothing else is cached: inline styles and logo, lila's colors, the theme from the system.
 const logo = readFileSync(join(root, 'public', 'favicon.svg'), 'utf8').trim();
-const offlinePage = (lang: Lang): string => {
+/** `installed`: the installed app's version, which also links to the pages kept offline. */
+const offlinePage = (lang: Lang, installed: boolean): string => {
   const t = app.offlineTexts(lang);
+  const works = `
+      <nav class="works" aria-label="${escapeHtml(t.offlineWorks)}">
+        <p>${escapeHtml(t.offlineWorks)}</p>
+        <ul>
+${t.links.map((link) => `          <li><a href="${link.href}">${escapeHtml(link.label)}</a></li>`).join('\n')}
+        </ul>
+      </nav>`;
   return `<!doctype html>
 <html lang="${t.lang}">
   <head>
@@ -130,6 +148,9 @@ const offlinePage = (lang: Lang): string => {
       .logo svg { width: 4rem; height: 4rem; }
       h1 { margin: 0.5rem 0; color: var(--strong); font-size: 1.5rem; font-weight: 500; }
       a { display: inline-block; margin-top: 1rem; padding: 0.6rem 1.4rem; border-radius: 4px; background: var(--accent); color: #fff; text-decoration: none; text-transform: uppercase; }
+      .works { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid color-mix(in srgb, var(--text) 25%, transparent); }
+      .works ul { list-style: none; margin: 0.5rem 0 0; padding: 0; display: grid; gap: 0.4rem; }
+      .works a { display: block; margin: 0; padding: 0.5rem 1rem; background: transparent; color: var(--accent); box-shadow: inset 0 0 0 1px currentColor; text-transform: none; }
     </style>
   </head>
   <body>
@@ -137,7 +158,7 @@ const offlinePage = (lang: Lang): string => {
       <div class="logo" aria-hidden="true">${logo}</div>
       <h1>${escapeHtml(t.pageTitle)}</h1>
       <p>${escapeHtml(t.pageText)}</p>
-      <a href="">${escapeHtml(t.retry)}</a>
+      <a href="">${escapeHtml(t.retry)}</a>${installed ? works : ''}
     </main>
   </body>
 </html>
@@ -148,15 +169,25 @@ rmSync(offlineDir, { recursive: true, force: true });
 mkdirSync(offlineDir, { recursive: true });
 const offlineHash = createHash('sha256');
 for (const lang of app.LANGS) {
-  const html = offlinePage(lang);
-  offlineHash.update(html);
-  writeFileSync(join(offlineDir, `${lang}.html`), html);
+  for (const [file, html] of [[`${lang}.html`, offlinePage(lang, false)], [`${lang}.app.html`, offlinePage(lang, true)]] as const) {
+    offlineHash.update(html);
+    writeFileSync(join(offlineDir, file), html);
+  }
 }
-// The cache name follows the pages, so the worker (and its cache) changes only when a page does.
+// Kept by the installed app so the offline pages run without a connection: the code, the styles and the fonts.
+// Sounds and flags are kept as they load. The cache name follows these files and the kept pages, so it changes with a deploy.
+const assets = readdirSync(join(dist, 'assets'))
+  .filter((file) => /\.(js|css|woff2)$/.test(file))
+  .sort()
+  .map((file) => `/assets/${file}`);
+offlineHash.update(assets.join('\n'));
+for (const lang of app.LANGS) {
+  for (const slug of [...app.OFFLINE_PAGES, 'shell']) offlineHash.update(readFileSync(join(pagesDir, lang, `${slug}.html`)));
+}
 const BUILD_LINE = /^const BUILD = .*;$/m;
 const worker = readFileSync(join(root, 'scripts', 'sw.js'), 'utf8');
 if (!BUILD_LINE.test(worker)) throw new Error('scripts/sw.js lost its BUILD line');
-const build = { cache: `ligungi-offline-${offlineHash.digest('hex').slice(0, 12)}`, langs: app.LANGS };
+const build = { cache: `ligungi-offline-${offlineHash.digest('hex').slice(0, 12)}`, langs: app.LANGS, assets, pages: app.OFFLINE_PAGES };
 writeFileSync(join(dist, 'sw.js'), worker.replace(BUILD_LINE, () => `const BUILD = ${JSON.stringify(build)};`));
 
 const alternates = (path: string): string =>

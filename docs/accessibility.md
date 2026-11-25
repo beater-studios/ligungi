@@ -95,7 +95,7 @@ What each screen shows only visually, and what blind mode needs there. Status: *
 | Rules page | `/learn` | piece movement diagrams | each diagram described in text | built (diagrams and piece trainer) |
 | Bell (header) | every page, signed in | none: lists of links and buttons | the count is in the button's label; an unread notice starts with "Unread" for screen readers | ok |
 | Connection notice | every page, at the bottom | none: a line of text | it is a `role="status"` region that stays in the page, so losing the connection and getting it back are both announced | ok |
-| No connection page | any address loaded without internet (from the service worker) | the logo | a heading, a sentence and a "Try again" link; no script, nothing else to read | ok |
+| No connection page | any address loaded without internet that is not kept offline (from the service worker) | the logo | a heading, a sentence and a "Try again" link; in the installed app also a named list of links to the pages that work offline; no script | ok |
 | Settings, account, sign in, info pages | `/settings`, `/account` (profile), `/account/privacy`, `/account/security`, `/account/data`, `/login`, `/about`... | swatches, previews | forms from `ui.tsx` with labels; previews are decoration | ok |
 
 Two options of the game screens (online game, computer, puzzles, practice) work the same with a screen reader, outside the screen reader mode: the typed move field (Settings > Preferences > Game) is a labelled input whose help and errors are a polite live region, and the zen mode (Z) only hides the side panel, the move list, what sits under the board and the site header and footer, never the screen reader panel, with a labelled button to leave it.

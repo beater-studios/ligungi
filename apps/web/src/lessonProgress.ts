@@ -68,8 +68,10 @@ export const useLessonProgress = () => {
   const record = useCallback(
     (id: string, stars: number) => {
       setProgress((current) => best(current ?? {}, { [id]: stars }));
-      if (user) api.post('/api/lessons/progress', { results: { [id]: stars } }).catch(() => {});
-      else writeLocal(best(readLocal(), { [id]: stars }));
+      const keep = () => writeLocal(best(readLocal(), { [id]: stars }));
+      // A result that does not reach the account (no connection) waits in the browser and moves there on the next load.
+      if (user) api.post('/api/lessons/progress', { results: { [id]: stars } }).catch(keep);
+      else keep();
     },
     [user?.id],
   );

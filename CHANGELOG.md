@@ -6,6 +6,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Play without internet in the installed app: the computer, the lessons, the analysis board and the rules keep working with no connection, and the "no connection" page links to them. A browser tab keeps nothing extra and still shows only the "no connection" page. Lesson stars earned while offline are saved to your account when the connection comes back.
+
 - Block a player, from their profile (a second click confirms): neither of you can challenge or follow the other, you are never paired in the lobby, neither can take the other's open game, challenge link or rematch, and the follows and open challenges between you are removed. They are not told. The list of blocked players, with a button to unblock each, is in Account > Privacy, and it is part of the data download.
 
 - Type moves (Settings > Preferences > Game): a field under the board in games, against the computer, in puzzles and in practice, where you type a move such as `6-6 samurai`, `6-7 6-6` or the rulebook notation, then Enter. Typing anywhere on the page goes to it, and when several moves match it lists them to pick one.

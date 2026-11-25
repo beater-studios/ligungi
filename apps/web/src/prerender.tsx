@@ -50,14 +50,34 @@ export const renderPage = (page: Page, lang: Lang, fixedLang: boolean): Rendered
   };
 };
 
+/** Pages that need no server, kept by the service worker in the installed app so they open without a connection. */
+export const OFFLINE_PAGES = ['computer', 'lessons', 'analysis', 'learn'] as const;
+
 /** The texts of the "no connection" page that the service worker shows when a page cannot load. */
-export const offlineTexts = (lang: Lang): OfflineTexts => ({ lang: localeOf(lang), ...messagesFor(lang).connection });
+export const offlineTexts = (lang: Lang): OfflineTexts => {
+  const t = messagesFor(lang);
+  return {
+    lang: localeOf(lang),
+    pageTitle: t.connection.pageTitle,
+    pageText: t.connection.pageText,
+    retry: t.connection.retry,
+    offlineWorks: t.connection.offlineWorks,
+    links: [
+      { href: '/computer', label: t.nav.playComputer },
+      { href: '/lessons', label: t.nav.lessons },
+      { href: '/analysis', label: t.nav.analysis },
+      { href: '/learn', label: t.nav.rules },
+    ],
+  };
+};
 
 export interface OfflineTexts {
   readonly lang: string;
   readonly pageTitle: string;
   readonly pageText: string;
   readonly retry: string;
+  readonly offlineWorks: string;
+  readonly links: ReadonlyArray<{ readonly href: string; readonly label: string }>;
 }
 
 /** Head of routes that are not prerendered (profiles, games): the language is right, the body stays empty. */

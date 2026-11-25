@@ -164,6 +164,7 @@
     "back": "Back online.",
     "pageTitle": "No connection",
     "pageText": "ligungi could not be reached. Check your internet connection and try again.",
+    "offlineWorks": "These still work without internet:",
     "retry": "Try again"
   },
   "board": {

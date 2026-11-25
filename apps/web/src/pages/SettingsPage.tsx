@@ -8,7 +8,7 @@ import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../p
 import { Checkbox, ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
 import { setLanguage, themeLabel, useT, type Messages } from '../i18n/index.ts';
 import { languageName } from '../i18n/languages.ts';
-import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../prefs/looks.tsx';
+import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../prefs/appearanceOptions.tsx';
 import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, BYOYOMI_COUNTS, CONFIRM_MOVES, KANJI_FONTS, LANGS, OPPONENT_PIECES, PIECE_PALETTES, PIECE_SHAPES, SOUND_SETS, SPEECH_PLACES, SPEECH_STYLES, SPOKEN_MOVES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs, type SpeechPlace } from '../prefs/prefs.ts';
 import { enableNotifications, notifyPermission } from '../notify.ts';
 import { playSound } from '../sound.ts';

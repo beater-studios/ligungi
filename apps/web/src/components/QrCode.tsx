@@ -1,5 +1,5 @@
 import { useMemo } from 'preact/hooks';
-import { qrMatrix } from '../qr.ts';
+import { qrMatrix } from './qrEncoder.ts';
 
 /** Light border around the code, in modules, that scanners need to find it. */
 const QUIET_ZONE = 4;

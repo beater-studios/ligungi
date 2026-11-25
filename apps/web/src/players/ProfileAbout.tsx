@@ -1,7 +1,7 @@
 import { PROFILE_LINKS, PROFILE_SITES, profileLinkUrl, type ProfileDetails, type ProfileSite } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
 import { useT } from '../i18n/index.ts';
-import { SITE_NAMES, SOCIAL_ICONS } from './profileSites.ts';
+import { SITE_NAMES, SOCIAL_ICONS } from './profileLinks.ts';
 
 /**
  * The other game sites are shown by the game they are for, not by their logo: the project does not use the lichess

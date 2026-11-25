@@ -1,5 +1,5 @@
 /** Short "Browser · OS" label for a session's user agent, or null when nothing is recognized. */
-export const describeUserAgent = (userAgent: string | null): string | null => {
+export const describeDevice = (userAgent: string | null): string | null => {
   if (!userAgent) return null;
   const browser = BROWSERS.find(([pattern]) => pattern.test(userAgent))?.[1];
   const os = SYSTEMS.find(([pattern]) => pattern.test(userAgent))?.[1];

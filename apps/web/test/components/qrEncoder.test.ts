@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { qrMatrix } from '../src/qr.ts';
+import { qrMatrix } from '../../src/components/qrEncoder.ts';
 
 const rows = (matrix: boolean[][]) => matrix.map((row) => row.map((dark) => (dark ? '1' : '0')).join(''));
 

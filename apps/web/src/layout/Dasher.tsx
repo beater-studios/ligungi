@@ -4,7 +4,7 @@ import { setLanguage, themeLabel, useT } from '../i18n/index.ts';
 import { languageName, localeOf } from '../i18n/languages.ts';
 import { icons } from '../icons.ts';
 import { useDropdown } from '../core/useDropdown.ts';
-import { Swatch, boardFaces, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../prefs/looks.tsx';
+import { Swatch, boardFaces, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../prefs/appearanceOptions.tsx';
 import { BOARD_THEMES, LANGS, OPPONENT_PIECES, PIECE_PALETTES, PIECE_SHAPES, THEMES, prefs, resolveLang, updatePrefs } from '../prefs/prefs.ts';
 import { navigate, useLocation } from '../core/router.ts';
 import { logout, session } from '../core/session.ts';

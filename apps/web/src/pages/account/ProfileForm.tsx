@@ -13,7 +13,7 @@ import { api } from '../../core/api.ts';
 import { SiteIcon } from '../../players/ProfileAbout.tsx';
 import { Field, Select, SubmitButton } from '../../components/ui.tsx';
 import { countryName, errorText, useT } from '../../i18n/index.ts';
-import { SITE_NAMES } from '../../players/profileSites.ts';
+import { SITE_NAMES } from '../../players/profileLinks.ts';
 
 type LinkDrafts = Record<ProfileSite, string>;
 

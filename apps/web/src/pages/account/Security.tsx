@@ -8,7 +8,7 @@ import { api } from '../../core/api.ts';
 import { QrCode } from '../../components/QrCode.tsx';
 import { Checkbox, Field, SubmitButton } from '../../components/ui.tsx';
 import { formatDate, useT } from '../../i18n/index.ts';
-import { describeUserAgent } from '../../userAgent.ts';
+import { describeDevice } from './describeDevice.ts';
 import { session } from '../../core/session.ts';
 import { socket } from '../../core/socket.ts';
 import { useStore } from '../../core/store.ts';
@@ -102,7 +102,7 @@ export const Sessions = () => {
           {list.map((session) => (
             <li key={session.id}>
               <div class="ligungi-sessions__device">
-                <strong>{describeUserAgent(session.userAgent) ?? t.account.unknownDevice}</strong>
+                <strong>{describeDevice(session.userAgent) ?? t.account.unknownDevice}</strong>
                 {session.current && <span class="ligungi-sessions__current">{t.account.thisDevice}</span>}
                 <small>{t.account.sessionDates(formatDate(t, session.createdAt), formatDate(t, session.seenAt))}</small>
               </div>

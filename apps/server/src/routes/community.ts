@@ -1,7 +1,7 @@
 import type { AppDeps } from '../app.ts';
 import { MODES, type Mode } from '@ligungi/engine';
 import { isErrorCode, LEADERBOARD_MAX, LEADERBOARD_TOP, MAX_BLOCKS, MAX_FOLLOWS, parseGameFilters, type FriendView, type Leaderboard, type UserProfile, type UserRef, type UserSearchResult } from '@ligungi/protocol';
-import { HttpError, sendJson, type Router } from '../http.ts';
+import { HttpError, intParam, sendJson, type Router } from '../http.ts';
 import { followingFeed, profileActivity } from '../feed.ts';
 import { requireUser } from './guards.ts';
 
@@ -176,7 +176,7 @@ export const registerCommunityRoutes = (router: Router, deps: AppDeps): void => 
     .add('GET', '/api/leaderboard/:mode', (ctx) => {
       const mode = ctx.params.mode as Mode;
       if (!MODES.includes(mode)) throw new HttpError('invalidMode');
-      const limit = Math.min(LEADERBOARD_MAX, Math.max(1, Math.trunc(Number(ctx.url.searchParams.get('limit'))) || LEADERBOARD_MAX));
+      const limit = intParam(ctx.url.searchParams, 'limit', 1, LEADERBOARD_MAX, LEADERBOARD_MAX);
       sendJson(ctx.res, 200, leaders(mode, limit, onlineUsers(ctx.session.userId)));
     });
 };

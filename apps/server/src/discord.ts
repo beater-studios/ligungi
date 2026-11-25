@@ -82,6 +82,14 @@ const logFailure = (what: string, error: unknown): void => {
  * Discord is only called when something changed, after the game is saved; a failure is logged and the next rated
  * game tries again. A player who left the Discord server is paused until they check again from their account.
  */
+export interface DiscordLinksOptions {
+  /** The app's settings; null runs the site without Discord. */
+  readonly config: DiscordConfig | null;
+  /** Calls Discord's API; tests pass a fake. */
+  readonly fetch: typeof fetch;
+  readonly now: () => number;
+}
+
 export class DiscordLinks {
   readonly #db: Db;
   readonly #users: Users;
@@ -94,12 +102,12 @@ export class DiscordLinks {
   /** Clean-ups left running after a request answered (a deleted account, a replaced Discord account). */
   readonly #background = new Set<Promise<void>>();
 
-  constructor(db: Db, users: Users, config: DiscordConfig | null, fetcher: typeof fetch, now: () => number) {
+  constructor(db: Db, users: Users, options: DiscordLinksOptions) {
     this.#db = db;
     this.#users = users;
-    this.#config = config;
-    this.#fetch = fetcher;
-    this.#now = now;
+    this.#config = options.config;
+    this.#fetch = options.fetch;
+    this.#now = options.now;
   }
 
   /** The application id, which is also the Activity's address (`<id>.discordsays.com`); null when not configured. */

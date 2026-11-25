@@ -15,7 +15,7 @@ if (args[0] === 'discord') {
     process.exitCode = 2;
   } else {
     try {
-      await new DiscordLinks(db, new Users(db, config.now), config.discord, config.fetch, config.now).registerMetadata();
+      await new DiscordLinks(db, new Users(db, config.now), { config: config.discord, fetch: config.fetch, now: config.now }).registerMetadata();
       console.log('Linked Roles fields registered');
     } catch (error) {
       console.log(error instanceof Error ? error.message : String(error));

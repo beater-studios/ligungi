@@ -35,8 +35,6 @@ import { Games, type Player } from './games.ts';
 import { randomId } from './ids.ts';
 import {
   HttpError,
-  DISCORD_PROXY,
-  RateLimiter,
   Router,
   clientIp,
   readJson,
@@ -56,6 +54,7 @@ import { Studies } from './studies.ts';
 import { Tv } from './tv.ts';
 import { TwoFactor } from './two-factor.ts';
 import { ANONYMOUS_NAME, Users } from './users.ts';
+import { createLimits } from './limits.ts';
 import { createPlayerLists } from './player-lists.ts';
 import { createSocketHandler } from './ws.ts';
 
@@ -109,15 +108,7 @@ const createDeps = (config: ServerConfig) => {
   const users = new Users(db, config.now);
   const notices = new Notices(db, config.now);
   const hub = new Hub();
-  const authLimiter = new RateLimiter(10, 60_000, config.now, { [DISCORD_PROXY]: 120 });
-  /** Failed logins per username, whatever the IP, so a botnet cannot brute-force one account. */
-  const loginFailures = new RateLimiter(20, 15 * 60_000, config.now);
-  /** New sessions per IP: each one is a database row. */
-  const sessionLimiter = new RateLimiter(30, 60_000, config.now, { [DISCORD_PROXY]: 600 });
-  /** The export reads every game of the account: a few per minute is plenty. */
-  const exportLimiter = new RateLimiter(5, 60_000, config.now);
-  /** Reports a player can file per hour: enough for real cases, too few to flood the queue. */
-  const reportLimiter = new RateLimiter(10, 60 * 60_000, config.now);
+  const { authLimiter, loginFailures, sessionLimiter, exportLimiter, reportLimiter, discordLimiter, studyLimiter, searchLimiter, activityLimiter, raceLimiter, activityRoomsLimiter } = createLimits(config.now);
   const csp = contentSecurityPolicy(config.cloudflareWebAnalytics);
   const activityCsp = contentSecurityPolicy(config.cloudflareWebAnalytics, true);
 
@@ -160,9 +151,7 @@ const createDeps = (config: ServerConfig) => {
     } else publishTv();
   };
 
-  const discord = new DiscordLinks(db, users, config.discord, config.fetch, config.now);
-  /** Discord sign-ins and checks per player and minute: each one calls Discord. */
-  const discordLimiter = new RateLimiter(10, 60_000, config.now);
+  const discord = new DiscordLinks(db, users, { config: config.discord, fetch: config.fetch, now: config.now });
 
   const games = new Games(db, users, {
     now: config.now,
@@ -186,10 +175,6 @@ const createDeps = (config: ServerConfig) => {
   });
   const explorer = new DraftExplorer(db, config.now);
   const studies = new Studies(db, config.now);
-  /** Study writes per author and minute: the editor saves on its own after each change, so this is generous. */
-  const studyLimiter = new RateLimiter(120, 60_000, config.now);
-  /** Game searches and insights per session and minute: each one may read a large part of the games table. */
-  const searchLimiter = new RateLimiter(30, 60_000, config.now);
   const tvGames = () => tv.live().slice(0, TV_GAMES).map((room) => room.summary());
   // Every move of every live game changes the list, so changes are gathered and sent at most every TV_PUBLISH_MS.
   let tvTimer: ReturnType<typeof setTimeout> | null = null;
@@ -304,11 +289,6 @@ const createDeps = (config: ServerConfig) => {
     for (const [id, entry] of activityPlayers) if (entry.at < limit) activityPlayers.delete(id);
     activityPlayers.set(sessionId, { discordId, at: config.now() });
   };
-  const activityLimiter = new RateLimiter(30, 60_000, config.now);
-  /** Races created or joined per session: enough to play race after race, too few to fill the server with them. */
-  const raceLimiter = new RateLimiter(30, 60_000, config.now);
-  // The page asks every few seconds what the call has going on, so this one allows more.
-  const activityRoomsLimiter = new RateLimiter(120, 60_000, config.now);
   const ACTIVITY_INSTANCE = /^[\w-]{1,100}$/;
   /** Checks that the caller signed in through the Activity and is in the call they act on; returns that call. */
   const activityCaller = async (ctx: Context, instanceId: unknown): Promise<string> => {

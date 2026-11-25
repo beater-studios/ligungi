@@ -1,6 +1,6 @@
 import type { AppDeps } from '../app.ts';
 import { isOrientation, STUDIES_MAX, STUDY_CHAPTER_NAME_MAX, STUDY_CHAPTERS_MAX, STUDY_QUERY_MAX, studyStart, studyText, DAY_MS, STUDY_DESCRIPTION_MAX, STUDY_PUBLIC_MIN_DAYS, STUDY_TITLE_MAX, emptyRoot, isStudyVisibility, parseStudyRoot, type StudyList, type StudyRoot } from '@ligungi/protocol';
-import { HttpError, sendJson, type Router, type Context } from '../http.ts';
+import { HttpError, intParam, sendJson, type Router, type Context } from '../http.ts';
 import { requireUser } from './guards.ts';
 import type { ChapterInput, StudyRecord } from '../studies.ts';
 
@@ -62,7 +62,7 @@ export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
         sendJson(ctx.res, 200, list);
         return;
       }
-      const page = Math.min(1000, Math.max(1, Math.trunc(Number(params.get('page'))) || 1));
+      const page = intParam(params, 'page', 1, 1000, 1);
       const list: StudyList = studies.listed(query, page);
       sendJson(ctx.res, 200, list);
     })

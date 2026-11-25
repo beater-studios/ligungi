@@ -35,6 +35,7 @@ Colors live in CSS variables (`--gg-board`, `--gg-line`, the piece faces and eve
 |---|---|
 | `app.ts` | Wires everything: `createDeps` builds the services and the helpers several areas share (presence, lobby, notices, sockets), and `createApp` keeps the security checks (same origin, JSON writes, CSP, the WebSocket origin), the session, the WebSocket upgrade and the router. |
 | `routes/` | The HTTP routes by area (`auth`, `account`, `discord`, `discordActivity`, `moderation`, `studies`, `community`, `play`, `training`), each a `register<Area>Routes(router, deps)`, with the helpers only that area uses; `guards.ts` has `requireUser`. The router takes the first route that matches, so a path's literal routes stay in the same module before its `:id` route. |
+| `limits.ts` | Every rate limit: what it counts, per which key (IP, session, user or username) and over which window. |
 | `ws.ts` | What a WebSocket does once accepted: topic subscriptions, game commands, race moves, and the presence and lobby updates when it closes. |
 | `player-lists.ts` | The players page, the ranking and the leaderboards as their routes send them, with the site-wide counts cached for a minute. |
 | `feed.ts`, `account-export.ts` | A profile's recent activity and the feed of followed players; the account data export (LGPD access right). |

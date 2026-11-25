@@ -45,6 +45,10 @@ export class HttpError extends Error {
 export const sendError = (res: ServerResponse, code: ErrorCode, details: Readonly<Record<string, unknown>> = {}): void =>
   sendJson(res, ERROR_STATUS[code], { ...details, error: ERROR_MESSAGES[code], code });
 
+/** A whole number from the query string, kept within `min` and `max`; `fallback` when it is missing or not a number. */
+export const intParam = (params: URLSearchParams, name: string, min: number, max: number, fallback: number): number =>
+  Math.min(max, Math.max(min, Math.trunc(Number(params.get(name))) || fallback));
+
 /** `decodeURIComponent` that returns null on malformed input instead of throwing. */
 export const safeDecode = (value: string): string | null => {
   try {

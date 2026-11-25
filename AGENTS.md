@@ -10,7 +10,7 @@ ligungi is a lichess-style site to play Gungi (the HUNTER×HUNTER board game) wi
 |---|---|
 | `packages/engine` | Rules engine, no dependencies. Shared by browser and server. |
 | `packages/board` | Framework-free DOM board (like chessground). |
-| `packages/bot` | Computer opponent, runs in a Web Worker. |
+| `packages/bot` | Computer opponent, runs in a Web Worker; its mate search also checks Puzzle Racer moves on the server. |
 | `packages/protocol` | Types, validation and error codes shared by server and site. |
 | `apps/server` | Node 24 server: `node:http`, `ws`, `node:sqlite`. |
 | `apps/web` | Preact site with lila's (lichess) markup and styles. |
@@ -61,7 +61,7 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 - Errors are stable codes from `packages/protocol/src/errors.ts` (`HttpError(code)`, WebSocket `{ t: 'error', code, message }`). Each code has one HTTP status, in `ERROR_STATUS` (`apps/server/src/errors.ts`). Add new codes there and their English message in `apps/web/src/i18n/locales/en.json` (`errors`).
 - SQL always uses bound parameters. Never interpolate user input into SQL.
 - Schema changes are new entries appended to `MIGRATIONS` in `apps/server/src/db.ts`. Never edit an existing migration.
-- Do not weaken the security checks: JSON content type and same-origin for writes, origin check on WebSocket and CSP in `app.ts`, and the rate limits applied in `routes/`.
+- Do not weaken the security checks: JSON content type and same-origin for writes, origin check on WebSocket and CSP in `app.ts`, and the rate limits (defined in `limits.ts`, applied in `routes/`).
 
 ### Web
 

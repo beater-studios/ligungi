@@ -15,6 +15,7 @@ import {
   type RankingView,
 } from '@ligungi/protocol';
 import type { ServerConfig } from './config.ts';
+import { intParam } from './http.ts';
 import type { Games } from './games.ts';
 import type { Users } from './users.ts';
 
@@ -66,7 +67,7 @@ export const createPlayerLists = ({
     const mine = MODES.filter((m) => modes[m].you).sort((a, b) => modes[b].you!.games - modes[a].you!.games)[0];
     const mode = requested ?? mine ?? fallback;
     // Capped so the offset stays an integer SQLite accepts; pages past the end simply come back empty.
-    const page = Math.min(RANKING_PAGE_LIMIT, Math.max(1, Math.trunc(Number(params.get('page'))) || 1));
+    const page = intParam(params, 'page', 1, RANKING_PAGE_LIMIT, 1);
     const query = (params.get('q') ?? '').trim().slice(0, RANKING_QUERY_MAX);
     const followerId = viewerId && params.get('followed') === '1' ? viewerId : null;
     const { rows, total } = users.rankings.rankingPage(mode, { query, followerId }, (page - 1) * RANKING_PAGE_SIZE, RANKING_PAGE_SIZE);

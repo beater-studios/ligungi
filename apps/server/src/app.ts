@@ -1,49 +1,18 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
-import { MODES, parseFen, type Color, type Mode } from '@ligungi/engine';
+import { MODES, type Color, type Mode } from '@ligungi/engine';
 import {
   ERROR_MESSAGES,
   SHORT_LINKS,
-  LEADERBOARD_MAX,
-  LEADERBOARD_TOP,
   RECENT_GAMES,
   RECENT_PLAYERS,
-  BOOKMARK_NOTE_MAX,
   RATING_TREND_DAYS,
   DAY_MS,
-  MAX_BLOCKS,
-  MAX_FOLLOWS,
-  isErrorCode,
   parseClientMessage,
-  parseGameFilters,
-  type FriendView,
   type LeaderEntry,
-  type Leaderboard,
   type ErrorCode,
-  LESSON_EXERCISES,
-  LESSON_PROGRESS_BATCH,
-  LESSON_STARS_MAX,
-  EXPLORER_BANDS,
-  EXPLORER_MODES,
-  PRACTICE_BATCH,
-  PRACTICE_POSITIONS,
-  PUZZLE_BATCH,
-  PUZZLE_RUN_BATCH,
-  PUZZLE_RUN_KINDS,
-  PUZZLE_THEMES,
-  parseProfileDetails,
-  parseSettings,
-  ACTIVITY_TIME_CONTROLS,
-  type TimeControl,
   type ClientMessage,
   type LobbyView,
-  type DiscordLinkResult,
-  type Me,
-  type PuzzleRun,
   type Topic,
-  type UserProfile,
-  CHALLENGE_POLICIES,
-  FOLLOW_POLICIES,
-  NOTICES_KEPT,
   type NoticeKind,
   type NoticeView,
   ONLINE_LIST_MAX,
@@ -51,64 +20,45 @@ import {
   RANKING_QUERY_MAX,
   RATING_BAND,
   REPORT_DETAILS_MAX,
-  REPORT_REASONS,
-  SUSPENSION_DAYS,
-  type ModUserView,
   type ReportReason,
   type ModeStanding,
   type OnlinePlayer,
   type PlayersView,
   type RankingView,
-  type SessionView,
-  type TwoFactorSetup,
-  type TwoFactorView,
-  type UserRef,
-  type UserSearchResult,
-  STUDIES_MAX,
-  STUDY_CHAPTERS_MAX,
   STUDY_CHAPTER_NAME_MAX,
   STUDY_DESCRIPTION_MAX,
   STUDY_PUBLIC_MIN_DAYS,
   STUDY_TITLE_MAX,
-  STUDY_QUERY_MAX,
   emptyRoot,
   isOrientation,
   isStudyVisibility,
   parseStudyRoot,
   studyStart,
   studyText,
-  type StudyList,
   type StudyRoot,
-  ACTIVITY_DAYS,
-  ACTIVITY_MAX,
-  FEED_DAYS,
-  FEED_MAX,
-  dayStart,
-  parseGameSearch,
-  type ActivityEvent,
-  type ActivityView,
-  type FeedItem,
-  type GameSearchResult,
 } from '@ligungi/protocol';
 import { WebSocketServer, type WebSocket } from 'ws';
 import {
   SESSION_COOKIE,
   Sessions,
-  hashPassword,
-  needsRehash,
   parseCookies,
   sessionCookie,
-  sessionHandle,
-  verifyPassword,
   type Session,
 } from './auth.ts';
 import { ActivityHalls } from './discordActivity.ts';
 import { Racers } from './racer.ts';
-import { BUILD } from './build.ts';
+import { registerAuthRoutes } from './routes/auth.ts';
+import { registerAccountRoutes } from './routes/account.ts';
+import { registerDiscordActivityRoutes } from './routes/discordActivity.ts';
+import { registerDiscordRoutes } from './routes/discord.ts';
+import { registerModerationRoutes } from './routes/moderation.ts';
+import { registerStudiesRoutes } from './routes/studies.ts';
+import { registerCommunityRoutes } from './routes/community.ts';
+import { registerPlayRoutes } from './routes/play.ts';
+import { registerTrainingRoutes } from './routes/training.ts';
 import { ChallengeStore } from './challenges.ts';
 import type { ServerConfig } from './config.ts';
 import { openDatabase, type Db } from './db.ts';
-import { exportGame } from './export.ts';
 import { DiscordLinks } from './discord.ts';
 import { DraftExplorer } from './explorer.ts';
 import { Games, type Player } from './games.ts';
@@ -120,9 +70,7 @@ import {
   Router,
   clientIp,
   readJson,
-  redirect,
   sendError,
-  sendJson,
   sendText,
   serveStatic,
   type Context,
@@ -131,18 +79,14 @@ import { Hub, type Client } from './hub.ts';
 import { Lobby } from './lobby.ts';
 import { Moderation } from './moderation.ts';
 import { Notices, type NoticeDetails } from './notices.ts';
-import { PUZZLE_COUNT, PuzzleStore, isPuzzle } from './puzzles.ts';
+import { PuzzleStore } from './puzzles.ts';
 import type { GameRoom } from './room.ts';
 import { SeekStore } from './seeks.ts';
 import { Studies, type ChapterInput, type StudyRecord } from './studies.ts';
-import type { SearchCriteria } from './games.ts';
-import { otpauthUri } from './totp.ts';
 import { Tv } from './tv.ts';
 import { TwoFactor } from './two-factor.ts';
-import { USERNAME_PATTERN, Users } from './users.ts';
+import { ANONYMOUS_NAME, Users } from './users.ts';
 
-/** Stored name of players without an account; the site shows a translated label instead. */
-export const ANONYMOUS_NAME = 'Anonymous';
 const HEARTBEAT_MS = 30_000;
 const SESSION_SWEEP_MS = 6 * 3_600_000;
 /** The site-wide counts and rating distribution on the players page are recomputed at most this often. */
@@ -150,13 +94,9 @@ const PLAYERS_CACHE_MS = 60_000;
 /** Expired challenges are canceled within this delay even if nobody opens them (the receiver's list updates). */
 const CHALLENGE_SWEEP_MS = 60_000;
 const MAX_TOPICS_PER_CLIENT = 32;
-const LESSON_IDS: ReadonlySet<string> = new Set(LESSON_EXERCISES.map((exercise) => exercise.id));
-const PRACTICE_IDS: ReadonlySet<string> = new Set(PRACTICE_POSITIONS.map((position) => position.id));
 /** Live games listed for the TV and the home page. */
 const TV_GAMES = 24;
 const TV_PUBLISH_MS = 500;
-const SEARCH_LIMIT = 10;
-const SITE_NAME = 'ligungi';
 /** Cloudflare Web Analytics: no cookies, aggregate only; its edge injects this script into the HTML. */
 const ANALYTICS_SCRIPT = 'https://static.cloudflareinsights.com';
 const ANALYTICS_REPORT = 'https://cloudflareinsights.com';
@@ -188,7 +128,11 @@ export interface App {
   close(): Promise<void>;
 }
 
-export const createApp = (config: ServerConfig): App => {
+/**
+ * Everything the routes, the WebSocket and the timers share: the stores, the live game state, the rate limits and the
+ * helpers that act across them. Built once per server.
+ */
+const createDeps = (config: ServerConfig) => {
   const db = openDatabase(config.databasePath);
   const sessions = new Sessions(db, config.now);
   const twoFactor = new TwoFactor(db, config.now);
@@ -207,7 +151,6 @@ export const createApp = (config: ServerConfig): App => {
   const reportLimiter = new RateLimiter(10, 60 * 60_000, config.now);
   const csp = contentSecurityPolicy(config.cloudflareWebAnalytics);
   const activityCsp = contentSecurityPolicy(config.cloudflareWebAnalytics, true);
-  let closing = false;
 
   const toPlayer = (session: Session): Player => {
     const user = session.userId ? users.findById(session.userId) : undefined;
@@ -652,1070 +595,106 @@ export const createApp = (config: ServerConfig): App => {
     }
   };
 
-  const router = new Router();
   const userPayload = (session: Session) => {
     const player = toPlayer(session);
     return player.userId ? { id: player.userId, name: player.name } : null;
   };
 
-  router
-    .add('GET', '/api/me', (ctx) => {
-      const me: Me = {
-        user: userPayload(ctx.session),
-        playing: games.playingFor(ctx.session.id, ctx.session.userId),
-        moderator: moderation.isModerator(ctx.session.userId),
-        puzzleRating: ctx.session.userId ? puzzles.ratingView(ctx.session.userId) : null,
-      };
-      sendJson(ctx.res, 200, me);
-    })
-    .add('POST', '/api/signup', async (ctx) => {
-      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
-      const { username, password } = (await ctx.body()) as { username?: unknown; password?: unknown };
-      if (typeof username !== 'string' || !USERNAME_PATTERN.test(username)) {
-        throw new HttpError(400, 'invalidUsername');
-      }
-      if (typeof password !== 'string' || password.length < 8 || password.length > 200) {
-        throw new HttpError(400, 'invalidPassword');
-      }
-      const user = users.create(username, await hashPassword(password));
-      if (!user) throw new HttpError(409, 'usernameTaken');
-      rotateSession(ctx, user.id);
-      sendJson(ctx.res, 200, { user: { id: user.id, name: user.name } });
-    })
-    .add('POST', '/api/login', async (ctx) => {
-      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
-      const { username, password, code } = (await ctx.body()) as { username?: unknown; password?: unknown; code?: unknown };
-      const key = typeof username === 'string' ? username.toLowerCase() : '';
-      if (loginFailures.blocked(key)) throw new HttpError(429, 'tooManyAttempts');
-      const user = typeof username === 'string' ? users.findByName(username) : undefined;
-      if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
-        loginFailures.allow(key);
-        throw new HttpError(401, 'wrongCredentials');
-      }
-      const suspension = moderation.suspension(user.id);
-      if (suspension) throw new HttpError(403, 'accountSuspended', { until: suspension.until, reason: suspension.reason });
-      // The client sends the password again with the code, so no half signed-in state lives on the server.
-      if (twoFactor.isEnabled(user.id)) {
-        if (code === undefined || code === '') throw new HttpError(401, 'twoFactorRequired');
-        if (typeof code !== 'string' || !twoFactor.verify(user.id, code)) {
-          loginFailures.allow(key);
-          throw new HttpError(401, 'wrongTwoFactorCode');
-        }
-      }
-      if (needsRehash(user.passwordHash)) users.updatePasswordHash(user.id, await hashPassword(password));
-      rotateSession(ctx, user.id);
-      sendJson(ctx.res, 200, { user: { id: user.id, name: user.name } });
-    })
-    .add('POST', '/api/logout', (ctx) => {
-      rotateSession(ctx, null);
-      sendJson(ctx.res, 200, { user: null });
-    })
-    .add('POST', '/api/account/password', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
-      const { current, next } = (await ctx.body()) as { current?: unknown; next?: unknown };
-      const user = users.findById(userId);
-      if (!user || typeof current !== 'string' || !(await verifyPassword(current, user.passwordHash))) {
-        throw new HttpError(401, 'wrongPassword');
-      }
-      if (typeof next !== 'string' || next.length < 8 || next.length > 200) throw new HttpError(400, 'invalidPassword');
-      users.updatePasswordHash(userId, await hashPassword(next));
-      // Every other device must sign in again with the new password.
-      sessions.deleteOtherSessions(userId, ctx.session.id);
-      closeUserSockets(userId);
-      rotateSession(ctx, userId);
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/account/delete', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
-      const { password } = (await ctx.body()) as { password?: unknown };
-      const user = users.findById(userId);
-      if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
-        throw new HttpError(401, 'wrongPassword');
-      }
-      if (games.hasOngoing(userId)) throw new HttpError(409, 'activeGame');
-      lobby.removeUser(userId);
-      games.anonymizeUser(userId, ANONYMOUS_NAME);
-      discord.forget(userId);
-      users.delete(userId);
-      closeUserSockets(userId);
-      rotateSession(ctx, null);
-      sendJson(ctx.res, 200, { user: null });
-    })
-    .add('GET', '/api/activity/config', (ctx) => {
-      if (!activityOrigin) throw new HttpError(404, 'activityDisabled');
-      sendJson(ctx.res, 200, { clientId: discord.clientId });
-    })
-    .add('POST', '/api/activity/session', async (ctx) => {
-      if (!activityOrigin) throw new HttpError(404, 'activityDisabled');
-      if (!activityLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
-      const { code } = (await ctx.body()) as { code?: unknown };
-      if (typeof code !== 'string' || code.length === 0 || code.length > 200) throw new HttpError(400, 'activitySignInFailed');
-      const signed = await discord.activitySignIn(code);
-      if (!signed) throw new HttpError(401, 'activitySignInFailed');
-      // A linked account signs in, unless it is suspended or uses two-step verification, which Discord cannot stand in
-      // for; then, as for anyone without a linked account, the player is a guest.
-      const reason = !signed.userId
-        ? 'unlinked'
-        : moderation.suspension(signed.userId)
-          ? 'suspended'
-          : twoFactor.isEnabled(signed.userId)
-            ? 'twoFactor'
-            : null;
-      const userId = reason === null ? signed.userId : null;
-      const next = rotateSession(ctx, userId);
-      rememberActivityPlayer(next.id, signed.discordId);
-      const user = userId ? users.findById(userId) : undefined;
-      sendJson(ctx.res, 200, { user: user ? { id: user.id, name: user.name } : null, reason, accessToken: signed.accessToken });
-    })
-    .add('GET', '/api/activity/rooms', (ctx) => {
-      if (!activityOrigin) throw new HttpError(404, 'activityDisabled');
-      if (!activityPlayers.has(ctx.session.id)) throw new HttpError(401, 'activitySignInRequired');
-      if (!activityRoomsLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
-      const instanceId = ctx.url.searchParams.get('instanceId') ?? '';
-      if (!ACTIVITY_INSTANCE.test(instanceId)) throw new HttpError(400, 'notInActivity');
-      sendJson(ctx.res, 200, { ...activities.view(instanceId, ctx.player), race: racers.callRace(instanceId) });
-    })
-    .add('POST', '/api/activity/race', async (ctx) => {
-      const body = (await ctx.body()) as { instanceId?: unknown };
-      const instanceId = await activityCaller(ctx, body.instanceId);
-      // The call has one race to join at a time: the one not started yet, else a new one.
-      const open = racers.callRace(instanceId);
-      if (open && open.status !== 'racing') {
-        const joined = racers.join(open.id, ctx.player, instanceId);
-        if (joined) throw new HttpError(409, joined);
-        return sendJson(ctx.res, 200, { id: open.id });
-      }
-      sendJson(ctx.res, 200, { id: racers.create(ctx.player, 'call', instanceId) });
-    })
-    .add('POST', '/api/activity/rooms', async (ctx) => {
-      const body = (await ctx.body()) as { instanceId?: unknown; mode?: unknown; timeControl?: unknown; color?: unknown };
-      const instanceId = await activityCaller(ctx, body.instanceId);
-      const asked = body.timeControl as Partial<TimeControl> | null | undefined;
-      const timeControl = ACTIVITY_TIME_CONTROLS.find((tc) => tc.initial === asked?.initial && tc.increment === asked?.increment);
-      if (!timeControl) throw new HttpError(400, 'invalidInitialTime');
-      const settings = parseSettings({ mode: body.mode, rated: false, timeControl, color: body.color });
-      if (isErrorCode(settings)) throw new HttpError(400, settings);
-      const opened = activities.open(instanceId, ctx.player, settings);
-      if (typeof opened === 'string') throw new HttpError(409, opened);
-      sendJson(ctx.res, 200, opened);
-    })
-    .add('POST', '/api/activity/rooms/:id/join', async (ctx) => {
-      const body = (await ctx.body()) as { instanceId?: unknown };
-      const instanceId = await activityCaller(ctx, body.instanceId);
-      const joined = activities.join(instanceId, ctx.params.id!, ctx.player);
-      if (typeof joined === 'string') throw new HttpError(409, joined);
-      sendJson(ctx.res, 200, joined);
-    })
-    .add('GET', '/api/discord/link', (ctx) => {
-      if (!discord.enabled) return redirect(ctx.res, '/account?discord=disabled');
-      // Discord's Linked Roles page sends people here, signed in or not.
-      if (!ctx.session.userId) return redirect(ctx.res, `/login?next=${encodeURIComponent('/api/discord/link')}`);
-      // A page visit, not a fetch: a refusal goes back to the account page instead of showing raw JSON.
-      if (!discordLimiter.allow(ctx.session.userId)) return redirect(ctx.res, '/account?discord=failed');
-      redirect(ctx.res, discord.authorizeUrl(ctx.session.userId));
-    })
-    .add('GET', '/api/discord/callback', async (ctx) => {
-      if (!discord.enabled) return redirect(ctx.res, '/account?discord=disabled');
-      const code = ctx.url.searchParams.get('code');
-      const state = ctx.url.searchParams.get('state');
-      if (!ctx.session.userId) {
-        if (state) discord.dropState(state);
-        return redirect(ctx.res, '/account?discord=failed');
-      }
-      let result: DiscordLinkResult;
-      if (code && state) result = await discord.complete(ctx.session.userId, state, code);
-      else {
-        if (state) discord.dropState(state);
-        result = ctx.url.searchParams.get('error') === 'access_denied' ? 'denied' : 'failed';
-      }
-      redirect(ctx.res, `/account?discord=${result}`);
-    })
-    .add('GET', '/api/account/discord', (ctx) => sendJson(ctx.res, 200, discord.view(requireUser(ctx))))
-    .add('POST', '/api/account/discord/check', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!discord.enabled) throw new HttpError(404, 'discordDisabled');
-      if (!discord.view(userId).link) throw new HttpError(404, 'discordNotLinked');
-      if (!discordLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
-      await discord.check(userId);
-      sendJson(ctx.res, 200, discord.view(userId));
-    })
-    .add('DELETE', '/api/account/discord', async (ctx) => {
-      const userId = requireUser(ctx);
-      await discord.unlink(userId);
-      sendJson(ctx.res, 200, discord.view(userId));
-    })
-    .add('GET', '/api/account/two-factor', (ctx) => {
-      const userId = requireUser(ctx);
-      const { enabled, recoveryCodesLeft } = twoFactor.state(userId);
-      const view: TwoFactorView = { enabled, recoveryCodesLeft };
-      sendJson(ctx.res, 200, view);
-    })
-    .add('POST', '/api/account/two-factor/setup', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
-      // The password, so that someone using a forgotten open session cannot lock the owner out.
-      const { password } = (await ctx.body()) as { password?: unknown };
-      const user = users.findById(userId);
-      if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
-        throw new HttpError(401, 'wrongPassword');
-      }
-      const secret = twoFactor.begin(userId);
-      if (!secret) throw new HttpError(409, 'twoFactorEnabled');
-      const setup: TwoFactorSetup = { secret, uri: otpauthUri(user.name, secret) };
-      ctx.res.setHeader('cache-control', 'no-store');
-      sendJson(ctx.res, 200, setup);
-    })
-    .add('DELETE', '/api/account/two-factor/setup', (ctx) => {
-      twoFactor.cancel(requireUser(ctx));
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/account/two-factor/enable', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
-      const { code, signOutOthers } = (await ctx.body()) as { code?: unknown; signOutOthers?: unknown };
-      const result = twoFactor.confirm(userId, typeof code === 'string' ? code : '');
-      if (result === 'notSetUp') throw new HttpError(409, 'twoFactorNotSetUp');
-      if (result === 'wrongCode') throw new HttpError(401, 'wrongTwoFactorCode');
-      // Sessions opened before only had to pass the password: whoever turns this on may want them gone.
-      const revoked = signOutOthers === true ? sessions.deleteOtherSessions(userId, ctx.session.id) : [];
-      closeSessionSockets(revoked);
-      ctx.res.setHeader('cache-control', 'no-store');
-      sendJson(ctx.res, 200, { recoveryCodes: result, revoked: revoked.length });
-    })
-    .add('POST', '/api/account/two-factor/recovery', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
-      const { code } = (await ctx.body()) as { code?: unknown };
-      checkAccountCode(userId, code);
-      ctx.res.setHeader('cache-control', 'no-store');
-      sendJson(ctx.res, 200, { recoveryCodes: twoFactor.regenerate(userId) });
-    })
-    .add('POST', '/api/account/two-factor/disable', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!authLimiter.allow(ctx.ip)) throw new HttpError(429, 'tooManyAttempts');
-      const { password, code } = (await ctx.body()) as { password?: unknown; code?: unknown };
-      const user = users.findById(userId);
-      if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
-        throw new HttpError(401, 'wrongPassword');
-      }
-      checkAccountCode(userId, code);
-      twoFactor.disable(userId);
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/reports', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!reportLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
-      const { username, reason, details, gameId, studyId, chapterId, chapterPath } = (await ctx.body()) as Record<string, unknown>;
-      const study = typeof studyId === 'string' ? studies.get(studyId) : undefined;
-      if (studyId !== undefined && (!study || !studies.canRead(study, userId, false))) throw new HttpError(404, 'studyNotFound');
-      // The chapter and move the reporter was on, so a moderator lands on the drawing or comment reported.
-      const chapter =
-        study && typeof chapterId === 'string' && studies.chapter(study.id, chapterId)
-          ? { id: chapterId, path: typeof chapterPath === 'string' && /^\d{1,3}(\.\d{1,3}){0,199}$/.test(chapterPath) ? chapterPath : '' }
-          : null;
-      const target = study ? users.findById(study.ownerId) : typeof username === 'string' ? users.findByName(username) : undefined;
-      if (!target) throw new HttpError(404, 'userNotFound');
-      if (target.id === userId) throw new HttpError(400, 'cannotReportSelf');
-      const text = typeof details === 'string' ? details.trim() : '';
-      if (!REPORT_REASONS.includes(reason as ReportReason) || text.length > REPORT_DETAILS_MAX) throw new HttpError(400, 'invalidReport');
-      const game = typeof gameId === 'string' && games.get(gameId) ? gameId : null;
-      const result = moderation.report(userId, target.id, reason as ReportReason, text, game, study?.id ?? null, chapter);
-      if (result === 'alreadyReported') throw new HttpError(409, 'alreadyReported');
-      sendJson(ctx.res, 200, { ok: true });
-      // The moderators hear of it on Discord at once, with a link to what was reported.
-      const origin = discord.siteOrigin;
-      if (origin) {
-        const where = study
-          ? `${origin}/study/${study.id}${chapter ? `?chapter=${chapter.id}${chapter.path ? `&move=${chapter.path}` : ''}` : ''}`
-          : game
-            ? `${origin}/${game}`
-            : `${origin}/@/${target.name}`;
-        const reporter = users.findById(userId)?.name ?? '?';
-        const lines = [
-          `**New report** · ${REPORT_LABELS[reason as ReportReason]}${study ? ` · study "${discordText(study.title)}"` : ''}`,
-          `${discordText(target.name)}, reported by ${discordText(reporter)}`,
-          ...(text ? [`> ${discordText(text).replace(/\n/g, '\n> ')}`] : []),
-          `<${where}> · <${origin}/mod>`,
-        ];
-        void discord.notifyModerators(lines.join('\n'));
-      }
-    })
-    .add('GET', '/api/studies', (ctx) => {
-      const params = ctx.url.searchParams;
-      const query = (params.get('q') ?? '').trim().slice(0, STUDY_QUERY_MAX);
-      if (params.get('list') === 'mine') {
-        const list: StudyList = { studies: studies.byOwner(requireUser(ctx), query), more: false };
-        sendJson(ctx.res, 200, list);
-        return;
-      }
-      const page = Math.min(1000, Math.max(1, Math.trunc(Number(params.get('page'))) || 1));
-      const list: StudyList = studies.listed(query, page);
-      sendJson(ctx.res, 200, list);
-    })
-    .add('POST', '/api/studies', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!studyLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
-      const body = (await ctx.body()) as Record<string, unknown>;
-      const fields = studyFields(body, userId);
-      const chapter = chapterInput(body.chapter);
-      if (studies.count(userId) >= STUDIES_MAX) throw new HttpError(409, 'tooManyStudies');
-      const id = studies.create(userId, fields.title, fields.description, fields.visibility, chapter);
-      sendJson(ctx.res, 200, studies.view(studies.get(id)!, userId));
-    })
-    .add('GET', '/api/studies/:id', (ctx) => {
-      sendJson(ctx.res, 200, studies.view(readableStudy(ctx), ctx.session.userId));
-    })
-    .add('POST', '/api/studies/:id', async (ctx) => {
-      const study = ownStudy(ctx);
-      const fields = studyFields((await ctx.body()) as Record<string, unknown>, study.ownerId);
-      studies.update(study.id, fields.title, fields.description, fields.visibility);
-      sendJson(ctx.res, 200, studies.view(studies.get(study.id)!, study.ownerId));
-    })
-    .add('DELETE', '/api/studies/:id', (ctx) => {
-      studies.delete(ownStudy(ctx).id);
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('GET', '/api/studies/:id/chapters/:chapter', (ctx) => {
-      const chapter = studies.chapter(readableStudy(ctx).id, ctx.params.chapter!);
-      if (!chapter) throw new HttpError(404, 'chapterNotFound');
-      sendJson(ctx.res, 200, chapter);
-    })
-    .add('POST', '/api/studies/:id/chapters', async (ctx) => {
-      const study = ownStudy(ctx);
-      const chapter = chapterInput(await ctx.body());
-      if (study.chapters >= STUDY_CHAPTERS_MAX) throw new HttpError(409, 'tooManyChapters');
-      sendJson(ctx.res, 200, studies.addChapter(study.id, chapter));
-    })
-    .add('POST', '/api/studies/:id/chapters/:chapter', async (ctx) => {
-      const study = ownStudy(ctx);
-      const current = studies.chapter(study.id, ctx.params.chapter!);
-      if (!current) throw new HttpError(404, 'chapterNotFound');
-      const { name, orientation, root } = (await ctx.body()) as Record<string, unknown>;
-      const text = name === undefined ? current.name : studyText(name, STUDY_CHAPTER_NAME_MAX, true);
-      const side = orientation === undefined ? current.orientation : orientation;
-      if (text === null || !isOrientation(side)) throw new HttpError(400, 'invalidChapter');
-      const tree = root === undefined ? current.root : checkedRoot(studyStart(current.fen)!, root);
-      studies.updateChapter(study.id, current.id, { name: text, orientation: side, root: tree });
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/studies/:id/chapters/:chapter/move', async (ctx) => {
-      const study = ownStudy(ctx);
-      if (!studies.chapter(study.id, ctx.params.chapter!)) throw new HttpError(404, 'chapterNotFound');
-      const { index } = (await ctx.body()) as { index?: unknown };
-      if (!Number.isInteger(index)) throw new HttpError(400, 'invalidChapter');
-      studies.moveChapter(study.id, ctx.params.chapter!, index as number);
-      sendJson(ctx.res, 200, studies.view(studies.get(study.id)!, study.ownerId));
-    })
-    .add('DELETE', '/api/studies/:id/chapters/:chapter', (ctx) => {
-      const study = ownStudy(ctx);
-      if (!studies.chapter(study.id, ctx.params.chapter!)) throw new HttpError(404, 'chapterNotFound');
-      if (study.chapters <= 1) throw new HttpError(409, 'lastChapter');
-      studies.deleteChapter(study.id, ctx.params.chapter!);
-      sendJson(ctx.res, 200, studies.view(studies.get(study.id)!, study.ownerId));
-    })
-    .add('POST', '/api/mod/studies/:id/hide', async (ctx) => {
-      const moderator = requireModerator(ctx);
-      const study = studies.get(ctx.params.id!);
-      if (!study) throw new HttpError(404, 'studyNotFound');
-      const { hidden, reason } = (await ctx.body()) as { hidden?: unknown; reason?: unknown };
-      const text = reasonOf(reason);
-      const hide = hidden !== false;
-      studies.setHidden(study.id, hide);
-      moderation.log(hide ? 'hideStudy' : 'unhideStudy', moderator.name, { id: study.ownerId, name: study.ownerName }, `${study.title} (${study.id}) · ${text}`);
-      if (hide !== study.hidden) notice(study.ownerId, hide ? 'studyHidden' : 'studyRestored', { subject: study.title, ref: study.id });
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/mod/studies/:id/chapters/:chapterId/clear-drawings', async (ctx) => {
-      const moderator = requireModerator(ctx);
-      const study = studies.get(ctx.params.id!);
-      const chapter = study ? studies.chapter(study.id, ctx.params.chapterId!) : undefined;
-      if (!study || !chapter) throw new HttpError(404, 'studyNotFound');
-      const { reason } = (await ctx.body()) as { reason?: unknown };
-      const text = reasonOf(reason);
-      // Every arrow and painted square of the chapter goes; the moves and comments stay.
-      const strip = <T extends StudyRoot>(node: T): T => ({ ...node, shapes: [], children: node.children.map(strip) });
-      studies.updateChapter(study.id, chapter.id, { name: chapter.name, orientation: chapter.orientation, root: strip(chapter.root) });
-      moderation.log('clearDrawings', moderator.name, { id: study.ownerId, name: study.ownerName }, `${study.title} (${study.id}) · ${chapter.name} · ${text}`);
-      notice(study.ownerId, 'studyDrawingsCleared', { subject: study.title, ref: study.id });
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/mod/studies/:id/delete', async (ctx) => {
-      const moderator = requireModerator(ctx);
-      const study = studies.get(ctx.params.id!);
-      if (!study) throw new HttpError(404, 'studyNotFound');
-      const { reason } = (await ctx.body()) as { reason?: unknown };
-      const text = reasonOf(reason);
-      studies.delete(study.id);
-      moderation.log('deleteStudy', moderator.name, { id: study.ownerId, name: study.ownerName }, `${study.title} (${study.id}) · ${text}`);
-      notice(study.ownerId, 'studyDeleted', { subject: study.title });
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('GET', '/api/mod/reports', (ctx) => {
-      requireModerator(ctx);
-      const status = ctx.url.searchParams.get('status') === 'closed' ? 'closed' : 'open';
-      sendJson(ctx.res, 200, moderation.reports(status));
-    })
-    .add('POST', '/api/mod/reports/:id/close', async (ctx) => {
-      const moderator = requireModerator(ctx);
-      const report = moderation.reportById(ctx.params.id!);
-      if (!report) throw new HttpError(404, 'reportNotFound');
-      const { resolution } = (await ctx.body()) as { resolution?: unknown };
-      const text = reasonOf(resolution);
-      moderation.closeReport(report.id, moderator.name, text);
-      moderation.log('closeReport', moderator.name, report.target, text, report.gameId);
-      if (report.status === 'open') notice(report.reporter.id, 'reportClosed', { subject: report.target.name });
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('GET', '/api/mod/log', (ctx) => {
-      requireModerator(ctx);
-      sendJson(ctx.res, 200, moderation.entries());
-    })
-    .add('GET', '/api/mod/users/:name', (ctx) => {
-      requireModerator(ctx);
-      const user = findUser(ctx.params.name!);
-      const view: ModUserView = {
-        user: { id: user.id, name: user.name },
-        moderator: moderation.isModerator(user.id),
-        suspension: moderation.suspension(user.id),
-        openReports: moderation.openReportsAbout(user.id),
-        log: moderation.entries(user.id, 50),
-      };
-      sendJson(ctx.res, 200, view);
-    })
-    .add('POST', '/api/mod/users/:name/suspend', async (ctx) => {
-      const moderator = requireModerator(ctx);
-      const target = sanctionable(ctx.params.name!);
-      const { days, reason } = (await ctx.body()) as { days?: unknown; reason?: unknown };
-      if (!SUSPENSION_DAYS.includes(days as number | null)) throw new HttpError(400, 'invalidSuspension');
-      const text = reasonOf(reason);
-      moderation.suspend(target.id, days as number | null, text);
-      // Out everywhere at once: no session, no socket, nothing left waiting in the lobby, and the games in progress lost.
-      lobby.cancelUser(target.id);
-      games.forfeitAll(target.id);
-      closeSessionSockets(sessions.deleteOtherSessions(target.id, ''));
-      closeUserSockets(target.id);
-      moderation.log('suspend', moderator.name, { id: target.id, name: target.name }, `${days === null ? '∞' : `${String(days)}d`} · ${text}`);
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/mod/users/:name/unsuspend', async (ctx) => {
-      const moderator = requireModerator(ctx);
-      const target = findUser(ctx.params.name!);
-      if (!moderation.suspension(target.id)) throw new HttpError(409, 'notSuspended');
-      const { reason } = (await ctx.body()) as { reason?: unknown };
-      const text = reasonOf(reason);
-      moderation.unsuspend(target.id);
-      moderation.log('unsuspend', moderator.name, { id: target.id, name: target.name }, text);
-      notice(target.id, 'suspensionLifted');
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/mod/users/:name/rename', async (ctx) => {
-      const moderator = requireModerator(ctx);
-      const target = sanctionable(ctx.params.name!);
-      const { username, reason } = (await ctx.body()) as { username?: unknown; reason?: unknown };
-      if (typeof username !== 'string' || !USERNAME_PATTERN.test(username)) throw new HttpError(400, 'invalidUsername');
-      const text = reasonOf(reason);
-      if (!users.rename(target.id, username)) throw new HttpError(409, 'usernameTaken');
-      games.renameUser(target.id, username);
-      lobby.renameUser(target.id, username);
-      // Their sockets carry the old name: reconnecting picks up the new one.
-      closeUserSockets(target.id);
-      moderation.log('rename', moderator.name, { id: target.id, name: username }, `${target.name} → ${username} · ${text}`);
-      notice(target.id, 'renamed', { subject: username });
-      sendJson(ctx.res, 200, { user: { id: target.id, name: username } });
-    })
-    .add('POST', '/api/mod/users/:name/clear-profile', async (ctx) => {
-      const moderator = requireModerator(ctx);
-      const target = sanctionable(ctx.params.name!);
-      const { reason } = (await ctx.body()) as { reason?: unknown };
-      const text = reasonOf(reason);
-      // The bio and the linked profiles are what can offend; the country stays.
-      users.setDetails(target.id, { ...users.details(target.id), bio: '', links: {} });
-      moderation.log('clearProfile', moderator.name, { id: target.id, name: target.name }, text);
-      notice(target.id, 'profileCleared');
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/mod/games/:id/void', async (ctx) => {
-      const moderator = requireModerator(ctx);
-      const { reason } = (await ctx.body()) as { reason?: unknown };
-      const text = reasonOf(reason);
-      const room = games.voidGame(ctx.params.id!);
-      if (room === 'gameNotFound') throw new HttpError(404, 'gameNotFound');
-      if (room === 'gameNotVoidable') throw new HttpError(409, 'gameNotVoidable');
-      moderation.log('void', moderator.name, null, text, room.id);
-      for (const seat of Object.values(room.seats)) if (seat.userId) notice(seat.userId, 'gameVoided', { ref: room.id });
-      publishGame(room);
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('GET', '/api/account/sessions', (ctx) => {
-      const userId = requireUser(ctx);
-      const list: SessionView[] = sessions.listForUser(userId).map((session) => ({
-        id: sessionHandle(session.id),
-        current: session.id === ctx.session.id,
-        createdAt: session.createdAt,
-        seenAt: session.seenAt,
-        userAgent: session.userAgent,
-      }));
-      sendJson(ctx.res, 200, list);
-    })
-    .add('DELETE', '/api/account/sessions', (ctx) => {
-      const userId = requireUser(ctx);
-      const removed = sessions.deleteOtherSessions(userId, ctx.session.id);
-      closeSessionSockets(removed);
-      sendJson(ctx.res, 200, { revoked: removed.length });
-    })
-    .add('DELETE', '/api/account/sessions/:id', (ctx) => {
-      const userId = requireUser(ctx);
-      const removed = sessions.deleteByHandle(userId, ctx.params.id!, ctx.session.id);
-      if (!removed) throw new HttpError(404, 'sessionNotFound');
-      closeSessionSockets([removed]);
-      sendJson(ctx.res, 200, { revoked: 1 });
-    })
-    .add('GET', '/api/account/export', (ctx) => {
-      const userId = requireUser(ctx);
-      if (!exportLimiter.allow(userId)) throw new HttpError(429, 'tooManyAttempts');
-      const user = users.findById(userId);
-      if (!user) throw new HttpError(401, 'loginRequired');
-      const iso = (ms: number) => new Date(ms).toISOString();
-      const data = {
-        about: 'Personal data held by ligungi for this account (LGPD access right). Display preferences live only in your browser.',
-        exportedAt: iso(config.now()),
-        account: { id: user.id, username: user.name, createdAt: iso(user.createdAt) },
-        settings: { challengePolicy: users.challengePolicy(userId), followPolicy: users.followPolicy(userId) },
-        profile: users.details(userId),
-        puzzles: (() => {
-          const { rating, history } = puzzles.dashboard(userId);
-          const { best } = puzzles.runs(userId);
-          return { rating, tries: history, solved: puzzles.solved(userId), runs: puzzles.allRuns(userId), best };
-        })(),
-        racer: racers.allResults(userId).map(({ score, at }) => ({ score, at: iso(at) })),
-        bookmarks: games.bookmarks(userId).map((bookmark) => ({ game: bookmark.game.id, note: bookmark.note, bookmarkedAt: iso(bookmark.bookmarkedAt) })),
-        studies: studies.byOwner(userId).map((study) => ({
-          id: study.id,
-          title: study.title,
-          description: study.description,
-          visibility: study.visibility,
-          updatedAt: iso(study.updatedAt),
-          chapters: studies.chapters(study.id),
-        })),
-        lessons: users.lessonProgress(userId),
-        practice: users.practiceProgress(userId),
-        // What moderation holds about the account: the suspension in force, the reports it made and the actions taken on
-        // it (without naming the moderator).
-        moderation: {
-          suspension: moderation.suspension(userId),
-          reportsMade: moderation.reportsBy(userId).map((report) => ({
-            createdAt: iso(report.createdAt),
-            player: report.target.name,
-            reason: report.reason,
-            details: report.details,
-            gameId: report.gameId,
-            studyId: report.studyId,
-            status: report.status,
-          })),
-          actionsOnAccount: moderation.entries(userId).map((entry) => ({ action: entry.action, date: iso(entry.createdAt), details: entry.details })),
-        },
-        // Whether it is on, never the secret or the recovery codes (stored only as hashes).
-        twoFactor: (({ enabled, enabledAt, recoveryCodesLeft }) => ({
-          enabled,
-          enabledAt: enabledAt === null ? null : iso(enabledAt),
-          recoveryCodesLeft,
-        }))(twoFactor.state(userId)),
-        ratings: users.ratings(userId),
-        discord: discord.exportFor(userId),
-        following: users.following(userId).map((entry) => entry.name),
-        followers: users.followers(userId).map((entry) => entry.name),
-        blocked: users.blocked(userId).map((entry) => entry.name),
-        notices: notices.list(userId, NOTICES_KEPT).map(({ kind, actor, subject, ref, createdAt, read }) => ({ kind, player: actor, subject, ref, date: iso(createdAt), read })),
-        sessions: sessions.listForUser(userId).map((session) => ({
-          current: session.id === ctx.session.id,
-          createdAt: iso(session.createdAt),
-          lastActive: iso(session.seenAt),
-          browser: session.userAgent,
-        })),
-        games: games.exportFor(userId),
-        // Only correspondence challenges and seeks are stored; the others live in memory for at most two hours.
-        seeks: seekStore.forUser(userId).map((seek) => ({ id: seek.id, createdAt: iso(seek.createdAt), settings: seek.settings })),
-        challenges: challengeStore.forUser(userId).map((challenge) => ({
-          id: challenge.id,
-          createdAt: iso(challenge.createdAt),
-          sent: challenge.owner.userId === userId,
-          opponent: challenge.owner.userId === userId ? (challenge.destination?.name ?? null) : challenge.owner.name,
-          status: challenge.status,
-          settings: challenge.settings,
-          gameId: challenge.gameId,
-        })),
-      };
-      ctx.res.setHeader('content-disposition', `attachment; filename="ligungi-${user.name}.json"`);
-      ctx.res.setHeader('cache-control', 'no-store');
-      sendJson(ctx.res, 200, data);
-    })
-    .add('GET', '/api/users', (ctx) => {
-      const query = ctx.url.searchParams.get('q')?.trim() ?? '';
-      if (!/^[A-Za-z0-9_-]{2,20}$/.test(query)) return sendJson(ctx.res, 200, []);
-      const online = onlineUsers(ctx.session.userId);
-      const results: UserSearchResult[] = users
-        .search(query, SEARCH_LIMIT)
-        .map((user) => ({ user, online: online.has(user.id) }));
-      sendJson(ctx.res, 200, results);
-    })
-    .add('GET', '/api/health', (ctx) => {
-      try {
-        db.prepare('select 1').get();
-        sendJson(ctx.res, 200, { ok: true, ...BUILD });
-      } catch {
-        sendJson(ctx.res, 503, { ok: false, ...BUILD });
-      }
-    })
-    .add('GET', '/api/users/:name', (ctx) => {
-      const user = findUser(ctx.params.name!);
-      const profile: UserProfile = {
-        user: { id: user.id, name: user.name },
-        createdAt: user.createdAt,
-        online: onlineUsers(ctx.session.userId).has(user.id),
-        ratings: users.ratings(user.id),
-        ranks: Object.fromEntries(MODES.map((mode) => [mode, users.rank(user.id, mode)])) as Record<Mode, number | null>,
-        counts: games.counts(user.id),
-        records: games.records(user.id),
-        ...users.followCounts(user.id),
-        followed: ctx.session.userId ? users.isFollowing(ctx.session.userId, user.id) : false,
-        blocked: ctx.session.userId ? users.hasBlocked(ctx.session.userId, user.id) : false,
-        canChallenge: ctx.session.userId ? users.canChallenge(ctx.session.userId, user.id) : false,
-        canFollow: ctx.session.userId ? users.canFollow(ctx.session.userId, user.id) : false,
-        details: users.details(user.id),
-        playing: games.ongoing().filter((room) => room.colorOf('', user.id)).map((room) => room.summary()),
-        recent: games.recentFor(user.id, 20),
-      };
-      sendJson(ctx.res, 200, profile);
-    })
-    .add('GET', '/api/users/:name/stats/:mode', (ctx) => {
-      const user = findUser(ctx.params.name!);
-      const mode = ctx.params.mode as Mode;
-      if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
-      sendJson(ctx.res, 200, games.modeStats(user.id, mode));
-    })
-    .add('GET', '/api/users/:name/games', (ctx) => {
-      const user = findUser(ctx.params.name!);
-      const filters = parseGameFilters(ctx.url.searchParams);
-      if (isErrorCode(filters)) throw new HttpError(400, filters);
-      const { vs, ...rest } = filters;
-      let vsId: string | undefined;
-      if (vs) {
-        const opponent = users.findByName(vs);
-        if (!opponent) return sendJson(ctx.res, 200, []);
-        vsId = opponent.id;
-      }
-      const before = Number(ctx.url.searchParams.get('before')) || undefined;
-      sendJson(ctx.res, 200, games.recentFor(user.id, 20, before, { ...rest, ...(vsId ? { vsId } : {}) }));
-    })
-    .add('GET', '/api/crosstable/:a/:b', (ctx) => {
-      // Only id and name leave the server: the stored user also holds the password hash.
-      const [a, b] = [findUser(ctx.params.a!), findUser(ctx.params.b!)].map((user) => ({ id: user.id, name: user.name })) as [UserRef, UserRef];
-      if (a.id === b.id) throw new HttpError(400, 'invalidFilter');
-      sendJson(ctx.res, 200, games.crosstable(a, b));
-    })
-    .add('GET', '/api/users/:name/activity', (ctx) => {
-      const user = findUser(ctx.params.name!);
-      const mine = ctx.session.userId === user.id;
-      const since = config.now() - ACTIVITY_DAYS * DAY_MS;
-      const events: ActivityEvent[] = [
-        ...games.activityGames([user.id], since, ACTIVITY_MAX).map(({ at, game }): ActivityEvent => ({ kind: 'game', at, game })),
-        ...studies.createdBy([user.id], since, ACTIVITY_MAX).map(({ id, title, at }): ActivityEvent => ({ kind: 'study', at, study: { id, title } })),
-        ...(user.createdAt >= since ? [{ kind: 'joined', at: user.createdAt } as const] : []),
-        ...(mine ? [...puzzles.activitySince(user.id, since), ...users.trainingSince(user.id, since)] : []),
-      ];
-      const view: ActivityView = { events: events.sort((a, b) => b.at - a.at).slice(0, ACTIVITY_MAX), mine };
-      sendJson(ctx.res, 200, view);
-    })
-    .add('GET', '/api/users/:name/insights/:mode', (ctx) => {
-      if (!searchLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
-      const user = findUser(ctx.params.name!);
-      const mode = ctx.params.mode as Mode;
-      if (!(MODES as readonly string[]).includes(mode)) throw new HttpError(400, 'invalidMode');
-      sendJson(ctx.res, 200, games.insights(user.id, mode));
-    })
-    .add('GET', '/api/feed', (ctx) => {
-      const userId = requireUser(ctx);
-      const names = new Map(users.following(userId).map((user) => [user.id, user.name]));
-      const followed = [...names.keys()];
-      const since = config.now() - FEED_DAYS * DAY_MS;
-      // A game between two followed players is told once, from the side of the first one found.
-      const seen = new Set<string>();
-      const played = games.activityGames(followed, since, FEED_MAX * 2).filter(({ game }) => !seen.has(game.id) && Boolean(seen.add(game.id)));
-      const items: FeedItem[] = [
-        ...played.map(({ userId: id, at, game }): FeedItem => ({ user: { id, name: names.get(id) ?? '' }, event: { kind: 'game', at, game } })),
-        ...studies
-          .createdBy(followed, since, FEED_MAX)
-          .map(({ ownerId, ownerName, id, title, at }): FeedItem => ({ user: { id: ownerId, name: ownerName }, event: { kind: 'study', at, study: { id, title } } })),
-      ];
-      sendJson(ctx.res, 200, items.sort((a, b) => b.event.at - a.event.at).slice(0, FEED_MAX));
-    })
-    .add('GET', '/api/users/:name/counts', (ctx) => {
-      const user = findUser(ctx.params.name!);
-      const filters = parseGameFilters(ctx.url.searchParams);
-      if (isErrorCode(filters)) throw new HttpError(400, filters);
-      let vsId: string | undefined;
-      if (filters.vs) {
-        const opponent = users.findByName(filters.vs);
-        if (!opponent) return sendJson(ctx.res, 200, { games: 0, rated: 0, wins: 0, losses: 0, draws: 0 });
-        vsId = opponent.id;
-      }
-      sendJson(
-        ctx.res,
-        200,
-        games.counts(user.id, { ...(filters.mode ? { mode: filters.mode } : {}), ...(filters.color ? { color: filters.color } : {}), ...(vsId ? { vsId } : {}) }),
-      );
-    })
-    .add('POST', '/api/users/:name/follow', (ctx) => {
-      const userId = requireUser(ctx);
-      const target = findUser(ctx.params.name!);
-      if (target.id === userId) throw new HttpError(400, 'cannotFollowSelf');
-      if (!users.isFollowing(userId, target.id) && users.followCounts(userId).following >= MAX_FOLLOWS) {
-        throw new HttpError(400, 'tooManyFollows');
-      }
-      if (!users.isFollowing(userId, target.id) && !users.canFollow(userId, target.id)) throw new HttpError(403, 'followRefused');
-      if (users.follow(userId, target.id)) notice(target.id, 'follow', { actorId: userId });
-      sendJson(ctx.res, 200, { followed: true, canFollow: true, ...users.followCounts(target.id) });
-    })
-    .add('DELETE', '/api/users/:name/follow', (ctx) => {
-      const userId = requireUser(ctx);
-      const target = findUser(ctx.params.name!);
-      users.unfollow(userId, target.id);
-      sendJson(ctx.res, 200, { followed: false, canFollow: users.canFollow(userId, target.id), ...users.followCounts(target.id) });
-    })
-    .add('POST', '/api/users/:name/block', (ctx) => {
-      const userId = requireUser(ctx);
-      const target = findUser(ctx.params.name!);
-      if (target.id === userId) throw new HttpError(400, 'cannotBlockSelf');
-      if (!users.hasBlocked(userId, target.id) && users.blockCount(userId) >= MAX_BLOCKS) throw new HttpError(409, 'tooManyBlocks');
-      users.block(userId, target.id);
-      lobby.cancelBetween(userId, target.id);
-      sendJson(ctx.res, 200, { blocked: true, followed: false, canFollow: false, canChallenge: false, ...users.followCounts(target.id) });
-    })
-    .add('DELETE', '/api/users/:name/block', (ctx) => {
-      const userId = requireUser(ctx);
-      const target = findUser(ctx.params.name!);
-      users.unblock(userId, target.id);
-      sendJson(ctx.res, 200, {
-        blocked: false,
-        followed: false,
-        canFollow: users.canFollow(userId, target.id),
-        canChallenge: users.canChallenge(userId, target.id),
-        ...users.followCounts(target.id),
-      });
-    })
-    .add('GET', '/api/account/blocks', (ctx) => {
-      const userId = requireUser(ctx);
-      sendJson(ctx.res, 200, users.blocked(userId).map((user) => user.name));
-    })
-    .add('GET', '/api/following', (ctx) => {
-      const userId = requireUser(ctx);
-      const online = onlineUsers(userId);
-      const playing = playingByUser();
-      const list: FriendView[] = users.following(userId).map((user) => ({
-        user,
-        online: online.has(user.id),
-        playing: playing.get(user.id) ?? null,
-        ratings: users.ratings(user.id),
-        canChallenge: users.canChallenge(userId, user.id),
-      }));
-      sendJson(ctx.res, 200, list);
-    })
-    .add('GET', '/api/players', (ctx) => sendJson(ctx.res, 200, playersView(ctx.session.userId, ctx.session.id)))
-    .add('GET', '/api/ranking', (ctx) => sendJson(ctx.res, 200, rankingView(null, ctx.url.searchParams, ctx.session.userId)))
-    .add('GET', '/api/ranking/:mode', (ctx) => {
-      const mode = ctx.params.mode as Mode;
-      if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
-      sendJson(ctx.res, 200, rankingView(mode, ctx.url.searchParams, ctx.session.userId));
-    })
-    .add('GET', '/api/leaderboard', (ctx) => {
-      const online = onlineUsers(ctx.session.userId);
-      const board = Object.fromEntries(MODES.map((mode) => [mode, leaders(mode, LEADERBOARD_TOP, online)])) as unknown as Leaderboard;
-      sendJson(ctx.res, 200, board);
-    })
-    .add('GET', '/api/leaderboard/:mode', (ctx) => {
-      const mode = ctx.params.mode as Mode;
-      if (!MODES.includes(mode)) throw new HttpError(404, 'invalidMode');
-      const limit = Math.min(LEADERBOARD_MAX, Math.max(1, Math.trunc(Number(ctx.url.searchParams.get('limit'))) || LEADERBOARD_MAX));
-      sendJson(ctx.res, 200, leaders(mode, limit, onlineUsers(ctx.session.userId)));
-    })
-    .add('GET', '/api/bookmarks', (ctx) => sendJson(ctx.res, 200, games.bookmarks(requireUser(ctx))))
-    .add('GET', '/api/games/:id/bookmark', (ctx) => {
-      const userId = requireUser(ctx);
-      if (!games.exists(ctx.params.id!)) throw new HttpError(404, 'gameNotFound');
-      sendJson(ctx.res, 200, games.bookmark(userId, ctx.params.id!));
-    })
-    .add('POST', '/api/games/:id/bookmark', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!games.exists(ctx.params.id!)) throw new HttpError(404, 'gameNotFound');
-      const { note = '' } = (await ctx.body()) as { note?: unknown };
-      if (typeof note !== 'string' || note.length > BOOKMARK_NOTE_MAX) throw new HttpError(400, 'invalidBookmarkNote');
-      sendJson(ctx.res, 200, games.saveBookmark(userId, ctx.params.id!, note.trim()));
-    })
-    .add('DELETE', '/api/games/:id/bookmark', (ctx) => {
-      const userId = requireUser(ctx);
-      if (!games.exists(ctx.params.id!)) throw new HttpError(404, 'gameNotFound');
-      sendJson(ctx.res, 200, games.removeBookmark(userId, ctx.params.id!));
-    })
-    .add('GET', '/api/games/search', (ctx) => {
-      if (!searchLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
-      const search = parseGameSearch(ctx.url.searchParams);
-      if (isErrorCode(search)) throw new HttpError(400, search);
-      const { player, vs, from, to, page, ...rest } = search;
-      const playerId = player ? users.findByName(player)?.id : undefined;
-      const vsId = vs ? users.findByName(vs)?.id : undefined;
-      const empty: GameSearchResult = { games: [], more: false };
-      // An unknown name matches no game, the same as a known one with no games.
-      if ((player && !playerId) || (vs && !vsId)) return sendJson(ctx.res, 200, empty);
-      const criteria: SearchCriteria = {
-        ...rest,
-        ...(playerId ? { playerId } : {}),
-        ...(vsId ? { vsId } : {}),
-        ...(from ? { from: dayStart(from)! } : {}),
-        ...(to ? { to: dayStart(to)! + DAY_MS } : {}),
-      };
-      sendJson(ctx.res, 200, games.search(criteria, page ?? 1));
-    })
-    .add('GET', '/api/games/:id', (ctx) => {
-      const room = games.get(ctx.params.id!);
-      if (!room) throw new HttpError(404, 'gameNotFound');
-      sendJson(ctx.res, 200, room.view(ctx.session.id, ctx.session.userId));
-    })
-    .add('GET', '/api/games/:id/export', (ctx) => {
-      const room = games.get(ctx.params.id!);
-      if (!room) throw new HttpError(404, 'gameNotFound');
-      const origin = `${ctx.req.headers['x-forwarded-proto'] ?? 'http'}://${ctx.req.headers.host ?? SITE_NAME}`;
-      sendText(ctx.res, 200, exportGame(room, origin));
-    })
-    .add('GET', '/api/tv', (ctx) => sendJson(ctx.res, 200, tvGames()))
-    .add('GET', '/api/tv/channels', (ctx) => sendJson(ctx.res, 200, tv.channels()))
-    .add('GET', '/api/version', (ctx) => sendJson(ctx.res, 200, BUILD))
-    .add('GET', '/api/lobby', (ctx) => sendJson(ctx.res, 200, lobbyView(ctx.player)))
-    .add('POST', '/api/seeks', async (ctx) => {
-      const settings = parseSettings(await ctx.body());
-      if (isErrorCode(settings)) throw new HttpError(400, settings);
-      const result = lobby.createSeek(ctx.player, settings, hub.hasSession(ctx.session.id));
-      if (isErrorCode(result)) throw new HttpError(result === 'connectionRequired' ? 409 : 400, result);
-      sendJson(ctx.res, 200, result);
-    })
-    .add('POST', '/api/seeks/:id/accept', (ctx) => {
-      const result = lobby.acceptSeek(ctx.params.id!, ctx.player);
-      if (isErrorCode(result)) throw new HttpError(409, result);
-      sendJson(ctx.res, 200, result);
-    })
-    .add('DELETE', '/api/seeks/:id', (ctx) => {
-      if (!lobby.cancelSeek(ctx.params.id!, ctx.player)) throw new HttpError(404, 'seekNotFound');
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/challenges', async (ctx) => {
-      const body = await ctx.body();
-      const settings = parseSettings(body);
-      if (isErrorCode(settings)) throw new HttpError(400, settings);
-      const to = (body as { to?: unknown }).to;
-      let destination: UserRef | null = null;
-      if (to !== undefined) {
-        // A challenge from a profile: the sender needs an account and a live connection (it is withdrawn when they leave).
-        const userId = requireUser(ctx);
-        const target = typeof to === 'string' ? users.findByName(to) : undefined;
-        if (!target) throw new HttpError(404, 'userNotFound');
-        if (target.id === userId) throw new HttpError(400, 'cannotChallengeSelf');
-        if (!users.canChallenge(userId, target.id)) throw new HttpError(403, 'challengeRefused');
-        if (!hub.hasSession(ctx.session.id)) throw new HttpError(409, 'connectionRequired');
-        destination = { id: target.id, name: target.name };
-      }
-      const challenge = lobby.createChallenge(ctx.player, settings, destination);
-      if (isErrorCode(challenge)) throw new HttpError(challenge === 'tooManyChallenges' ? 429 : 400, challenge);
-      if (destination) sendIncoming(destination.id);
-      sendJson(ctx.res, 200, lobby.challengeView(challenge, ctx.player));
-    })
-    .add('POST', '/api/challenges/:id/decline', (ctx) => {
-      if (!lobby.declineChallenge(ctx.params.id!, ctx.player)) throw new HttpError(404, 'challengeNotFound');
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('GET', '/api/account/settings', (ctx) => {
-      const userId = requireUser(ctx);
-      sendJson(ctx.res, 200, { challengePolicy: users.challengePolicy(userId), followPolicy: users.followPolicy(userId) });
-    })
-    .add('POST', '/api/account/settings', async (ctx) => {
-      const userId = requireUser(ctx);
-      const { challengePolicy, followPolicy } = (await ctx.body()) as { challengePolicy?: unknown; followPolicy?: unknown };
-      const challenge = CHALLENGE_POLICIES.find((value) => value === challengePolicy);
-      const follow = FOLLOW_POLICIES.find((value) => value === followPolicy);
-      if (challengePolicy !== undefined && !challenge) throw new HttpError(400, 'invalidChallengePolicy');
-      if (followPolicy !== undefined && !follow) throw new HttpError(400, 'invalidFollowPolicy');
-      if (!challenge && !follow) throw new HttpError(400, 'invalidChallengePolicy');
-      if (challenge) users.setChallengePolicy(userId, challenge);
-      if (follow) users.setFollowPolicy(userId, follow);
-      sendJson(ctx.res, 200, { challengePolicy: users.challengePolicy(userId), followPolicy: users.followPolicy(userId) });
-    })
-    .add('POST', '/api/notices/read', (ctx) => {
-      const userId = requireUser(ctx);
-      if (notices.markRead(userId)) sendNotices(userId);
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('GET', '/api/account/profile', (ctx) => sendJson(ctx.res, 200, users.details(requireUser(ctx))))
-    .add('POST', '/api/account/profile', async (ctx) => {
-      const userId = requireUser(ctx);
-      const details = parseProfileDetails(await ctx.body());
-      if (isErrorCode(details)) throw new HttpError(400, details);
-      users.setDetails(userId, details);
-      sendJson(ctx.res, 200, details);
-    })
-    .add('GET', '/api/lessons/progress', (ctx) => sendJson(ctx.res, 200, users.lessonProgress(requireUser(ctx))))
-    .add('POST', '/api/lessons/progress', async (ctx) => {
-      const userId = requireUser(ctx);
-      const { results } = (await ctx.body()) as { results?: unknown };
-      const entries = typeof results === 'object' && results !== null && !Array.isArray(results) ? Object.entries(results) : null;
-      const valid =
-        entries !== null &&
-        entries.length <= LESSON_PROGRESS_BATCH &&
-        entries.every(([id, stars]) => LESSON_IDS.has(id) && Number.isInteger(stars) && (stars as number) >= 1 && (stars as number) <= LESSON_STARS_MAX);
-      if (!valid) throw new HttpError(400, 'invalidLessonProgress');
-      users.saveLessonProgress(userId, Object.fromEntries(entries) as Record<string, number>);
-      sendJson(ctx.res, 200, users.lessonProgress(userId));
-    })
-    .add('GET', '/api/explorer', (ctx) => {
-      const params = ctx.url.searchParams;
-      const mode = EXPLORER_MODES.find((value) => value === params.get('mode'));
-      if (!mode) throw new HttpError(400, 'invalidMode');
-      const band = EXPLORER_BANDS.find((value) => value === (params.get('band') ?? 'all'));
-      if (!band) throw new HttpError(400, 'invalidExplorerQuery');
-      const fen = params.get('fen');
-      if (fen !== null) {
-        let position;
-        try {
-          position = parseFen(fen);
-        } catch {
-          throw new HttpError(400, 'invalidExplorerQuery');
-        }
-        if (position.phase !== 'draft' || position.mode !== mode) throw new HttpError(400, 'invalidExplorerQuery');
-      }
-      sendJson(ctx.res, 200, explorer.query(mode, band, params.get('rated') === '1', fen));
-    })
-    .add('GET', '/api/practice/progress', (ctx) => sendJson(ctx.res, 200, users.practiceProgress(requireUser(ctx))))
-    .add('POST', '/api/practice/progress', async (ctx) => {
-      const userId = requireUser(ctx);
-      const { results } = (await ctx.body()) as { results?: unknown };
-      const entries = typeof results === 'object' && results !== null && !Array.isArray(results) ? Object.entries(results) : null;
-      const valid =
-        entries !== null &&
-        entries.length <= PRACTICE_BATCH &&
-        entries.every(([id, moves]) => PRACTICE_IDS.has(id) && Number.isInteger(moves) && (moves as number) >= 1 && (moves as number) <= 1000);
-      if (!valid) throw new HttpError(400, 'invalidPracticeProgress');
-      users.savePracticeProgress(userId, Object.fromEntries(entries) as Record<string, number>);
-      sendJson(ctx.res, 200, users.practiceProgress(userId));
-    })
-    .add('GET', '/api/puzzles/next', (ctx) => {
-      const params = ctx.url.searchParams;
-      const theme = PUZZLE_THEMES.find((value) => value === params.get('theme')) ?? null;
-      const mode = MODES.find((value) => value === params.get('mode')) ?? null;
-      // Without an account, the browser says what it already solved (ids that are not puzzles are ignored).
-      const exclude = (params.get('exclude') ?? '').split(',').filter(isPuzzle).slice(0, PUZZLE_BATCH);
-      const id = puzzles.next(ctx.session.userId, { theme, mode }, exclude);
-      if (!id) throw new HttpError(404, 'noPuzzleLeft');
-      sendJson(ctx.res, 200, { id });
-    })
-    .add('GET', '/api/puzzles/daily', (ctx) => {
-      sendJson(ctx.res, 200, puzzles.daily(new Date(config.now()).toISOString().slice(0, 10)));
-    })
-    .add('GET', '/api/puzzles/dashboard', (ctx) => sendJson(ctx.res, 200, puzzles.dashboard(requireUser(ctx))))
-    .add('GET', '/api/puzzles/solved', (ctx) => sendJson(ctx.res, 200, puzzles.solved(requireUser(ctx))))
-    .add('POST', '/api/puzzles/solved', async (ctx) => {
-      const userId = requireUser(ctx);
-      const { ids } = (await ctx.body()) as { ids?: unknown };
-      if (!Array.isArray(ids) || ids.length > PUZZLE_BATCH || !ids.every((id) => typeof id === 'string' && isPuzzle(id))) {
-        throw new HttpError(400, 'invalidPuzzle');
-      }
-      puzzles.importSolved(userId, ids as string[]);
-      sendJson(ctx.res, 200, puzzles.solved(userId));
-    })
-    .add('GET', '/api/racer', (ctx) => {
-      const userId = ctx.session.userId;
-      sendJson(ctx.res, 200, { records: userId ? racers.records(userId) : null, waiting: racers.waiting() });
-    })
-    .add('POST', '/api/racer/public', (ctx) => {
-      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
-      sendJson(ctx.res, 200, { id: racers.joinPublic(ctx.player) });
-    })
-    .add('POST', '/api/racer', (ctx) => {
-      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
-      sendJson(ctx.res, 200, { id: racers.create(ctx.player, 'friends') });
-    })
-    .add('GET', '/api/racer/:id', (ctx) => {
-      const race = racers.view(ctx.params.id!, ctx.player);
-      if (!race) throw new HttpError(404, 'raceNotFound');
-      sendJson(ctx.res, 200, race);
-    })
-    .add('POST', '/api/racer/:id/join', async (ctx) => {
-      if (!raceLimiter.allow(ctx.session.id)) throw new HttpError(429, 'tooManyAttempts');
-      const body = (await ctx.body()) as { instanceId?: unknown };
-      // A call's race is only for the people in that call.
-      const instanceId = body.instanceId === undefined ? null : await activityCaller(ctx, body.instanceId);
-      const joined = racers.join(ctx.params.id!, ctx.player, instanceId);
-      if (joined) throw new HttpError(joined === 'raceNotFound' ? 404 : 409, joined);
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('POST', '/api/racer/:id/start', (ctx) => {
-      const started = racers.start(ctx.params.id!, ctx.player);
-      if (started) throw new HttpError(started === 'raceNotFound' ? 404 : 409, started);
-      sendJson(ctx.res, 200, { ok: true });
-    })
-    .add('GET', '/api/puzzles/sequence', (ctx) => {
-      const kind = PUZZLE_RUN_KINDS.find((value) => value === ctx.url.searchParams.get('kind'));
-      if (!kind) throw new HttpError(400, 'invalidPuzzleRun');
-      sendJson(ctx.res, 200, { ids: puzzles.sequence(kind) });
-    })
-    .add('GET', '/api/puzzles/runs', (ctx) => sendJson(ctx.res, 200, puzzles.runs(requireUser(ctx))))
-    .add('POST', '/api/puzzles/runs', async (ctx) => {
-      const userId = requireUser(ctx);
-      const { runs } = (await ctx.body()) as { runs?: unknown };
-      const latest = config.now() + 60_000;
-      const valid =
-        Array.isArray(runs) &&
-        runs.length <= PUZZLE_RUN_BATCH &&
-        runs.every((run: unknown) => {
-          if (typeof run !== 'object' || run === null) return false;
-          const { kind, score, at } = run as Record<string, unknown>;
-          return (
-            PUZZLE_RUN_KINDS.some((value) => value === kind) &&
-            Number.isInteger(score) &&
-            (score as number) >= 0 &&
-            (score as number) <= PUZZLE_COUNT &&
-            Number.isInteger(at) &&
-            (at as number) >= 0 &&
-            (at as number) <= latest
-          );
-        });
-      if (!valid) throw new HttpError(400, 'invalidPuzzleRun');
-      puzzles.saveRuns(userId, runs as PuzzleRun[]);
-      sendJson(ctx.res, 200, puzzles.runs(userId));
-    })
-    .add('GET', '/api/puzzles/:id', (ctx) => {
-      if (!isPuzzle(ctx.params.id!)) throw new HttpError(404, 'puzzleNotFound');
-      sendJson(ctx.res, 200, puzzles.view(ctx.params.id!, ctx.session.userId));
-    })
-    .add('POST', '/api/puzzles/:id/attempt', async (ctx) => {
-      const userId = requireUser(ctx);
-      if (!isPuzzle(ctx.params.id!)) throw new HttpError(404, 'puzzleNotFound');
-      const { win } = (await ctx.body()) as { win?: unknown };
-      if (typeof win !== 'boolean') throw new HttpError(400, 'invalidPuzzle');
-      sendJson(ctx.res, 200, puzzles.attempt(userId, ctx.params.id!, win));
-    })
-    .add('GET', '/api/challenges/:id', (ctx) => {
-      const challenge = lobby.challenge(ctx.params.id!);
-      if (!challenge) throw new HttpError(404, 'challengeNotFound');
-      sendJson(ctx.res, 200, lobby.challengeView(challenge, ctx.player));
-    })
-    .add('POST', '/api/challenges/:id/accept', (ctx) => {
-      const result = lobby.acceptChallenge(ctx.params.id!, ctx.player);
-      if (isErrorCode(result)) throw new HttpError(result === 'notYourChallenge' ? 403 : 409, result);
-      sendJson(ctx.res, 200, result);
-    })
-    .add('DELETE', '/api/challenges/:id', (ctx) => {
-      if (!lobby.cancelChallenge(ctx.params.id!, ctx.player)) throw new HttpError(404, 'challengeNotFound');
-      sendJson(ctx.res, 200, { ok: true });
-    });
+  return {
+    config,
+    db,
+    sessions,
+    twoFactor,
+    moderation,
+    users,
+    notices,
+    hub,
+    authLimiter,
+    loginFailures,
+    sessionLimiter,
+    exportLimiter,
+    reportLimiter,
+    csp,
+    activityCsp,
+    toPlayer,
+    sendTurns,
+    sendNotices,
+    notice,
+    publishGame,
+    discord,
+    discordLimiter,
+    games,
+    tv,
+    puzzles,
+    racers,
+    explorer,
+    studies,
+    studyLimiter,
+    searchLimiter,
+    tvGames,
+    publishTv,
+    lobbyView,
+    publishLobby,
+    challengeStore,
+    seekStore,
+    lobby,
+    updatePresence,
+    onlineUsers,
+    onlineCount,
+    playingByUser,
+    requireUser,
+    checkAccountCode,
+    requireModerator,
+    REPORT_LABELS,
+    discordText,
+    reasonOf,
+    sanctionable,
+    readableStudy,
+    ownStudy,
+    studyFields,
+    checkedRoot,
+    chapterInput,
+    seatsBlocked,
+    findUser,
+    RANKING_PAGE_LIMIT,
+    rankingView,
+    playersView,
+    trendSince,
+    leaders,
+    rotateSession,
+    activityOrigin,
+    fromActivity,
+    activities,
+    activityPlayers,
+    rememberActivityPlayer,
+    activityLimiter,
+    raceLimiter,
+    activityRoomsLimiter,
+    ACTIVITY_INSTANCE,
+    activityCaller,
+    sendIncoming,
+    closeSessionSockets,
+    closeUserSockets,
+    userPayload,
+  };
+};
+
+export type AppDeps = ReturnType<typeof createDeps>;
+
+export const createApp = (config: ServerConfig): App => {
+  const deps = createDeps(config);
+  const { activityCsp, activityOrigin, csp, db, discord, fromActivity, games, hub, lobby, lobbyView, publishLobby, racers, seatsBlocked, sendIncoming, sendNotices, sendTurns, sessionLimiter, sessions, toPlayer, tvGames, twoFactor, updatePresence } = deps;
+  let closing = false;
+  const router = new Router();
+  registerAuthRoutes(router, deps);
+  registerAccountRoutes(router, deps);
+  registerDiscordActivityRoutes(router, deps);
+  registerDiscordRoutes(router, deps);
+  registerModerationRoutes(router, deps);
+  registerStudiesRoutes(router, deps);
+  registerCommunityRoutes(router, deps);
+  registerPlayRoutes(router, deps);
+  registerTrainingRoutes(router, deps);
 
   const sameOrigin = (req: IncomingMessage) => {
     const origin = req.headers.origin;

@@ -1,6 +1,6 @@
 import { MODES, type Color, type Mode, type Outcome } from '@ligungi/engine';
 import type { ErrorCode } from './errors.ts';
-import type { GameSummary } from './index.ts';
+import type { GameSummary } from './games.ts';
 
 export const GAME_SEARCH_PAGE = 30;
 /** Pages a search can go through: the oldest games are reached by narrowing the search, not by paging forever. */
@@ -125,5 +125,61 @@ export const gameSearchQuery = (search: GameSearch): URLSearchParams => {
     if (value === undefined || value === '') continue;
     params.set(key, typeof value === 'boolean' ? (value ? '1' : '0') : String(value));
   }
+  return params;
+};
+
+export type ResultFilter = 'win' | 'loss' | 'draw';
+
+/** Filters for a player's game history; every field is optional. */
+export interface GameFilters {
+  readonly mode?: Mode;
+  readonly result?: ResultFilter;
+  readonly rated?: boolean;
+  readonly color?: Color;
+  /** Opponent username. */
+  readonly vs?: string;
+}
+
+const RESULTS: readonly string[] = ['win', 'loss', 'draw'];
+
+/** Reads history filters from a query string; unknown values are an error, empty ones are ignored. */
+export const parseGameFilters = (params: URLSearchParams): GameFilters | ErrorCode => {
+  const filters: { -readonly [K in keyof GameFilters]: GameFilters[K] } = {};
+  const mode = params.get('mode');
+  if (mode) {
+    if (!(MODES as readonly string[]).includes(mode)) return 'invalidFilter';
+    filters.mode = mode as Mode;
+  }
+  const result = params.get('result');
+  if (result) {
+    if (!RESULTS.includes(result)) return 'invalidFilter';
+    filters.result = result as ResultFilter;
+  }
+  const rated = params.get('rated');
+  if (rated) {
+    if (rated !== '1' && rated !== '0') return 'invalidFilter';
+    filters.rated = rated === '1';
+  }
+  const color = params.get('color');
+  if (color) {
+    if (color !== 'white' && color !== 'black') return 'invalidFilter';
+    filters.color = color;
+  }
+  const vs = params.get('vs')?.trim();
+  if (vs) {
+    if (vs.length > 20) return 'invalidFilter';
+    filters.vs = vs;
+  }
+  return filters;
+};
+
+/** Inverse of `parseGameFilters`, for links and requests. */
+export const gameFiltersQuery = (filters: GameFilters): URLSearchParams => {
+  const params = new URLSearchParams();
+  if (filters.mode) params.set('mode', filters.mode);
+  if (filters.result) params.set('result', filters.result);
+  if (filters.rated !== undefined) params.set('rated', filters.rated ? '1' : '0');
+  if (filters.color) params.set('color', filters.color);
+  if (filters.vs) params.set('vs', filters.vs);
   return params;
 };

@@ -1,5 +1,6 @@
 import type { Mode, Outcome, Role } from '@ligungi/engine';
-import type { ModeRecord, UserRef } from './index.ts';
+import type { ModeRecord } from './players.ts';
+import type { UserRef } from './users.ts';
 
 /** Bounds of the rating difference groups (opponent minus player) of the insights, lowest first; the last one has none. */
 export const OPPONENT_BANDS: readonly (number | null)[] = [-200, -50, 50, 200, null];

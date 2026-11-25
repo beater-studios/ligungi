@@ -61,7 +61,7 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 - Errors are stable codes from `packages/protocol/src/errors.ts` (`HttpError(status, code)`, WebSocket `{ t: 'error', code, message }`). Add new codes there and their English message in `apps/web/src/i18n/locales/en.json` (`errors`).
 - SQL always uses bound parameters. Never interpolate user input into SQL.
 - Schema changes are new entries appended to `MIGRATIONS` in `apps/server/src/db.ts`. Never edit an existing migration.
-- Do not weaken the security checks in `app.ts`: JSON content type and same-origin for writes, origin check on WebSocket, auth rate limit, CSP.
+- Do not weaken the security checks: JSON content type and same-origin for writes, origin check on WebSocket and CSP in `app.ts`, and the rate limits applied in `routes/`.
 
 ### Web
 

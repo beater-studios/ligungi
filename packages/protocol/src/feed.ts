@@ -1,5 +1,5 @@
 import type { Color, Mode, Outcome } from '@ligungi/engine';
-import type { UserRef } from './index.ts';
+import type { UserRef } from './users.ts';
 
 /** Days of activity a profile shows. */
 export const ACTIVITY_DAYS = 30;

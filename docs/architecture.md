@@ -33,7 +33,8 @@ Colors live in CSS variables (`--gg-board`, `--gg-line`, the piece faces and eve
 
 | File | Responsibility |
 |---|---|
-| `app.ts` | Wires everything: HTTP routes, WebSocket, presence, lobby, friends and leaderboards. |
+| `app.ts` | Wires everything: `createDeps` builds the services and shared helpers (presence, lobby, friends, leaderboards), and `createApp` keeps the security checks (same origin, JSON writes, CSP), the session, the WebSocket and the router. |
+| `routes/` | The HTTP routes by area (`auth`, `account`, `discord`, `discordActivity`, `moderation`, `studies`, `community`, `play`, `training`), each a `register<Area>Routes(router, deps)`. The router takes the first route that matches, so a path's literal routes stay in the same module before its `:id` route. |
 | `room.ts` | `GameRoom`: one ongoing game. Validates moves and handles the clock, abort, draw, rematch, victory claims and deadlines. |
 | `games.ts` | Keeps the rooms, persists to SQLite on every change, updates ratings at the end, reloads ongoing games on restart, and serves the filtered game history. |
 | `lobby.ts` | Seeks (with automatic pairing of compatible seeks) and challenge links. |

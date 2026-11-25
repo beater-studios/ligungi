@@ -1,6 +1,6 @@
 # API
 
-The types of every response and message are in [packages/protocol/src/index.ts](../packages/protocol/src/index.ts).
+The types of every response and message are in [packages/protocol/src](../packages/protocol/src), one file per area (games, lobby, players, account, moderation, socket messages, studies, puzzles and so on), all re-exported by `index.ts`.
 
 The session is a `sid` cookie, created by `GET /api/me` or by the first write. Login, signup and logout replace it; anonymous games, seeks and challenges move to the new session, and WebSocket connections opened with the old one are closed with code `4001` so the client reconnects. Writes (`POST`, `DELETE`) need `Content-Type: application/json` (send `{}` even with an empty body) and cannot come from another origin.
 

@@ -10,7 +10,7 @@ import {
   type Position,
   type PositionProblem,
 } from '@ligungi/engine';
-import type { UserRef } from './index.ts';
+import type { UserRef } from './users.ts';
 
 /** `public` studies are listed and searchable, `unlisted` ones open only through their link, `private` ones only for their author. */
 export const STUDY_VISIBILITIES = ['public', 'unlisted', 'private'] as const;

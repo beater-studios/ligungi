@@ -12,6 +12,9 @@ export interface UserRecord extends UserRef {
   readonly country: Country | null;
 }
 
+/** Stored name of players without an account; the site shows a translated label instead. */
+export const ANONYMOUS_NAME = 'Anonymous';
+
 export const USERNAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{2,19}$/;
 
 interface UserRow {

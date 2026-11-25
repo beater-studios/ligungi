@@ -89,3 +89,6 @@ export const lineRoot = (moves: readonly string[]): StudyRoot => {
   for (let i = moves.length - 1; i >= 0; i--) children = [{ move: moves[i]!, comment: '', shapes: [], children }];
   return { comment: '', shapes: [], children };
 };
+
+/** The tree with every drawing removed, as the moderators' clear-drawings leaves a chapter. */
+export const withoutShapes = <T extends StudyRoot>(node: T): T => ({ ...node, shapes: [], children: node.children.map(withoutShapes) });

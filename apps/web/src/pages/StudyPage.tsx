@@ -1,23 +1,17 @@
-import { legalMoves, moveToString, opposite, parseFen, parseMove, toFen, type Color, type Move } from '@ligungi/engine';
+import { legalMoves, moveToString, opposite, parseMove, toFen, type Move } from '@ligungi/engine';
 import type { Shape } from '@ligungi/board';
 import {
-  REPORT_DETAILS_MAX,
   SHAPE_COLORS,
   STUDY_ARROWS_MAX,
   STUDY_COMMENT_MAX,
   STUDY_SQUARES_MAX,
-  chapterFits,
   shapeCounts,
   toggleShape,
   type ShapeColor,
-  type StudyChapter,
   type StudyNode,
-  type StudyRoot,
   type StudyShape,
-  type StudyView,
 } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { api } from '../api.ts';
 import { sayMove } from '../speech.ts';
 import { BlindPanel } from '../components/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
@@ -27,17 +21,17 @@ import { ChapterSettingsModal, NewChapterModal, StudySettingsModal } from '../co
 import { StudyMoves } from '../components/StudyMoves.tsx';
 import { Field, Toggle } from '../components/ui.tsx';
 import { describeMove, describeShapes, isWord, normalize, parseDrawing, type Speaker } from '../blind.ts';
-import { errorText, listText, timeAgo, usePieceNames, useT } from '../i18n/index.ts';
+import { listText, timeAgo, usePieceNames, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { prefs } from '../prefs.ts';
 import { navigate, useLocation } from '../router.ts';
 import { session } from '../session.ts';
 import { useStore } from '../store.ts';
 import { useTowerTap } from '../towerTap.ts';
-import { addMove, deleteAt, lineEnd, nodeAt, positionAt, promote, updateAt, type Path } from '../studyTree.ts';
+import { StudyModTools } from './study/StudyModTools.tsx';
+import { useStudyChapter } from './study/useStudyChapter.ts';
+import { addMove, deleteAt, lineEnd, nodeAt, positionAt, promote, updateAt, withoutShapes, type Path } from '../studyTree.ts';
 
-/** The editor saves on its own this long after the last change. */
-const SAVE_DELAY_MS = 800;
 const NOTICE_MS = 4000;
 
 /** The study reads each move through `where`, so the screen reader mode gets no move list to announce. */
@@ -46,93 +40,34 @@ const NO_MOVES: readonly never[] = [];
 const toStudyShape = (shape: Shape, color: ShapeColor): StudyShape =>
   shape.kind === 'arrow' ? { kind: 'arrow', from: shape.from, to: shape.to, color } : { kind: 'square', square: shape.square, color };
 
-interface Pending {
-  readonly url: string;
-  readonly root: StudyRoot;
-}
-
-/** The chapter's tree with every drawing removed, as the moderators' clear-drawings leaves it. */
-const withoutShapes = <T extends StudyRoot>(node: T): T => ({ ...node, shapes: [], children: node.children.map(withoutShapes) });
-
-/** Hide, show again or delete a study, or clear the drawings of the chapter open, with the reason the log keeps. */
-const StudyModTools = ({
-  study,
-  chapterId,
-  onChange,
-  onCleared,
-}: {
-  study: StudyView;
-  chapterId: string | null;
-  onChange: (hidden: boolean | null) => void;
-  onCleared: () => void;
-}) => {
-  const t = useT();
-  const [reason, setReason] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const clear = async () => {
-    if (!chapterId) return;
-    setError(null);
-    try {
-      await api.post(`/api/mod/studies/${study.id}/chapters/${chapterId}/clear-drawings`, { reason });
-      setReason('');
-      onCleared();
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  };
-  const act = async (route: 'hide' | 'delete', hidden?: boolean) => {
-    setError(null);
-    try {
-      await api.post(`/api/mod/studies/${study.id}/${route}`, { reason, ...(hidden === undefined ? {} : { hidden }) });
-      setReason('');
-      onChange(route === 'delete' ? null : hidden ?? true);
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  };
-  return (
-    <section class="ligungi-study__mod box box-pad">
-      <h2>{t.mod.panel}</h2>
-      <Field label={t.mod.reason} htmlFor="study-mod-reason">
-        <textarea
-          id="study-mod-reason"
-          class="form-control"
-          rows={2}
-          maxLength={REPORT_DETAILS_MAX}
-          value={reason}
-          onInput={(e) => setReason((e.target as HTMLTextAreaElement).value)}
-        />
-      </Field>
-      {error && <p class="error">{error}</p>}
-      <div class="ligungi-study__actions">
-        <button type="button" class="button button-empty" disabled={!reason.trim()} onClick={() => void act('hide', !study.hidden)}>
-          {study.hidden ? t.study.unhide : t.study.hide}
-        </button>
-        {chapterId && (
-          <button type="button" class="button button-empty" disabled={!reason.trim()} onClick={() => void clear()}>
-            {t.study.clearDrawings}
-          </button>
-        )}
-        <button type="button" class="button button-empty button-red" data-icon={icons.Trash} disabled={!reason.trim()} onClick={() => void act('delete')}>
-          {t.study.deleteStudy}
-        </button>
-      </div>
-    </section>
-  );
-};
-
 export const StudyPage = ({ id }: { id: string }) => {
   const t = useT();
   const { search } = useLocation();
   const { user, moderator } = useStore(session);
-  const [study, setStudy] = useState<StudyView | null>(null);
-  const [failed, setFailed] = useState<string | null>(null);
-  const [chapter, setChapter] = useState<StudyChapter | null>(null);
-  const [root, setRoot] = useState<StudyRoot | null>(null);
-  const [path, setPath] = useState<Path>([]);
-  const [orientation, setOrientation] = useState<Color>('white');
-  const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved');
   const [notice, setNotice] = useState<string | null>(null);
+  const {
+    study,
+    setStudy,
+    failed,
+    chapterId,
+    chapter,
+    setChapter,
+    root,
+    setRoot,
+    path,
+    setPath,
+    orientation,
+    setOrientation,
+    saveState,
+    editable,
+    start,
+    tree,
+    position,
+    node,
+    edit,
+    editTo,
+    discard,
+  } = useStudyChapter(id, new URLSearchParams(search).get('chapter'), setNotice);
   const [color, setColor] = useState<ShapeColor>('green');
   const [drawMode, setDrawMode] = useState(false);
   const [modal, setModal] = useState<'settings' | 'chapter' | 'newChapter' | null>(null);
@@ -140,84 +75,13 @@ export const StudyPage = ({ id }: { id: string }) => {
   const [hands, setHands] = useState<{ top: HTMLElement; bottom: HTMLElement } | null>(null);
   const topHand = useRef<HTMLDivElement>(null);
   const bottomHand = useRef<HTMLDivElement>(null);
-  const pending = useRef<Pending | null>(null);
   const { screenReader } = useStore(prefs);
   const tap = useTowerTap(true);
   const speaker: Speaker = { t, names: usePieceNames() };
-  const saving = useRef(false);
-  const timer = useRef<number | undefined>(undefined);
-
-  const wanted = new URLSearchParams(search).get('chapter');
-  const chapterId = study ? (study.chapters.find((c) => c.id === wanted) ?? study.chapters[0])?.id : undefined;
-  const editable = study?.mine === true;
-
-  // One save at a time: two in flight could reach the server out of order and leave the older tree saved.
-  const flush = (keepalive = false) => {
-    window.clearTimeout(timer.current);
-    const next = pending.current;
-    if (!next) return;
-    if (keepalive) {
-      pending.current = null;
-      void fetch(next.url, { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ root: next.root }) });
-      return;
-    }
-    if (saving.current) return;
-    pending.current = null;
-    saving.current = true;
-    api
-      .post(next.url, { root: next.root })
-      .then(() => {
-        saving.current = false;
-        if (pending.current) flush();
-        else setSaveState('saved');
-      })
-      .catch(() => {
-        saving.current = false;
-        pending.current ??= next;
-        setSaveState('error');
-      });
-  };
 
   useEffect(() => {
     if (topHand.current && bottomHand.current) setHands({ top: topHand.current, bottom: bottomHand.current });
-    const leave = () => flush(true);
-    window.addEventListener('pagehide', leave);
-    return () => {
-      window.removeEventListener('pagehide', leave);
-      flush();
-    };
   }, []);
-
-  useEffect(() => {
-    setStudy(null);
-    setFailed(null);
-    api
-      .get<StudyView>(`/api/studies/${id}`)
-      .then(setStudy)
-      .catch((err: Error) => setFailed(err.message));
-  }, [id]);
-
-  useEffect(() => {
-    if (!chapterId) return;
-    flush();
-    let current = true;
-    api
-      .get<StudyChapter>(`/api/studies/${id}/chapters/${chapterId}`)
-      .then((loaded) => {
-        if (!current) return;
-        setChapter(loaded);
-        setRoot(loaded.root);
-        // A link can open the chapter at a move (`?move=0.1.0`), as a moderator's link to a report does.
-        const move = (new URLSearchParams(window.location.search).get('move') ?? '').split('.').filter(Boolean).map(Number);
-        setPath(move.length > 0 && move.every(Number.isInteger) && nodeAt(loaded.root, move) ? move : []);
-        setOrientation(loaded.orientation);
-        setSaveState('saved');
-      })
-      .catch((err: Error) => current && setFailed(err.message));
-    return () => {
-      current = false;
-    };
-  }, [id, chapterId]);
 
   useEffect(() => {
     if (!notice) return;
@@ -225,10 +89,6 @@ export const StudyPage = ({ id }: { id: string }) => {
     return () => window.clearTimeout(clear);
   }, [notice]);
 
-  const start = useMemo(() => (chapter ? parseFen(chapter.fen) : null), [chapter]);
-  const tree = chapter?.id === chapterId ? root : null;
-  const position = useMemo(() => (start && tree ? positionAt(start, tree, path) : null), [start, tree, path]);
-  const node = tree ? (nodeAt(tree, path) ?? tree) : null;
   const legal = useMemo(() => (editable && position ? legalMoves(position) : []), [editable, position]);
   const lastMove = path.length && node ? (parseMove((node as StudyNode).move) ?? null) : null;
   // Spoken moves: the move of the node reached, each time it changes; opening a chapter says nothing.
@@ -240,20 +100,6 @@ export const StudyPage = ({ id }: { id: string }) => {
     if (opened || !lastMove || !start || !tree) return;
     sayMove('review', positionAt(start, tree, path.slice(0, -1)), lastMove, 'other');
   }, [pathKey, chapter?.id]);
-
-  /** Applies an edit of the author and saves it shortly after, unless it would make the chapter too big. */
-  const edit = (next: StudyRoot, nextPath: Path = path) => {
-    if (!chapter || !study) return;
-    if (!chapterFits(next)) return setNotice(errorText(t, 'chapterTooLarge'));
-    setRoot(next);
-    setPath(nextPath);
-    pending.current = { url: `/api/studies/${study.id}/chapters/${chapter.id}`, root: next };
-    setSaveState('saving');
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => flush(), SAVE_DELAY_MS);
-  };
-
-  const editTo = (next: { root: StudyRoot; path: Path }) => edit(next.root, next.path);
 
   const onMove = (move: Move) => {
     if (!tree) return;
@@ -631,7 +477,7 @@ export const StudyPage = ({ id }: { id: string }) => {
             setModal(null);
           }}
           onDeleted={(next) => {
-            pending.current = null;
+            discard();
             setStudy(next);
             setModal(null);
             navigate(`/study/${study.id}`, true);

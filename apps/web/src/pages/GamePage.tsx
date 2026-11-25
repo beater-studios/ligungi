@@ -3,14 +3,10 @@ import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type GameView } from '@ligungi/p
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { usePresence } from '../presence.ts';
-import { api } from '../api.ts';
 import { turnNotice } from '../challenges.ts';
-import { ExportGame } from '../components/ExportGame.tsx';
-import { BookmarkPanel } from '../components/BookmarkPanel.tsx';
 import { Crosstable } from '../components/Crosstable.tsx';
 import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
-import { errorText, getT, outcomeText, pieceNamesFor, playerName, speedText, useT } from '../i18n/index.ts';
-import { icons } from '../icons.ts';
+import { getT, outcomeText, pieceNamesFor, playerName, useT } from '../i18n/index.ts';
 import { moveText, useMoveText } from '../notation.ts';
 import { notify } from '../notify.ts';
 import { prefs } from '../prefs.ts';
@@ -18,18 +14,14 @@ import { replayGame } from '../replay.ts';
 import { socket } from '../socket.ts';
 import { playSound } from '../sound.ts';
 import { moveSound } from '../speech.ts';
-import { ReportButton } from '../components/ReportButton.tsx';
-import { VoidGame } from '../components/VoidGame.tsx';
-import { session } from '../session.ts';
 import { useStore } from '../store.ts';
+import { GameControls, gameCommands, type Declined } from './game/GameControls.tsx';
+import { GameInfo } from './game/GameInfo.tsx';
+import { useGameSocket } from './game/useGameSocket.ts';
 
 /** `tv`: the channel list, shown above the game details when the game is watched on a TV channel. */
 export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => {
   const t = useT();
-  const { user, moderator } = useStore(session);
-  const [view, setView] = useState<GameView | null>(null);
-  const [receivedAt, setReceivedAt] = useState(0);
-  const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [ply, setPly] = useState<number | null>(null);
   const [flipped, setFlipped] = useState(false);
@@ -41,39 +33,14 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
   const [confirming, setConfirming] = useState<'resign' | 'draw' | null>(null);
   const previous = useRef<Pick<GameView, 'status' | 'drawOffer' | 'takebackOffer' | 'rematchOffer'> & { plies: number } | null>(null);
   /** The opponent turned down the viewer's offer: said once, until the next move or offer. */
-  const [declined, setDeclined] = useState<'draw' | 'takeback' | 'rematch' | null>(null);
+  const [declined, setDeclined] = useState<Declined | null>(null);
+  const { view, receivedAt, error } = useGameSocket(id, setNotice);
 
   useEffect(() => {
-    setView(null);
     setPly(null);
     setPremove(null);
-    setError(null);
     setDeclined(null);
     previous.current = null;
-    let alive = true;
-    api
-      .get<GameView>(`/api/games/${id}`)
-      .then((game) => {
-        if (!alive) return;
-        setView((current) => current ?? game);
-        setReceivedAt(performance.now());
-      })
-      .catch((err: Error) => alive && setError(err.message));
-    const unsubscribe = socket.subscribe(`game:${id}`);
-    const off = socket.on((message) => {
-      if (message.t === 'game' && message.game.id === id) {
-        setView(message.game);
-        setReceivedAt(performance.now());
-      } else if (message.t === 'error') {
-        setNotice(errorText(getT(), message.code, message.message));
-        playSound('error');
-      }
-    });
-    return () => {
-      alive = false;
-      unsubscribe();
-      off();
-    };
   }, [id]);
 
   // Keyed on the last move too: after a takeback the list can come back with the same length but other moves.
@@ -233,8 +200,7 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
   const opponent = you ? opposite(you) : null;
   const started = view.status === 'started';
   const turn = replay.game.position.turn;
-  const action = (kind: 'resign' | 'abort' | 'claim') => socket.send({ t: kind, game: view.id });
-  const offer = (kind: 'draw' | 'rematch' | 'takeback', act: 'offer' | 'accept' | 'decline') => socket.send({ t: kind, game: view.id, action: act });
+  const { action, offer } = gameCommands(view.id);
   const giveTime = view.canGiveTime
     ? { label: t.game.giveTime(EXTRA_TIME_SECONDS), onClick: () => socket.send({ t: 'moretime', game: view.id }) }
     : null;
@@ -273,169 +239,22 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
     ? t.turnStatus(position.phase === 'draft', turn, myTurn ? 'you' : null)
     : outcomeText(t, view.outcome, view.status === 'aborted');
 
-  const pendingText = pending ? (({ text, full }) => full ?? text)(listedMove(position, pending)) : '';
+  const pendingText = pending ? (({ text, full }) => full ?? text)(listedMove(position, pending)) : null;
   const controls = (
-    <>
-      {pending && (
-        <div class="question ligungi-confirm-move" role="group" aria-label={t.game.confirmMove}>
-          <button type="button" class="no" title={t.game.cancel} aria-label={t.game.cancel} data-icon={icons.X} onClick={() => setPending(null)} />
-          <p>
-            {t.game.confirmMove} <strong>{pendingText}</strong>
-          </p>
-          <button type="button" class="yes" title={t.game.confirm} aria-label={t.game.confirm} data-icon={icons.Checkmark} onClick={confirmPending} />
-        </div>
-      )}
-      {you && started && (
-        <div class="ricons">
-          {doneAvailable && (
-            <button type="button" class="fbt text strong glowing ligungi-done" onClick={() => send({ kind: 'done' })}>
-              {t.done}
-            </button>
-          )}
-          {confirming ? (
-            <div class="act-confirm">
-              <span class="ligungi-confirm-text">{confirming === 'resign' ? t.game.confirmResign : t.game.confirmDraw}</span>
-              <button
-                type="button"
-                class="fbt yes"
-                title={t.game.confirm}
-                data-icon={icons.Checkmark}
-                onClick={() => {
-                  if (confirming === 'resign') action('resign');
-                  else offer('draw', 'offer');
-                  setConfirming(null);
-                }}
-              />
-              <button type="button" class="fbt no" title={t.game.cancel} data-icon={icons.X} onClick={() => setConfirming(null)} />
-            </div>
-          ) : view.canAbort ? (
-            <button type="button" class="fbt abort ligungi-ctl" title={t.game.abort} data-icon={icons.X} onClick={() => action('abort')}>
-              <span>{t.game.ctlAbort}</span>
-            </button>
-          ) : (
-            <>
-              {view.canTakeback && view.takebackOffer !== opponent && (
-                <button
-                  type="button"
-                  class="fbt takeback-yes ligungi-ctl"
-                  title={view.takebackOffer === you ? t.game.takebackProposed : t.game.proposeTakeback}
-                  disabled={view.takebackOffer === you}
-                  data-icon={icons.Back}
-                  onClick={() => offer('takeback', 'offer')}
-                >
-                  <span>{t.game.ctlTakeback}</span>
-                </button>
-              )}
-              <button
-                type="button"
-                class="fbt draw-yes ligungi-ctl"
-                title={view.drawOffer === you ? t.game.drawOffered : t.game.offerDraw}
-                disabled={view.drawOffer === you}
-                data-icon={icons.OneHalf}
-                onClick={() => setConfirming('draw')}
-              >
-                <span>{t.game.ctlDraw}</span>
-              </button>
-              <button type="button" class="fbt resign ligungi-ctl" title={t.game.resign} data-icon={icons.FlagOutline} onClick={() => setConfirming('resign')}>
-                <span>{t.game.ctlResign}</span>
-              </button>
-            </>
-          )}
-        </div>
-      )}
-      {you && started && view.drawOffer === opponent && (
-        <div class="question">
-          <button type="button" class="no" title={t.game.decline} data-icon={icons.X} onClick={() => offer('draw', 'decline')} />
-          <p>{t.game.opponentOffersDraw}</p>
-          <button type="button" class="yes" title={t.game.accept} data-icon={icons.Checkmark} onClick={() => offer('draw', 'accept')} />
-        </div>
-      )}
-      {you && started && view.takebackOffer === opponent && (
-        <div class="question">
-          <button type="button" class="no" title={t.game.decline} data-icon={icons.X} onClick={() => offer('takeback', 'decline')} />
-          <p>{t.game.opponentProposesTakeback}</p>
-          <button type="button" class="yes" title={t.game.accept} data-icon={icons.Checkmark} onClick={() => offer('takeback', 'accept')} />
-        </div>
-      )}
-      {you && started && view.drawOffer === you && (
-        <div class="pending">
-          <p>{t.game.drawPending}</p>
-        </div>
-      )}
-      {you && started && view.takebackOffer === you && (
-        <div class="pending">
-          <p>{t.game.takebackPending}</p>
-        </div>
-      )}
-      {declined && (
-        <p class="ligungi-declined" role="status">
-          {{ draw: t.game.drawDeclined, takeback: t.game.takebackDeclined, rematch: t.game.rematchDeclined }[declined]}
-        </p>
-      )}
-      {view.canClaimVictory && (
-        <div class="suggestion">
-          <p>{t.game.opponentLeft}</p>
-          <button type="button" class="button" onClick={() => action('claim')}>
-            {t.game.claimVictory}
-          </button>
-        </div>
-      )}
-      {!started && (
-        <div class="follow-up">
-          {view.rematchId ? (
-            <a class="fbt strong glowing" href={`/${view.rematchId}`}>
-              {t.game.goToRematch}
-            </a>
-          ) : you && view.status === 'ended' && view.rematchOffer === opponent ? (
-            <div class="question">
-              <button type="button" class="no" title={t.game.decline} data-icon={icons.X} onClick={() => offer('rematch', 'decline')} />
-              <p>{t.game.opponentWantsRematch}</p>
-              <button type="button" class="yes" title={t.game.accept} data-icon={icons.Checkmark} onClick={() => offer('rematch', 'accept')} />
-            </div>
-          ) : you && view.status === 'ended' ? (
-            <button
-              type="button"
-              class={`fbt rematch ${view.rematchOffer === you ? 'glowing' : ''}`}
-              disabled={view.rematchOffer === you}
-              onClick={() => offer('rematch', 'offer')}
-            >
-              {view.rematchOffer === you ? t.game.rematchOffered : t.game.rematch}
-            </button>
-          ) : null}
-          <a class="fbt" href="/">
-            {t.common.newGame}
-          </a>
-        </div>
-      )}
-    </>
+    <GameControls
+      view={view}
+      doneAvailable={doneAvailable}
+      pendingText={pendingText}
+      onCancelPending={() => setPending(null)}
+      onConfirmPending={confirmPending}
+      onDone={() => send({ kind: 'done' })}
+      confirming={confirming}
+      onConfirming={setConfirming}
+      declined={declined}
+    />
   );
 
-  const info = (
-    <section class="ligungi-card ligungi-game-info">
-      <p class="ligungi-game-info__setup">
-        {t.modes[view.mode]} · {speedText(t, view)} · {view.rated ? t.rated : t.casual}
-      </p>
-      {view.freeDraft && <p class="ligungi-notice">{t.freeDraftHint}</p>}
-      {!started && <p class="ligungi-game-info__status">{outcomeText(t, view.outcome, view.status === 'aborted')}</p>}
-      {notice && <p class="ligungi-notice">{notice}</p>}
-      {premove && <p class="ligungi-notice">{t.game.premove(moveToString(premove))}</p>}
-      {view.voided && <p class="ligungi-notice ligungi-game-info__voided">{t.mod.voided}</p>}
-      <ExportGame gameId={view.id} />
-      {user && <BookmarkPanel gameId={view.id} />}
-      {(() => {
-        // A player can report their opponent from the game; a moderator can void a finished rated one.
-        const rival = opponent ? view.players[opponent].user : null;
-        const canVoid = moderator && view.status === 'ended' && view.rated && !view.voided;
-        if (!(user && rival) && !canVoid) return null;
-        return (
-          <div class="ligungi-game-info__actions">
-            {user && rival && <ReportButton username={rival.name} gameId={view.id} />}
-            {canVoid && <VoidGame gameId={view.id} />}
-          </div>
-        );
-      })()}
-    </section>
-  );
+  const info = <GameInfo view={view} notice={notice} premove={premove} />;
   // Between two accounts, their record so far, from the viewer's side when they play; reloaded when the game ends.
   const [whiteUser, blackUser] = [view.players.white.user, view.players.black.user];
   const crosstable =

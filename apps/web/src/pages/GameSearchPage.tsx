@@ -1,10 +1,10 @@
 import { MODES } from '@ligungi/engine';
 import { GAME_REASONS, GAME_SEARCH_PAGES_MAX, type GameSearchResult, type GameSummary } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../api.ts';
+import { api } from '../core/api.ts';
 import { Field, Select, SubmitButton } from '../components/ui.tsx';
 import { formatDate, playerName, speedText, useT } from '../i18n/index.ts';
-import { navigate, useLocation } from '../router.ts';
+import { navigate, useLocation } from '../core/router.ts';
 
 const FIELDS = ['player', 'color', 'vs', 'mode', 'rated', 'result', 'reason', 'ratingMin', 'ratingMax', 'from', 'to', 'movesMin', 'movesMax'] as const;
 type Form = Record<(typeof FIELDS)[number], string>;

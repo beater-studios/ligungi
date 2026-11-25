@@ -52,8 +52,8 @@ Element.prototype.scrollIntoView = () => undefined;
 
 const { h, render } = await import('preact');
 const { App } = await import('../src/app.tsx');
-const { navigate } = await import('../src/router.ts');
-const { updatePrefs } = await import('../src/prefs.ts');
+const { navigate } = await import('../src/core/router.ts');
+const { updatePrefs } = await import('../src/prefs/prefs.ts');
 
 const root = document.createElement('div');
 document.body.append(root);

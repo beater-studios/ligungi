@@ -1,8 +1,8 @@
-import { RaceTrack } from '../../components/RaceTrack.tsx';
-import { Flag } from '../../components/Flag.tsx';
-import { PlayerTag } from '../../components/PlayerTag.tsx';
-import { ProfileAbout } from '../../components/ProfileAbout.tsx';
-import { RatingHistoryChart } from '../../components/RatingHistoryChart.tsx';
+import { RaceTrack } from '../../puzzles/RaceTrack.tsx';
+import { Flag } from '../../players/Flag.tsx';
+import { PlayerTag } from '../../players/PlayerTag.tsx';
+import { ProfileAbout } from '../../players/ProfileAbout.tsx';
+import { RatingHistoryChart } from '../../players/RatingHistoryChart.tsx';
 import { Example, Section } from './parts.tsx';
 
 export const DataSection = () => (

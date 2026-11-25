@@ -1,11 +1,11 @@
 import { REPORT_DETAILS_MAX, type ModLogEntry, type ReportView } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { ModLog } from '../components/ModLog.tsx';
+import { api } from '../core/api.ts';
+import { ModLog } from '../mod/ModLog.tsx';
 import { Field, SubmitButton } from '../components/ui.tsx';
 import { formatDate, useT } from '../i18n/index.ts';
-import { session } from '../session.ts';
-import { useStore } from '../store.ts';
+import { session } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
 
 const ReportCard = ({ report, onClosed }: { report: ReportView; onClosed: () => void }) => {
   const t = useT();

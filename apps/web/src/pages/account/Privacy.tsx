@@ -3,7 +3,7 @@ import {
   type FollowPolicy,
 } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../../api.ts';
+import { api } from '../../core/api.ts';
 import { OptionCards } from '../../components/ui.tsx';
 import { useT } from '../../i18n/index.ts';
 import { icons } from '../../icons.ts';

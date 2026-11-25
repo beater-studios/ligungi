@@ -2,8 +2,8 @@ import type { PieceNames } from '@ligungi/board';
 import type { Outcome } from '@ligungi/engine';
 import { DAY_MS, formatTimeControl, isErrorCode, type GameSettings, type TimeControl } from '@ligungi/protocol';
 import type { ColorChoice } from '@ligungi/protocol';
-import { prefs, resolveLang, updatePrefs, type Prefs, type Theme } from '../prefs.ts';
-import { useStore } from '../store.ts';
+import { prefs, resolveLang, updatePrefs, type Prefs, type Theme } from '../prefs/prefs.ts';
+import { useStore } from '../core/store.ts';
 import { ENGLISH, listText, loadAllLanguages, loadLanguage, loads, messagesFor, pieceNamesFor, type Messages } from './messages.ts';
 
 export { ENGLISH, listText, loadAllLanguages, loadLanguage, messagesFor, pieceNamesFor, type Messages };

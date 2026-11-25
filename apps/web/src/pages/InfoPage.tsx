@@ -1,5 +1,5 @@
 import { useEffect } from 'preact/hooks';
-import { CookiePreferences } from '../components/Consent.tsx';
+import { CookiePreferences } from '../layout/Consent.tsx';
 import { LEGAL_UPDATED, usePage } from '../i18n/content/index.ts';
 import { faqItems, Markdown } from '../i18n/content/markdown.tsx';
 import { useT } from '../i18n/index.ts';

@@ -1,16 +1,16 @@
 import { initialPosition, legalMoves, parseFen, parseSquare } from '@ligungi/engine';
-import { FeedList } from '../../components/ActivityFeed.tsx';
+import { FeedList } from '../../players/ActivityFeed.tsx';
 import { TowerStrip } from '../../components/Panels.tsx';
-import { BlindPanel } from '../../components/BlindPanel.tsx';
+import { BlindPanel } from '../../blind/BlindPanel.tsx';
 import { BoardView } from '../../components/BoardView.tsx';
-import { CrosstableView } from '../../components/Crosstable.tsx';
-import { KeyboardMove } from '../../components/KeyboardMove.tsx';
-import { RatingTrend } from '../../components/RatingTrend.tsx';
+import { CrosstableView } from '../../game/Crosstable.tsx';
+import { KeyboardMove } from '../../game/KeyboardMove.tsx';
+import { RatingTrend } from '../../players/RatingTrend.tsx';
 import { MiniBoard } from '../../components/MiniBoard.tsx';
-import { Stars } from '../../components/Stars.tsx';
+import { Stars } from '../../learn/Stars.tsx';
 import { icons } from '../../icons.ts';
 import { ResultBar } from '../../components/ResultBar.tsx';
-import { Records } from '../../components/Records.tsx';
+import { Records } from '../../puzzles/Records.tsx';
 import { Example, Section } from './parts.tsx';
 
 const lessonPosition = parseFen('9/9/9/9/9/9/4P4/4S4/9 w - advanced p w');
@@ -184,7 +184,7 @@ export const GameSection = () => (
         </ul>
       </section>
     </Example>
-    <Example label="Rating trend beside a rating (components/RatingTrend.tsx): the change over the last 7 days, nothing when it did not move">
+    <Example label="Rating trend beside a rating (players/RatingTrend.tsx): the change over the last 7 days, nothing when it did not move">
       <span style={{ display: 'flex', gap: '1.5rem' }}>
         <span>
           <strong>1712</strong> <RatingTrend value={24} />
@@ -194,7 +194,7 @@ export const GameSection = () => (
         </span>
       </span>
     </Example>
-    <Example label="Head to head between two players (components/Crosstable.tsx): score, draws and the latest results from the first player's side">
+    <Example label="Head to head between two players (game/Crosstable.tsx): score, draws and the latest results from the first player's side">
       <div style={{ maxWidth: '20rem', width: '100%' }}>
         <CrosstableView
           data={{

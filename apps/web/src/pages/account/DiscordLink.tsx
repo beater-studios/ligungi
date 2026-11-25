@@ -6,10 +6,10 @@ import {
   type DiscordLinkView,
 } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../../api.ts';
+import { api } from '../../core/api.ts';
 import { useT } from '../../i18n/index.ts';
 import { LINKS } from '../../i18n/content/shared.tsx';
-import { navigate, useLocation } from '../../router.ts';
+import { navigate, useLocation } from '../../core/router.ts';
 
 /**
  * The link to the community Discord server: the rank role the bot gives from the rating, the Linked Roles connection,

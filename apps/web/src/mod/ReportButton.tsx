@@ -1,0 +1,101 @@
+import { REPORT_DETAILS_MAX, REPORT_REASONS, type ReportReason } from '@ligungi/protocol';
+import { useState } from 'preact/hooks';
+import { api } from '../core/api.ts';
+import { useT } from '../i18n/index.ts';
+import { icons } from '../icons.ts';
+import { Modal } from '../components/Modal.tsx';
+import { Field, OptionCards, SubmitButton } from '../components/ui.tsx';
+
+/** What a study can be reported for: what it shows, or anything else. */
+const STUDY_REASONS: readonly ReportReason[] = ['content', 'other'];
+const PLAYER_REASONS = REPORT_REASONS.filter((reason) => reason !== 'content');
+
+/**
+ * Reports a player to the moderators, from their profile or from a game against them, or one of their studies
+ * (`studyId`), at the chapter and move the reporter is on (`chapter`), so a moderator lands on what was reported.
+ */
+export const ReportButton = ({
+  username,
+  gameId,
+  studyId,
+  chapter,
+}: {
+  username: string;
+  gameId?: string;
+  studyId?: string;
+  chapter?: { readonly id: string; readonly name: string; readonly path: string };
+}) => {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState<ReportReason>(studyId ? 'content' : 'cheating');
+  const [details, setDetails] = useState('');
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const close = () => {
+    setOpen(false);
+    setSent(false);
+    setError(null);
+    setDetails('');
+  };
+
+  const submit = async (event: Event) => {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      await api.post('/api/reports', {
+        reason,
+        details,
+        ...(studyId ? { studyId } : { username }),
+        ...(gameId ? { gameId } : {}),
+        ...(studyId && chapter ? { chapterId: chapter.id, chapterPath: chapter.path } : {}),
+      });
+      setSent(true);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <button type="button" class="button button-empty text" data-icon={icons.FlagOutline} onClick={() => setOpen(true)}>
+        {t.report.button}
+      </button>
+      {open && (
+        <Modal title={studyId ? t.report.studyTitle : t.report.title(username)} onClose={close}>
+          {sent ? (
+            <p class="ligungi-success">{t.report.sent}</p>
+          ) : (
+            <form class="form3 ligungi-report-form" onSubmit={submit}>
+              {studyId && chapter && <p class="ligungi-report-form__chapter">{t.report.chapter(chapter.name)}</p>}
+              <OptionCards
+                name="report-reason"
+                legend={t.report.reason}
+                layout="row"
+                value={reason}
+                options={(studyId ? STUDY_REASONS : PLAYER_REASONS).map((value) => ({ value, label: t.report.reasons[value] }))}
+                onChange={setReason}
+              />
+              <Field label={t.report.details} htmlFor="report-details" help={studyId ? t.report.studyDetailsHelp : t.report.detailsHelp}>
+                <textarea
+                  id="report-details"
+                  class="form-control"
+                  rows={4}
+                  maxLength={REPORT_DETAILS_MAX}
+                  value={details}
+                  onInput={(e) => setDetails((e.target as HTMLTextAreaElement).value)}
+                />
+              </Field>
+              {error && <p class="error">{error}</p>}
+              <SubmitButton disabled={busy}>{t.report.send}</SubmitButton>
+            </form>
+          )}
+        </Modal>
+      )}
+    </>
+  );
+};

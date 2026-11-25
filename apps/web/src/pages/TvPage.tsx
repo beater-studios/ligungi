@@ -1,11 +1,11 @@
 import { MODES, type Mode } from '@ligungi/engine';
 import type { GameSummary } from '@ligungi/protocol';
 import { useState } from 'preact/hooks';
-import { LivePlayer } from '../components/LivePlayer.tsx';
+import { LivePlayer } from '../game/LivePlayer.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { speedText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { useLiveGames } from '../liveGames.ts';
+import { useLiveGames } from '../game/liveGames.ts';
 
 const GameCard = ({ game, since, featured = false }: { game: GameSummary; since: number; featured?: boolean }) => {
   const t = useT();

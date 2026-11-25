@@ -1,8 +1,8 @@
 import { Gungiground, type Api, type Config } from '@ligungi/board';
 import { useEffect, useRef } from 'preact/hooks';
 import { usePieceNames, useT } from '../i18n/index.ts';
-import { guidesShown, prefs } from '../prefs.ts';
-import { useStore } from '../store.ts';
+import { guidesShown, prefs } from '../prefs/prefs.ts';
+import { useStore } from '../core/store.ts';
 
 export type BoardProps = Partial<Omit<Config, 'pieceNames' | 'moveGuides' | 'pieceStyle' | 'labels' | 'coordinates' | 'coordinateStyle' | 'animation' | 'hoverReach'>>;
 

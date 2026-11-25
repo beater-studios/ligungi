@@ -3,8 +3,8 @@ import {
   type Leaderboard,
 } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../../api.ts';
-import { RatingTrend } from '../../components/RatingTrend.tsx';
+import { api } from '../../core/api.ts';
+import { RatingTrend } from '../../players/RatingTrend.tsx';
 import { useT } from '../../i18n/index.ts';
 
 /** Leaders shown per mode in the home's leaders card. */

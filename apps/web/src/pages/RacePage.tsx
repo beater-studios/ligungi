@@ -1,19 +1,19 @@
 import { moveToString, opposite, type Color, type Move } from '@ligungi/engine';
 import { RACE_TIME_MS, type RaceView } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { RaceTrack } from '../components/RaceTrack.tsx';
-import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
+import { api } from '../core/api.ts';
+import { RaceTrack } from '../puzzles/RaceTrack.tsx';
+import { RoundLayout, type RoundPlayer } from '../game/RoundLayout.tsx';
 import { SettingRow, Toggle } from '../components/ui.tsx';
 import { discordActivity, inActivity } from '../discord/activity.ts';
 import { formatClock, useT } from '../i18n/index.ts';
-import { racerName, setShowGhosts, showGhosts } from '../racer.ts';
-import { navigate } from '../router.ts';
-import { usePuzzleEntries, usePuzzleSolver } from '../puzzleSolver.ts';
-import { socket } from '../socket.ts';
+import { racerName, setShowGhosts, showGhosts } from '../puzzles/racer.ts';
+import { navigate } from '../core/router.ts';
+import { usePuzzleEntries, usePuzzleSolver } from '../puzzles/puzzleSolver.ts';
+import { socket } from '../core/socket.ts';
 import { playSound } from '../sound.ts';
-import { useStore } from '../store.ts';
-import { useCopy, useTimers } from '../hooks.ts';
+import { useStore } from '../core/store.ts';
+import { useCopy, useTimers } from '../core/hooks.ts';
 
 /** The opponent's reply and the next puzzle come quickly: the clock is running for everyone. */
 const ANSWER_DELAY_MS = 250;

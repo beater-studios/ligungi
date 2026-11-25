@@ -1,17 +1,17 @@
 import { MODES, type Mode } from '@ligungi/engine';
 import { RATING_BAND, type OnlinePlayer, type PlayersView } from '@ligungi/protocol';
 import { useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { CreateGame } from '../components/CreateGame.tsx';
-import { Flag } from '../components/Flag.tsx';
-import { RatingChart } from '../components/RatingChart.tsx';
+import { api } from '../core/api.ts';
+import { CreateGame } from '../game/CreateGame.tsx';
+import { Flag } from '../players/Flag.tsx';
+import { RatingChart } from '../players/RatingChart.tsx';
 import { Checkbox, Select } from '../components/ui.tsx';
 import { playerName, timeAgo, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { session } from '../session.ts';
-import { useStore } from '../store.ts';
-import { usePolling } from '../hooks.ts';
-import { CommunityNav } from '../components/CommunityNav.tsx';
+import { session } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
+import { usePolling } from '../core/hooks.ts';
+import { CommunityNav } from '../players/CommunityNav.tsx';
 
 const REFRESH_MS = 30_000;
 

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'preact/hooks';
-import { ApiError } from '../api.ts';
+import { ApiError } from '../core/api.ts';
 import { Field, SubmitButton } from '../components/ui.tsx';
 import { asSentence, formatDate, useT } from '../i18n/index.ts';
-import { prefs, updatePrefs } from '../prefs.ts';
-import { navigate, useLocation } from '../router.ts';
-import { login } from '../session.ts';
-import { useStore } from '../store.ts';
+import { prefs, updatePrefs } from '../prefs/prefs.ts';
+import { navigate, useLocation } from '../core/router.ts';
+import { login } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
 
 /**
  * Where to go after signing in, from `?next=`: only a path on this site, never another origin (`//host`). A server

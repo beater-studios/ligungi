@@ -1,6 +1,6 @@
-import { prefs, updatePrefs } from './prefs.ts';
-import { navigate } from './router.ts';
-import { createStore } from './store.ts';
+import { prefs, updatePrefs } from './prefs/prefs.ts';
+import { navigate } from './core/router.ts';
+import { createStore } from './core/store.ts';
 
 export type NotifyPermission = 'default' | 'granted' | 'denied' | 'unsupported';
 

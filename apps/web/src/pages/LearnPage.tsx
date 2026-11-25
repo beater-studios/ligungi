@@ -15,10 +15,10 @@ import { useEffect, useState } from 'preact/hooks';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { PieceGlyph } from '../components/PieceGlyph.tsx';
 import { icons } from '../icons.ts';
-import { PieceTrainer } from '../components/PieceTrainer.tsx';
+import { PieceTrainer } from '../learn/PieceTrainer.tsx';
 import { usePage } from '../i18n/content/index.ts';
 import { Markdown } from '../i18n/content/markdown.tsx';
-import { squareText } from '../blind.ts';
+import { squareText } from '../blind/blind.ts';
 import { listText, usePieceNames, useT } from '../i18n/index.ts';
 
 const CENTER = squareAt(4, 4);

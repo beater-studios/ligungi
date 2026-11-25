@@ -3,15 +3,15 @@ import { legalMoves, opposite, parseFen, parseMove, repetitionKey, toFen, type C
 import { PRACTICE_LEVEL, PRACTICE_POSITIONS, PRACTICE_SECTIONS, practiceResult, type PracticeGoal, type PracticePosition } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { MiniBoard } from '../components/MiniBoard.tsx';
-import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
+import { RoundLayout, type RoundPlayer } from '../game/RoundLayout.tsx';
 import { useT, type Messages } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { useLocalGame } from '../localGame.ts';
-import { usePracticeProgress, type PracticeProgress } from '../practiceProgress.ts';
-import { session } from '../session.ts';
+import { useLocalGame } from '../game/localGame.ts';
+import { usePracticeProgress, type PracticeProgress } from '../learn/practiceProgress.ts';
+import { session } from '../core/session.ts';
 import { playSound } from '../sound.ts';
-import { moveSound } from '../speech.ts';
-import { useStore } from '../store.ts';
+import { moveSound } from '../blind/speech.ts';
+import { useStore } from '../core/store.ts';
 
 const MIN_THINK_MS = 450;
 
@@ -83,7 +83,7 @@ const PracticeGame = ({ practice, record }: { practice: PracticePosition; record
   const request = useRef(0);
 
   useEffect(() => {
-    worker.current = new Worker(new URL('../bot.worker.ts', import.meta.url), { type: 'module' });
+    worker.current = new Worker(new URL('../game/bot.worker.ts', import.meta.url), { type: 'module' });
     return () => worker.current?.terminate();
   }, []);
 

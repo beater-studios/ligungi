@@ -114,7 +114,7 @@
 }
 
 /*
- * ===== Compact dialogs: create a game (components/CreateGame.tsx) and the study forms (components/StudyForms.tsx).
+ * ===== Compact dialogs: create a game (game/CreateGame.tsx) and the study forms (study/StudyForms.tsx).
  * Every choice side by side and short gaps, so they need no scrolling. =====
  */
 .ligungi-modal__box:has(.ligungi-create, .ligungi-study-form) {

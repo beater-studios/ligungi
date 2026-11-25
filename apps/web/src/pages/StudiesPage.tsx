@@ -1,12 +1,12 @@
 import { STUDY_QUERY_MAX, type StudyList, type StudyListItem } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { NewStudyModal } from '../components/StudyForms.tsx';
+import { api } from '../core/api.ts';
+import { NewStudyModal } from '../study/StudyForms.tsx';
 import { timeAgo, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { navigate, useLocation } from '../router.ts';
-import { session } from '../session.ts';
-import { useStore } from '../store.ts';
+import { navigate, useLocation } from '../core/router.ts';
+import { session } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
 
 /** Waits this long after the last key before searching. */
 const SEARCH_DELAY_MS = 300;

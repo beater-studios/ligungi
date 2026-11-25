@@ -1,16 +1,16 @@
 import { initialPosition, legalMoves, parseMove, toFen, type Move, type Position } from '@ligungi/engine';
 import { EXPLORER_BANDS, EXPLORER_MODES, type ExplorerBand, type ExplorerMode, type ExplorerView } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { BlindPanel } from '../components/BlindPanel.tsx';
+import { api } from '../core/api.ts';
+import { BlindPanel } from '../blind/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { Checkbox, Field, OptionCards, Select } from '../components/ui.tsx';
 import { formatDate, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { useMoveText } from '../notation.ts';
-import { prefs } from '../prefs.ts';
-import { replayFrom } from '../replay.ts';
-import { useStore } from '../store.ts';
+import { useMoveText } from '../game/notation.ts';
+import { prefs } from '../prefs/prefs.ts';
+import { replayFrom } from '../game/replay.ts';
+import { useStore } from '../core/store.ts';
 import { ResultBar } from '../components/ResultBar.tsx';
 
 const percent = (part: number, whole: number) => (whole === 0 ? 0 : Math.round((part / whole) * 100));

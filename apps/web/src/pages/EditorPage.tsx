@@ -23,16 +23,16 @@ import {
   type Square,
 } from '@ligungi/engine';
 import { useEffect, useState } from 'preact/hooks';
-import { isWord, normalize, readPieceWords, squareText } from '../blind.ts';
-import { BlindPanel } from '../components/BlindPanel.tsx';
+import { isWord, normalize, readPieceWords, squareText } from '../blind/blind.ts';
+import { BlindPanel } from '../blind/BlindPanel.tsx';
 import { PieceGlyph } from '../components/PieceGlyph.tsx';
 import { Field, OptionCards, Select } from '../components/ui.tsx';
 import { usePieceNames, useT, type Messages } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { prefs } from '../prefs.ts';
-import { navigate, useLocation } from '../router.ts';
-import { useStore } from '../store.ts';
-import { useCopy } from '../hooks.ts';
+import { prefs } from '../prefs/prefs.ts';
+import { navigate, useLocation } from '../core/router.ts';
+import { useStore } from '../core/store.ts';
+import { useCopy } from '../core/hooks.ts';
 
 type Tool = { readonly kind: 'piece'; readonly piece: Piece } | { readonly kind: 'erase' };
 

@@ -1,4 +1,4 @@
-import { createStore } from '../../store.ts';
+import { createStore } from '../../core/store.ts';
 import { LANGS, type Lang } from '../languages.ts';
 import { markdownProblems, placeholdersOf } from './markdown.tsx';
 

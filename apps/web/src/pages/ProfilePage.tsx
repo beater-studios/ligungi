@@ -12,21 +12,21 @@ import {
   type UserProfile,
 } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { CreateGame } from '../components/CreateGame.tsx';
-import { Flag } from '../components/Flag.tsx';
-import { ModPanel } from '../components/ModPanel.tsx';
-import { Crosstable } from '../components/Crosstable.tsx';
-import { ProfileAbout } from '../components/ProfileAbout.tsx';
-import { ActivityTimeline } from '../components/ActivityFeed.tsx';
-import { RatingHistory } from '../components/RatingHistory.tsx';
-import { ReportButton } from '../components/ReportButton.tsx';
+import { api } from '../core/api.ts';
+import { CreateGame } from '../game/CreateGame.tsx';
+import { Flag } from '../players/Flag.tsx';
+import { ModPanel } from '../mod/ModPanel.tsx';
+import { Crosstable } from '../game/Crosstable.tsx';
+import { ProfileAbout } from '../players/ProfileAbout.tsx';
+import { ActivityTimeline } from '../players/ActivityFeed.tsx';
+import { RatingHistory } from '../players/RatingHistory.tsx';
+import { ReportButton } from '../mod/ReportButton.tsx';
 import { Select } from '../components/ui.tsx';
 import { countryName, formatDate, playerName, speedText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { navigate, useLocation } from '../router.ts';
-import { session } from '../session.ts';
-import { useStore } from '../store.ts';
+import { navigate, useLocation } from '../core/router.ts';
+import { session } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
 
 const PAGE = 20;
 

@@ -4,9 +4,9 @@ import type { ColorChoice } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Checkbox, OptionCards } from '../components/ui.tsx';
 import { colorChoiceOptions, useT } from '../i18n/index.ts';
-import { prefs } from '../prefs.ts';
+import { prefs } from '../prefs/prefs.ts';
 import { playSound } from '../sound.ts';
-import { useStore } from '../store.ts';
+import { useStore } from '../core/store.ts';
 
 type Mode = 'find' | 'name';
 type Style = 'rulebook' | 'machine';

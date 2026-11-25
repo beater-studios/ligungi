@@ -1,14 +1,14 @@
 import type { RacerLobbyView } from '@ligungi/protocol';
 import { useState } from 'preact/hooks';
-import { api } from '../api.ts';
+import { api } from '../core/api.ts';
 import { useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { racerRecords } from '../racer.ts';
-import { navigate } from '../router.ts';
-import { session } from '../session.ts';
-import { useStore } from '../store.ts';
-import { Records } from '../components/Records.tsx';
-import { usePolling } from '../hooks.ts';
+import { racerRecords } from '../puzzles/racer.ts';
+import { navigate } from '../core/router.ts';
+import { session } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
+import { Records } from '../puzzles/Records.tsx';
+import { usePolling } from '../core/hooks.ts';
 
 /** How often the page refreshes how many players wait for the public race. */
 const LOBBY_POLL_MS = 5_000;

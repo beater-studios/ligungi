@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { SiteIcon } from '../../components/ProfileAbout.tsx';
+import { SiteIcon } from '../../players/ProfileAbout.tsx';
 import { QrCode } from '../../components/QrCode.tsx';
 import { Checkbox, ColorField, Field, FieldRow, OptionCards, RadioGroup, Select, SettingRow, Slider, SubmitButton, Toggle } from '../../components/ui.tsx';
 import { Example, Section } from './parts.tsx';

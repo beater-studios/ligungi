@@ -12,25 +12,25 @@ import {
   type StudyShape,
 } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { sayMove } from '../speech.ts';
-import { BlindPanel } from '../components/BlindPanel.tsx';
+import { sayMove } from '../blind/speech.ts';
+import { BlindPanel } from '../blind/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
 import { DraftPanel, TowerPanel, TowerStrip } from '../components/Panels.tsx';
-import { ReportButton } from '../components/ReportButton.tsx';
-import { ChapterSettingsModal, NewChapterModal, StudySettingsModal } from '../components/StudyForms.tsx';
-import { StudyMoves } from '../components/StudyMoves.tsx';
+import { ReportButton } from '../mod/ReportButton.tsx';
+import { ChapterSettingsModal, NewChapterModal, StudySettingsModal } from '../study/StudyForms.tsx';
+import { StudyMoves } from '../study/StudyMoves.tsx';
 import { Field, Toggle } from '../components/ui.tsx';
-import { describeMove, describeShapes, isWord, normalize, parseDrawing, type Speaker } from '../blind.ts';
+import { describeMove, describeShapes, isWord, normalize, parseDrawing, type Speaker } from '../blind/blind.ts';
 import { listText, timeAgo, usePieceNames, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { prefs } from '../prefs.ts';
-import { navigate, useLocation } from '../router.ts';
-import { session } from '../session.ts';
-import { useStore } from '../store.ts';
-import { useTowerTap } from '../towerTap.ts';
+import { prefs } from '../prefs/prefs.ts';
+import { navigate, useLocation } from '../core/router.ts';
+import { session } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
+import { useTowerTap } from '../prefs/towerTap.ts';
 import { StudyModTools } from './study/StudyModTools.tsx';
 import { useStudyChapter } from './study/useStudyChapter.ts';
-import { addMove, deleteAt, lineEnd, nodeAt, positionAt, promote, updateAt, withoutShapes, type Path } from '../studyTree.ts';
+import { addMove, deleteAt, lineEnd, nodeAt, positionAt, promote, updateAt, withoutShapes, type Path } from '../study/studyTree.ts';
 
 const NOTICE_MS = 4000;
 

@@ -7,15 +7,15 @@ import {
   type TimeControl,
 } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { turns } from '../challenges.ts';
-import { CreateGame, type CreateTarget } from '../components/CreateGame.tsx';
+import { api } from '../core/api.ts';
+import { turns } from '../game/challenges.ts';
+import { CreateGame, type CreateTarget } from '../game/CreateGame.tsx';
 import { Modal } from '../components/Modal.tsx';
 import { formatClock, playerName, settingsText, speedText, useT } from '../i18n/index.ts';
-import { navigate, useLocation } from '../router.ts';
-import { session } from '../session.ts';
-import { socket } from '../socket.ts';
-import { useStore } from '../store.ts';
+import { navigate, useLocation } from '../core/router.ts';
+import { session } from '../core/session.ts';
+import { socket } from '../core/socket.ts';
+import { useStore } from '../core/store.ts';
 import { FollowFeed, OnlineFriends } from './home/Friends.tsx';
 import { Leaders } from './home/Leaders.tsx';
 import { Live } from './home/Live.tsx';

@@ -9,11 +9,11 @@ import {
   type ProfileSite,
 } from '@ligungi/protocol';
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { api } from '../../api.ts';
-import { SiteIcon } from '../../components/ProfileAbout.tsx';
+import { api } from '../../core/api.ts';
+import { SiteIcon } from '../../players/ProfileAbout.tsx';
 import { Field, Select, SubmitButton } from '../../components/ui.tsx';
 import { countryName, errorText, useT } from '../../i18n/index.ts';
-import { SITE_NAMES } from '../../profileSites.ts';
+import { SITE_NAMES } from '../../players/profileSites.ts';
 
 type LinkDrafts = Record<ProfileSite, string>;
 

@@ -1,4 +1,4 @@
-import { prefs, type SoundSet } from './prefs.ts';
+import { prefs, type SoundSet } from './prefs/prefs.ts';
 
 /**
  * Sounds from lila's "sfx", "piano", "futuristic" and "nes" sets by Enigmahack (AGPLv3+, see lila's COPYING.md), one

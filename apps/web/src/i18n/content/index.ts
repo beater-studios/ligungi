@@ -1,6 +1,6 @@
 import { useEffect } from 'preact/hooks';
-import { prefs, resolveLang } from '../../prefs.ts';
-import { useStore } from '../../store.ts';
+import { prefs, resolveLang } from '../../prefs/prefs.ts';
+import { useStore } from '../../core/store.ts';
 import { loads, loadPages, pageSource, type LongPage } from './pages.ts';
 
 export { LEGAL_UPDATED, LONG_PAGES, loadAllPages, loadPages, pageSource, type LongPage } from './pages.ts';

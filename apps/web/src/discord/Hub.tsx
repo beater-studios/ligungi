@@ -18,11 +18,11 @@ import {
   type RoomSettings,
 } from './activity.ts';
 import { colorChoiceOptions, playerName, speedText, useT } from '../i18n/index.ts';
-import { navigate, useLocation } from '../router.ts';
+import { navigate, useLocation } from '../core/router.ts';
 import { SITE_URL, SOURCE_URL } from '../source.ts';
-import { useStore } from '../store.ts';
+import { useStore } from '../core/store.ts';
 import { OptionCards, SubmitButton } from '../components/ui.tsx';
-import { usePolling } from '../hooks.ts';
+import { usePolling } from '../core/hooks.ts';
 
 /** How often the hub asks for the call's rooms, while the page is visible. */
 const ROOMS_POLL_MS = 4000;

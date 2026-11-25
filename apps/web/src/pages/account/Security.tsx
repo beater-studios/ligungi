@@ -4,15 +4,15 @@ import {
   type TwoFactorView,
 } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { api } from '../../api.ts';
+import { api } from '../../core/api.ts';
 import { QrCode } from '../../components/QrCode.tsx';
 import { Checkbox, Field, SubmitButton } from '../../components/ui.tsx';
 import { formatDate, useT } from '../../i18n/index.ts';
 import { describeUserAgent } from '../../userAgent.ts';
-import { session } from '../../session.ts';
-import { socket } from '../../socket.ts';
-import { useStore } from '../../store.ts';
-import { useCopy } from '../../hooks.ts';
+import { session } from '../../core/session.ts';
+import { socket } from '../../core/socket.ts';
+import { useStore } from '../../core/store.ts';
+import { useCopy } from '../../core/hooks.ts';
 
 export const PasswordForm = () => {
   const t = useT();

@@ -5,13 +5,13 @@
 import type { VNode } from 'preact';
 import { renderToString } from 'preact-render-to-string';
 import { App } from './app.tsx';
-import { consent } from './consent.ts';
+import { consent } from './layout/consent.ts';
 import { loadAllPages, pageSource } from './i18n/content/index.ts';
 import { faqItems, Markdown } from './i18n/content/markdown.tsx';
 import { loadAllLanguages, messagesFor } from './i18n/index.ts';
 import { localeOf } from './i18n/languages.ts';
-import { LANGS, prefs, type Lang } from './prefs.ts';
-import { navigate } from './router.ts';
+import { LANGS, prefs, type Lang } from './prefs/prefs.ts';
+import { navigate } from './core/router.ts';
 import { PAGES, headHtml, pageUrl, type Page } from './seo.ts';
 import { SITE_URL, SOURCE_URL } from './source.ts';
 

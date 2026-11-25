@@ -1,13 +1,13 @@
 import type { ChallengeView } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../api.ts';
+import { api } from '../core/api.ts';
 import { inActivity } from '../discord/activity.ts';
 import { playerName, speedText, useT } from '../i18n/index.ts';
-import { navigate } from '../router.ts';
-import { session } from '../session.ts';
-import { socket } from '../socket.ts';
-import { useStore } from '../store.ts';
-import { useCopy } from '../hooks.ts';
+import { navigate } from '../core/router.ts';
+import { session } from '../core/session.ts';
+import { socket } from '../core/socket.ts';
+import { useStore } from '../core/store.ts';
+import { useCopy } from '../core/hooks.ts';
 
 export const ChallengePage = ({ id }: { id: string }) => {
   const t = useT();

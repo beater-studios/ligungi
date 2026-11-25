@@ -1,12 +1,12 @@
 import { PUZZLE_RUN_KINDS, PUZZLE_THEMES, type PuzzleDashboard, type RatingPoint } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { RatingHistoryChart } from '../components/RatingHistoryChart.tsx';
+import { api } from '../core/api.ts';
+import { RatingHistoryChart } from '../players/RatingHistoryChart.tsx';
 import { formatDate, useT } from '../i18n/index.ts';
-import { runRecords, usePuzzleRuns } from '../puzzleRuns.ts';
-import { Records } from '../components/Records.tsx';
-import { session } from '../session.ts';
-import { useStore } from '../store.ts';
+import { runRecords, usePuzzleRuns } from '../puzzles/puzzleRuns.ts';
+import { Records } from '../puzzles/Records.tsx';
+import { session } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
 
 const RECENT = 20;
 

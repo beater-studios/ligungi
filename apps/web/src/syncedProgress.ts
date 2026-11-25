@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
-import { session } from './session.ts';
-import { useStore } from './store.ts';
+import { session } from './core/session.ts';
+import { useStore } from './core/store.ts';
 
 /**
  * A JSON value kept in the browser under `key`. Storage may be missing (the prerender) or blocked: then nothing reads

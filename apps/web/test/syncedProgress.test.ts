@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { bestScores } from '../src/puzzleRuns.ts';
+import { bestScores } from '../src/puzzles/puzzleRuns.ts';
 import { localJson, sendOrKeep } from '../src/syncedProgress.ts';
 
 afterEach(() => {

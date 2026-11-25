@@ -1,9 +1,9 @@
 import { parseFen, type Color } from '@ligungi/engine';
 import { chapterFits, type StudyChapter, type StudyRoot, type StudyView } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { api } from '../../api.ts';
+import { api } from '../../core/api.ts';
 import { errorText, useT } from '../../i18n/index.ts';
-import { nodeAt, positionAt, type Path } from '../../studyTree.ts';
+import { nodeAt, positionAt, type Path } from '../../study/studyTree.ts';
 
 /** The editor saves on its own this long after the last change. */
 const SAVE_DELAY_MS = 800;

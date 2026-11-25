@@ -1,8 +1,8 @@
 import { pieceGlyph } from '@ligungi/board';
 import type { Role } from '@ligungi/engine';
 import { usePieceNames } from '../i18n/index.ts';
-import { guidesShown, prefs } from '../prefs.ts';
-import { useStore } from '../store.ts';
+import { guidesShown, prefs } from '../prefs/prefs.ts';
+import { useStore } from '../core/store.ts';
 
 /**
  * A piece's kanji or icon in the style the viewer chose, for the static places (piece panel, mini boards). The markup

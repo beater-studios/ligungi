@@ -1,12 +1,12 @@
 import { moveToString, opposite, type Move } from '@ligungi/engine';
 import type { GameView } from '@ligungi/protocol';
-import { ExportGame } from '../../components/ExportGame.tsx';
-import { BookmarkPanel } from '../../components/BookmarkPanel.tsx';
+import { ExportGame } from '../../game/ExportGame.tsx';
+import { BookmarkPanel } from '../../game/BookmarkPanel.tsx';
 import { outcomeText, speedText, useT } from '../../i18n/index.ts';
-import { ReportButton } from '../../components/ReportButton.tsx';
-import { VoidGame } from '../../components/VoidGame.tsx';
-import { session } from '../../session.ts';
-import { useStore } from '../../store.ts';
+import { ReportButton } from '../../mod/ReportButton.tsx';
+import { VoidGame } from '../../mod/VoidGame.tsx';
+import { session } from '../../core/session.ts';
+import { useStore } from '../../core/store.ts';
 
 /** The game's card beside the board: its settings, result and notices, export, bookmark, report and void. */
 export const GameInfo = ({ view, notice, premove }: { view: GameView; notice: string | null; premove: Move | null }) => {

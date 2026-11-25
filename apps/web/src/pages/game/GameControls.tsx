@@ -2,7 +2,7 @@ import { opposite } from '@ligungi/engine';
 import type { GameView } from '@ligungi/protocol';
 import { useT } from '../../i18n/index.ts';
 import { icons } from '../../icons.ts';
-import { socket } from '../../socket.ts';
+import { socket } from '../../core/socket.ts';
 
 /** Sends a game command of the viewer: resign, abort or claim, and the answers to draw, takeback and rematch offers. */
 export const gameCommands = (gameId: string) => ({

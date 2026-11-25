@@ -11,19 +11,19 @@ import {
   type LessonState,
 } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { BlindPanel } from '../components/BlindPanel.tsx';
+import { BlindPanel } from '../blind/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
-import { Stars } from '../components/Stars.tsx';
+import { Stars } from '../learn/Stars.tsx';
 import { listText, useT } from '../i18n/index.ts';
-import { squareText } from '../blind.ts';
+import { squareText } from '../blind/blind.ts';
 import { icons } from '../icons.ts';
-import { useLessonProgress, type LessonProgress } from '../lessonProgress.ts';
-import { prefs } from '../prefs.ts';
-import { navigate } from '../router.ts';
-import { session } from '../session.ts';
+import { useLessonProgress, type LessonProgress } from '../learn/lessonProgress.ts';
+import { prefs } from '../prefs/prefs.ts';
+import { navigate } from '../core/router.ts';
+import { session } from '../core/session.ts';
 import { playSound } from '../sound.ts';
-import { moveSound } from '../speech.ts';
-import { useStore } from '../store.ts';
+import { moveSound } from '../blind/speech.ts';
+import { useStore } from '../core/store.ts';
 
 const DEFENSE_DELAY_MS = 450;
 const WRONG_DELAY_MS = 900;
@@ -118,7 +118,7 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
 
   useEffect(() => {
     if (top.current && bottom.current) setHands({ top: top.current, bottom: bottom.current });
-    worker.current = new Worker(new URL('../mate.worker.ts', import.meta.url), { type: 'module' });
+    worker.current = new Worker(new URL('../puzzles/mate.worker.ts', import.meta.url), { type: 'module' });
     return () => {
       worker.current?.terminate();
       if (timer.current) clearTimeout(timer.current);

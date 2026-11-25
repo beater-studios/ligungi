@@ -1,10 +1,10 @@
 import { TV_CHANNELS, type TvChannel, type TvChannelView } from '@ligungi/protocol';
 import { useState } from 'preact/hooks';
-import { api } from '../api.ts';
+import { api } from '../core/api.ts';
 import { playerName, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { GamePage } from './GamePage.tsx';
-import { usePolling } from '../hooks.ts';
+import { usePolling } from '../core/hooks.ts';
 
 /** The server keeps a channel on its game until a few seconds after it ends, so polling is enough to follow it. */
 const POLL_MS = 3_000;

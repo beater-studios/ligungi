@@ -2,10 +2,10 @@ import type { DiscordSDK } from '@discord/embedded-app-sdk';
 import { MODES, type Mode } from '@ligungi/engine';
 import type { ActivityHallView, ColorChoice, TimeControl, UserRef } from '@ligungi/protocol';
 import { PRESENCE_PREFIX } from '../presence.ts';
-import { api } from '../api.ts';
+import { addRequestHeader, api } from '../core/api.ts';
 import { getT } from '../i18n/index.ts';
 import { SITE_URL } from '../source.ts';
-import { createStore } from '../store.ts';
+import { createStore } from '../core/store.ts';
 
 const LAUNCH_KEY = 'ligungi.activity';
 
@@ -29,6 +29,9 @@ const launch = readLaunch();
 
 /** Whether the site runs as the Discord Activity, inside a voice call. */
 export const inActivity = launch !== null;
+
+// Inside Discord the session cookie must be the kind a third-party frame keeps; the server tells by this header.
+if (inActivity) addRequestHeader('x-ligungi-activity', '1');
 
 /** Why a Discord account plays as a guest. */
 export type GuestReason = 'unlinked' | 'suspended' | 'twoFactor';

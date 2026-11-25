@@ -2,7 +2,7 @@ import { JAPANESE_PIECE_NAMES, type PieceNames } from '@ligungi/board';
 import { ROLES } from '@ligungi/engine';
 import { createElement, Fragment, type ComponentChildren } from 'preact';
 import { argumentsOf, checkMessage, formatParts, formatText, tagsOf, type Args } from './icu.ts';
-import { createStore } from '../store.ts';
+import { createStore } from '../core/store.ts';
 import { isLang, LANGS, languageName, localeOf, type Lang } from './languages.ts';
 import source from './locales/en.json';
 import { SCHEMA, type ListSpec, type RichSpec, type Spec, type TextSpec } from './schema.tsx';

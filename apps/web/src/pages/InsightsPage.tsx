@@ -2,11 +2,11 @@ import { pieceName } from '@ligungi/board';
 import { MODES, ROLES, type Mode } from '@ligungi/engine';
 import { PACES, type InsightsView, type UserProfile } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { RecordRow } from '../components/RatingHistory.tsx';
+import { api } from '../core/api.ts';
+import { RecordRow } from '../players/RatingHistory.tsx';
 import { usePieceNames, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { navigate, useLocation } from '../router.ts';
+import { navigate, useLocation } from '../core/router.ts';
 
 const RESULTS = ['win', 'draw', 'loss'] as const;
 

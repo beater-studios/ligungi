@@ -1,8 +1,8 @@
 import { pieceName } from '@ligungi/board';
 import { ROLE_INFO, handSize, type Color, type Position, type Square } from '@ligungi/engine';
 import { usePieceNames, useT } from '../i18n/index.ts';
-import { prefs } from '../prefs.ts';
-import { useStore } from '../store.ts';
+import { prefs } from '../prefs/prefs.ts';
+import { useStore } from '../core/store.ts';
 import { PieceGlyph } from './PieceGlyph.tsx';
 
 /** Fixed panel with the composition of the tower the user is looking at, top first. */

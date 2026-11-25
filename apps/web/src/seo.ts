@@ -1,7 +1,7 @@
 import type { Messages } from './i18n/index.ts';
 import { LINKS, STUDIO } from './i18n/content/shared.tsx';
 import { localeOf } from './i18n/languages.ts';
-import { LANGS, type Lang } from './prefs.ts';
+import { LANGS, type Lang } from './prefs/prefs.ts';
 import { SITE_URL, SOURCE_URL } from './source.ts';
 
 export type PageKey = Exclude<keyof Messages['seo']['pages'], 'default'>;

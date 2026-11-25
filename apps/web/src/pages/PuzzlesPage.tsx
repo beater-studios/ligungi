@@ -7,17 +7,17 @@ import {
   type PuzzleView,
 } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
+import { api } from '../core/api.ts';
+import { RoundLayout, type RoundPlayer } from '../game/RoundLayout.tsx';
 import { Field, Select } from '../components/ui.tsx';
 import { errorText, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { readLocalSolved, useSolvedPuzzles } from '../puzzleProgress.ts';
-import { usePuzzleEntries, usePuzzleSolver, type PuzzleEntry } from '../puzzleSolver.ts';
-import { navigate, useLocation } from '../router.ts';
-import { session } from '../session.ts';
+import { readLocalSolved, useSolvedPuzzles } from '../puzzles/puzzleProgress.ts';
+import { usePuzzleEntries, usePuzzleSolver, type PuzzleEntry } from '../puzzles/puzzleSolver.ts';
+import { navigate, useLocation } from '../core/router.ts';
+import { session } from '../core/session.ts';
 import { playSound } from '../sound.ts';
-import { useStore } from '../store.ts';
+import { useStore } from '../core/store.ts';
 
 const WRONG_DELAY_MS = 900;
 

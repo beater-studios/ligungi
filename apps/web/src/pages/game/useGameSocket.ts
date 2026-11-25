@@ -1,8 +1,8 @@
 import type { GameView } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../../api.ts';
+import { api } from '../../core/api.ts';
 import { errorText, getT } from '../../i18n/index.ts';
-import { socket } from '../../socket.ts';
+import { socket } from '../../core/socket.ts';
 import { playSound } from '../../sound.ts';
 
 /** The game `id` as the server sends it: loaded once, then each change over the socket. `onNotice` shows a move the server refused. */

@@ -1,11 +1,11 @@
 import {
   type LobbyView,
 } from '@ligungi/protocol';
-import { LivePlayer } from '../../components/LivePlayer.tsx';
+import { LivePlayer } from '../../game/LivePlayer.tsx';
 import { MiniBoard } from '../../components/MiniBoard.tsx';
 import { speedText, useT } from '../../i18n/index.ts';
 import { icons } from '../../icons.ts';
-import { useLiveGames } from '../../liveGames.ts';
+import { useLiveGames } from '../../game/liveGames.ts';
 
 /** The strongest live game, following every move with its clocks, as on the TV, and how many are online and playing. */
 export const Live = ({ lobby }: { lobby: LobbyView | null }) => {

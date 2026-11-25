@@ -13,21 +13,21 @@ import {
 } from '@ligungi/engine';
 import type { GameView } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { sayMove } from '../speech.ts';
-import { BlindPanel } from '../components/BlindPanel.tsx';
+import { api } from '../core/api.ts';
+import { sayMove } from '../blind/speech.ts';
+import { BlindPanel } from '../blind/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
-import { ImportGame } from '../components/ImportGame.tsx';
+import { ImportGame } from '../game/ImportGame.tsx';
 import { DraftPanel, TowerPanel, TowerStrip } from '../components/Panels.tsx';
 import { Select } from '../components/ui.tsx';
 import { outcomeText, useT } from '../i18n/index.ts';
-import { useMoveText } from '../notation.ts';
+import { useMoveText } from '../game/notation.ts';
 import { icons } from '../icons.ts';
-import { useLocalGame } from '../localGame.ts';
-import { prefs } from '../prefs.ts';
-import { navigate, useLocation } from '../router.ts';
-import { useStore } from '../store.ts';
-import { useTowerTap } from '../towerTap.ts';
+import { useLocalGame } from '../game/localGame.ts';
+import { prefs } from '../prefs/prefs.ts';
+import { navigate, useLocation } from '../core/router.ts';
+import { useStore } from '../core/store.ts';
+import { useTowerTap } from '../prefs/towerTap.ts';
 
 export const AnalysisPage = () => {
   const t = useT();

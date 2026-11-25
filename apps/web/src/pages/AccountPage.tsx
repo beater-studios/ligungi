@@ -1,8 +1,8 @@
 import { useState } from 'preact/hooks';
 import { useT } from '../i18n/index.ts';
-import { session } from '../session.ts';
-import { useStore } from '../store.ts';
-import { SettingsShell, type SettingsSection } from '../components/SettingsShell.tsx';
+import { session } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
+import { SettingsShell, type SettingsSection } from '../prefs/SettingsShell.tsx';
 import { DeleteForm } from './account/DeleteForm.tsx';
 import { DiscordLink } from './account/DiscordLink.tsx';
 import { BlockedPlayers, PrivacySettings } from './account/Privacy.tsx';

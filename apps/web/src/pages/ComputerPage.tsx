@@ -4,14 +4,14 @@ import type { ColorChoice } from '@ligungi/protocol';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { usePresence } from '../presence.ts';
 import { MiniBoard } from '../components/MiniBoard.tsx';
-import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
+import { RoundLayout, type RoundPlayer } from '../game/RoundLayout.tsx';
 import { Checkbox, OptionCards, SubmitButton } from '../components/ui.tsx';
 import { icons } from '../icons.ts';
 import { colorChoiceOptions, outcomeText, useT } from '../i18n/index.ts';
-import { useLocalGame } from '../localGame.ts';
-import { useLocation } from '../router.ts';
+import { useLocalGame } from '../game/localGame.ts';
+import { useLocation } from '../core/router.ts';
 import { playSound } from '../sound.ts';
-import { moveSound } from '../speech.ts';
+import { moveSound } from '../blind/speech.ts';
 
 const MIN_THINK_MS = 450;
 
@@ -45,7 +45,7 @@ export const ComputerPage = () => {
   const request = useRef(0);
 
   useEffect(() => {
-    worker.current = new Worker(new URL('../bot.worker.ts', import.meta.url), { type: 'module' });
+    worker.current = new Worker(new URL('../game/bot.worker.ts', import.meta.url), { type: 'module' });
     return () => worker.current?.terminate();
   }, []);
 

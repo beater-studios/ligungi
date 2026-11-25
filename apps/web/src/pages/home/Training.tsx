@@ -4,11 +4,11 @@ import {
   type PuzzleRatingView,
 } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { api } from '../../api.ts';
+import { api } from '../../core/api.ts';
 import { MiniBoard } from '../../components/MiniBoard.tsx';
 import { useT } from '../../i18n/index.ts';
-import { useLessonProgress } from '../../lessonProgress.ts';
-import { usePuzzleRuns } from '../../puzzleRuns.ts';
+import { useLessonProgress } from '../../learn/lessonProgress.ts';
+import { usePuzzleRuns } from '../../puzzles/puzzleRuns.ts';
 
 /** For a signed-in player: their puzzle rating, Storm and Streak records and how far the lessons go, each a link. */
 export const Training = ({ puzzleRating }: { puzzleRating: PuzzleRatingView | null }) => {

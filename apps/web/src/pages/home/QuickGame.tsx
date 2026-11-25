@@ -8,7 +8,7 @@ import {
   type TimeControl,
 } from '@ligungi/protocol';
 import { playerName, settingsText, speedText, timeControlText, useT } from '../../i18n/index.ts';
-import { useLessonProgress } from '../../lessonProgress.ts';
+import { useLessonProgress } from '../../learn/lessonProgress.ts';
 
 export const QUICK_MODE_KEY = 'ligungi.quickMode';
 

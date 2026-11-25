@@ -1,21 +1,21 @@
 import type { ComponentChildren } from 'preact';
-import { MoveListPreview } from '../components/MoveListPreview.tsx';
-import { PiecePreview } from '../components/PiecePreview.tsx';
+import { MoveListPreview } from '../prefs/MoveListPreview.tsx';
+import { PiecePreview } from '../prefs/PiecePreview.tsx';
 import { PIECE_STYLES } from '@ligungi/board';
 import { initialPosition, legalMoves, topOf } from '@ligungi/engine';
-import { customBoardStyle, DEFAULT_CUSTOM_BOARD, type BoardWarning } from '../boardColors.ts';
-import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../pieceColors.ts';
+import { customBoardStyle, DEFAULT_CUSTOM_BOARD, type BoardWarning } from '../prefs/boardColors.ts';
+import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../prefs/pieceColors.ts';
 import { Checkbox, ColorField, FieldRow, OptionCards, SettingRow, Toggle } from '../components/ui.tsx';
 import { setLanguage, themeLabel, useT, type Messages } from '../i18n/index.ts';
 import { languageName } from '../i18n/languages.ts';
-import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../looks.tsx';
-import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, BYOYOMI_COUNTS, CONFIRM_MOVES, KANJI_FONTS, LANGS, OPPONENT_PIECES, PIECE_PALETTES, PIECE_SHAPES, SOUND_SETS, SPEECH_PLACES, SPEECH_STYLES, SPOKEN_MOVES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs, type SpeechPlace } from '../prefs.ts';
+import { Swatch, boardThemeLabel, paletteFaces, paletteLabel, shapeLabel, styleLabel } from '../prefs/looks.tsx';
+import { BOARD_SIZES, BOARD_THEMES, BOARD_VIEWS, BYOYOMI_COUNTS, CONFIRM_MOVES, KANJI_FONTS, LANGS, OPPONENT_PIECES, PIECE_PALETTES, PIECE_SHAPES, SOUND_SETS, SPEECH_PLACES, SPEECH_STYLES, SPOKEN_MOVES, THEMES, TOWER_TAPS, prefs, updatePrefs, type Prefs, type SpeechPlace } from '../prefs/prefs.ts';
 import { enableNotifications, notifyPermission } from '../notify.ts';
 import { playSound } from '../sound.ts';
-import { speakSample } from '../speech.ts';
-import { useStore } from '../store.ts';
-import { TowerTapPreview } from '../components/TowerTapPreview.tsx';
-import { SettingsShell } from '../components/SettingsShell.tsx';
+import { speakSample } from '../blind/speech.ts';
+import { useStore } from '../core/store.ts';
+import { TowerTapPreview } from '../prefs/TowerTapPreview.tsx';
+import { SettingsShell } from '../prefs/SettingsShell.tsx';
 
 /** A titled group of settings; with a preview, the rows sit on the left and the preview on the right. */
 const Group = ({ id, title, help, preview, children }: { id: string; title: string; help?: string; preview?: ComponentChildren; children: ComponentChildren }) => (

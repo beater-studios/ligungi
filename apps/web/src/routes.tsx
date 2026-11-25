@@ -37,8 +37,8 @@ import { TvChannelPage } from './pages/TvChannelPage.tsx';
 import { TvPage } from './pages/TvPage.tsx';
 import { MODES, type Mode } from '@ligungi/engine';
 import { LESSON_STAGE_IDS, SHORT_LINKS, TV_CHANNELS, type TvChannel } from '@ligungi/protocol';
-import { navigate, type Route } from './router.ts';
-import { useStore } from './store.ts';
+import { navigate, type Route } from './core/router.ts';
+import { useStore } from './core/store.ts';
 
 /** A short link reached inside the site (the server redirects it on a full page load): leave for its target. */
 const ShortLink = ({ to }: { to: string }) => {

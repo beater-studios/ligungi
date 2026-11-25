@@ -1,10 +1,10 @@
 import { useState } from 'preact/hooks';
-import { api } from '../../api.ts';
+import { api } from '../../core/api.ts';
 import { Checkbox, Field } from '../../components/ui.tsx';
 import { useT } from '../../i18n/index.ts';
-import { navigate } from '../../router.ts';
-import { loadSession } from '../../session.ts';
-import { socket } from '../../socket.ts';
+import { navigate } from '../../core/router.ts';
+import { loadSession } from '../../core/session.ts';
+import { socket } from '../../core/socket.ts';
 
 export const DeleteForm = () => {
   const t = useT();

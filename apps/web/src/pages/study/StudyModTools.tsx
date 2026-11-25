@@ -1,6 +1,6 @@
 import { REPORT_DETAILS_MAX, type StudyView } from '@ligungi/protocol';
 import { useState } from 'preact/hooks';
-import { api } from '../../api.ts';
+import { api } from '../../core/api.ts';
 import { Field } from '../../components/ui.tsx';
 import { useT } from '../../i18n/index.ts';
 import { icons } from '../../icons.ts';

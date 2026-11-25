@@ -4,13 +4,13 @@ import logoUrl from '../assets/logo.svg';
 import { icons } from '../icons.ts';
 import { ActivitySwitch } from '../discord/Hub.tsx';
 import { inActivity } from '../discord/activity.ts';
-import { ChallengeBell } from '../components/ChallengeBell.tsx';
-import { HeaderSearch } from '../components/HeaderSearch.tsx';
+import { ChallengeBell } from './ChallengeBell.tsx';
+import { HeaderSearch } from './HeaderSearch.tsx';
 import { Dasher } from './Dasher.tsx';
-import { useLocation } from '../router.ts';
-import { session } from '../session.ts';
-import { socket } from '../socket.ts';
-import { useStore } from '../store.ts';
+import { useLocation } from '../core/router.ts';
+import { session } from '../core/session.ts';
+import { socket } from '../core/socket.ts';
+import { useStore } from '../core/store.ts';
 
 export const Header = () => {
   const t = useT();

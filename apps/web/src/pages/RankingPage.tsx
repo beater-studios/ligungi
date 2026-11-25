@@ -1,14 +1,14 @@
 import { MODES, type Mode } from '@ligungi/engine';
 import { RANKING_QUERY_MAX, type ModeStanding, type RankingRow, type RankingView } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { api } from '../api.ts';
-import { RatingTrend } from '../components/RatingTrend.tsx';
-import { Flag } from '../components/Flag.tsx';
+import { api } from '../core/api.ts';
+import { RatingTrend } from '../players/RatingTrend.tsx';
+import { Flag } from '../players/Flag.tsx';
 import { Checkbox } from '../components/ui.tsx';
 import { useT } from '../i18n/index.ts';
-import { session } from '../session.ts';
-import { useStore } from '../store.ts';
-import { CommunityNav } from '../components/CommunityNav.tsx';
+import { session } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
+import { CommunityNav } from '../players/CommunityNav.tsx';
 
 const SEARCH_DELAY_MS = 250;
 

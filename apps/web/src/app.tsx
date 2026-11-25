@@ -1,13 +1,13 @@
 import { useEffect } from 'preact/hooks';
 import { getT, useT } from './i18n/index.ts';
 import { notify } from './notify.ts';
-import { CookieBanner } from './components/Consent.tsx';
+import { CookieBanner } from './layout/Consent.tsx';
 import { ActivityFooter, useActivityChrome } from './discord/Hub.tsx';
 import { inActivity } from './discord/activity.ts';
-import { ConnectionToast } from './components/ConnectionToast.tsx';
-import { matchRoute, navigate, useLocation } from './router.ts';
+import { ConnectionToast } from './layout/ConnectionToast.tsx';
+import { matchRoute, navigate, useLocation } from './core/router.ts';
 import { applyHead } from './seo.ts';
-import { socket } from './socket.ts';
+import { socket } from './core/socket.ts';
 import { NotFound, ROUTES } from './routes.tsx';
 import { Header } from './layout/Header.tsx';
 import { SiteFooter } from './layout/SiteFooter.tsx';

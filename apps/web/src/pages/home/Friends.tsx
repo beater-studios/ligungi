@@ -1,7 +1,7 @@
-import { FeedList, useFeed } from '../../components/ActivityFeed.tsx';
+import { FeedList, useFeed } from '../../players/ActivityFeed.tsx';
 import { useT } from '../../i18n/index.ts';
 import { icons } from '../../icons.ts';
-import { useFriends } from '../../friends.ts';
+import { useFriends } from '../../players/friends.ts';
 
 export const OnlineFriends = () => {
   const t = useT();

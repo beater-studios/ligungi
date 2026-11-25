@@ -1,18 +1,18 @@
 import { opposite, type Color, type Move } from '@ligungi/engine';
 import { STORM_PENALTY_MS, STORM_TIME_MS, stormBonus, type PuzzleRunKind } from '@ligungi/protocol';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { api } from '../api.ts';
+import { api } from '../core/api.ts';
 import { MiniBoard } from '../components/MiniBoard.tsx';
-import { RoundLayout, type RoundPlayer } from '../components/RoundLayout.tsx';
+import { RoundLayout, type RoundPlayer } from '../game/RoundLayout.tsx';
 import { formatClock, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
-import { runRecords, usePuzzleRuns, type RunRecords } from '../puzzleRuns.ts';
-import { usePuzzleEntries, usePuzzleSolver, type PuzzleEntry } from '../puzzleSolver.ts';
-import { session } from '../session.ts';
+import { runRecords, usePuzzleRuns, type RunRecords } from '../puzzles/puzzleRuns.ts';
+import { usePuzzleEntries, usePuzzleSolver, type PuzzleEntry } from '../puzzles/puzzleSolver.ts';
+import { session } from '../core/session.ts';
 import { playSound } from '../sound.ts';
-import { useStore } from '../store.ts';
-import { useTimers } from '../hooks.ts';
-import { Records } from '../components/Records.tsx';
+import { useStore } from '../core/store.ts';
+import { useTimers } from '../core/hooks.ts';
+import { Records } from '../puzzles/Records.tsx';
 
 type Outcome = 'won' | 'lost' | 'skipped';
 

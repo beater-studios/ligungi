@@ -1,14 +1,14 @@
 import { MODES, type Mode } from '@ligungi/engine';
 import type { FriendView } from '@ligungi/protocol';
 import { useState } from 'preact/hooks';
-import { FeedList, useFeed } from '../components/ActivityFeed.tsx';
-import { CreateGame } from '../components/CreateGame.tsx';
+import { FeedList, useFeed } from '../players/ActivityFeed.tsx';
+import { CreateGame } from '../game/CreateGame.tsx';
 import { Checkbox, Select } from '../components/ui.tsx';
 import { useT } from '../i18n/index.ts';
-import { CommunityNav } from '../components/CommunityNav.tsx';
-import { session } from '../session.ts';
-import { useStore } from '../store.ts';
-import { useFriends } from '../friends.ts';
+import { CommunityNav } from '../players/CommunityNav.tsx';
+import { session } from '../core/session.ts';
+import { useStore } from '../core/store.ts';
+import { useFriends } from '../players/friends.ts';
 
 const FriendRow = ({ friend, mode, onChallenge }: { friend: FriendView; mode: Mode; onChallenge: (name: string) => void }) => {
   const t = useT();

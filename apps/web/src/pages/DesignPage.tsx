@@ -1,6 +1,6 @@
 import { RadioGroup } from '../components/ui.tsx';
-import { prefs, updatePrefs } from '../prefs.ts';
-import { useStore } from '../store.ts';
+import { prefs, updatePrefs } from '../prefs/prefs.ts';
+import { useStore } from '../core/store.ts';
 import { PrinciplesSection } from './design/Principles.tsx';
 import { ColorsSection } from './design/Colors.tsx';
 import { TypographySection } from './design/Typography.tsx';

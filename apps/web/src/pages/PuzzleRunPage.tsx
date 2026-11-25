@@ -205,7 +205,7 @@ export const PuzzleRunPage = ({ kind }: { kind: PuzzleRunKind }) => {
   const entry = solver.entry;
   if (error || !sequence || !entry) {
     return (
-      <main class="ligungi-page ligungi-mates-loading">
+      <main class="ligungi-page ligungi-drill-loading">
         <h1>{title}</h1>
         <p>{kind === 'streak' ? t.puzzleRuns.streakIntro : t.puzzleRuns.stormIntro}</p>
         <p class={error ? 'error' : 'ligungi-notice'}>{error ? t.genericError : t.common.loading}</p>
@@ -300,9 +300,9 @@ export const PuzzleRunPage = ({ kind }: { kind: PuzzleRunKind }) => {
       }
       side={
         <section class="ligungi-card ligungi-game-info ligungi-run">
-          <h1 class="ligungi-mates__title">{title}</h1>
+          <h1 class="ligungi-drill__title">{title}</h1>
           {!over && state.played.length === 0 && state.correct + state.wrong === 0 && (
-            <p class="ligungi-mates__intro">
+            <p class="ligungi-drill__intro">
               {kind === 'streak' ? t.puzzleRuns.streakIntro : t.puzzleRuns.stormIntro}
               {kind === 'storm' && ` ${t.puzzleRuns.clockHint}`}
             </p>
@@ -366,7 +366,7 @@ export const PuzzleRunPage = ({ kind }: { kind: PuzzleRunKind }) => {
             <a href="/racer">{t.racer.title}</a>
           </p>
           {loaded && !user && (
-            <p class="ligungi-mates__login">
+            <p class="ligungi-drill__login">
               <a href="/login">{t.puzzleRuns.loginToSave}</a>
             </p>
           )}

@@ -74,7 +74,7 @@ export const RacerPage = () => {
           </>
         )}
         {loaded && !user && (
-          <p class="ligungi-mates__login">
+          <p class="ligungi-drill__login">
             <a href="/login">{r.loginToSave}</a>
           </p>
         )}

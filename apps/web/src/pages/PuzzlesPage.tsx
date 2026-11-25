@@ -149,7 +149,7 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
   if (!entries || !current) {
     const notFound = (entries && id && !current) || none;
     return (
-      <main class="ligungi-page ligungi-mates-loading">
+      <main class="ligungi-page ligungi-drill-loading">
         <h1>{daily ? t.puzzles.daily : t.puzzles.title}</h1>
         <p>{t.puzzles.intro}</p>
         <p class="ligungi-notice">{notFound ? (none && !id ? errorText(t, 'noPuzzleLeft') : t.puzzles.notFound) : t.common.loading}</p>
@@ -223,14 +223,14 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
         </div>
       }
       side={
-        <section class="ligungi-card ligungi-game-info ligungi-mates">
-          <h1 class="ligungi-mates__title">{daily ? t.puzzles.daily : t.puzzles.title}</h1>
-          <p class="ligungi-mates__task">
+        <section class="ligungi-card ligungi-game-info ligungi-drill">
+          <h1 class="ligungi-drill__title">{daily ? t.puzzles.daily : t.puzzles.title}</h1>
+          <p class="ligungi-drill__task">
             <strong>{task}</strong>
             {solved?.has(puzzle.id) && <span class="ligungi-tag">{t.puzzles.solvedTag}</span>}
           </p>
           {message && (
-            <p class={`ligungi-mates__feedback${stage === 'wrong' ? ' error' : stage === 'done' && !revealed ? ' ligungi-success' : ''}`} role="status">
+            <p class={`ligungi-drill__feedback${stage === 'wrong' ? ' error' : stage === 'done' && !revealed ? ' ligungi-success' : ''}`} role="status">
               {message}
             </p>
           )}
@@ -238,7 +238,7 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
             (result.counted ? (
               <p class={`ligungi-puzzle__change ${result.change >= 0 ? 'is-up' : 'is-down'}`}>{t.puzzles.ratingChange(signed(result.change), result.rating.rating)}</p>
             ) : (
-              <p class="ligungi-mates__intro">{t.puzzles.alreadyTried}</p>
+              <p class="ligungi-drill__intro">{t.puzzles.alreadyTried}</p>
             ))}
           {finished && view && (
             <p class="ligungi-game-info__setup">
@@ -246,7 +246,7 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
             </p>
           )}
           {!daily && (
-            <div class="form3 ligungi-mates__filters">
+            <div class="form3 ligungi-drill__filters">
               <Field label={t.puzzles.theme} htmlFor="puzzle-theme">
                 <Select
                   id="puzzle-theme"
@@ -265,7 +265,7 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
               </Field>
             </div>
           )}
-          <p class="ligungi-mates__progress" data-icon={icons.Checkmark}>
+          <p class="ligungi-drill__progress" data-icon={icons.Checkmark}>
             {t.puzzles.progress(solvedHere, filtered.length)}
           </p>
           <p class="ligungi-puzzle__links">
@@ -276,7 +276,7 @@ export const PuzzlesPage = ({ id, daily = false }: { id?: string; daily?: boolea
             <a href="/racer">{t.racer.title}</a>
           </p>
           {loaded && !user && (
-            <p class="ligungi-mates__login">
+            <p class="ligungi-drill__login">
               <a href="/login">{t.puzzles.loginToRate}</a>
             </p>
           )}

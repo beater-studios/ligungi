@@ -299,7 +299,7 @@ export const RacePage = ({ id }: { id: string }) => {
       }
       side={
         <section class="ligungi-card ligungi-game-info ligungi-run ligungi-race">
-          <h1 class="ligungi-mates__title">{r.title}</h1>
+          <h1 class="ligungi-drill__title">{r.title}</h1>
           {phase === 'countdown' && start !== null ? (
             <p class="ligungi-race__countdown" role="timer">
               {r.startsIn(Math.ceil((start - now) / 1000))}

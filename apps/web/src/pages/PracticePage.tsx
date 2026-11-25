@@ -189,18 +189,18 @@ const PracticeGame = ({ practice, record }: { practice: PracticePosition; record
         </div>
       }
       side={
-        <section class="ligungi-card ligungi-game-info ligungi-mates">
+        <section class="ligungi-card ligungi-game-info ligungi-drill">
           <a class="text" href="/practice" data-icon={icons.Back}>
             {t.practice.all}
           </a>
-          <h1 class="ligungi-mates__title">{t.practice.positions[practice.id as keyof typeof t.practice.positions]}</h1>
-          <p class="ligungi-mates__task">
+          <h1 class="ligungi-drill__title">{t.practice.positions[practice.id as keyof typeof t.practice.positions]}</h1>
+          <p class="ligungi-drill__task">
             <strong>{goalText(t, practice.goal)}</strong>
           </p>
           <p class="ligungi-game-info__setup">
             {t.practice.movesUsed(playerMoves, practice.goal.moves)} · {t.modes[start.mode]}
           </p>
-          <p class={`ligungi-mates__feedback${result === 'failed' ? ' error' : result === 'won' ? ' ligungi-success' : ''}`} role="status">
+          <p class={`ligungi-drill__feedback${result === 'failed' ? ' error' : result === 'won' ? ' ligungi-success' : ''}`} role="status">
             {status}
           </p>
           <LoginLine />

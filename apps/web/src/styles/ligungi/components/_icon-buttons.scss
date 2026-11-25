@@ -1,77 +1,7 @@
-/* ===== Profile about (players/ProfileAbout.tsx): bio, social networks and profiles on other game sites ===== */
 /* ===== Buttons with an icon and a label ===== */
 // lila spaces an icon from its label only with `.text`; any button that has both gets the same space, so a missing
 // class never glues them together. Icon-only buttons (no children, such as `.fbt`) are left as they are.
 .button[data-icon]:not(:empty)::before {
   margin-inline: 0 0.4em;
   line-height: 1;
-}
-
-.ligungi-site-icon {
-  display: inline-block;
-  flex: none;
-  width: 1.1em;
-  height: 1.1em;
-  fill: currentColor;
-  vertical-align: -0.15em;
-
-  &[data-icon]::before {
-    font-size: 1em;
-    line-height: 1;
-  }
-}
-
-.ligungi-profile-about {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem 2.5rem;
-  padding: 1.1rem 1.25rem;
-
-  &__bio {
-    flex: 1 1 100%;
-    margin: 0;
-    color: $c-font;
-    white-space: pre-line;
-    overflow-wrap: anywhere;
-  }
-
-  &__links {
-    min-width: 0;
-
-    h2 {
-      margin: 0 0 0.5rem;
-      color: $c-font-dim;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    ul {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem 1.25rem;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    a {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      min-width: 0;
-    }
-  }
-
-  &__site {
-    color: $c-font-clear;
-  }
-
-  &__name {
-    overflow: hidden;
-    color: $c-font-dim;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 }

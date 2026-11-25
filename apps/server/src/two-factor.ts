@@ -71,15 +71,15 @@ export class TwoFactor {
   }
 
   /** Turns two-factor on once the app shows the right code, and returns the first recovery codes. */
-  confirm(userId: string, input: string): string[] | 'notSetUp' | 'wrongCode' {
+  confirm(userId: string, input: string): string[] | 'twoFactorNotSetUp' | 'wrongTwoFactorCode' {
     const row = this.#row(userId);
-    if (!row || row.enabled_at !== null) return 'notSetUp';
+    if (!row || row.enabled_at !== null) return 'twoFactorNotSetUp';
     if (row.last_step < this.#step() - PENDING_STEPS) {
       this.cancel(userId);
-      return 'notSetUp';
+      return 'twoFactorNotSetUp';
     }
     const step = matchStep(row.secret, normalizeCode(input), this.#now());
-    if (step === null) return 'wrongCode';
+    if (step === null) return 'wrongTwoFactorCode';
     return this.#transaction(() => {
       this.#db.prepare('update two_factor set enabled_at = ?, last_step = ? where user_id = ?').run(this.#now(), step, userId);
       return this.#replaceRecoveryCodes(userId);

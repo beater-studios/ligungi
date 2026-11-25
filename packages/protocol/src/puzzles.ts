@@ -156,6 +156,24 @@ export interface PuzzleRun {
 
 /** Runs saved in one request (runs played without an account, sent when signing in). */
 export const PUZZLE_RUN_BATCH = 100;
+
+/**
+ * Validates the runs a player sends, at most `PUZZLE_RUN_BATCH`: a kind, a score up to `maxScore` (the puzzles there are)
+ * and a time up to `latest` (ms).
+ */
+export const parsePuzzleRuns = (input: unknown, maxScore: number, latest: number): PuzzleRun[] | 'invalidPuzzleRun' => {
+  if (!Array.isArray(input) || input.length > PUZZLE_RUN_BATCH) return 'invalidPuzzleRun';
+  const runs: PuzzleRun[] = [];
+  for (const run of input as unknown[]) {
+    if (typeof run !== 'object' || run === null) return 'invalidPuzzleRun';
+    const { kind, score, at } = run as Record<string, unknown>;
+    const known = PUZZLE_RUN_KINDS.find((value) => value === kind);
+    if (!known || typeof score !== 'number' || !Number.isInteger(score) || score < 0 || score > maxScore) return 'invalidPuzzleRun';
+    if (typeof at !== 'number' || !Number.isInteger(at) || at < 0 || at > latest) return 'invalidPuzzleRun';
+    runs.push({ kind: known, score, at });
+  }
+  return runs;
+};
 /** How far back the recent runs go: a week, with a day to spare for time zones. */
 export const PUZZLE_RUN_RECENT_MS = 8 * 86_400_000;
 

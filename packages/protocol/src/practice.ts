@@ -73,3 +73,20 @@ export const practiceResult = (goal: PracticeGoal, outcome: Outcome | null, play
   if (playerMoves >= goal.moves) return goal.kind === 'survive' ? 'won' : 'failed';
   return 'playing';
 };
+
+/** No practice position takes more moves than this to finish. */
+const PRACTICE_MOVES_MAX = 1000;
+const PRACTICE_IDS: ReadonlySet<string> = new Set(PRACTICE_POSITIONS.map((position) => position.id));
+
+/** Validates the practice results a player sends: the fewest moves of each position, by id, at most `PRACTICE_BATCH`. */
+export const parsePracticeProgress = (input: unknown): Record<string, number> | 'invalidPracticeProgress' => {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) return 'invalidPracticeProgress';
+  const entries = Object.entries(input);
+  if (entries.length > PRACTICE_BATCH) return 'invalidPracticeProgress';
+  const results: Record<string, number> = {};
+  for (const [id, moves] of entries) {
+    if (!PRACTICE_IDS.has(id) || typeof moves !== 'number' || !Number.isInteger(moves) || moves < 1 || moves > PRACTICE_MOVES_MAX) return 'invalidPracticeProgress';
+    results[id] = moves;
+  }
+  return results;
+};

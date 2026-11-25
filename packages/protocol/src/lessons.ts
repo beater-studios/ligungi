@@ -215,3 +215,18 @@ export const lessonStars = (exercise: LessonExercise, moves: number, mistakes: n
 };
 
 export const opponentOf = (exercise: LessonExercise): Color => opposite(parseFen(exercise.fen).turn);
+
+const LESSON_IDS: ReadonlySet<string> = new Set(LESSON_EXERCISES.map((exercise) => exercise.id));
+
+/** Validates the lesson results a player sends: the stars of each exercise, by id, at most `LESSON_PROGRESS_BATCH`. */
+export const parseLessonProgress = (input: unknown): Record<string, number> | 'invalidLessonProgress' => {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) return 'invalidLessonProgress';
+  const entries = Object.entries(input);
+  if (entries.length > LESSON_PROGRESS_BATCH) return 'invalidLessonProgress';
+  const results: Record<string, number> = {};
+  for (const [id, stars] of entries) {
+    if (!LESSON_IDS.has(id) || typeof stars !== 'number' || !Number.isInteger(stars) || stars < 1 || stars > LESSON_STARS_MAX) return 'invalidLessonProgress';
+    results[id] = stars;
+  }
+  return results;
+};

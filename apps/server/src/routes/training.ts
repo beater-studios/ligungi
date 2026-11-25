@@ -1,12 +1,9 @@
 import type { AppDeps } from '../app.ts';
 import { MODES, parseFen } from '@ligungi/engine';
-import { EXPLORER_BANDS, EXPLORER_MODES, LESSON_EXERCISES, LESSON_PROGRESS_BATCH, LESSON_STARS_MAX, PRACTICE_BATCH, PRACTICE_POSITIONS, PUZZLE_BATCH, PUZZLE_RUN_BATCH, PUZZLE_RUN_KINDS, PUZZLE_THEMES, type PuzzleRun } from '@ligungi/protocol';
+import { isErrorCode, parseLessonProgress, parsePracticeProgress, parsePuzzleRuns, EXPLORER_BANDS, EXPLORER_MODES, PUZZLE_BATCH, PUZZLE_RUN_KINDS, PUZZLE_THEMES } from '@ligungi/protocol';
 import { HttpError, sendJson, type Router } from '../http.ts';
 import { requireUser } from './guards.ts';
 import { isPuzzle, PUZZLE_COUNT } from '../puzzles.ts';
-
-const LESSON_IDS: ReadonlySet<string> = new Set(LESSON_EXERCISES.map((exercise) => exercise.id));
-const PRACTICE_IDS: ReadonlySet<string> = new Set(PRACTICE_POSITIONS.map((position) => position.id));
 
 /** Training: lessons, practice, the draft explorer, puzzles, puzzle runs and Puzzle Racer. */
 export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
@@ -16,13 +13,9 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
     .add('POST', '/api/lessons/progress', async (ctx) => {
       const userId = requireUser(ctx);
       const { results } = (await ctx.body()) as { results?: unknown };
-      const entries = typeof results === 'object' && results !== null && !Array.isArray(results) ? Object.entries(results) : null;
-      const valid =
-        entries !== null &&
-        entries.length <= LESSON_PROGRESS_BATCH &&
-        entries.every(([id, stars]) => LESSON_IDS.has(id) && Number.isInteger(stars) && (stars as number) >= 1 && (stars as number) <= LESSON_STARS_MAX);
-      if (!valid) throw new HttpError('invalidLessonProgress');
-      users.training.saveLessonProgress(userId, Object.fromEntries(entries) as Record<string, number>);
+      const progress = parseLessonProgress(results);
+      if (isErrorCode(progress)) throw new HttpError(progress);
+      users.training.saveLessonProgress(userId, progress);
       sendJson(ctx.res, 200, users.training.lessonProgress(userId));
     })
     .add('GET', '/api/explorer', (ctx) => {
@@ -47,13 +40,9 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
     .add('POST', '/api/practice/progress', async (ctx) => {
       const userId = requireUser(ctx);
       const { results } = (await ctx.body()) as { results?: unknown };
-      const entries = typeof results === 'object' && results !== null && !Array.isArray(results) ? Object.entries(results) : null;
-      const valid =
-        entries !== null &&
-        entries.length <= PRACTICE_BATCH &&
-        entries.every(([id, moves]) => PRACTICE_IDS.has(id) && Number.isInteger(moves) && (moves as number) >= 1 && (moves as number) <= 1000);
-      if (!valid) throw new HttpError('invalidPracticeProgress');
-      users.training.savePracticeProgress(userId, Object.fromEntries(entries) as Record<string, number>);
+      const progress = parsePracticeProgress(results);
+      if (isErrorCode(progress)) throw new HttpError(progress);
+      users.training.savePracticeProgress(userId, progress);
       sendJson(ctx.res, 200, users.training.practiceProgress(userId));
     })
     .add('GET', '/api/puzzles/next', (ctx) => {
@@ -120,25 +109,9 @@ export const registerTrainingRoutes = (router: Router, deps: AppDeps): void => {
     .add('POST', '/api/puzzles/runs', async (ctx) => {
       const userId = requireUser(ctx);
       const { runs } = (await ctx.body()) as { runs?: unknown };
-      const latest = config.now() + 60_000;
-      const valid =
-        Array.isArray(runs) &&
-        runs.length <= PUZZLE_RUN_BATCH &&
-        runs.every((run: unknown) => {
-          if (typeof run !== 'object' || run === null) return false;
-          const { kind, score, at } = run as Record<string, unknown>;
-          return (
-            PUZZLE_RUN_KINDS.some((value) => value === kind) &&
-            Number.isInteger(score) &&
-            (score as number) >= 0 &&
-            (score as number) <= PUZZLE_COUNT &&
-            Number.isInteger(at) &&
-            (at as number) >= 0 &&
-            (at as number) <= latest
-          );
-        });
-      if (!valid) throw new HttpError('invalidPuzzleRun');
-      puzzles.saveRuns(userId, runs as PuzzleRun[]);
+      const parsed = parsePuzzleRuns(runs, PUZZLE_COUNT, config.now() + 60_000);
+      if (isErrorCode(parsed)) throw new HttpError(parsed);
+      puzzles.saveRuns(userId, parsed);
       sendJson(ctx.res, 200, puzzles.runs(userId));
     })
     .add('GET', '/api/puzzles/:id', (ctx) => {

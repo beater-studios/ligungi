@@ -2,7 +2,7 @@ import type { AppDeps } from '../app.ts';
 import type { Me, TwoFactorSetup, TwoFactorView } from '@ligungi/protocol';
 import { hashPassword, needsRehash, verifyPassword, type Session } from '../auth.ts';
 import { HttpError, sendJson, type Router } from '../http.ts';
-import { requireUser } from './guards.ts';
+import { requirePassword, requireUser } from './guards.ts';
 import { otpauthUri } from '../totp.ts';
 import { USERNAME_PATTERN } from '../users.ts';
 
@@ -91,10 +91,7 @@ export const registerAuthRoutes = (router: Router, deps: AppDeps): void => {
       if (!authLimiter.allow(ctx.ip)) throw new HttpError('tooManyAttempts');
       // The password, so that someone using a forgotten open session cannot lock the owner out.
       const { password } = (await ctx.body()) as { password?: unknown };
-      const user = users.findById(userId);
-      if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
-        throw new HttpError('wrongPassword');
-      }
+      const user = await requirePassword(users, userId, password);
       const secret = twoFactor.begin(userId);
       if (!secret) throw new HttpError('twoFactorEnabled');
       const setup: TwoFactorSetup = { secret, uri: otpauthUri(user.name, secret) };
@@ -110,8 +107,7 @@ export const registerAuthRoutes = (router: Router, deps: AppDeps): void => {
       if (!authLimiter.allow(ctx.ip)) throw new HttpError('tooManyAttempts');
       const { code, signOutOthers } = (await ctx.body()) as { code?: unknown; signOutOthers?: unknown };
       const result = twoFactor.confirm(userId, typeof code === 'string' ? code : '');
-      if (result === 'notSetUp') throw new HttpError('twoFactorNotSetUp');
-      if (result === 'wrongCode') throw new HttpError('wrongTwoFactorCode');
+      if (!Array.isArray(result)) throw new HttpError(result);
       // Sessions opened before only had to pass the password: whoever turns this on may want them gone.
       const revoked = signOutOthers === true ? sessions.deleteOtherSessions(userId, ctx.session.id) : [];
       closeSessionSockets(revoked);
@@ -130,10 +126,7 @@ export const registerAuthRoutes = (router: Router, deps: AppDeps): void => {
       const userId = requireUser(ctx);
       if (!authLimiter.allow(ctx.ip)) throw new HttpError('tooManyAttempts');
       const { password, code } = (await ctx.body()) as { password?: unknown; code?: unknown };
-      const user = users.findById(userId);
-      if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
-        throw new HttpError('wrongPassword');
-      }
+      await requirePassword(users, userId, password);
       checkAccountCode(userId, code);
       twoFactor.disable(userId);
       sendJson(ctx.res, 200, { ok: true });

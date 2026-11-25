@@ -1,9 +1,9 @@
 import type { AppDeps } from '../app.ts';
 import { CHALLENGE_POLICIES, FOLLOW_POLICIES, isErrorCode, parseProfileDetails, type SessionView } from '@ligungi/protocol';
-import { hashPassword, sessionHandle, verifyPassword } from '../auth.ts';
+import { hashPassword, sessionHandle } from '../auth.ts';
 import { HttpError, sendJson, type Router } from '../http.ts';
 import { accountExport } from '../account-export.ts';
-import { requireUser } from './guards.ts';
+import { requirePassword, requireUser } from './guards.ts';
 import { ANONYMOUS_NAME } from '../users.ts';
 
 /** The signed-in player's own account: password, deletion, sessions, data export, settings, profile, blocks and read notices. */
@@ -14,10 +14,7 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
       const userId = requireUser(ctx);
       if (!authLimiter.allow(ctx.ip)) throw new HttpError('tooManyAttempts');
       const { current, next } = (await ctx.body()) as { current?: unknown; next?: unknown };
-      const user = users.findById(userId);
-      if (!user || typeof current !== 'string' || !(await verifyPassword(current, user.passwordHash))) {
-        throw new HttpError('wrongPassword');
-      }
+      await requirePassword(users, userId, current);
       if (typeof next !== 'string' || next.length < 8 || next.length > 200) throw new HttpError('invalidPassword');
       users.updatePasswordHash(userId, await hashPassword(next));
       // Every other device must sign in again with the new password.
@@ -30,10 +27,7 @@ export const registerAccountRoutes = (router: Router, deps: AppDeps): void => {
       const userId = requireUser(ctx);
       if (!authLimiter.allow(ctx.ip)) throw new HttpError('tooManyAttempts');
       const { password } = (await ctx.body()) as { password?: unknown };
-      const user = users.findById(userId);
-      if (!user || typeof password !== 'string' || !(await verifyPassword(password, user.passwordHash))) {
-        throw new HttpError('wrongPassword');
-      }
+      await requirePassword(users, userId, password);
       if (games.hasOngoing(userId)) throw new HttpError('activeGame');
       lobby.removeUser(userId);
       games.anonymizeUser(userId, ANONYMOUS_NAME);

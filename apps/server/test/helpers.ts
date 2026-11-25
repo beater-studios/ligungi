@@ -1,10 +1,13 @@
 import type { AddressInfo } from 'node:net';
 import { legalMoves, moveToString, parseFen, type Position } from '@ligungi/engine';
-import type { ClientMessage, GameView, ServerMessage } from '@ligungi/protocol';
+import type { ChallengeView, ClientMessage, GameView, ServerMessage } from '@ligungi/protocol';
 import { Game, initialPosition, parseMove } from '@ligungi/engine';
+import { afterEach, expect } from 'vitest';
 import { WebSocket } from 'ws';
 import { createApp, type App } from '../src/app.ts';
 import type { ServerConfig } from '../src/config.ts';
+import { Moderation, moderatorCommand } from '../src/moderation.ts';
+import { Users } from '../src/users.ts';
 
 export interface TestServer {
   readonly app: App;
@@ -134,3 +137,64 @@ export const firstMove = (game: GameView): string => {
 };
 
 export { parseFen };
+
+/** A casual game settings payload: introductory mode, 10+5, the creator plays white. */
+export const casual = { mode: 'intro', rated: false, timeControl: { initial: 600, increment: 5 }, color: 'white' };
+
+/**
+ * One test server at a time for a test file: `start` boots it (again, after a restart), `client` makes a client of the
+ * current one, and after each test every client is disconnected and the server closed.
+ */
+export const useServer = () => {
+  let current: TestServer | undefined;
+  const clients: Client[] = [];
+  afterEach(async () => {
+    for (const client of clients.splice(0)) client.disconnect();
+    await current?.close();
+    current = undefined;
+  });
+  return {
+    start: async (overrides: Partial<ServerConfig> = {}): Promise<TestServer> => (current = await startServer(overrides)),
+    client: (): Client => {
+      const c = new Client(current!.base);
+      clients.push(c);
+      return c;
+    },
+  };
+};
+
+export const signup = async (c: Client, username: string) => {
+  const res = await c.request('POST', '/api/signup', { username, password: 'segredo123' });
+  expect(res.status).toBe(200);
+};
+
+/** Creates a challenge from `a`, accepts it with `b` and subscribes both to the game. */
+export const startGame = async (a: Client, b: Client, settings: object = casual) => {
+  const created = await a.request<ChallengeView>('POST', '/api/challenges', settings);
+  expect(created.status).toBe(200);
+  const accepted = await b.request<{ gameId: string }>('POST', `/api/challenges/${created.data.id}/accept`);
+  expect(accepted.status).toBe(200);
+  const id = accepted.data.gameId;
+  for (const c of [a, b]) {
+    if (!c.socket) await c.connect();
+    c.send({ t: 'sub', topic: `game:${id}` });
+  }
+  const [viewA] = await Promise.all([a.waitGame(id), b.waitGame(id)]);
+  return { id, view: viewA };
+};
+
+/** `mover` plays its first legal move and both wait for the game to show it. */
+export const play = async (mover: Client, other: Client, view: GameView): Promise<GameView> => {
+  const move = firstMove(view);
+  mover.send({ t: 'move', game: view.id, move, ply: view.moves.length });
+  const next = view.moves.length + 1;
+  const [updated] = await Promise.all([
+    mover.waitGame(view.id, (g) => g.moves.length === next),
+    other.waitGame(view.id, (g) => g.moves.length === next),
+  ]);
+  return updated;
+};
+
+/** Grants the moderator role, as the server command does. */
+export const makeModerator = (server: TestServer, name: string) =>
+  moderatorCommand(new Moderation(server.app.db, Date.now), new Users(server.app.db, Date.now), ['moderator', 'add', name]);

@@ -1,21 +1,12 @@
 import type { ChallengeView, GameView, LobbyView, ServerMessage, UserProfile } from '@ligungi/protocol';
-import { afterEach, describe, expect, it } from 'vitest';
-import { Client, firstMove, startServer, type TestServer } from './helpers.ts';
+import { describe, expect, it } from 'vitest';
+import { Client, casual, firstMove, signup as signupWith, useServer } from './helpers.ts';
 
-let server: TestServer | undefined;
-const clients: Client[] = [];
-afterEach(async () => {
-  for (const c of clients.splice(0)) c.disconnect();
-  await server?.close();
-  server = undefined;
-});
-
-const casual = { mode: 'intro', rated: false, timeControl: { initial: 600, increment: 5 }, color: 'white' };
+const { start: startServer, client } = useServer();
 
 const signup = async (name: string): Promise<Client> => {
-  const c = new Client(server!.base);
-  clients.push(c);
-  expect((await c.request('POST', '/api/signup', { username: name, password: 'segredo123' })).status).toBe(200);
+  const c = client();
+  await signupWith(c, name);
   return c;
 };
 
@@ -23,7 +14,7 @@ const isLobby = (m: ServerMessage): m is Extract<ServerMessage, { t: 'lobby' }> 
 
 describe('blocking a player', () => {
   it('stops challenges and follows both ways, removes the follows and is listed until undone', async () => {
-    server = await startServer();
+    await startServer();
     const gon = await signup('Gon');
     const killua = await signup('Killua');
     expect((await killua.request('POST', '/api/users/Gon/follow')).status).toBe(200);
@@ -47,7 +38,7 @@ describe('blocking a player', () => {
   });
 
   it('never pairs the two in the lobby nor lets one take the other’s game or challenge link', async () => {
-    server = await startServer();
+    await startServer();
     const gon = await signup('Gon');
     const killua = await signup('Killua');
     await gon.request('POST', '/api/users/Killua/block');
@@ -74,7 +65,7 @@ describe('blocking a player', () => {
   });
 
   it('cancels the open challenges between the two when one blocks the other', async () => {
-    server = await startServer();
+    await startServer();
     const gon = await signup('Gon');
     const killua = await signup('Killua');
     await killua.connect();
@@ -85,7 +76,7 @@ describe('blocking a player', () => {
   });
 
   it('refuses a rematch between the two', async () => {
-    server = await startServer();
+    await startServer();
     const gon = await signup('Gon');
     const killua = await signup('Killua');
     const link = await gon.request<ChallengeView>('POST', '/api/challenges', casual);

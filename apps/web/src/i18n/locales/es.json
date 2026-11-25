@@ -2047,6 +2047,12 @@
       "unlinked": "Juegas como invitado. Para jugar con tu cuenta de ligungi, vincula este Discord en los ajustes de la cuenta.",
       "suspended": "Tu cuenta de ligungi está suspendida, así que juegas como invitado.",
       "twoFactor": "Tu cuenta de ligungi usa verificación en dos pasos, que Discord no puede confirmar, así que juegas como invitado."
+    },
+    "presence": {
+      "playing": "Jugando una partida",
+      "watching": "Viendo una partida",
+      "reviewing": "Revisando la partida",
+      "browsing": "Navegando por el sitio"
     }
   }
 }

@@ -2047,6 +2047,12 @@
       "unlinked": "You play as a guest. To play with your ligungi account, link this Discord account in your account settings.",
       "suspended": "Your ligungi account is suspended, so you play as a guest.",
       "twoFactor": "Your ligungi account uses two-step verification, which Discord cannot confirm, so you play as a guest."
+    },
+    "presence": {
+      "playing": "Playing a game",
+      "watching": "Watching a game",
+      "reviewing": "Reviewing a game",
+      "browsing": "Browsing the site"
     }
   }
 }

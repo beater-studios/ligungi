@@ -1,6 +1,9 @@
 import type { DiscordSDK } from '@discord/embedded-app-sdk';
+import { MODES } from '@ligungi/engine';
 import type { UserRef } from '@ligungi/protocol';
+import { ACTIVITY_PREFIX } from './activity.ts';
 import { api } from './api.ts';
+import { getT } from './i18n/index.ts';
 import { SITE_URL } from './source.ts';
 import { createStore } from './store.ts';
 
@@ -54,6 +57,51 @@ const watchExternalLinks = () =>
     openExternal(url.origin === window.location.origin ? `${SITE_URL}${url.pathname}${url.search}` : url.href);
   });
 
+/** What the page says the player is doing, from the `data-activity-*` attributes the pages set for PreMiD. */
+const pageActivity = (): Readonly<Record<string, string>> =>
+  Object.fromEntries(
+    [...document.documentElement.attributes].filter((a) => a.name.startsWith(ACTIVITY_PREFIX)).map((a) => [a.name.slice(ACTIVITY_PREFIX.length), a.value]),
+  );
+
+export const presenceOf = (page: Readonly<Record<string, string>>): { details?: string; state: string } => {
+  const t = getT();
+  const p = t.discordActivity.presence;
+  const mode = MODES.find((m) => m === page.mode);
+  if (page.kind === 'game' && mode) {
+    return { details: t.modes[mode], state: page.status !== 'started' ? p.reviewing : page.role === 'player' ? p.playing : p.watching };
+  }
+  const level = Number(page.level);
+  if (page.kind === 'computer' && mode) return { details: t.modes[mode], state: level ? t.computer.bot(level) : p.playing };
+  return { state: p.browsing };
+};
+
+/**
+ * Keeps the player's Discord status in step with the page, as PreMiD does outside Discord: the mode, and whether they
+ * play, watch or review. Sent only when it changes, since Discord limits how often it may be set.
+ */
+const watchPresence = (client: DiscordSDK) => {
+  let last = '';
+  let place = '';
+  let start = Date.now();
+  const update = () => {
+    const page = pageActivity();
+    const presence = presenceOf(page);
+    // The time shown restarts with each game; outside games the whole visit counts as one.
+    const here = page.kind ? `${page.kind}:${window.location.pathname}` : 'site';
+    if (here !== place) {
+      place = here;
+      start = Date.now();
+    }
+    const key = JSON.stringify([presence, start]);
+    if (key === last) return;
+    last = key;
+    const activity = { type: 0, ...presence, assets: { large_image: 'ligungi', large_text: new URL(SITE_URL).host }, timestamps: { start } };
+    void client.commands.setActivity({ activity }).catch(() => undefined);
+  };
+  new MutationObserver(update).observe(document.documentElement, { attributes: true });
+  update();
+};
+
 /**
  * Connects to Discord and signs the player in: with their ligungi account when it is linked to this Discord account,
  * else as a guest. Resolves once the session cookie is set, so the session can be loaded after it.
@@ -74,10 +122,11 @@ export const startActivity = async (): Promise<void> => {
     sdk = client;
     watchExternalLinks();
     await client.ready();
-    const { code } = await client.commands.authorize({ client_id: clientId, response_type: 'code', state: '', prompt: 'none', scope: ['identify'] });
+    const { code } = await client.commands.authorize({ client_id: clientId, response_type: 'code', state: '', prompt: 'none', scope: ['identify', 'rpc.activities.write'] });
     const signed = await api.post<{ user: UserRef | null; reason: GuestReason | null; accessToken: string }>('/api/activity/session', { code });
     await client.commands.authenticate({ access_token: signed.accessToken });
     activity.set({ status: 'ready', instanceId: client.instanceId, reason: signed.reason });
+    watchPresence(client);
   } catch {
     activity.set({ status: 'failed' });
   }

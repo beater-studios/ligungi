@@ -2047,6 +2047,12 @@
       "unlinked": "Você joga como convidado. Para jogar com sua conta do ligungi, vincule este Discord nas configurações da conta.",
       "suspended": "Sua conta do ligungi está suspensa, então você joga como convidado.",
       "twoFactor": "Sua conta do ligungi usa verificação em duas etapas, que o Discord não confirma, então você joga como convidado."
+    },
+    "presence": {
+      "playing": "Jogando uma partida",
+      "watching": "Assistindo a uma partida",
+      "reviewing": "Revendo a partida",
+      "browsing": "Navegando pelo site"
     }
   }
 }

@@ -8,12 +8,12 @@ import { useEffect } from 'preact/hooks';
  */
 export type PageActivity = Readonly<Record<string, string>>;
 
-const PREFIX = 'data-activity-';
+export const ACTIVITY_PREFIX = 'data-activity-';
 
 /** Sets the attributes and returns what removes them. */
 export const applyActivity = (root: HTMLElement, activity: PageActivity): (() => void) => {
-  const names = Object.keys(activity).map((key) => PREFIX + key);
-  for (const [key, value] of Object.entries(activity)) root.setAttribute(PREFIX + key, value);
+  const names = Object.keys(activity).map((key) => ACTIVITY_PREFIX + key);
+  for (const [key, value] of Object.entries(activity)) root.setAttribute(ACTIVITY_PREFIX + key, value);
   return () => {
     for (const name of names) root.removeAttribute(name);
   };

@@ -9,7 +9,7 @@ import {
   type Mode,
   type Outcome,
 } from '@ligungi/engine';
-import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type ErrorCode, type GameStatus, type GameSummary, type GameView, type PlayerView, type TimeControl } from '@ligungi/protocol';
+import { DAY_MS, DRAFT_QUEUE_MAX, EXTRA_TIME_SECONDS, isByoyomi, type ErrorCode, type GameStatus, type GameSummary, type GameView, type PlayerView, type TimeControl } from '@ligungi/protocol';
 import { Clock } from './clock.ts';
 
 export interface Seat {
@@ -40,6 +40,7 @@ export interface RoomInit {
   readonly rematchId?: string | null;
   readonly endedAt?: number | null;
   readonly voided?: boolean;
+  readonly draftQueue?: Readonly<Record<Color, readonly string[]>> | null;
 }
 
 export interface RoomHooks {
@@ -88,6 +89,12 @@ export class GameRoom {
   endedAt: number | null;
   /** A moderator voided this finished game (see `Games.voidGame`). */
   voided: boolean;
+  /**
+   * Correspondence draft: each player's queued placements (machine notation), played by the server one per turn, so
+   * the draft goes on while they are away. Within the rulebook: the draft stays alternating and in the open, a queue
+   * only gives up reacting to the opponent's next placements. Emptied when the draft ends.
+   */
+  draftQueue: Record<Color, readonly string[]>;
   readonly #absentSince: Record<Color, number | null>;
   readonly #hooks: RoomHooks;
   #turnStartedAt: number;
@@ -114,6 +121,7 @@ export class GameRoom {
     this.rematchId = init.rematchId ?? null;
     this.endedAt = init.endedAt ?? null;
     this.voided = init.voided ?? false;
+    this.draftQueue = { white: [...(init.draftQueue?.white ?? [])], black: [...(init.draftQueue?.black ?? [])] };
     const now = hooks.now();
     this.#turnStartedAt = now;
     this.#absentSince = { white: now, black: now };
@@ -167,10 +175,19 @@ export class GameRoom {
     if (ply !== this.plies) return 'staleMove';
     const move = parseMove(text);
     if (!move) return 'invalidMove';
+    if (!this.#play(color, move)) return 'illegalMove';
+    this.#runQueue();
+    if (this.game.outcome) this.#end(this.game.outcome);
+    else this.#changed();
+    return null;
+  }
+
+  /** Plays a move of `color` and moves the clocks on; false when the move is illegal. */
+  #play(color: Color, move: NonNullable<ReturnType<typeof parseMove>>): boolean {
     try {
       this.game.play(move);
     } catch {
-      return 'illegalMove';
+      return false;
     }
     const now = this.#hooks.now();
     const next = this.game.position.turn;
@@ -183,6 +200,46 @@ export class GameRoom {
     if (this.drawOffer && this.drawOffer !== color) this.drawOffer = null;
     // A takeback request is about the position it was made in; any move makes it moot.
     this.takebackOffer = null;
+    return true;
+  }
+
+  /**
+   * Plays queued placements while the player to move has one. A placement the opponent's moves made impossible (the
+   * square taken, the piece no longer allowed) drops the rest of that queue: the player takes over by hand.
+   */
+  #runQueue(): void {
+    while (this.status === 'started' && !this.game.outcome && this.game.position.phase === 'draft') {
+      const color = this.game.position.turn;
+      const [next, ...rest] = this.draftQueue[color];
+      if (next === undefined) return;
+      this.draftQueue[color] = rest;
+      const move = parseMove(next);
+      if (!move || !this.#play(color, move)) {
+        this.draftQueue[color] = [];
+        return;
+      }
+    }
+    this.draftQueue = { white: [], black: [] };
+  }
+
+  /** Placements can be queued only during the draft of a correspondence game. */
+  canQueue(): boolean {
+    return this.status === 'started' && this.daysPerMove !== null && this.game.position.phase === 'draft' && !this.game.outcome;
+  }
+
+  /**
+   * Replaces `color`'s queue. Each entry is a placement or "done", and "done" can only come last: after it the player
+   * places nothing more. On the player's own turn the first one is played at once.
+   */
+  queue(color: Color, moves: readonly string[]): ErrorCode | null {
+    if (!this.canQueue()) return 'queueUnavailable';
+    if (moves.length > DRAFT_QUEUE_MAX) return 'invalidMove';
+    for (const [i, text] of moves.entries()) {
+      const move = parseMove(text);
+      if (!move || move.kind === 'move' || (move.kind === 'done' && i !== moves.length - 1)) return 'invalidMove';
+    }
+    this.draftQueue[color] = [...moves];
+    this.#runQueue();
     if (this.game.outcome) this.#end(this.game.outcome);
     else this.#changed();
     return null;
@@ -417,6 +474,7 @@ export class GameRoom {
       canClaimVictory: you !== null && this.canClaim(you),
       canTakeback: you !== null && this.canTakeback(you),
       canGiveTime: you !== null && this.canGiveTime(you),
+      draftQueue: you ? this.draftQueue[you] : [],
       createdAt: this.createdAt,
       endedAt: this.endedAt,
     };
@@ -464,6 +522,8 @@ export class GameRoom {
   #undo(color: Color): void {
     const count = this.#takebackCount(color);
     for (let i = 0; i < count; i++) this.game.undo();
+    // A queue was planned for the position that no longer is.
+    this.draftQueue = { white: [], black: [] };
     const now = this.#hooks.now();
     if (this.clock?.running) {
       this.clock.stop(now);
@@ -486,6 +546,7 @@ export class GameRoom {
     this.endedAt = now;
     this.drawOffer = null;
     this.takebackOffer = null;
+    this.draftQueue = { white: [], black: [] };
     this.clock?.stop(now);
     this.deadline = null;
     this.dispose();

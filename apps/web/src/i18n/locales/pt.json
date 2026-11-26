@@ -143,6 +143,7 @@
     "rematchUnavailable": "Revanche indisponível.",
     "noRematchOffer": "Não há proposta de revanche.",
     "takebackUnavailable": "Voltar lance indisponível agora.",
+    "queueUnavailable": "Só dá para programar colocações durante o draft de uma partida por correspondência.",
     "noTakebackOffer": "Não há pedido para voltar lance.",
     "extraTimeUnavailable": "Não dá para dar tempo agora.",
     "invalidTopic": "Tópico inválido.",
@@ -610,6 +611,14 @@
     "playAnonymous": "Jogar sem conta"
   },
   "game": {
+    "queue": {
+      "title": "Colocações programadas",
+      "hint": "Enquanto o adversário coloca, você pode programar as suas próximas colocações no tabuleiro. Elas são jogadas uma por vez, mesmo com você fora do site.",
+      "note": "Jogadas uma por vez. Se uma deixar de ser possível, o resto é descartado e você coloca à mão.",
+      "thenDone": "Depois, pronto",
+      "undo": "Desfazer a última",
+      "clear": "Apagar"
+    },
     "ctlTakeback": "Voltar",
     "ctlDraw": "Empate",
     "ctlResign": "Abandonar",

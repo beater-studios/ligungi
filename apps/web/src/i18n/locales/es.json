@@ -138,6 +138,7 @@
     "discordDisabled": "La conexión con Discord no está disponible en este sitio.",
     "discordNotLinked": "Tu cuenta no está conectada a Discord.",
     "takebackUnavailable": "No se puede deshacer la jugada ahora.",
+    "queueUnavailable": "Solo se pueden programar colocaciones durante el draft de una partida por correspondencia.",
     "noTakebackOffer": "No hay petición de deshacer.",
     "extraTimeUnavailable": "No se puede dar tiempo ahora.",
     "cannotChallengeSelf": "No puedes desafiarte a ti mismo.",
@@ -610,6 +611,14 @@
     "playAnonymous": "Jugar sin cuenta"
   },
   "game": {
+    "queue": {
+      "title": "Colocaciones programadas",
+      "hint": "Mientras tu rival coloca, puedes programar tus próximas colocaciones en el tablero. Se juegan una por turno, aunque no estés en el sitio.",
+      "note": "Se juegan una por turno. Si una ya no se puede jugar, el resto se descarta y colocas a mano.",
+      "thenDone": "Después, listo",
+      "undo": "Deshacer la última",
+      "clear": "Borrar"
+    },
     "ctlTakeback": "Deshacer",
     "ctlDraw": "Tablas",
     "ctlResign": "Abandonar",

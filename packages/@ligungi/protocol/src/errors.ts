@@ -93,6 +93,7 @@ export const ERROR_MESSAGES = {
   rematchUnavailable: 'Revanche indisponível.',
   noRematchOffer: 'Não há proposta de revanche.',
   takebackUnavailable: 'Voltar lance indisponível agora.',
+  queueUnavailable: 'Só dá para programar colocações durante o draft de uma partida por correspondência.',
   noTakebackOffer: 'Não há pedido para voltar lance.',
   extraTimeUnavailable: 'Não dá para dar tempo agora.',
   invalidTopic: 'Tópico inválido.',

@@ -355,6 +355,9 @@ const MIGRATIONS = [
   );
   create index study_likes_study on study_likes(study_id);
   `,
+  `
+  alter table games add column draft_queue text;
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

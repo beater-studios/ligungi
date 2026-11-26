@@ -157,6 +157,52 @@
   font-size: 0.9em;
 }
 
+// Correspondence draft: the placements planned on the opponent's turn, under the board.
+.ligungi-draft-queue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  padding: 0.7em 3%;
+  border-bottom: $border;
+  text-align: start;
+
+  &__title {
+    margin: 0;
+    color: $c-font-clear;
+    font-weight: 600;
+  }
+
+  &__hint {
+    margin: 0;
+    color: $c-font-dim;
+    font-size: 0.9em;
+  }
+
+  &__list {
+    margin: 0;
+    padding-inline-start: 1.6em;
+
+    li::marker {
+      color: $c-font-dim;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+
+    &:empty {
+      display: none;
+    }
+
+    .button {
+      padding: 0.4em 0.8em;
+      font-size: 0.85em;
+    }
+  }
+}
+
 .ligungi-declined {
   margin: 0;
   padding: 0.5em 3%;

@@ -41,6 +41,8 @@ interface RoundLayoutProps {
   /** The screen's name for screen readers, where the side panel has no heading of its own. */
   readonly heading?: string;
   readonly board: BoardProps;
+  /** The position really played, when the board shows a plan on top of it (the draft queue): the draft panel counts from it. */
+  readonly played?: Position;
   readonly orientation: Color;
   readonly players: Readonly<Record<Color, RoundPlayer>>;
   readonly clocks?: Readonly<Record<Color, RoundClock>> | null;
@@ -330,7 +332,7 @@ export const RoundLayout = (props: RoundLayoutProps) => {
         <div class="ligungi-panels ligungi-card">
           {props.board.position && (
             <DraftPanel
-              position={props.board.position}
+              position={props.played ?? props.board.position}
               names={{ white: props.players.white.name, black: props.players.black.name }}
             />
           )}

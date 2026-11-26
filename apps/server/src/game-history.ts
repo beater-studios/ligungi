@@ -64,6 +64,8 @@ export interface GameRow {
   created_at: number;
   ended_at: number | null;
   voided: number;
+  /** Correspondence draft queues, `{ white, black }` as JSON; `null` when neither player has one. */
+  draft_queue: string | null;
 }
 
 /** A game search with its player names resolved to ids and its days to milliseconds. */

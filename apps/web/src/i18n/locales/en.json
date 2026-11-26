@@ -138,6 +138,7 @@
     "discordDisabled": "Linking to Discord is not available on this site.",
     "discordNotLinked": "Your account is not linked to Discord.",
     "takebackUnavailable": "A takeback is not available now.",
+    "queueUnavailable": "Placements can only be queued during the draft of a correspondence game.",
     "noTakebackOffer": "There is no takeback request.",
     "extraTimeUnavailable": "You cannot give time now.",
     "cannotChallengeSelf": "You cannot challenge yourself.",
@@ -610,6 +611,14 @@
     "playAnonymous": "Play without an account"
   },
   "game": {
+    "queue": {
+      "title": "Planned placements",
+      "hint": "While your opponent places, you can plan your next placements on the board. They are played one per turn, even when you are away.",
+      "note": "Played one per turn. If one can no longer be played, the rest is dropped and you place by hand.",
+      "thenDone": "Then done",
+      "undo": "Undo last",
+      "clear": "Clear"
+    },
     "ctlTakeback": "Takeback",
     "ctlDraw": "Draw",
     "ctlResign": "Resign",

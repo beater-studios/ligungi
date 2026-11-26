@@ -95,6 +95,7 @@ export const ERROR_STATUS: Readonly<Record<ErrorCode, number>> = {
   rematchUnavailable: 400,
   noRematchOffer: 400,
   takebackUnavailable: 400,
+  queueUnavailable: 400,
   noTakebackOffer: 400,
   extraTimeUnavailable: 400,
   invalidTopic: 400,

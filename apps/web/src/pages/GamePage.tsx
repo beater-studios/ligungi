@@ -1,3 +1,4 @@
+import type { Shape } from '@ligungi/board';
 import { applyMove, legalMoves, moveToString, opposite, type Color, type Move } from '@ligungi/engine';
 import { DAY_MS, EXTRA_TIME_SECONDS, isByoyomi, type GameView } from '@ligungi/protocol';
 import type { ComponentChildren } from 'preact';
@@ -17,7 +18,14 @@ import { moveSound } from '../blind/speech.ts';
 import { useStore } from '../core/store.ts';
 import { GameControls, gameCommands, type Declined } from './game/GameControls.tsx';
 import { GameInfo } from './game/GameInfo.tsx';
+import { DraftQueue, draftPlan } from './game/DraftQueue.tsx';
 import { useGameSocket } from './game/useGameSocket.ts';
+
+/**
+ * The board keeps an option until it is given another, so leaving the draft plan passes no marks rather than leaving
+ * the planned squares marked.
+ */
+const NO_SHAPES: readonly Shape[] = [];
 
 /** `tv`: the channel list, shown above the game details when the game is watched on a TV channel. */
 export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => {
@@ -119,6 +127,26 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
   );
 
   const moves = useMemo(() => (replay && myTurn ? legalMoves(replay.game.position) : []), [replay, myTurn]);
+  // Correspondence draft, on the opponent's turn: the viewer plans their next placements on the board.
+  const queuing = Boolean(
+    view && you && live && view.status === 'started' && view.daysPerMove !== null && replay?.game.position.phase === 'draft' && replay.game.position.turn !== you,
+  );
+  const plan = useMemo(
+    () => (queuing && replay && view && you ? draftPlan(replay.game.position, view.draftQueue, you) : null),
+    [queuing, replay, view?.draftQueue, you],
+  );
+  const planMoves = useMemo(() => (plan && !plan.endsWithDone ? legalMoves(plan.position) : []), [plan]);
+  const planShapes = useMemo(
+    (): readonly Shape[] => plan?.moves.flatMap((m) => (m.kind === 'drop' ? [{ kind: 'square' as const, square: m.to, color: 'blue' }] : [])) ?? NO_SHAPES,
+    [plan],
+  );
+  const sendQueue = useCallback(
+    (queued: readonly Move[]) => {
+      if (!view) return;
+      if (!socket.send({ t: 'queue', game: view.id, moves: queued.map(moveToString) })) setNotice(getT().offline);
+    },
+    [view],
+  );
   const premoveMoves = useMemo(() => {
     if (!replay || !view || !you || !live || view.status !== 'started') return [];
     const current = replay.game.position;
@@ -254,6 +282,9 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
     />
   );
 
+  const queuePanel = plan ? (
+    <DraftQueue plan={plan} canDone={planMoves.some((m) => m.kind === 'done')} onChange={sendQueue} />
+  ) : null;
   const info = <GameInfo view={view} notice={notice} premove={premove} />;
   // Between two accounts, their record so far, from the viewer's side when they play; reloaded when the game ends.
   const [whiteUser, blackUser] = [view.players.white.user, view.players.black.user];
@@ -277,18 +308,32 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
     <RoundLayout
       heading={t.game.heading(playerName(t, view.players.white), playerName(t, view.players.black))}
       training={!view.rated}
-      board={{
-        // A move waiting for Confirm is shown played, and the board waits for the answer.
-        position: pending ? applyMove(position, pending) : position,
-        movableColor: live && started && you && !pending ? you : null,
-        moves: pending ? [] : moves,
-        lastMove: pending ?? lastMove,
-        onMove: onBoardMove,
-        premoveMoves: pending ? [] : premoveMoves,
-        premove,
-        onPremove: setPremove,
-      }}
-      onTypedMove={send}
+      board={
+        plan && you
+          ? {
+              // The queued placements are shown placed, each square marked, and a move on the board adds one more.
+              position: plan.position,
+              movableColor: you,
+              moves: planMoves.filter((m) => m.kind !== 'done'),
+              lastMove,
+              onMove: (move: Move) => sendQueue([...plan.moves, move]),
+              shapes: planShapes,
+            }
+          : {
+              // A move waiting for Confirm is shown played, and the board waits for the answer.
+              position: pending ? applyMove(position, pending) : position,
+              movableColor: live && started && you && !pending ? you : null,
+              moves: pending ? [] : moves,
+              lastMove: pending ?? lastMove,
+              onMove: onBoardMove,
+              premoveMoves: pending ? [] : premoveMoves,
+              premove,
+              onPremove: setPremove,
+              shapes: NO_SHAPES,
+            }
+      }
+      onTypedMove={plan ? (move: Move) => sendQueue([...plan.moves, move]) : send}
+      {...(plan ? { played: replay.game.position } : {})}
       orientation={orientation}
       players={{ white: player('white'), black: player('black') }}
       clocks={clocks}
@@ -315,7 +360,12 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
       {...(you && started
         ? { commands: { resign: () => action('resign'), draw: () => offer('draw', view.drawOffer === opponent ? 'accept' : 'offer') } }
         : {})}
-      controls={controls}
+      controls={
+        <>
+          {queuePanel}
+          {controls}
+        </>
+      }
       side={side}
     />
   );

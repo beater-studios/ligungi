@@ -53,6 +53,11 @@ export interface GameView {
   readonly canTakeback: boolean;
   /** Whether the viewer may give the opponent extra time now (a game with a clock, in progress). */
   readonly canGiveTime: boolean;
+  /**
+   * Correspondence draft: the viewer's own queued placements (machine notation), played one per turn by the server.
+   * Empty for everyone else: the queue is the player's plan, never shown to the opponent.
+   */
+  readonly draftQueue: readonly string[];
   readonly createdAt: number;
   readonly endedAt: number | null;
 }

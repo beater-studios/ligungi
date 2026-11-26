@@ -6,6 +6,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Correspondence games: during the draft, on the opponent's turn, you can plan your next placements on the board (and declare done after them). The server plays them one per turn, even while you are away, so a draft no longer takes days of coming back for each placement. Only you see your plan; if a placement can no longer be played, the rest of the plan is dropped and you place by hand.
 - The footer has a Community column (players, friends, Discord, reporting a problem and how to contribute) and the icons of ligungi's profiles: Discord, X, Instagram, YouTube, Twitch and GitHub. The Community menu at the top also links to Discord and to reporting a problem.
 
 ### Changed

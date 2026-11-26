@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Clock } from '../src/clock.ts';
 import { openDatabase } from '../src/db.ts';
 import { Games, type Player } from '../src/games.ts';
-import { legalMoves, moveToString } from '@ligungi/engine';
+import { applyMove, legalMoves, moveToString, type Position } from '@ligungi/engine';
 import { DEFAULT_RATING, updateRating } from '../src/glicko.ts';
 import { base32Decode, base32Encode, hotp, matchStep, newRecoveryCodes, normalizeCode, otpauthUri, TOTP_STEP_MS } from '../src/totp.ts';
 import { TV_LINGER_MS, Tv } from '../src/tv.ts';
@@ -183,6 +183,82 @@ describe('board moves', () => {
     db.prepare('update games set board_moves = null where id = ?').run(room.id);
     new Games(db, users, options);
     expect(stored()).toBe(boardMoves);
+    db.close();
+  });
+});
+
+describe('correspondence draft queue', () => {
+  const setup = (daysPerMove: number | null = 3) => {
+    const db = openDatabase(':memory:');
+    const users = new Users(db, Date.now);
+    const options = { now: Date.now, abortAfterMs: 60_000, claimAfterMs: 30_000, broadcast: () => {} };
+    const games = new Games(db, users, options);
+    const room = games.create({
+      mode: 'advanced',
+      rated: true,
+      timeControl: null,
+      daysPerMove,
+      freeDraft: false,
+      players: { white: { sessionId: 'w', userId: null, name: 'White' }, black: { sessionId: 'b', userId: null, name: 'Black' } },
+    });
+    return { db, users, options, room };
+  };
+  /** Black's next `count` placements as Black would make them, from the current position. */
+  const blackPlacements = (start: Position, count: number): string[] => {
+    const out: string[] = [];
+    let position = start;
+    for (let i = 0; i < count; i++) {
+      const move = legalMoves({ ...position, turn: 'black' }).find((m) => m.kind === 'drop')!;
+      out.push(moveToString(move));
+      position = applyMove({ ...position, turn: 'black' }, move);
+    }
+    return out;
+  };
+  const whitePlays = (room: ReturnType<typeof setup>['room']) => {
+    const move = legalMoves(room.game.position).find((m) => m.kind === 'drop')!;
+    expect(room.move('white', moveToString(move), room.plies)).toBeNull();
+  };
+
+  it('plays the queued placements on the player\'s turns, shows them only to that player and keeps them on a restart', () => {
+    const { db, users, options, room } = setup();
+    const queued = blackPlacements(room.game.position, 2);
+    expect(room.queue('black', queued)).toBeNull();
+    expect(room.view('b', null).draftQueue).toEqual(queued);
+    expect(room.view('w', null).draftQueue).toEqual([]);
+
+    whitePlays(room);
+    expect(moveToString(room.game.moves[1]!)).toBe(queued[0]);
+    expect(room.game.position.turn).toBe('white');
+    expect(room.view('b', null).draftQueue).toEqual([queued[1]]);
+
+    const restored = new Games(db, users, options).get(room.id)!;
+    expect(restored.view('b', null).draftQueue).toEqual([queued[1]]);
+    whitePlays(restored);
+    expect(moveToString(restored.game.moves[3]!)).toBe(queued[1]);
+    expect(restored.view('b', null).draftQueue).toEqual([]);
+    db.close();
+  });
+
+  it('drops the rest of the queue when a placement can no longer be played', () => {
+    const { db, room } = setup();
+    // A placement in White's camp, which Black can never make.
+    const wrong = moveToString(legalMoves(room.game.position).find((m) => m.kind === 'drop')!);
+    const later = blackPlacements(room.game.position, 1);
+    expect(room.queue('black', [wrong, ...later])).toBeNull();
+    whitePlays(room);
+    expect(room.game.position.turn).toBe('black');
+    expect(room.view('b', null).draftQueue).toEqual([]);
+    db.close();
+  });
+
+  it('is only for the draft of a correspondence game, with done last and placements only', () => {
+    const live = setup(null);
+    expect(live.room.queue('black', blackPlacements(live.room.game.position, 1))).toBe('queueUnavailable');
+    live.db.close();
+    const { db, room } = setup();
+    expect(room.queue('black', ['done', ...blackPlacements(room.game.position, 1)])).toBe('invalidMove');
+    expect(room.queue('black', ['e1e2'])).toBe('invalidMove');
+    expect(room.queue('black', [...blackPlacements(room.game.position, 1), 'done'])).toBeNull();
     db.close();
   });
 });

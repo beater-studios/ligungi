@@ -41,6 +41,18 @@ export interface GamesOptions {
 /** Finished games kept in memory after being loaded, for quick access (views, rematch offers). */
 const FINISHED_CACHE = 500;
 
+/** The stored draft queues; anything unreadable counts as no queue, so a bad row never blocks loading a game. */
+const draftQueueFrom = (text: string | null): Record<Color, readonly string[]> | null => {
+  if (!text) return null;
+  try {
+    const value = JSON.parse(text) as Partial<Record<Color, unknown>>;
+    const list = (entry: unknown): string[] => (Array.isArray(entry) ? entry.filter((move): move is string => typeof move === 'string') : []);
+    return { white: list(value.white), black: list(value.black) };
+  } catch {
+    return null;
+  }
+};
+
 export class Games {
   readonly #db: Db;
   readonly #users: Users;
@@ -337,6 +349,7 @@ export class Games {
       rematchId: row.rematch_id,
       endedAt: row.ended_at,
       voided: row.voided === 1,
+      draftQueue: draftQueueFrom(row.draft_queue),
     };
     return new GameRoom(init, this.#hooks());
   }
@@ -352,14 +365,14 @@ export class Games {
           white_session, white_user, white_name, white_rating, white_provisional, white_diff,
           black_session, black_user, black_name, black_rating, black_provisional, black_diff,
           moves, status, winner, reason, clock_white, clock_black, clock_running, days_per_move, deadline, rematch_id,
-          created_at, ended_at, updated_at, board_moves)
-         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          created_at, ended_at, updated_at, board_moves, draft_queue)
+         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          on conflict (id) do update set white_session = excluded.white_session, black_session = excluded.black_session,
           white_diff = excluded.white_diff, black_diff = excluded.black_diff,
           moves = excluded.moves, status = excluded.status, winner = excluded.winner, reason = excluded.reason,
           clock_white = excluded.clock_white, clock_black = excluded.clock_black, clock_running = excluded.clock_running,
           deadline = excluded.deadline, rematch_id = excluded.rematch_id, ended_at = excluded.ended_at, updated_at = excluded.updated_at,
-          board_moves = excluded.board_moves`,
+          board_moves = excluded.board_moves, draft_queue = excluded.draft_queue`,
       )
       .run(
         room.id,
@@ -397,6 +410,7 @@ export class Games {
         room.endedAt,
         now,
         room.status === 'ended' ? room.boardMoves : null,
+        room.draftQueue.white.length || room.draftQueue.black.length ? JSON.stringify(room.draftQueue) : null,
       );
   }
 }

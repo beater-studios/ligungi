@@ -98,9 +98,11 @@
   }
 
   &--segmented {
+    // Each option as wide as its label, the spare room shared out; options that do not fit on one line go on to the
+    // next, in a narrow dialog as on a phone, never past the edge.
     .ligungi-choice__options {
-      // Equal widths while the labels fit; a longer one ("Intermediário") widens its own option instead of touching its edges.
-      grid-auto-columns: minmax(max-content, 1fr);
+      display: flex;
+      flex-wrap: wrap;
       gap: 4px;
       padding: 4px;
       border-radius: 6px;
@@ -108,6 +110,7 @@
     }
 
     .ligungi-choice__option {
+      flex: 1 1 auto;
       min-height: 2.5rem;
       padding: 0.4rem 0.8rem;
       border: 0;
@@ -146,18 +149,6 @@
       .ligungi-choice__badge {
         flex: 0 0 2rem;
         text-align: center;
-      }
-    }
-
-    // Options that do not fit on one line wrap to the next instead of scrolling sideways.
-    &--segmented {
-      .ligungi-choice__options {
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      .ligungi-choice__option {
-        flex: 1 1 auto;
       }
     }
   }

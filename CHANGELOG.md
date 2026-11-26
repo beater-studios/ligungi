@@ -14,6 +14,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 - Quick pairing names the speed of each clock, as lichess does: 5+3 is Blitz, 10+5 and 15+10 are Rapid, and 30+0, 30+20 and 60+30 are Classical, from the clock's estimated length over 40 moves.
 - The notification bell was redesigned: each item has an icon in its own color (your turn, challenge, new follower, moderation, study), names stand out in bold, a challenge shows its mode, clock and rated or casual as separate tags and says which color you would play, the accept and decline buttons have labels, unread notices have a dot and a tinted background, and the time left in a correspondence game turns orange on its last day.
 
+### Fixed
+
+- The choices of the new study dialog (where to start) and of other narrow dialogs no longer run past their edge on a computer: as on a phone, the options that do not fit go on to a second line.
+
 ## [0.10.0] - 2026-11-26
 
 ### Added

@@ -248,16 +248,10 @@
     width: 100%;
   }
 
-  // Phones: every choice fills the width instead of scrolling sideways; the four modes take two rows.
+  // Phones: the four modes take two rows of two.
   @media (max-width: at-most($small)) {
-    .ligungi-choice--segmented .ligungi-choice__options {
-      grid-auto-columns: minmax(0, 1fr);
-      overflow-x: visible;
-    }
-
-    .ligungi-choice:has([name='cg-mode']) .ligungi-choice__options {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      grid-auto-flow: row;
+    .ligungi-choice:has([name='cg-mode']) .ligungi-choice__option {
+      flex-basis: 40%;
     }
   }
 }

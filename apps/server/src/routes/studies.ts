@@ -1,5 +1,6 @@
 import type { AppDeps } from '../app.ts';
-import { isOrientation, STUDIES_MAX, STUDY_CHAPTER_NAME_MAX, STUDY_CHAPTERS_MAX, STUDY_QUERY_MAX, studyStart, studyText, DAY_MS, STUDY_DESCRIPTION_MAX, STUDY_PUBLIC_MIN_DAYS, STUDY_TITLE_MAX, emptyRoot, isStudyVisibility, parseStudyRoot, STUDY_SORTS, type StudyList, type StudyRoot } from '@ligungi/protocol';
+import { isOrientation, STUDIES_MAX, STUDY_CHAPTER_NAME_MAX, STUDY_CHAPTERS_MAX, STUDY_QUERY_MAX, studyStart, studyText, STUDY_DESCRIPTION_MAX, STUDY_TITLE_MAX, emptyRoot, isStudyTopic, isStudyVisibility, parseStudyRoot, parseStudyTopics, STUDY_SORTS, type StudyList, type StudyRoot } from '@ligungi/protocol';
+import { MODES } from '@ligungi/engine';
 import { HttpError, intParam, sendJson, type Router, type Context } from '../http.ts';
 import { requireUser } from './guards.ts';
 import type { ChapterInput, StudyRecord } from '../studies.ts';
@@ -22,7 +23,7 @@ const chapterInput = (value: unknown): ChapterInput => {
 
 /** Studies and their chapters. */
 export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
-  const { config, moderation, studies, studyLimiter, users } = deps;
+  const { moderation, studies, studyLimiter, users } = deps;
 
   /** A study the viewer may open; one they may not is reported as missing, so its existence does not leak. */
   const readableStudy = (ctx: Context): StudyRecord => {
@@ -40,17 +41,14 @@ export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
     return study;
   };
 
-  /** Title, description and visibility of a study; new accounts may not make one public yet. */
-  const studyFields = (body: Record<string, unknown>, userId: string) => {
+  /** Title, description, visibility and topics of a study. */
+  const studyFields = (body: Record<string, unknown>) => {
     const title = studyText(body.title, STUDY_TITLE_MAX, true);
     const description = studyText(body.description ?? '', STUDY_DESCRIPTION_MAX, false);
+    const topics = parseStudyTopics(body.topics ?? []);
     const { visibility } = body;
-    if (title === null || description === null || !isStudyVisibility(visibility)) throw new HttpError('invalidStudy');
-    const user = users.findById(userId);
-    if (visibility === 'public' && (!user || config.now() - user.createdAt < STUDY_PUBLIC_MIN_DAYS * DAY_MS)) {
-      throw new HttpError('studyPublicTooSoon');
-    }
-    return { title, description, visibility };
+    if (title === null || description === null || topics === null || !isStudyVisibility(visibility)) throw new HttpError('invalidStudy');
+    return { title, description, visibility, topics };
   };
 
   router
@@ -69,17 +67,30 @@ export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
       }
       const page = intParam(params, 'page', 1, 1000, 1);
       const sort = STUDY_SORTS.find((value) => value === params.get('sort')) ?? 'updated';
-      const list: StudyList = studies.listed(query, page, sort);
+      const mode = MODES.find((value) => value === params.get('mode'));
+      const topic = params.get('topic');
+      const authorName = params.get('author');
+      const author = authorName ? users.findByName(authorName) : undefined;
+      // An author that does not exist has no studies, rather than every study.
+      if (authorName && !author) {
+        sendJson(ctx.res, 200, { studies: [], more: false } satisfies StudyList);
+        return;
+      }
+      const list: StudyList = studies.listed(query, page, sort, {
+        ...(mode ? { mode } : {}),
+        ...(isStudyTopic(topic) ? { topic } : {}),
+        ...(author ? { ownerId: author.id } : {}),
+      });
       sendJson(ctx.res, 200, list);
     })
     .add('POST', '/api/studies', async (ctx) => {
       const userId = requireUser(ctx);
       if (!studyLimiter.allow(userId)) throw new HttpError('tooManyAttempts');
       const body = (await ctx.body()) as Record<string, unknown>;
-      const fields = studyFields(body, userId);
+      const fields = studyFields(body);
       const chapter = chapterInput(body.chapter);
       if (studies.count(userId) >= STUDIES_MAX) throw new HttpError('tooManyStudies');
-      const id = studies.create(userId, fields.title, fields.description, fields.visibility, chapter);
+      const id = studies.create(userId, fields.title, fields.description, fields.visibility, fields.topics, chapter);
       sendJson(ctx.res, 200, studies.view(studies.get(id)!, userId));
     })
     .add('GET', '/api/studies/:id', (ctx) => {
@@ -87,8 +98,8 @@ export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
     })
     .add('POST', '/api/studies/:id', async (ctx) => {
       const study = ownStudy(ctx);
-      const fields = studyFields((await ctx.body()) as Record<string, unknown>, study.ownerId);
-      studies.update(study.id, fields.title, fields.description, fields.visibility);
+      const fields = studyFields((await ctx.body()) as Record<string, unknown>);
+      studies.update(study.id, fields.title, fields.description, fields.visibility, fields.topics);
       sendJson(ctx.res, 200, studies.view(studies.get(study.id)!, study.ownerId));
     })
     .add('DELETE', '/api/studies/:id', (ctx) => {

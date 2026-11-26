@@ -22,7 +22,7 @@ import { StudyLike } from '../study/StudyLike.tsx';
 import { StudyMoves } from '../study/StudyMoves.tsx';
 import { Field, Toggle } from '../components/ui.tsx';
 import { describeMove, describeShapes, isWord, normalize, parseDrawing, type Speaker } from '../blind/blind.ts';
-import { listText, timeAgo, usePieceNames, useT } from '../i18n/index.ts';
+import { formatDate, listText, timeAgo, usePieceNames, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { prefs } from '../prefs/prefs.ts';
 import { navigate, useLocation } from '../core/router.ts';
@@ -219,6 +219,16 @@ export const StudyPage = ({ id }: { id: string }) => {
                   <div class="ligungi-study__by">
                     {t.study.by(<a href={`/@/${study.owner.name}`}>{study.owner.name}</a>)} · {t.study.visibilities[study.visibility]}
                   </div>
+                  {study.listedFrom !== null && <p class="ligungi-study__listed-from">{t.study.listedFrom(formatDate(t, study.listedFrom))}</p>}
+                  {study.topics.length > 0 && (
+                    <div class="ligungi-studies__tags">
+                      {study.topics.map((topic) => (
+                        <a key={topic} class="ligungi-studies__tag" href={`/study?topic=${topic}`}>
+                          {t.study.topicNames[topic]}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </section>

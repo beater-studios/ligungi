@@ -6,12 +6,14 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Studies: authors pick up to three topics (game reviews, drafts and openings, strategy, tactics, mates and endgames, rules and basics), and the public list filters by topic, by the mode of the chapters and by author. Each card shows its topics and modes, and a player's profile lists their public studies.
 - Lessons: a ninth stage, Draft strategy, with seven exercises: towering (tall towers at the front), a step (a lower tower in front of a taller one), Marshal steps (towers the Marshal climbs), a cannon track, a runner launched from a tall tower, a deep drop once a piece has gone forward, and stopping the opponent's runner.
 - Correspondence games: during the draft, on the opponent's turn, you can plan your next placements on the board (and declare done after them). The server plays them one per turn, even while you are away, so a draft no longer takes days of coming back for each placement. Only you see your plan; if a placement can no longer be played, the rest of the plan is dropped and you place by hand.
 - The footer has a Community column (players, friends, Discord, reporting a problem and how to contribute) and the icons of ligungi's profiles: Discord, X, Instagram, YouTube, Twitch and GitHub. The Community menu at the top also links to Discord and to reporting a problem.
 
 ### Changed
 
+- Studies: accounts younger than 7 days can now make a study public. It shows on the author's profile at once and joins the public list of studies when the account turns 7 days old, instead of being refused; until then the author sees the date on the study and in My studies. The `studyPublicTooSoon` error code is gone.
 - Quick pairing names the speed of each clock, as lichess does: 5+3 is Blitz, 10+5 and 15+10 are Rapid, and 30+0, 30+20 and 60+30 are Classical, from the clock's estimated length over 40 moves.
 - The notification bell was redesigned: each item has an icon in its own color (your turn, challenge, new follower, moderation, study), names stand out in bold, a challenge shows its mode, clock and rated or casual as separate tags and says which color you would play, the accept and decline buttons have labels, unread notices have a dot and a tinted background, and the time left in a correspondence game turns orange on its last day.
 

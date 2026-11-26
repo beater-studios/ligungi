@@ -49,7 +49,6 @@ export const ERROR_MESSAGES = {
   tooManyStudies: 'Você chegou ao limite de estudos. Apague algum para criar outro.',
   tooManyChapters: 'Este estudo chegou ao limite de capítulos.',
   lastChapter: 'Um estudo precisa de pelo menos um capítulo.',
-  studyPublicTooSoon: 'Contas novas publicam estudos como não listados ou privados. Depois de 7 dias, você pode torná-los públicos.',
   invalidPuzzleRun: 'Resultado de corrida de puzzles inválido.',
   puzzleNotFound: 'Puzzle não encontrado.',
   noPuzzleLeft: 'Não sobrou nenhum puzzle com esses filtros.',

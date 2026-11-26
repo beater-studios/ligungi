@@ -19,6 +19,7 @@ import { ModPanel } from '../mod/ModPanel.tsx';
 import { Crosstable } from '../game/Crosstable.tsx';
 import { ProfileAbout } from '../players/ProfileAbout.tsx';
 import { ActivityTimeline } from '../players/ActivityFeed.tsx';
+import { ProfileStudies } from '../players/ProfileStudies.tsx';
 import { RatingHistory } from '../players/RatingHistory.tsx';
 import { ReportButton } from '../mod/ReportButton.tsx';
 import { Select } from '../components/ui.tsx';
@@ -426,6 +427,8 @@ export const ProfilePage = ({ name }: { name: string }) => {
       <RatingHistory profile={profile} />
 
       <ActivityTimeline name={profile.user.name} />
+
+      <ProfileStudies name={profile.user.name} />
 
       {profile.playing.map((game) => (
         <section key={game.id} class="ligungi-card ligungi-live-strip">

@@ -358,6 +358,9 @@ const MIGRATIONS = [
   `
   alter table games add column draft_queue text;
   `,
+  `
+  alter table studies add column topics text not null default '';
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

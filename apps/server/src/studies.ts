@@ -1,12 +1,15 @@
-import type { Color } from '@ligungi/engine';
+import { MODES, type Color, type Mode } from '@ligungi/engine';
 import {
+  DAY_MS,
   STUDY_LIST_PAGE,
+  STUDY_PUBLIC_MIN_DAYS,
   type StudyChapter,
   type StudyChapterRef,
   type StudyLikes,
   type StudyListItem,
   type StudyRoot,
   type StudySort,
+  type StudyTopic,
   type StudyView,
   type StudyVisibility,
 } from '@ligungi/protocol';
@@ -17,6 +20,7 @@ interface StudyRow {
   id: string;
   owner_id: string;
   owner_name: string;
+  owner_created_at: number;
   title: string;
   description: string;
   visibility: StudyVisibility;
@@ -25,6 +29,9 @@ interface StudyRow {
   updated_at: number;
   chapters: number;
   likes: number;
+  topics: string;
+  /** The chapters' starting positions, joined with `|`. */
+  fens: string | null;
 }
 
 interface ChapterRow {
@@ -39,6 +46,8 @@ export interface StudyRecord {
   readonly id: string;
   readonly ownerId: string;
   readonly ownerName: string;
+  /** When the author's account was created: its public studies join the list `STUDY_PUBLIC_MIN_DAYS` later. */
+  readonly ownerCreatedAt: number;
   readonly title: string;
   readonly description: string;
   readonly visibility: StudyVisibility;
@@ -47,6 +56,15 @@ export interface StudyRecord {
   readonly updatedAt: number;
   readonly chapters: number;
   readonly likes: number;
+  readonly topics: readonly StudyTopic[];
+  readonly modes: readonly Mode[];
+}
+
+/** Narrows the public list: chapters in a mode, a topic, an author. */
+export interface StudyFilters {
+  readonly mode?: Mode;
+  readonly topic?: StudyTopic;
+  readonly ownerId?: string;
 }
 
 export interface ChapterInput {
@@ -56,15 +74,23 @@ export interface ChapterInput {
   readonly root: StudyRoot;
 }
 
-const STUDY_SELECT = `select studies.*, users.username as owner_name,
+const STUDY_SELECT = `select studies.*, users.username as owner_name, users.created_at as owner_created_at,
     (select count(*) from study_chapters where study_chapters.study_id = studies.id) as chapters,
-    (select count(*) from study_likes where study_likes.study_id = studies.id) as likes
+    (select count(*) from study_likes where study_likes.study_id = studies.id) as likes,
+    (select group_concat(fen, '|') from study_chapters where study_chapters.study_id = studies.id) as fens
   from studies join users on users.id = studies.owner_id`;
+
+/** The mode of each chapter's starting position, the fourth field of its FEN, in the order of `MODES`. */
+const modesOf = (fens: string | null): Mode[] => {
+  const found = new Set((fens ?? '').split('|').map((fen) => fen.split(' ')[3]));
+  return MODES.filter((mode) => found.has(mode));
+};
 
 const toRecord = (row: StudyRow): StudyRecord => ({
   id: row.id,
   ownerId: row.owner_id,
   ownerName: row.owner_name,
+  ownerCreatedAt: row.owner_created_at,
   title: row.title,
   description: row.description,
   visibility: row.visibility,
@@ -73,9 +99,17 @@ const toRecord = (row: StudyRow): StudyRecord => ({
   updatedAt: row.updated_at,
   chapters: row.chapters,
   likes: row.likes,
+  topics: row.topics ? (row.topics.split(',') as StudyTopic[]) : [],
+  modes: modesOf(row.fens),
 });
 
-const toItem = (study: StudyRecord): StudyListItem => ({
+/** When a public study joins the public list, if that is still ahead of `now`. */
+const listedFromOf = (study: StudyRecord, now: number): number | null => {
+  const from = study.ownerCreatedAt + STUDY_PUBLIC_MIN_DAYS * DAY_MS;
+  return study.visibility === 'public' && from > now ? from : null;
+};
+
+const toItem = (study: StudyRecord, listedFrom: number | null = null): StudyListItem => ({
   id: study.id,
   title: study.title,
   description: study.description,
@@ -85,6 +119,9 @@ const toItem = (study: StudyRecord): StudyListItem => ({
   chapters: study.chapters,
   likes: study.likes,
   updatedAt: study.updatedAt,
+  topics: study.topics,
+  modes: study.modes,
+  listedFrom,
 });
 
 const toChapter = (row: ChapterRow): StudyChapter => ({
@@ -137,22 +174,41 @@ export class Studies {
       mine: study.ownerId === viewerId,
       likes: study.likes,
       liked: viewerId !== null && this.#likes(viewerId, study.id),
+      topics: study.topics,
+      modes: study.modes,
+      listedFrom: study.ownerId === viewerId ? listedFromOf(study, this.#now()) : null,
     };
   }
 
-  /** Public studies, latest changed first or most liked first, optionally whose title contains `query`. */
-  listed(query: string, page: number, sort: StudySort = 'updated'): { studies: StudyListItem[]; more: boolean } {
+  /**
+   * Public studies, latest changed first or most liked first, optionally whose title contains `query`, with a chapter
+   * in a mode, about a topic or by an author. An account younger than `STUDY_PUBLIC_MIN_DAYS` may publish, but its
+   * public studies only join the list once it is that old; listed by author (its profile), they show at once.
+   */
+  listed(query: string, page: number, sort: StudySort = 'updated', filters: StudyFilters = {}): { studies: StudyListItem[]; more: boolean } {
     const order = sort === 'liked' ? 'likes desc, studies.updated_at desc, studies.rowid desc' : 'studies.updated_at desc, studies.rowid desc';
     const rows = this.#db
       .prepare(
         `${STUDY_SELECT} where studies.visibility = 'public' and studies.hidden = 0 and (?1 = '' or instr(lower(studies.title), lower(?1)) > 0)
+           and (?4 = '' or exists (select 1 from study_chapters where study_chapters.study_id = studies.id and study_chapters.fen like '% ' || ?4 || ' %'))
+           and (?5 = '' or instr(',' || studies.topics || ',', ',' || ?5 || ',') > 0)
+           and (?6 = '' or studies.owner_id = ?6)
+           and (?6 != '' or users.created_at <= ?7)
          order by ${order} limit ?2 offset ?3`,
       )
-      .all(query, STUDY_LIST_PAGE + 1, (page - 1) * STUDY_LIST_PAGE) as unknown as StudyRow[];
+      .all(
+        query,
+        STUDY_LIST_PAGE + 1,
+        (page - 1) * STUDY_LIST_PAGE,
+        filters.mode ?? '',
+        filters.topic ?? '',
+        filters.ownerId ?? '',
+        this.#now() - STUDY_PUBLIC_MIN_DAYS * DAY_MS,
+      ) as unknown as StudyRow[];
     return { studies: rows.slice(0, STUDY_LIST_PAGE).map((row) => toItem(toRecord(row))), more: rows.length > STUDY_LIST_PAGE };
   }
 
-  /** Every study of an author, whatever its visibility. */
+  /** Every study of an author, whatever its visibility, for the author: with when the public ones join the list. */
   byOwner(ownerId: string, query = ''): StudyListItem[] {
     const rows = this.#db
       .prepare(
@@ -160,7 +216,11 @@ export class Studies {
          order by studies.updated_at desc, studies.rowid desc`,
       )
       .all(ownerId, query) as unknown as StudyRow[];
-    return rows.map((row) => toItem(toRecord(row)));
+    const now = this.#now();
+    return rows.map((row) => {
+      const study = toRecord(row);
+      return toItem(study, listedFromOf(study, now));
+    });
   }
 
   /**
@@ -209,14 +269,14 @@ export class Studies {
     return (this.#db.prepare('select count(*) as n from studies where owner_id = ?').get(ownerId) as { n: number }).n;
   }
 
-  create(ownerId: string, title: string, description: string, visibility: StudyVisibility, chapter: ChapterInput): string {
+  create(ownerId: string, title: string, description: string, visibility: StudyVisibility, topics: readonly StudyTopic[], chapter: ChapterInput): string {
     const id = randomId(8);
     const now = this.#now();
     this.#db.exec('begin');
     try {
       this.#db
-        .prepare('insert into studies (id, owner_id, title, description, visibility, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?)')
-        .run(id, ownerId, title, description, visibility, now, now);
+        .prepare('insert into studies (id, owner_id, title, description, visibility, topics, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(id, ownerId, title, description, visibility, topics.join(','), now, now);
       this.#insertChapter(id, chapter, 0, now);
       this.#db.exec('commit');
     } catch (error) {
@@ -226,10 +286,10 @@ export class Studies {
     return id;
   }
 
-  update(id: string, title: string, description: string, visibility: StudyVisibility): void {
+  update(id: string, title: string, description: string, visibility: StudyVisibility, topics: readonly StudyTopic[]): void {
     this.#db
-      .prepare('update studies set title = ?, description = ?, visibility = ?, updated_at = ? where id = ?')
-      .run(title, description, visibility, this.#now(), id);
+      .prepare('update studies set title = ?, description = ?, visibility = ?, topics = ?, updated_at = ? where id = ?')
+      .run(title, description, visibility, topics.join(','), this.#now(), id);
   }
 
   setHidden(id: string, hidden: boolean): void {

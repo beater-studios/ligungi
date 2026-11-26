@@ -30,6 +30,7 @@ export const accountExport = (deps: AppDeps, user: UserRecord, sessionId: string
       title: study.title,
       description: study.description,
       visibility: study.visibility,
+      topics: study.topics,
       updatedAt: iso(study.updatedAt),
       chapters: studies.chapters(study.id),
     })),

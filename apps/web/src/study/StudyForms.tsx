@@ -3,6 +3,8 @@ import {
   STUDY_CHAPTER_NAME_MAX,
   STUDY_DESCRIPTION_MAX,
   STUDY_TITLE_MAX,
+  STUDY_TOPICS,
+  STUDY_TOPICS_MAX,
   STUDY_VISIBILITIES,
   chapterFits,
   emptyRoot,
@@ -10,6 +12,7 @@ import {
   type GameView,
   type StudyChapter,
   type StudyRoot,
+  type StudyTopic,
   type StudyView,
   type StudyVisibility,
 } from '@ligungi/protocol';
@@ -21,13 +24,41 @@ import { navigate } from '../core/router.ts';
 import { lineRoot } from './studyTree.ts';
 import { recordErrorText } from '../game/ImportGame.tsx';
 import { Modal } from '../components/Modal.tsx';
-import { Field, FieldRow, OptionCards, Select, SubmitButton } from '../components/ui.tsx';
+import { Checkbox, Field, FieldRow, OptionCards, Select, SubmitButton } from '../components/ui.tsx';
 
 export interface StudyFieldsValue {
   readonly title: string;
   readonly description: string;
   readonly visibility: StudyVisibility;
+  readonly topics: readonly StudyTopic[];
 }
+
+/** The topics of a study, up to `STUDY_TOPICS_MAX`: once that many are picked, the others wait for one to be unpicked. */
+const TopicPicker = ({ value, onChange }: { value: readonly StudyTopic[]; onChange: (topics: StudyTopic[]) => void }) => {
+  const t = useT();
+  const full = value.length >= STUDY_TOPICS_MAX;
+  return (
+    <fieldset class="ligungi-choice ligungi-topic-picker">
+      <legend class="ligungi-choice__legend">{t.study.topicsLegend}</legend>
+      <div class="ligungi-topic-picker__options">
+        {STUDY_TOPICS.map((topic) => {
+          const checked = value.includes(topic);
+          return (
+            <Checkbox
+              key={topic}
+              id={`study-topic-${topic}`}
+              checked={checked}
+              disabled={!checked && full}
+              label={t.study.topicNames[topic]}
+              onChange={(on) => onChange(STUDY_TOPICS.filter((other) => (other === topic ? on : value.includes(other))))}
+            />
+          );
+        })}
+      </div>
+      <small class="form-help">{t.study.topicsHelp}</small>
+    </fieldset>
+  );
+};
 
 const StudyFields = ({ value, onChange }: { value: StudyFieldsValue; onChange: (value: StudyFieldsValue) => void }) => {
   const t = useT();
@@ -62,6 +93,7 @@ const StudyFields = ({ value, onChange }: { value: StudyFieldsValue; onChange: (
         onChange={(visibility) => onChange({ ...value, visibility })}
         help={`${t.study.visibilityHints[value.visibility]} ${t.study.publicHelp}`}
       />
+      <TopicPicker value={value.topics} onChange={(topics) => onChange({ ...value, topics })} />
     </>
   );
 };
@@ -192,7 +224,7 @@ const ChapterFields = ({ value, onChange }: { value: ChapterState; onChange: (va
 /** Creates a study with its first chapter, then opens it. */
 export const NewStudyModal = ({ onClose }: { onClose: () => void }) => {
   const t = useT();
-  const [fields, setFields] = useState<StudyFieldsValue>({ title: '', description: '', visibility: 'unlisted' });
+  const [fields, setFields] = useState<StudyFieldsValue>({ title: '', description: '', visibility: 'unlisted', topics: [] });
   const [chapter, setChapter] = useState<ChapterState>(newChapter(t.study.firstChapter));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -277,7 +309,7 @@ const DeleteButton = ({ label, confirm, onDelete }: { label: string; confirm: st
 /** The author changes the study's title, description and visibility, or deletes it. */
 export const StudySettingsModal = ({ study, onClose, onSaved }: { study: StudyView; onClose: () => void; onSaved: (study: StudyView) => void }) => {
   const t = useT();
-  const [fields, setFields] = useState<StudyFieldsValue>({ title: study.title, description: study.description, visibility: study.visibility });
+  const [fields, setFields] = useState<StudyFieldsValue>({ title: study.title, description: study.description, visibility: study.visibility, topics: study.topics });
   const [error, setError] = useState<string | null>(null);
 
   const submit = async (event: Event) => {

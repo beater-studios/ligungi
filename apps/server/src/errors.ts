@@ -51,7 +51,6 @@ export const ERROR_STATUS: Readonly<Record<ErrorCode, number>> = {
   tooManyStudies: 409,
   tooManyChapters: 409,
   lastChapter: 409,
-  studyPublicTooSoon: 403,
   invalidPuzzleRun: 400,
   puzzleNotFound: 404,
   noPuzzleLeft: 404,

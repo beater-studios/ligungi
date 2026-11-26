@@ -163,7 +163,6 @@
     "tooManyStudies": "Llegaste al límite de estudios. Borra alguno para crear otro.",
     "tooManyChapters": "Este estudio llegó al límite de capítulos.",
     "lastChapter": "Un estudio necesita al menos un capítulo.",
-    "studyPublicTooSoon": "Las cuentas nuevas publican estudios como no listados o privados. Después de 7 días puedes hacerlos públicos.",
     "invalidPuzzleRun": "Resultado de partida de puzzles no válido.",
     "puzzleNotFound": "Puzzle no encontrado.",
     "noPuzzleLeft": "No quedan puzzles con estos filtros.",
@@ -735,6 +734,8 @@
     "all": "Ver todas las partidas entre los dos"
   },
   "profile": {
+    "studiesTitle": "Estudios",
+    "allStudies": "Ver todos los estudios",
     "edit": "Editar perfil",
     "aboutLabel": "Sobre el jugador",
     "socialTitle": "Redes sociales",
@@ -1382,6 +1383,24 @@
     }
   },
   "study": {
+    "listedFrom": "Este estudio es público y ya aparece en tu perfil. Entra en la lista de estudios el {date}, cuando tu cuenta cumpla 7 días.",
+    "listedFromShort": "En la lista desde el {date}",
+    "topicsLegend": "Temas",
+    "topicsHelp": "Hasta tres, para que quien busca estudios encuentre este.",
+    "topicNames": {
+      "games": "Análisis de partidas",
+      "draft": "Drafts y aperturas",
+      "strategy": "Estrategia",
+      "tactics": "Táctica",
+      "endgames": "Mates y finales",
+      "rules": "Reglas y básicos"
+    },
+    "filterMode": "Modo",
+    "allModes": "Todos los modos",
+    "filterTopic": "Tema",
+    "allTopics": "Todos los temas",
+    "byAuthor": "Estudios de {name}",
+    "showEveryAuthor": "Todos los autores",
     "title": "Estudios",
     "intro": "Capítulos con jugadas comentadas, variantes y dibujos en el tablero, hechos por la comunidad para enseñar Gungi.",
     "publicTab": "Públicos",
@@ -1416,7 +1435,7 @@
       "unlisted": "Solo quien tiene el enlace puede abrirlo.",
       "private": "Solo tú puedes abrirlo."
     },
-    "publicHelp": "Las cuentas con menos de 7 días publican como no listado o privado.",
+    "publicHelp": "Los estudios públicos de cuentas con menos de 7 días aparecen en el perfil del autor al momento y entran en la lista pública cuando la cuenta cumple 7 días.",
     "studyTitle": "Título",
     "description": "Descripción (opcional)",
     "firstChapter": "Capítulo 1",

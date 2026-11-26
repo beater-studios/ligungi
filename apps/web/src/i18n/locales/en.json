@@ -163,7 +163,6 @@
     "tooManyStudies": "You reached the limit of studies. Delete one to create another.",
     "tooManyChapters": "This study reached the limit of chapters.",
     "lastChapter": "A study needs at least one chapter.",
-    "studyPublicTooSoon": "New accounts publish studies as unlisted or private. After 7 days you can make them public.",
     "invalidPuzzleRun": "Invalid puzzle run result.",
     "puzzleNotFound": "Puzzle not found.",
     "noPuzzleLeft": "No puzzles left with these filters.",
@@ -735,6 +734,8 @@
     "all": "See every game between them"
   },
   "profile": {
+    "studiesTitle": "Studies",
+    "allStudies": "See every study",
     "edit": "Edit profile",
     "aboutLabel": "About the player",
     "socialTitle": "Social networks",
@@ -1382,6 +1383,24 @@
     }
   },
   "study": {
+    "listedFrom": "This study is public and already shows on your profile. It joins the list of studies on {date}, when your account is 7 days old.",
+    "listedFromShort": "In the list from {date}",
+    "topicsLegend": "Topics",
+    "topicsHelp": "Up to three, so players looking for studies find it.",
+    "topicNames": {
+      "games": "Game reviews",
+      "draft": "Drafts and openings",
+      "strategy": "Strategy",
+      "tactics": "Tactics",
+      "endgames": "Mates and endgames",
+      "rules": "Rules and basics"
+    },
+    "filterMode": "Mode",
+    "allModes": "Every mode",
+    "filterTopic": "Topic",
+    "allTopics": "Every topic",
+    "byAuthor": "Studies by {name}",
+    "showEveryAuthor": "Every author",
     "title": "Studies",
     "intro": "Chapters of commented moves, variations and drawings on the board, made by the community to teach Gungi.",
     "publicTab": "Public",
@@ -1416,7 +1435,7 @@
       "unlisted": "Only people with the link can open it.",
       "private": "Only you can open it."
     },
-    "publicHelp": "Accounts younger than 7 days publish as unlisted or private.",
+    "publicHelp": "Public studies of accounts younger than 7 days show on the author's profile at once, and join the public list when the account turns 7 days old.",
     "studyTitle": "Title",
     "description": "Description (optional)",
     "firstChapter": "Chapter 1",

@@ -107,6 +107,9 @@ export const SCHEMA = {
   'challenge.waitingFor': text<[name: string]>('name'),
   'challenge.declinedBy': text<[name: string]>('name'),
   'challenge.youPlay': text<[color: string]>('color'),
+  'study.byAuthor': text<[name: string]>('name'),
+  'study.listedFrom': text<[date: string]>('date'),
+  'study.listedFromShort': text<[date: string]>('date'),
 
   'auth.pitchItems': lines,
   'auth.suspended': text<[until: string, reason: string]>('until', 'reason'),

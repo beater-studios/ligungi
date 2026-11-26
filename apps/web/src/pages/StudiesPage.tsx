@@ -1,8 +1,10 @@
-import { STUDY_QUERY_MAX, type StudyList, type StudyListItem, type StudySort } from '@ligungi/protocol';
+import { MODES, type Mode } from '@ligungi/engine';
+import { STUDY_QUERY_MAX, STUDY_TOPICS, isStudyTopic, type StudyList, type StudyListItem, type StudySort, type StudyTopic } from '@ligungi/protocol';
+import { Field, FieldRow, Select } from '../components/ui.tsx';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../core/api.ts';
 import { NewStudyModal } from '../study/StudyForms.tsx';
-import { timeAgo, useT } from '../i18n/index.ts';
+import { formatDate, timeAgo, useT } from '../i18n/index.ts';
 import { icons } from '../icons.ts';
 import { navigate, useLocation } from '../core/router.ts';
 import { session } from '../core/session.ts';
@@ -23,6 +25,20 @@ export const StudiesPage = () => {
   const mine = params.get('list') === 'mine' && user !== null;
   const liked = params.get('list') === 'liked' && user !== null;
   const sort: StudySort = !mine && !liked && params.get('sort') === 'liked' ? 'liked' : 'updated';
+  // The public list narrows by the mode of the chapters, a topic and an author, all kept in the address to share.
+  const pub = !mine && !liked;
+  const mode = pub ? (MODES.find((m) => m === params.get('mode')) ?? null) : null;
+  const topicParam = params.get('topic');
+  const topic: StudyTopic | null = pub && isStudyTopic(topicParam) ? topicParam : null;
+  const author = pub ? params.get('author') : null;
+  /** The public list's address with one filter changed, the others kept. */
+  const hrefWith = (changes: Record<string, string | null>) => {
+    const next = new URLSearchParams();
+    const current: Record<string, string | null> = { sort: sort === 'liked' ? 'liked' : null, mode, topic, author, ...changes };
+    for (const [key, value] of Object.entries(current)) if (value) next.set(key, value);
+    const query = next.toString();
+    return query ? `/study?${query}` : '/study';
+  };
   const [query, setQuery] = useState('');
   const [list, setList] = useState<StudyListItem[] | null>(null);
   const [more, setMore] = useState(false);
@@ -35,6 +51,9 @@ export const StudiesPage = () => {
       q: query.trim(),
       page: String(pageToLoad),
       ...(mine ? { list: 'mine' } : liked ? { list: 'liked' } : sort === 'liked' ? { sort } : {}),
+      ...(mode ? { mode } : {}),
+      ...(topic ? { topic } : {}),
+      ...(author ? { author } : {}),
     });
     api
       .get<StudyList>(`/api/studies?${q.toString()}`)
@@ -50,7 +69,7 @@ export const StudiesPage = () => {
   useEffect(() => {
     const timer = window.setTimeout(() => load(1, false), query ? SEARCH_DELAY_MS : 0);
     return () => window.clearTimeout(timer);
-  }, [query, mine, liked, sort]);
+  }, [query, mine, liked, sort, mode, topic, author]);
 
   return (
     <main class="ligungi-page ligungi-studies">
@@ -90,15 +109,40 @@ export const StudiesPage = () => {
           )}
         </div>
         <p class="ligungi-studies__intro">{t.study.intro}</p>
-        {!mine && !liked && (
-          <nav class="ligungi-segmented ligungi-studies__sort" aria-label={t.study.sort}>
-            <a href="/study" aria-current={sort === 'updated' ? 'page' : undefined} class={sort === 'updated' ? 'active' : ''}>
-              {t.study.sortUpdated}
-            </a>
-            <a href="/study?sort=liked" aria-current={sort === 'liked' ? 'page' : undefined} class={sort === 'liked' ? 'active' : ''}>
-              {t.study.sortLiked}
-            </a>
-          </nav>
+        {pub && (
+          <div class="ligungi-studies__filters">
+            <nav class="ligungi-segmented ligungi-studies__sort" aria-label={t.study.sort}>
+              <a href={hrefWith({ sort: null })} aria-current={sort === 'updated' ? 'page' : undefined} class={sort === 'updated' ? 'active' : ''}>
+                {t.study.sortUpdated}
+              </a>
+              <a href={hrefWith({ sort: 'liked' })} aria-current={sort === 'liked' ? 'page' : undefined} class={sort === 'liked' ? 'active' : ''}>
+                {t.study.sortLiked}
+              </a>
+            </nav>
+            <FieldRow>
+              <Field label={t.study.filterMode} htmlFor="studies-mode">
+                <Select<Mode | ''>
+                  id="studies-mode"
+                  value={mode ?? ''}
+                  options={[{ value: '', label: t.study.allModes }, ...MODES.map((m) => ({ value: m, label: t.modes[m] }))]}
+                  onChange={(value) => navigate(hrefWith({ mode: value || null }), true)}
+                />
+              </Field>
+              <Field label={t.study.filterTopic} htmlFor="studies-topic">
+                <Select<StudyTopic | ''>
+                  id="studies-topic"
+                  value={topic ?? ''}
+                  options={[{ value: '', label: t.study.allTopics }, ...STUDY_TOPICS.map((value) => ({ value, label: t.study.topicNames[value] }))]}
+                  onChange={(value) => navigate(hrefWith({ topic: value || null }), true)}
+                />
+              </Field>
+            </FieldRow>
+            {author && (
+              <p class="ligungi-studies__author">
+                <strong>{t.study.byAuthor(author)}</strong> <a href={hrefWith({ author: null })}>{t.study.showEveryAuthor}</a>
+              </p>
+            )}
+          </div>
         )}
         {error && <p class="ligungi-error">{error}</p>}
         {list && list.length === 0 && <p class="ligungi-empty">{query ? t.study.noMatch : mine ? t.study.noneMine : liked ? t.study.noneLiked : t.study.none}</p>}
@@ -109,6 +153,20 @@ export const StudiesPage = () => {
                 <a class="ligungi-studies__card" href={`/study/${study.id}`}>
                   <strong class="ligungi-studies__name">{study.title}</strong>
                   {study.description && <span class="ligungi-studies__description">{study.description}</span>}
+                  {(study.topics.length > 0 || study.modes.length > 0) && (
+                    <span class="ligungi-studies__tags">
+                      {study.topics.map((value) => (
+                        <span key={value} class="ligungi-studies__tag">
+                          {t.study.topicNames[value]}
+                        </span>
+                      ))}
+                      {study.modes.map((value) => (
+                        <span key={value} class="ligungi-studies__tag ligungi-studies__tag--mode">
+                          {t.modes[value]}
+                        </span>
+                      ))}
+                    </span>
+                  )}
                   <span class="ligungi-studies__meta">
                     <span>{t.study.chapterCount(study.chapters)}</span>
                     {study.likes > 0 && (
@@ -118,6 +176,7 @@ export const StudiesPage = () => {
                     )}
                     {!mine && <span>{t.study.by(study.owner.name)}</span>}
                     {mine && <span>{t.study.visibilities[study.visibility]}</span>}
+                    {mine && study.listedFrom !== null && <span>{t.study.listedFromShort(formatDate(t, study.listedFrom))}</span>}
                     {study.hidden && <span class="ligungi-studies__hidden">{t.study.hiddenTag}</span>}
                     <span>{timeAgo(t, study.updatedAt)}</span>
                   </span>

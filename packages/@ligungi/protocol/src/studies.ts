@@ -7,6 +7,7 @@ import {
   parseFen,
   phaseProblems,
   type Color,
+  type Mode,
   type Position,
 } from '@ligungi/engine';
 import type { UserRef } from './users.ts';
@@ -87,6 +88,14 @@ export interface StudyView {
   readonly likes: number;
   /** The viewer, signed in, likes it. */
   readonly liked: boolean;
+  readonly topics: readonly StudyTopic[];
+  /** The modes of its chapters' starting positions. */
+  readonly modes: readonly Mode[];
+  /**
+   * For the author only: when a public study joins the public list, if that is still ahead (the account is younger
+   * than `STUDY_PUBLIC_MIN_DAYS`); `null` otherwise, and always for other viewers, as it tells the account's age.
+   */
+  readonly listedFrom: number | null;
 }
 
 export interface StudyListItem {
@@ -99,12 +108,33 @@ export interface StudyListItem {
   readonly chapters: number;
   readonly likes: number;
   readonly updatedAt: number;
+  readonly topics: readonly StudyTopic[];
+  readonly modes: readonly Mode[];
+  /** As in `StudyView`: set only in the author's own list. */
+  readonly listedFrom: number | null;
 }
 
 export interface StudyList {
   readonly studies: readonly StudyListItem[];
   readonly more: boolean;
 }
+
+/**
+ * What a study is about, chosen by its author (up to `STUDY_TOPICS_MAX`): game reviews, drafts and openings,
+ * strategy, tactics, mates and endgames, rules and basics. A fixed list, so the topics stay few and filterable.
+ */
+export const STUDY_TOPICS = ['games', 'draft', 'strategy', 'tactics', 'endgames', 'rules'] as const;
+export type StudyTopic = (typeof STUDY_TOPICS)[number];
+export const STUDY_TOPICS_MAX = 3;
+
+export const isStudyTopic = (value: unknown): value is StudyTopic => STUDY_TOPICS.some((topic) => topic === value);
+
+/** The topics a client sent, without repeats and in the list's order; `null` when not a list of known topics or too many. */
+export const parseStudyTopics = (value: unknown): StudyTopic[] | null => {
+  if (!Array.isArray(value) || !value.every(isStudyTopic)) return null;
+  const topics = STUDY_TOPICS.filter((topic) => value.includes(topic));
+  return topics.length <= STUDY_TOPICS_MAX ? topics : null;
+};
 
 /** How the public studies are listed: latest changed first, or most liked first. */
 export const STUDY_SORTS = ['updated', 'liked'] as const;

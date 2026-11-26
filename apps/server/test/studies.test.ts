@@ -141,18 +141,24 @@ describe('studies', () => {
     expect((await author.request('DELETE', `/api/studies/${study.id}/chapters/${left.chapters[0]!.id}`)).data).toMatchObject({ code: 'lastChapter' });
   });
 
-  it('lists public studies to everyone, keeps private ones to the author and lets new accounts publish only after a week', async () => {
+  it('lists public studies to everyone, keeps private ones to the author and lists a new account\'s public studies after a week', async () => {
     await start();
     const author = await signup('Kite');
-    expect((await author.request('POST', '/api/studies', { title: 'Cedo', visibility: 'public', chapter: chapter() })).data).toMatchObject({
-      code: 'studyPublicTooSoon',
-    });
+    const anonymous = new Client(server!.base);
+    // A week-old account's public study shows on its profile at once, and in the public list only once the week is over.
+    const early = await createStudy(author, 'public', 'Cedo');
+    // Only the author is told when it joins the list, since the date gives away how old the account is.
+    expect(early.listedFrom).toBeGreaterThan(now + 6 * DAY_MS);
+    expect((await anonymous.request<StudyView>('GET', `/api/studies/${early.id}`)).data.listedFrom).toBeNull();
+    expect((await author.request<StudyList>('GET', '/api/studies?list=mine')).data.studies[0]!.listedFrom).toBe(early.listedFrom);
+    expect((await anonymous.request<StudyList>('GET', '/api/studies')).data.studies).toEqual([]);
+    expect((await anonymous.request<StudyList>('GET', '/api/studies?author=kite')).data.studies.map((s) => s.title)).toEqual(['Cedo']);
+    expect((await author.request<StudyView>('POST', `/api/studies/${early.id}`, { title: 'Cedo', visibility: 'private' })).status).toBe(200);
     const hidden = await createStudy(author, 'private', 'Rascunho');
     const unlisted = await createStudy(author, 'unlisted', 'Pelo link');
     now += 7 * DAY_MS;
     const listed = await createStudy(author, 'public', 'Finais com o General');
 
-    const anonymous = new Client(server!.base);
     const list = (await anonymous.request<StudyList>('GET', '/api/studies')).data;
     expect(list.studies.map((s) => s.title)).toEqual(['Finais com o General']);
     expect((await anonymous.request<StudyList>('GET', '/api/studies?q=GENERAL')).data.studies).toHaveLength(1);
@@ -163,11 +169,40 @@ describe('studies', () => {
     expect((await anonymous.request('GET', '/api/studies?list=mine')).status).toBe(401);
 
     const mine = (await author.request<StudyList>('GET', '/api/studies?list=mine')).data.studies;
-    expect(mine.map((s) => s.title)).toEqual(['Finais com o General', 'Pelo link', 'Rascunho']);
+    expect(mine.map((s) => s.title)).toEqual(['Finais com o General', 'Pelo link', 'Rascunho', 'Cedo']);
     expect((await author.request<StudyView>('POST', `/api/studies/${listed.id}`, { title: 'Finais', description: '', visibility: 'private' })).data.visibility).toBe(
       'private',
     );
     expect((await anonymous.request<StudyList>('GET', '/api/studies')).data.studies).toEqual([]);
+  });
+
+  it('filters the public studies by the mode of their chapters, by topic and by author, and refuses unknown topics', async () => {
+    await start();
+    const kite = await signup('Kite');
+    const palm = await signup('Palm');
+    now += 7 * DAY_MS;
+    const advancedFen = toFen(initialPosition('advanced'));
+    const post = (c: Client, body: object) => c.request<StudyView>('POST', '/api/studies', { visibility: 'public', chapter: chapter(), ...body });
+    const drafts = (await post(kite, { title: 'Drafts', topics: ['strategy', 'draft'], chapter: chapter({ fen: advancedFen }) })).data;
+    expect(drafts).toMatchObject({ topics: ['draft', 'strategy'], modes: ['advanced'] });
+    await post(kite, { title: 'Partida comentada', topics: ['games'] });
+    await post(palm, { title: 'Regras', topics: ['rules'] });
+    expect((await post(palm, { title: 'Demais', topics: ['games', 'draft', 'strategy', 'tactics'] })).data).toMatchObject({ code: 'invalidStudy' });
+    expect((await post(palm, { title: 'Inventado', topics: ['memes'] })).data).toMatchObject({ code: 'invalidStudy' });
+
+    const titles = async (query: string) =>
+      (await new Client(server!.base).request<StudyList>('GET', `/api/studies?${query}`)).data.studies.map((s) => s.title).sort();
+    expect(await titles('mode=advanced')).toEqual(['Drafts']);
+    expect(await titles('mode=intro')).toEqual(['Partida comentada', 'Regras']);
+    expect(await titles('topic=draft')).toEqual(['Drafts']);
+    expect(await titles('author=kite')).toEqual(['Drafts', 'Partida comentada']);
+    expect(await titles('author=kite&topic=games')).toEqual(['Partida comentada']);
+    expect(await titles('author=nobody')).toEqual([]);
+
+    expect((await kite.request<StudyView>('POST', `/api/studies/${drafts.id}`, { title: 'Drafts', visibility: 'public', topics: ['tactics'] })).data).toMatchObject({
+      topics: ['tactics'],
+    });
+    expect(await titles('topic=draft')).toEqual([]);
   });
 
   it('takes reports about a study and lets moderators hide or delete it, with a log entry', async () => {

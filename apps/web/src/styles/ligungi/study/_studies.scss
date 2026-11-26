@@ -81,9 +81,73 @@
   color: $c-bad;
 }
 
+// The public list's sort, then its mode and topic filters, side by side while they fit.
+.ligungi-studies__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.6rem 1.2rem;
+  margin-bottom: 1rem;
+
+  .ligungi-field-row {
+    flex: 1 1 22rem;
+  }
+
+  .form-group {
+    margin-bottom: 0;
+  }
+}
+
 .ligungi-studies__sort {
   width: fit-content;
-  margin-bottom: 1rem;
+}
+
+.ligungi-studies__author {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+// Topics and modes of a study, on its card.
+.ligungi-studies__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+// On the study page the topics sit under the author line (or the notice about the public list), with some room.
+.ligungi-study__by + .ligungi-studies__tags,
+.ligungi-study__listed-from + .ligungi-studies__tags {
+  margin-top: 0.6rem;
+}
+
+// On the study page each topic links to the public studies about it.
+.ligungi-studies__tag {
+  padding: 0.15em 0.55em;
+  border-radius: 4px;
+  background: $c-bg-zebra2;
+  color: $c-font;
+  font-size: 0.78em;
+
+  @at-root a#{&}:hover {
+    color: $c-link;
+  }
+
+  &--mode {
+    background: none;
+    box-shadow: inset 0 0 0 1px $c-border;
+    color: $c-font-dim;
+  }
+}
+
+// The topics of a new or edited study: checkboxes in two columns while they fit.
+.ligungi-topic-picker__options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0 1rem;
+
+  .form-group {
+    margin-bottom: 0.4rem;
+  }
 }
 
 .ligungi-studies__likes::before {
@@ -102,6 +166,18 @@
 .ligungi-study__by {
   color: $c-font-dim;
   font-size: 0.9em;
+}
+
+// The author's own public study before their account is a week old: where it already shows, and when it joins the list.
+.ligungi-study__listed-from {
+  margin: 0.6rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-inline-start: 3px solid $c-primary;
+  border-radius: 4px;
+  background: color-mix(in srgb, #{$c-primary} 10%, transparent);
+  color: $c-font;
+  font-size: 0.9em;
+  line-height: 1.45;
 }
 
 .ligungi-study__description {

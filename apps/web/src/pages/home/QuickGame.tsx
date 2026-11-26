@@ -2,6 +2,7 @@ import { MODES, type Mode } from '@ligungi/engine';
 import {
   TIME_PRESETS,
   sameTimeControl,
+  speedOf,
   type GameSettings,
   type LobbyView,
   type SeekView,
@@ -99,10 +100,14 @@ export const QuickGame = ({
           <div class="ligungi-pools">
             {TIME_PRESETS.map((timeControl) => {
               const waiting = waitingFor(lobby?.seeks ?? [], { mode, rated, timeControl });
+              const speed = speedOf(timeControl);
               return (
                 <button key={timeControlText(t, timeControl)} type="button" class="ligungi-pool" onClick={() => onPool(timeControl)}>
                   <span class="ligungi-pool__clock">{timeControlText(t, timeControl)}</span>
-                  <span class="ligungi-pool__kind">{rated ? t.rated : t.casual}</span>
+                  <span class="ligungi-pool__kind">
+                    {speed ? `${t.speeds[speed]} · ` : ''}
+                    {rated ? t.rated : t.casual}
+                  </span>
                   <span class={`ligungi-pool__waiting${waiting > 0 ? ' is-waiting' : ''}`}>{t.home.waiting(waiting)}</span>
                 </button>
               );

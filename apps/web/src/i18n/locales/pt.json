@@ -40,6 +40,13 @@
   "days": "{n, plural, =0 {# dias} one {# dia} other {# dias}}",
   "rated": "Ranqueada",
   "casual": "Casual",
+  "speeds": {
+    "bullet": "Bullet",
+    "blitz": "Blitz",
+    "rapid": "Rápida",
+    "classical": "Clássica",
+    "correspondence": "Correspondência"
+  },
   "freeDraftTag": "draft livre",
   "freeDraftHint": "Cada jogador coloca peças até declarar pronto; o draft só termina quando os dois terminam.",
   "freeDraftLabel": "Cada jogador termina seu draft",

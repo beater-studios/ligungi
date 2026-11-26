@@ -45,6 +45,24 @@ export const TIME_PRESETS: readonly TimeControl[] = [
   { initial: 3600, increment: 30 },
 ];
 
+/** The speed categories of a game, as on lichess: from the clock's estimated length, or correspondence. */
+export const SPEEDS = ['bullet', 'blitz', 'rapid', 'classical', 'correspondence'] as const;
+export type Speed = (typeof SPEEDS)[number];
+
+/**
+ * A game's speed, `null` for a game with no clock. lichess estimates a game at 40 moves: the initial time plus 40
+ * increments, under 3 minutes bullet, under 8 blitz, under 25 rapid. A byo-yomi period counts like an increment.
+ */
+export const speedOf = (tc: TimeControl | null, daysPerMove: number | null = null): Speed | null => {
+  if (daysPerMove) return 'correspondence';
+  if (!tc) return null;
+  const seconds = tc.initial + 40 * (tc.increment + (isByoyomi(tc) ? tc.byoyomi : 0));
+  if (seconds < 180) return 'bullet';
+  if (seconds < 480) return 'blitz';
+  if (seconds < 1500) return 'rapid';
+  return 'classical';
+};
+
 /** Days per move offered for correspondence games. */
 export const CORRESPONDENCE_DAYS: readonly number[] = [1, 3, 7, 14];
 

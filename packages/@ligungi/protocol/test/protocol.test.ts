@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { byoyomiState, formatTimeControl, gameFiltersQuery, parseClientMessage, parseGameFilters, parseSettings, type GameFilters } from '../src/index.ts';
+import { TIME_PRESETS, byoyomiState, formatTimeControl, speedOf, gameFiltersQuery, parseClientMessage, parseGameFilters, parseSettings, type GameFilters } from '../src/index.ts';
 
 describe('protocol', () => {
+  it('names the speed of a game as lichess does, from its estimated length', () => {
+    expect(TIME_PRESETS.map((tc) => speedOf(tc))).toEqual(['blitz', 'rapid', 'rapid', 'classical', 'classical', 'classical']);
+    expect(speedOf({ initial: 60, increment: 1 })).toBe('bullet');
+    expect(speedOf({ initial: 0, increment: 0, byoyomi: 10, periods: 1 })).toBe('blitz');
+    expect(speedOf(null, 3)).toBe('correspondence');
+    expect(speedOf(null)).toBeNull();
+  });
+
   it('validates game settings', () => {
     const valid = { mode: 'advanced', rated: true, timeControl: { initial: 600, increment: 5 }, daysPerMove: null, color: 'random', freeDraft: false };
     expect(parseSettings(valid)).toEqual(valid);

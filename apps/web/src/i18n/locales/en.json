@@ -40,6 +40,13 @@
   "days": "{n, plural, one {# day} other {# days}}",
   "rated": "Rated",
   "casual": "Casual",
+  "speeds": {
+    "bullet": "Bullet",
+    "blitz": "Blitz",
+    "rapid": "Rapid",
+    "classical": "Classical",
+    "correspondence": "Correspondence"
+  },
   "freeDraftTag": "free draft",
   "freeDraftHint": "Each player places pieces until they declare done; the draft only ends when both are done.",
   "freeDraftLabel": "Each player finishes their own draft",

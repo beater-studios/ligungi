@@ -55,7 +55,7 @@ export const InsightsPage = ({ name }: { name: string }) => {
   return (
     <main class="ligungi-page ligungi-insights">
       <section class="ligungi-card ligungi-insights__head">
-        <a class="text" href={`/@/${userName}`} data-icon={icons.Back}>
+        <a class="text" href={`/@/${userName}`} data-icon={icons.LessThan}>
           {i.back}
         </a>
         <h1>{i.title(userName)}</h1>

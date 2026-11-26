@@ -190,7 +190,7 @@ const PracticeGame = ({ practice, record }: { practice: PracticePosition; record
       }
       side={
         <section class="ligungi-card ligungi-game-info ligungi-drill">
-          <a class="text" href="/practice" data-icon={icons.Back}>
+          <a class="text" href="/practice" data-icon={icons.LessThan}>
             {t.practice.all}
           </a>
           <h1 class="ligungi-drill__title">{t.practice.positions[practice.id as keyof typeof t.practice.positions]}</h1>

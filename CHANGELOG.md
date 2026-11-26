@@ -25,6 +25,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 - The challenges in the notification bell show their accept and decline buttons side by side and small again, instead of a wide accept button that squeezed the challenge's details.
 - Lessons: in a position with no opposing Marshal, such as "Marshal in danger", a move that leaves your Marshal attacked is no longer offered, so the exercise to get the Marshal out of attack can no longer be passed by moving it along the attacker's line.
+- The links back to all the lessons, to the practice list and from insights to the player's profile show a back arrow instead of the take back icon.
 - The zen mode button no longer sits outside the bar of buttons over the move list: the seven buttons now share the row.
 - On a phone, choices that do not fit on one line, such as the piece style in Settings, wrap to a second line instead of scrolling sideways.
 - A practice result or a Puzzle Streak or Storm run that cannot reach your account (the connection dropped) is no longer lost: it waits in the browser and moves to your account on the next visit, as lesson stars already did.

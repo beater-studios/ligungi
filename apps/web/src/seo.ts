@@ -89,7 +89,7 @@ const escape = (value: string): string =>
 const jsonLd = (data: object): string =>
   `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
 
-const organization = { '@type': 'Organization', name: 'Beater Studios', url: STUDIO };
+const organization = { '@type': 'Organization', name: 'Beater Studios', url: STUDIO, sameAs: [LINKS.youtube] };
 
 /** Structured data of the home page: the site, the game it offers and who publishes it. */
 const homeData = (t: Messages, lang: Lang): object => ({
@@ -116,7 +116,7 @@ const homeData = (t: Messages, lang: Lang): object => ({
       offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' },
       license: LINKS.agpl,
       codeRepository: SOURCE_URL,
-      sameAs: [SOURCE_URL, LINKS.alternativeTo, LINKS.discord, LINKS.indieDb, LINKS.twitch, LINKS.microsoftStore],
+      sameAs: [SOURCE_URL, LINKS.alternativeTo, LINKS.discord, LINKS.indieDb, LINKS.twitch, LINKS.x, LINKS.instagram, LINKS.microsoftStore],
       publisher: organization,
       // schema.org accessibility properties; only what the screen reader mode really offers is claimed.
       accessibilityAPI: 'ARIA',

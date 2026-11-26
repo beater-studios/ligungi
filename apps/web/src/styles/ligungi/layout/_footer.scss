@@ -1,4 +1,4 @@
-/* ===== Site footer: brand, three link columns, then the legal line ===== */
+/* ===== Site footer: brand and social profiles, five link columns, then the legal line ===== */
 .ligungi-footer {
   // lila's dim text is below 4.5:1 on the light theme at this size; halfway to the main text passes on both themes.
   --ligungi-footer-text: color-mix(in srgb, #{$c-font} 50%, #{$c-font-dim});
@@ -20,7 +20,7 @@
 
   &__main {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.4fr) repeat(5, minmax(0, 1fr));
     gap: 2rem;
 
     @media (max-width: at-most($small)) {
@@ -53,6 +53,32 @@
     &,
     &:hover {
       color: $c-font-clear;
+    }
+  }
+
+  // The official profiles: brand icons in the footer text color, the link color on hover.
+  .ligungi-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.3rem;
+
+    a {
+      display: grid;
+      place-items: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+
+      &:hover {
+        background: $c-bg-zebra;
+      }
+    }
+
+    svg {
+      width: 1.15rem;
+      height: 1.15rem;
+      fill: currentColor;
     }
   }
 

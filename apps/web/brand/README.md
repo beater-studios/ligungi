@@ -35,6 +35,9 @@ Images for listings outside the site are rendered to the git-ignored `/media` fo
 | `igdb/screenshot-*.png` cropped, with a title and subtitle over lila's dark background (rendered from HTML) | `producthunt/gallery-2-towers` to `gallery-6-pieces` (`-1270x760.png`) | 1270×760 | Product Hunt gallery |
 | `../src/assets/logo.svg` (at 75% on `#2b2723`) | `producthunt/thumbnail-240x240.png` | 240×240 | Product Hunt thumbnail |
 | screenshot of the ligungi.org home (English, cookie notice dismissed) | `listings/ligungi-home-1280x800.png` | 1280×800 | websitelaunches.com |
+| `x-banner.svg` | `x/banner-1500x500.png` | 1500×500 | X header (the profile picture covers the bottom left corner, so the text starts in the middle) |
+| `../src/assets/logo.svg` (at 75% on a radial `#6a6158` to `#4a443e`, so the black tier stands out) | `x/profile-400.png`, `instagram/profile-400.png` | 400×400 | X and Instagram profile picture |
+| `igdb/keyart-logo-1920x1080.png` and boards captured from ligungi.org (1280 wide at 2x, English, dark theme), with a title over the dark background (rendered from HTML) | `instagram/post1-slide1` to `post1-slide5` (`-1080x1350.png`) | 1080×1350 | Instagram first carousel |
 
 Text uses Noto Sans, bundled in `src/assets/font` (license in its [README](../src/assets/font/README.md)).
 

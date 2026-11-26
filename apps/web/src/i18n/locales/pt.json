@@ -288,6 +288,8 @@
     "faq": "FAQ",
     "contact": "Contato",
     "discord": "Discord",
+    "reportProblem": "Reportar um problema",
+    "contribute": "Contribuir",
     "sites": "Sites semelhantes",
     "terms": "Condições de uso",
     "account": "Conta",
@@ -305,7 +307,8 @@
     "sourceCode": "Código-fonte (AGPL-3.0)",
     "basedOnLila": "Baseado no lila",
     "trademark": "Gungi e HUNTER×HUNTER pertencem aos seus detentores. Projeto de fãs, sem afiliação oficial.",
-    "studio": "Um projeto <studio>Beater Studios</studio>"
+    "studio": "Um projeto <studio>Beater Studios</studio>",
+    "social": "ligungi nas redes sociais"
   },
   "consent": {
     "title": "Cookies e privacidade",

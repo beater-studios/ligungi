@@ -4,6 +4,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- The footer has a Community column (players, friends, Discord, reporting a problem and how to contribute) and the icons of ligungi's profiles: Discord, X, Instagram, YouTube, Twitch and GitHub. The Community menu at the top also links to Discord and to reporting a problem.
+
 ### Changed
 
 - The notification bell was redesigned: each item has an icon in its own color (your turn, challenge, new follower, moderation, study), names stand out in bold, a challenge shows its mode, clock and rated or casual as separate tags and says which color you would play, the accept and decline buttons have labels, unread notices have a dot and a tinted background, and the time left in a correspondence game turns orange on its last day.

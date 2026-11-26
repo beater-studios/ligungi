@@ -12,6 +12,7 @@ export const LINKS = {
   gungiWeb: 'https://gungi.2410.dev/rules.html',
   spec: `${REPO}/blob/main/docs/rules.md`,
   issues: `${REPO}/issues`,
+  contributing: `${REPO}/blob/main/CONTRIBUTING.md`,
   security: `${REPO}/security/advisories/new`,
   lila: 'https://github.com/lichess-org/lila',
   lilaCopying: 'https://github.com/lichess-org/lila/blob/master/COPYING.md',
@@ -29,6 +30,10 @@ export const LINKS = {
   alternativeTo: 'https://alternativeto.net/software/ligungi/about/',
   indieDb: 'https://www.indiedb.com/games/ligungi',
   twitch: 'https://www.twitch.tv/ligungi',
+  x: 'https://x.com/ligungi',
+  instagram: 'https://www.instagram.com/ligungi/',
+  /** The studio's channel, where ligungi videos are published. */
+  youtube: 'https://www.youtube.com/@BeaterStudios',
   microsoftStore: 'https://apps.microsoft.com/detail/9nf5zjpld95c',
 } as const;
 

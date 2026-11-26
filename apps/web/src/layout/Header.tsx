@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { useT } from '../i18n/index.ts';
 import logoUrl from '../assets/logo.svg';
 import { icons } from '../icons.ts';
+import { LINKS } from '../i18n/content/shared.tsx';
 import { ActivitySwitch } from '../discord/Hub.tsx';
 import { inActivity } from '../discord/activity.ts';
 import { ChallengeBell } from './ChallengeBell.tsx';
@@ -83,6 +84,12 @@ export const Header = () => {
               <a href="/players">{t.nav.playerList}</a>
               <a href="/ranking">{t.nav.players}</a>
               <a href="/friends">{t.nav.friends}</a>
+              <a href={LINKS.discord} target="_blank" rel="noopener noreferrer">
+                {t.nav.discord}
+              </a>
+              <a href={LINKS.issues} target="_blank" rel="noopener noreferrer">
+                {t.nav.reportProblem}
+              </a>
             </div>
           </section>
           <section>

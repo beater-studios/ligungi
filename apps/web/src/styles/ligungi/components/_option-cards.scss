@@ -149,9 +149,16 @@
       }
     }
 
-    &--segmented .ligungi-choice__options {
-      grid-auto-columns: max-content;
-      overflow-x: auto;
+    // Options that do not fit on one line wrap to the next instead of scrolling sideways.
+    &--segmented {
+      .ligungi-choice__options {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .ligungi-choice__option {
+        flex: 1 1 auto;
+      }
     }
   }
 }

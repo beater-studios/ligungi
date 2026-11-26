@@ -17,6 +17,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 ### Changed
 
 - Studies: each move can have up to 8 arrows and 8 painted squares (2 and 4 before), enough to show every direction of any piece.
+- Settings: the board preview stays in view while you scroll through the appearance options, beside them on a computer and as a smaller strip above them on a phone. It also shows the pieces under its tower when that setting is on.
 - API: each error code now always comes with the same HTTP status. A few responses changed: an unknown mode in a ranking, leaderboard or stats address is `400 invalidMode` (was 404); an account needed for rated or correspondence play is `401` (was 400 or 409); `tooManyChallenges` is always `429`, `notYourChallenge` and `notInActivity` `403`, and `activitySignInFailed` `401`.
 
 ### Fixed
@@ -24,6 +25,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 - The challenges in the notification bell show their accept and decline buttons side by side and small again, instead of a wide accept button that squeezed the challenge's details.
 - Lessons: in a position with no opposing Marshal, such as "Marshal in danger", a move that leaves your Marshal attacked is no longer offered, so the exercise to get the Marshal out of attack can no longer be passed by moving it along the attacker's line.
 - The zen mode button no longer sits outside the bar of buttons over the move list: the seven buttons now share the row.
+- On a phone, choices that do not fit on one line, such as the piece style in Settings, wrap to a second line instead of scrolling sideways.
 - A practice result or a Puzzle Streak or Storm run that cannot reach your account (the connection dropped) is no longer lost: it waits in the browser and moves to your account on the next visit, as lesson stars already did.
 
 ## [0.9.11] - 2026-11-25

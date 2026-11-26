@@ -18,12 +18,36 @@
     }
   }
 
+  // The preview stays in view while the group's options scroll, just under the sticky header: beside them on wide
+  // screens, as a smaller strip above them on phones.
   &__preview {
+    position: sticky;
+    top: 4rem;
     padding-top: 0.9rem;
 
     @media (max-width: at-most($small)) {
-      padding-top: 0;
-      justify-self: center;
+      order: -1;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      margin: 0 -1rem;
+      padding: 0.6rem 1rem;
+      background: $c-bg-box;
+      border-bottom: 1px solid $c-border;
+
+      @include mq-sticky-header {
+        top: $site-header-height;
+      }
+
+      .ligungi-board-preview {
+        grid-template-columns: repeat(3, 3.2rem);
+        grid-template-rows: repeat(3, 3.2rem);
+      }
+
+      .gg-3d & .ligungi-board-preview {
+        grid-template-rows: repeat(3, 2.6rem);
+      }
     }
   }
 }
@@ -122,6 +146,10 @@
 
     .gg-height {
       font-size: 20cqw;
+    }
+
+    .gg-chip {
+      font-size: 17cqw;
     }
   }
 

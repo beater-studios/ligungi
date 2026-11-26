@@ -891,7 +891,7 @@
   },
   "lessons": {
     "title": "Lecciones",
-    "intro": "Aprende Gungi jugando: ocho etapas cortas, de las piezas al mate. Cada ejercicio vale hasta 3 estrellas, según el número de jugadas.",
+    "intro": "Aprende Gungi jugando: nueve etapas cortas, de las piezas a la estrategia del draft. Cada ejercicio vale hasta 3 estrellas, según el número de jugadas.",
     "stage": "Etapa {n}",
     "exerciseOf": "Ejercicio {n} de {total}",
     "stars": "{n} de {max} estrellas",
@@ -947,6 +947,10 @@
       "draft": {
         "title": "El draft",
         "intro": "En los modos Intermedio y Avanzado, cada jugador arma su posición colocando una pieza por vez en su territorio (初期配置)."
+      },
+      "strategy": {
+        "title": "Estrategia del draft",
+        "intro": "Cómo colocar tus piezas en el draft: torres que se protegen y piezas que abren camino a las colocaciones desde la mano."
       }
     },
     "exercises": {
@@ -1097,6 +1101,34 @@
       "draft-done": {
         "instruction": "Cuando no quieras colocar más piezas, declara listo. Como juegas segundo, el draft termina en el acto.",
         "hint": "Usa el botón Listo (済み)."
+      },
+      "strategy-step": {
+        "instruction": "Un escalón: una torre de 2 delante de una torre de 3. Quien captura la torre de delante queda allí solo, en el nivel 1; quien se apila en ella la deja con 3. En los dos casos, la torre de atrás puede tomarla. Deja en la estrella de atrás una torre de 3 y en la de delante una torre de 2.",
+        "hint": "Coloca piezas de la mano encima de las tuyas: una más en la estrella de atrás y dos en la de delante."
+      },
+      "strategy-runner": {
+        "instruction": "Un corredor: una pieza ligera en lo alto de una torre empieza con un alcance largo. En el nivel 3, el Caballero avanza hasta cuatro casillas. Llévalo a la esquina del otro lado.",
+        "hint": "Mueve el Caballero desde lo alto de la torre y después una vez más desde donde quede."
+      },
+      "strategy-deep-drop": {
+        "instruction": "Solo puedes colocar piezas de la mano hasta la fila de tu pieza más avanzada. Manda el Lancero hacia delante desde su torre y después coloca el Samurái en la estrella, en el campo del rival.",
+        "hint": "En el nivel 3, el Lancero avanza hasta cuatro casillas. Cuando esté en la fila de la estrella o más allá, se puede colocar el Samurái allí."
+      },
+      "strategy-stop": {
+        "instruction": "El corredor del rival es una torre de 2, y una pieza en el nivel 1 no puede capturarla. Sube tu Soldado con la pieza de la mano y después captura la torre.",
+        "hint": "Coloca el Soldado de la mano encima de tu Soldado: en el nivel 2 alcanza dos casillas hacia delante."
+      },
+      "strategy-towering": {
+        "instruction": "Torres al frente (towering): torres altas en la primera línea de tu draft. Una pieza en el nivel 1 no puede capturar ni apilarse en una torre de 2, así que el rival necesita piezas apiladas o de largo alcance para atacar. Deja cada estrella con una torre de 2.",
+        "hint": "Coloca un Soldado de la mano encima de cada Soldado de delante."
+      },
+      "strategy-marshal-steps": {
+        "instruction": "Escalones del Mariscal: torres de altura creciente junto al Mariscal le permiten subir al comienzo de la partida, donde es más difícil de capturar. En Intermedio hay un escalón, porque las torres llegan a 2; en Avanzado, dos. Sube hasta la estrella.",
+        "hint": "Un escalón cada vez: el Mariscal solo se apila en una torre que no sea más alta que su nivel. Primero el Soldado, después la torre de 2."
+      },
+      "strategy-cannon-track": {
+        "instruction": "Riel del Cañón: en lo alto de una torre el Cañón salta más lejos, y las piezas bajas a su lado le permiten cambiar de columna sin perder altura. Pasa el Cañón encima de un Soldado a su lado y después captura la pieza de la estrella.",
+        "hint": "En el nivel 2 el Cañón salta 3 o 4 casillas hacia delante, y apilarse en el Soldado lo mantiene en el nivel 2."
       }
     }
   },
@@ -2067,7 +2099,7 @@
       },
       "lessons": {
         "title": "Lecciones interactivas de Gungi · ligungi",
-        "description": "Aprende Gungi jugando: las piezas, las torres, las piezas en mano, la traición, el mate y el draft, en ejercicios cortos en el tablero."
+        "description": "Aprende Gungi jugando: las piezas, las torres, las piezas en mano, la traición, el mate, el draft y la estrategia del draft, en ejercicios cortos en el tablero."
       },
       "explorer": {
         "title": "Explorador de draft de Gungi · ligungi",

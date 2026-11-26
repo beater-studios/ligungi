@@ -17,7 +17,8 @@ import {
  * What an exercise asks. `targets`: end moves on every starred square (moving, stacking, capturing or dropping
  * there). `escape`: get the Marshal out of attack. `betray`: turn the enemy pieces of a tower with the Tactician.
  * `mate`: mate in that many moves against the computer's best defense. `placeMarshal` and `finishDraft`: the draft.
- * In every goal but `mate` the opponent does not move, so the player keeps the turn.
+ * `build`: own towers at least that tall on those squares. In every goal but `mate` the opponent does not move, so the
+ * player keeps the turn.
  */
 export type LessonGoal =
   | { readonly kind: 'targets'; readonly squares: readonly string[] }
@@ -25,7 +26,8 @@ export type LessonGoal =
   | { readonly kind: 'betray'; readonly square: string }
   | { readonly kind: 'mate'; readonly moves: number }
   | { readonly kind: 'placeMarshal' }
-  | { readonly kind: 'finishDraft' };
+  | { readonly kind: 'finishDraft' }
+  | { readonly kind: 'build'; readonly towers: Readonly<Record<string, number>> };
 
 export interface LessonExercise {
   readonly id: string;
@@ -35,7 +37,7 @@ export interface LessonExercise {
   readonly par: number;
 }
 
-export const LESSON_STAGE_IDS = ['pieces', 'towers', 'hand', 'jumpers', 'betrayal', 'marshal', 'mate', 'draft'] as const;
+export const LESSON_STAGE_IDS = ['pieces', 'towers', 'hand', 'jumpers', 'betrayal', 'marshal', 'mate', 'draft', 'strategy'] as const;
 export type LessonStageId = (typeof LESSON_STAGE_IDS)[number];
 
 export interface LessonStage {
@@ -125,6 +127,20 @@ export const LESSON_STAGES: readonly LessonStage[] = [
       { id: 'draft-done', fen: fenFromTowers({ e1: 'M', e9: 'm' }, { hands: 'G2S', phase: 'db', first: 'b' }), goal: { kind: 'finishDraft' }, par: 1 },
     ],
   },
+  {
+    // Draft strategy (docs/rules.md sections 4 and 5): a piece only captures or stacks on a tower no taller than its own
+    // tier, and drops reach the rank of the most advanced own piece.
+    id: 'strategy',
+    exercises: [
+      { id: 'strategy-towering', fen: fenFromTowers({ e1: 'M', d3: 'P', e3: 'P', f3: 'P' }, { hands: '3P', phase: 'd' }), goal: { kind: 'build', towers: { d3: 2, e3: 2, f3: 2 } }, par: 3 },
+      { id: 'strategy-step', fen: fenFromTowers({ e1: 'M', e2: 'PS' }, { hands: '3PG', phase: 'd' }), goal: { kind: 'build', towers: { e2: 3, e3: 2 } }, par: 3 },
+      { id: 'strategy-marshal-steps', fen: fenFromTowers({ f1: 'M', e1: 'P', d1: 'PP' }), goal: { kind: 'build', towers: { d1: 3 } }, par: 2 },
+      { id: 'strategy-cannon-track', fen: fenFromTowers({ e1: 'PC', d1: 'P', f1: 'P', h1: 'M', e3: 'ppp', d5: 'p' }), goal: targets('d5'), par: 2 },
+      { id: 'strategy-runner', fen: fenFromTowers({ e1: 'M', a3: 'PPR' }), goal: targets('a9'), par: 2 },
+      { id: 'strategy-deep-drop', fen: fenFromTowers({ e1: 'M', b3: 'PPN' }, { hands: 'S' }), goal: targets('f6'), par: 2 },
+      { id: 'strategy-stop', fen: fenFromTowers({ e1: 'M', a4: 'P', a6: 'pp' }, { hands: 'P' }), goal: targets('a6'), par: 2 },
+    ],
+  },
 ];
 
 export const LESSON_EXERCISES: readonly LessonExercise[] = LESSON_STAGES.flatMap((stage) => stage.exercises);
@@ -170,9 +186,28 @@ export const lessonDone = (exercise: LessonExercise, state: LessonState, player:
       return findMarshal(state.position, player) !== undefined;
     case 'finishDraft':
       return state.position.phase === 'play';
+    case 'build':
+      return lessonTargets(exercise, state).length === 0;
     case 'mate':
       return false;
   }
+};
+
+/**
+ * The squares still to reach, marked with a star: the starred squares not yet reached, or the squares whose own tower
+ * is not yet as tall as asked. Empty for the other goals.
+ */
+export const lessonTargets = (exercise: LessonExercise, state: LessonState): string[] => {
+  const goal = exercise.goal;
+  if (goal.kind === 'targets') return goal.squares.filter((square) => !state.collected.includes(square));
+  if (goal.kind !== 'build') return [];
+  const player = parseFen(exercise.fen).turn;
+  return Object.entries(goal.towers)
+    .filter(([square, height]) => {
+      const tower = state.position.board[parseSquare(square)!]!;
+      return tower.length < height || topOf(tower)?.color !== player;
+    })
+    .map(([square]) => square);
 };
 
 /**

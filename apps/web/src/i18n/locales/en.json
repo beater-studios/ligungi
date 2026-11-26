@@ -891,7 +891,7 @@
   },
   "lessons": {
     "title": "Lessons",
-    "intro": "Learn Gungi by playing: eight short stages, from the pieces to mate. Each exercise is worth up to 3 stars, by the number of moves.",
+    "intro": "Learn Gungi by playing: nine short stages, from the pieces to draft strategy. Each exercise is worth up to 3 stars, by the number of moves.",
     "stage": "Stage {n}",
     "exerciseOf": "Exercise {n} of {total}",
     "stars": "{n} of {max} stars",
@@ -947,6 +947,10 @@
       "draft": {
         "title": "The draft",
         "intro": "In the Intermediate and Advanced modes, each player sets up their position by placing one piece at a time in their territory (初期配置)."
+      },
+      "strategy": {
+        "title": "Draft strategy",
+        "intro": "How to set up your pieces in the draft: towers that protect each other, and pieces that open the way for your drops."
       }
     },
     "exercises": {
@@ -1097,6 +1101,34 @@
       "draft-done": {
         "instruction": "When you do not want to place more pieces, declare done. As you play second, the draft ends right away.",
         "hint": "Use the Done (済み) button."
+      },
+      "strategy-step": {
+        "instruction": "A step: a tower of 2 in front of a tower of 3. An attacker that captures the front tower stands there alone, at tier 1; one that stacks on it makes it 3 tall. Either way, the tower behind can take it. Make the back star a tower of 3 and the front star a tower of 2.",
+        "hint": "Drop pieces from your hand on your own pieces: one more on the back star, two on the front one."
+      },
+      "strategy-runner": {
+        "instruction": "A runner: a light piece on top of a tall tower starts with a long reach. At tier 3 the Knight goes up to four squares forward. Take it to the far corner.",
+        "hint": "Move the Knight from the top of the tower, then once more from where it lands."
+      },
+      "strategy-deep-drop": {
+        "instruction": "You can drop pieces up to the rank of your most advanced piece. Send the Lancer forward from its tower, then drop the Samurai on the star, deep in your opponent's camp.",
+        "hint": "At tier 3 the Lancer goes up to four squares forward. Once it stands on the star's rank or farther, the Samurai can be dropped there."
+      },
+      "strategy-stop": {
+        "instruction": "Your opponent's runner is a tower of 2, and a piece at tier 1 cannot capture it. Raise your Soldier with the piece in your hand, then capture the tower.",
+        "hint": "Drop the Soldier from your hand on your own Soldier: at tier 2 it reaches two squares forward."
+      },
+      "strategy-towering": {
+        "instruction": "Towering: tall towers at the front of your draft. A piece at tier 1 can neither capture nor stack on a tower of 2, so your opponent has to bring stacked or long-range pieces to attack. Make each star a tower of 2.",
+        "hint": "Drop a Soldier from your hand on each of your front Soldiers."
+      },
+      "strategy-marshal-steps": {
+        "instruction": "Marshal steps: towers of growing height next to your Marshal let it climb at the start of the game, where it is harder to capture. In Intermediate there is one step, as towers go up to 2; in Advanced, two. Climb to the star.",
+        "hint": "Step by step: the Marshal only stacks on a tower no taller than its own tier. First the Soldier, then the tower of 2."
+      },
+      "strategy-cannon-track": {
+        "instruction": "Cannon track: on top of a tower the Cannon jumps farther, and low pieces beside it let it change file without losing height. Shift the Cannon onto a Soldier beside it, then capture the piece on the star.",
+        "hint": "At tier 2 the Cannon jumps 3 or 4 squares forward, and stacking on the Soldier keeps it at tier 2."
       }
     }
   },
@@ -2067,7 +2099,7 @@
       },
       "lessons": {
         "title": "Interactive Gungi lessons · ligungi",
-        "description": "Learn Gungi by playing: the pieces, towers, pieces in hand, betrayal, mate and the draft, in short exercises on the board."
+        "description": "Learn Gungi by playing: the pieces, towers, pieces in hand, betrayal, mate, the draft and draft strategy, in short exercises on the board."
       },
       "explorer": {
         "title": "Gungi draft explorer · ligungi",

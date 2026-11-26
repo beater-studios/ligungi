@@ -891,7 +891,7 @@
   },
   "lessons": {
     "title": "Lições",
-    "intro": "Aprenda Gungi jogando: oito etapas curtas, das peças ao mate. Cada exercício vale até 3 estrelas, conforme o número de lances.",
+    "intro": "Aprenda Gungi jogando: nove etapas curtas, das peças à estratégia de draft. Cada exercício vale até 3 estrelas, conforme o número de lances.",
     "stage": "Etapa {n}",
     "exerciseOf": "Exercício {n} de {total}",
     "stars": "{n} de {max} estrelas",
@@ -947,6 +947,10 @@
       "draft": {
         "title": "O draft",
         "intro": "Nos modos Intermediário e Avançado, cada jogador monta a posição colocando uma peça por vez no seu território (初期配置)."
+      },
+      "strategy": {
+        "title": "Estratégia de draft",
+        "intro": "Como montar suas peças no draft: torres que se protegem e peças que abrem caminho para as colocações da mão."
       }
     },
     "exercises": {
@@ -1097,6 +1101,34 @@
       "draft-done": {
         "instruction": "Quando não quiser colocar mais peças, declare pronto. Como você joga em segundo, o draft termina na hora.",
         "hint": "Use o botão Pronto (済み)."
+      },
+      "strategy-step": {
+        "instruction": "Um degrau: uma torre de 2 na frente de uma torre de 3. Quem captura a torre da frente fica sozinho ali, no nível 1; quem empilha nela a deixa com 3. Nos dois casos, a torre de trás pode tomá-la. Deixe a estrela de trás com uma torre de 3 e a da frente com uma torre de 2.",
+        "hint": "Coloque peças da mão em cima das suas: mais uma na estrela de trás e duas na da frente."
+      },
+      "strategy-runner": {
+        "instruction": "Um corredor: uma peça leve no alto de uma torre começa com um alcance longo. No nível 3, o Cavaleiro anda até quatro casas para a frente. Leve-o até o canto do outro lado.",
+        "hint": "Mova o Cavaleiro do alto da torre e depois mais uma vez de onde ele parar."
+      },
+      "strategy-deep-drop": {
+        "instruction": "Você só coloca peças da mão até a fileira da sua peça mais avançada. Mande o Lanceiro para a frente, saindo da torre, e depois coloque o Samurai na estrela, no campo do adversário.",
+        "hint": "No nível 3, o Lanceiro anda até quatro casas para a frente. Quando ele estiver na fileira da estrela ou além, dá para colocar o Samurai lá."
+      },
+      "strategy-stop": {
+        "instruction": "O corredor do adversário é uma torre de 2, e uma peça no nível 1 não consegue capturá-la. Levante o seu Soldado com a peça da mão e depois capture a torre.",
+        "hint": "Coloque o Soldado da mão em cima do seu Soldado: no nível 2 ele alcança duas casas para a frente."
+      },
+      "strategy-towering": {
+        "instruction": "Torres na frente (towering): torres altas na linha da frente do seu draft. Uma peça no nível 1 não captura nem empilha numa torre de 2, então o adversário precisa de peças empilhadas ou de longo alcance para atacar. Deixe cada estrela com uma torre de 2.",
+        "hint": "Coloque um Soldado da mão em cima de cada Soldado da frente."
+      },
+      "strategy-marshal-steps": {
+        "instruction": "Degraus do Marechal: torres de altura crescente ao lado do Marechal deixam ele subir no começo da partida, onde fica mais difícil de capturar. No Intermediário há um degrau, porque as torres vão até 2; no Avançado, dois. Suba até a estrela.",
+        "hint": "Um degrau por vez: o Marechal só empilha numa torre que não seja mais alta que o nível dele. Primeiro o Soldado, depois a torre de 2."
+      },
+      "strategy-cannon-track": {
+        "instruction": "Trilho do Canhão: no alto de uma torre o Canhão salta mais longe, e peças baixas ao lado deixam ele mudar de coluna sem perder altura. Passe o Canhão para cima de um Soldado ao lado e depois capture a peça na estrela.",
+        "hint": "No nível 2 o Canhão salta 3 ou 4 casas para a frente, e empilhar no Soldado o mantém no nível 2."
       }
     }
   },
@@ -2067,7 +2099,7 @@
       },
       "lessons": {
         "title": "Lições interativas de Gungi · ligungi",
-        "description": "Aprenda Gungi jogando: as peças, as torres, as peças da mão, a traição, o mate e o draft, em exercícios curtos no tabuleiro."
+        "description": "Aprenda Gungi jogando: as peças, as torres, as peças da mão, a traição, o mate, o draft e a estratégia de draft, em exercícios curtos no tabuleiro."
       },
       "explorer": {
         "title": "Explorador de draft de Gungi · ligungi",

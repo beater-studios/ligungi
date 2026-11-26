@@ -1,5 +1,5 @@
 import { applyMove, legalMoves, moveToString, parseMove, parseSquare, toFen, type Move, type Position } from '@ligungi/engine';
-import { LESSON_STAGES, LESSON_STARS_MAX, lessonDone, lessonStars, playLesson, startLesson, type LessonExercise, type LessonStage, type LessonState } from '@ligungi/content';
+import { LESSON_STAGES, LESSON_STARS_MAX, lessonDone, lessonStars, lessonTargets, playLesson, startLesson, type LessonExercise, type LessonStage, type LessonState } from '@ligungi/content';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { BlindPanel } from '../blind/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';
@@ -193,8 +193,8 @@ const Exercise = ({ stage, index, progress, record }: { stage: LessonStage; inde
   const allMoves = useMemo(() => (finished || waiting ? [] : legalMoves(state.position)), [state, finished, waiting]);
   const boardMoves = useMemo(() => allMoves.filter((move) => move.kind !== 'done'), [allMoves]);
   const targets = useMemo(
-    () => (goal.kind === 'targets' ? goal.squares.filter((square) => !state.collected.includes(square)).map((square) => parseSquare(square)!) : []),
-    [state.collected],
+    () => lessonTargets(exercise, state).map((square) => parseSquare(square)!),
+    [state],
   );
   // Only the exercise about ending the draft offers "done": declared early in another, it would leave no move.
   const doneAvailable = goal.kind === 'finishDraft' && allMoves.some((move) => move.kind === 'done');

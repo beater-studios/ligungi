@@ -7,6 +7,7 @@ import {
   initialPosition,
   isMarshalAttacked,
   material,
+  parseFen,
   parseMove,
   toFen,
 } from '../src/index.ts';
@@ -123,6 +124,15 @@ describe('end of game', () => {
     expect(moves).not.toContain('d3');
     expect(moves).not.toContain('f3');
     expect(moves).toContain('e4');
+  });
+
+  it('keeps the own marshal safe in a position without an opposing marshal, as lessons set up', () => {
+    // The lesson "Marshal in danger": a White Marshal attacked by a Black General down the file, and no Black Marshal.
+    const position = parseFen('9/9/9/4g4/9/9/9/4M4/9 w - advanced p w');
+    const moves = movesFrom(position, 'e2');
+    expect(moves).not.toContain('e3');
+    expect(moves).not.toContain('e1');
+    expect(moves.sort()).toEqual(['d1', 'd2', 'd3', 'f1', 'f2', 'f3']);
   });
 
   it('declares mate when no move keeps the marshal safe, even without check', () => {

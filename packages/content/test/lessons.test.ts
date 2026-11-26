@@ -1,5 +1,5 @@
 import { mateDistance } from '@ligungi/bot';
-import { legalMoves, parseFen, positionProblems, toFen } from '@ligungi/engine';
+import { applyMove, isMarshalAttacked, legalMoves, moveToString, parseFen, positionProblems, toFen } from '@ligungi/engine';
 import { LESSON_EXERCISES, LESSON_STAGES, lessonDone, lessonStars, playLesson, startLesson, type LessonExercise } from '../src/index.ts';
 import { describe, expect, it } from 'vitest';
 
@@ -41,6 +41,19 @@ describe('lessons', () => {
         expect(exercise.par, exercise.id).toBe(exercise.goal.moves);
       } else {
         expect(shortest(exercise, exercise.par + 1), exercise.id).toBe(exercise.par);
+      }
+    }
+  });
+
+  // An escape exercise is done after any move, which is only right if every move offered gets the Marshal out of attack.
+  it('offers only moves that get the Marshal out of attack in escape exercises', () => {
+    const escapes = LESSON_EXERCISES.filter((exercise) => exercise.goal.kind === 'escape');
+    expect(escapes.length).toBeGreaterThan(0);
+    for (const exercise of escapes) {
+      const start = parseFen(exercise.fen);
+      expect(isMarshalAttacked(start, start.turn), exercise.id).toBe(true);
+      for (const move of legalMoves(start)) {
+        expect(isMarshalAttacked({ ...applyMove(start, move), turn: start.turn }, start.turn), `${exercise.id} ${moveToString(move)}`).toBe(false);
       }
     }
   });

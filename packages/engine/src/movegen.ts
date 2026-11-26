@@ -228,8 +228,11 @@ export const legalMoves = (position: Position): Move[] => {
   const moves = pseudoLegalMoves(position);
   if (position.phase === 'draft') return moves;
   const color = position.turn;
+  // Capturing the opposing Marshal ends the game, so it is allowed even with the mover's own Marshal left attacked. A
+  // position with no opposing Marshal at all (a lesson set up by hand) has nothing to capture, and the check applies.
+  const enemyMarshal = findMarshal(position, opposite(color)) !== undefined;
   return moves.filter((move) => {
     const next = applyMove(position, move);
-    return findMarshal(next, opposite(color)) === undefined || !isMarshalAttacked(next, color);
+    return (enemyMarshal && findMarshal(next, opposite(color)) === undefined) || !isMarshalAttacked(next, color);
   });
 };

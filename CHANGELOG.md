@@ -17,6 +17,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Fixed
 
+- Lessons: in a position with no opposing Marshal, such as "Marshal in danger", a move that leaves your Marshal attacked is no longer offered, so the exercise to get the Marshal out of attack can no longer be passed by moving it along the attacker's line.
 - The zen mode button no longer sits outside the bar of buttons over the move list: the seven buttons now share the row.
 - A practice result or a Puzzle Streak or Storm run that cannot reach your account (the connection dropped) is no longer lost: it waits in the browser and moves to your account on the next visit, as lesson stars already did.
 

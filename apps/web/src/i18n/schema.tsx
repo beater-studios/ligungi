@@ -208,6 +208,8 @@ export const SCHEMA = {
   'report.chapter': text<[name: string]>('name'),
 
   'study.chapterCount': text<[n: number]>('n'),
+  'study.likeCount': text<[n: number]>('n'),
+  'study.likeAria': text<[n: number]>('n'),
   'study.by': rich<[name: ComponentChildren]>({}, 'name'),
   'study.chapterNumber': text<[n: number]>('n'),
   'study.counts': text<[arrows: number, arrowsMax: number, squares: number, squaresMax: number]>('arrows', 'arrowsMax', 'squares', 'squaresMax'),

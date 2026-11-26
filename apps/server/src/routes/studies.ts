@@ -1,5 +1,5 @@
 import type { AppDeps } from '../app.ts';
-import { isOrientation, STUDIES_MAX, STUDY_CHAPTER_NAME_MAX, STUDY_CHAPTERS_MAX, STUDY_QUERY_MAX, studyStart, studyText, DAY_MS, STUDY_DESCRIPTION_MAX, STUDY_PUBLIC_MIN_DAYS, STUDY_TITLE_MAX, emptyRoot, isStudyVisibility, parseStudyRoot, type StudyList, type StudyRoot } from '@ligungi/protocol';
+import { isOrientation, STUDIES_MAX, STUDY_CHAPTER_NAME_MAX, STUDY_CHAPTERS_MAX, STUDY_QUERY_MAX, studyStart, studyText, DAY_MS, STUDY_DESCRIPTION_MAX, STUDY_PUBLIC_MIN_DAYS, STUDY_TITLE_MAX, emptyRoot, isStudyVisibility, parseStudyRoot, STUDY_SORTS, type StudyList, type StudyRoot } from '@ligungi/protocol';
 import { HttpError, intParam, sendJson, type Router, type Context } from '../http.ts';
 import { requireUser } from './guards.ts';
 import type { ChapterInput, StudyRecord } from '../studies.ts';
@@ -62,8 +62,14 @@ export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
         sendJson(ctx.res, 200, list);
         return;
       }
+      if (params.get('list') === 'liked') {
+        const list: StudyList = { studies: studies.likedBy(requireUser(ctx), query), more: false };
+        sendJson(ctx.res, 200, list);
+        return;
+      }
       const page = intParam(params, 'page', 1, 1000, 1);
-      const list: StudyList = studies.listed(query, page);
+      const sort = STUDY_SORTS.find((value) => value === params.get('sort')) ?? 'updated';
+      const list: StudyList = studies.listed(query, page, sort);
       sendJson(ctx.res, 200, list);
     })
     .add('POST', '/api/studies', async (ctx) => {
@@ -88,6 +94,16 @@ export const registerStudiesRoutes = (router: Router, deps: AppDeps): void => {
     .add('DELETE', '/api/studies/:id', (ctx) => {
       studies.delete(ownStudy(ctx).id);
       sendJson(ctx.res, 200, { ok: true });
+    })
+    .add('POST', '/api/studies/:id/like', (ctx) => {
+      const userId = requireUser(ctx);
+      if (!studyLimiter.allow(userId)) throw new HttpError('tooManyAttempts');
+      sendJson(ctx.res, 200, studies.setLiked(userId, readableStudy(ctx).id, true));
+    })
+    .add('DELETE', '/api/studies/:id/like', (ctx) => {
+      const userId = requireUser(ctx);
+      if (!studyLimiter.allow(userId)) throw new HttpError('tooManyAttempts');
+      sendJson(ctx.res, 200, studies.setLiked(userId, readableStudy(ctx).id, false));
     })
     .add('GET', '/api/studies/:id/chapters/:chapter', (ctx) => {
       const chapter = studies.chapter(readableStudy(ctx).id, ctx.params.chapter!);

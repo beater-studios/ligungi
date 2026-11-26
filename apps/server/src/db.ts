@@ -346,6 +346,15 @@ const MIGRATIONS = [
   alter table reports add column chapter_id text;
   alter table reports add column chapter_path text;
   `,
+  `
+  create table study_likes (
+    user_id text not null references users(id),
+    study_id text not null references studies(id) on delete cascade,
+    created_at integer not null,
+    primary key (user_id, study_id)
+  );
+  create index study_likes_study on study_likes(study_id);
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

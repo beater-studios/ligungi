@@ -6,6 +6,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Studies can be liked: a heart on each study shows how many like it, the list can show the most liked first, and a new tab keeps the studies you like.
 - Studies: reporting a study now points the moderators to the chapter and move you were on, and their link opens the study right there. Moderators hear of each new report on Discord, and can clear the drawings of a chapter without hiding the whole study.
 - Puzzle Racer (`/racer`): race other players on the same puzzles for 90 seconds. Each correct move scores a point, a mistake moves you on to the next puzzle, long combos score extra points, and you can skip one puzzle. Join the public race, create one to share by link, or race the people of a Discord call from the Activity's hub. A public race can bring back players of an earlier race over the same puzzles as ghosts, at the pace they had; a switch hides them. With an account, your best races of today, the week and all time are kept.
 

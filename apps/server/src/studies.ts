@@ -3,8 +3,10 @@ import {
   STUDY_LIST_PAGE,
   type StudyChapter,
   type StudyChapterRef,
+  type StudyLikes,
   type StudyListItem,
   type StudyRoot,
+  type StudySort,
   type StudyView,
   type StudyVisibility,
 } from '@ligungi/protocol';
@@ -22,6 +24,7 @@ interface StudyRow {
   created_at: number;
   updated_at: number;
   chapters: number;
+  likes: number;
 }
 
 interface ChapterRow {
@@ -43,6 +46,7 @@ export interface StudyRecord {
   readonly createdAt: number;
   readonly updatedAt: number;
   readonly chapters: number;
+  readonly likes: number;
 }
 
 export interface ChapterInput {
@@ -53,7 +57,8 @@ export interface ChapterInput {
 }
 
 const STUDY_SELECT = `select studies.*, users.username as owner_name,
-    (select count(*) from study_chapters where study_chapters.study_id = studies.id) as chapters
+    (select count(*) from study_chapters where study_chapters.study_id = studies.id) as chapters,
+    (select count(*) from study_likes where study_likes.study_id = studies.id) as likes
   from studies join users on users.id = studies.owner_id`;
 
 const toRecord = (row: StudyRow): StudyRecord => ({
@@ -67,6 +72,7 @@ const toRecord = (row: StudyRow): StudyRecord => ({
   createdAt: row.created_at,
   updatedAt: row.updated_at,
   chapters: row.chapters,
+  likes: row.likes,
 });
 
 const toItem = (study: StudyRecord): StudyListItem => ({
@@ -77,6 +83,7 @@ const toItem = (study: StudyRecord): StudyListItem => ({
   visibility: study.visibility,
   hidden: study.hidden,
   chapters: study.chapters,
+  likes: study.likes,
   updatedAt: study.updatedAt,
 });
 
@@ -128,15 +135,18 @@ export class Studies {
       updatedAt: study.updatedAt,
       chapters: chapters.map(({ id, name }) => ({ id, name })),
       mine: study.ownerId === viewerId,
+      likes: study.likes,
+      liked: viewerId !== null && this.#likes(viewerId, study.id),
     };
   }
 
-  /** Public studies, latest changed first, optionally whose title contains `query`. */
-  listed(query: string, page: number): { studies: StudyListItem[]; more: boolean } {
+  /** Public studies, latest changed first or most liked first, optionally whose title contains `query`. */
+  listed(query: string, page: number, sort: StudySort = 'updated'): { studies: StudyListItem[]; more: boolean } {
+    const order = sort === 'liked' ? 'likes desc, studies.updated_at desc, studies.rowid desc' : 'studies.updated_at desc, studies.rowid desc';
     const rows = this.#db
       .prepare(
         `${STUDY_SELECT} where studies.visibility = 'public' and studies.hidden = 0 and (?1 = '' or instr(lower(studies.title), lower(?1)) > 0)
-         order by studies.updated_at desc, studies.rowid desc limit ?2 offset ?3`,
+         order by ${order} limit ?2 offset ?3`,
       )
       .all(query, STUDY_LIST_PAGE + 1, (page - 1) * STUDY_LIST_PAGE) as unknown as StudyRow[];
     return { studies: rows.slice(0, STUDY_LIST_PAGE).map((row) => toItem(toRecord(row))), more: rows.length > STUDY_LIST_PAGE };
@@ -151,6 +161,36 @@ export class Studies {
       )
       .all(ownerId, query) as unknown as StudyRow[];
     return rows.map((row) => toItem(toRecord(row)));
+  }
+
+  /**
+   * The studies a player likes that they can still open (their own, or any other neither private nor hidden), latest
+   * liked first, optionally whose title contains `query`.
+   */
+  likedBy(userId: string, query = ''): StudyListItem[] {
+    const rows = this.#db
+      .prepare(
+        `${STUDY_SELECT} join study_likes on study_likes.study_id = studies.id and study_likes.user_id = ?1
+         where (studies.owner_id = ?1 or (studies.visibility != 'private' and studies.hidden = 0)) and (?2 = '' or instr(lower(studies.title), lower(?2)) > 0)
+         order by study_likes.created_at desc, study_likes.rowid desc`,
+      )
+      .all(userId, query) as unknown as StudyRow[];
+    return rows.map((row) => toItem(toRecord(row)));
+  }
+
+  /** Likes a study, or takes the like back; one like per player and study. */
+  setLiked(userId: string, studyId: string, liked: boolean): StudyLikes {
+    if (liked) this.#db.prepare('insert or ignore into study_likes (user_id, study_id, created_at) values (?, ?, ?)').run(userId, studyId, this.#now());
+    else this.#db.prepare('delete from study_likes where user_id = ? and study_id = ?').run(userId, studyId);
+    const { n } = this.#db.prepare('select count(*) as n from study_likes where study_id = ?').get(studyId) as { n: number };
+    return { likes: n, liked };
+  }
+
+  /** Every like of a player, for their data export. */
+  likesBy(userId: string): Array<{ studyId: string; at: number }> {
+    return (
+      this.#db.prepare('select study_id, created_at from study_likes where user_id = ? order by created_at').all(userId) as Array<{ study_id: string; created_at: number }>
+    ).map((row) => ({ studyId: row.study_id, at: row.created_at }));
   }
 
   /** Public studies, not hidden, created since a moment by some authors, newest first (activity and feed). */
@@ -261,6 +301,10 @@ export class Studies {
       )
       .run(id, studyId, position, chapter.name, chapter.fen, chapter.orientation, JSON.stringify(chapter.root), now, now);
     return id;
+  }
+
+  #likes(userId: string, studyId: string): boolean {
+    return this.#db.prepare('select 1 from study_likes where user_id = ? and study_id = ?').get(userId, studyId) !== undefined;
   }
 
   #touch(studyId: string, now: number): void {

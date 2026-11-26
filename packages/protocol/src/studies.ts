@@ -84,6 +84,9 @@ export interface StudyView {
   readonly chapters: readonly StudyChapterRef[];
   /** The viewer is the author and may edit it. */
   readonly mine: boolean;
+  readonly likes: number;
+  /** The viewer, signed in, likes it. */
+  readonly liked: boolean;
 }
 
 export interface StudyListItem {
@@ -94,12 +97,23 @@ export interface StudyListItem {
   readonly visibility: StudyVisibility;
   readonly hidden: boolean;
   readonly chapters: number;
+  readonly likes: number;
   readonly updatedAt: number;
 }
 
 export interface StudyList {
   readonly studies: readonly StudyListItem[];
   readonly more: boolean;
+}
+
+/** How the public studies are listed: latest changed first, or most liked first. */
+export const STUDY_SORTS = ['updated', 'liked'] as const;
+export type StudySort = (typeof STUDY_SORTS)[number];
+
+/** What liking or unliking a study answers: how many like it now, and whether the viewer does. */
+export interface StudyLikes {
+  readonly likes: number;
+  readonly liked: boolean;
 }
 
 export const emptyRoot = (): StudyRoot => ({ comment: '', shapes: [], children: [] });

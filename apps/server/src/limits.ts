@@ -17,7 +17,7 @@ export const createLimits = (now: () => number) => ({
   reportLimiter: new RateLimiter(10, 60 * 60_000, now),
   /** Discord sign-ins and checks per player and minute: each one calls Discord. */
   discordLimiter: new RateLimiter(10, 60_000, now),
-  /** Study writes per author and minute: the editor saves on its own after each change, so this is generous. */
+  /** Study writes and likes per player and minute: the editor saves on its own after each change, so this is generous. */
   studyLimiter: new RateLimiter(120, 60_000, now),
   /** Game searches and insights per session and minute: each one may read a large part of the games table. */
   searchLimiter: new RateLimiter(30, 60_000, now),

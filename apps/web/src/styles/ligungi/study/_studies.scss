@@ -81,6 +81,16 @@
   color: $c-bad;
 }
 
+.ligungi-studies__sort {
+  width: fit-content;
+  margin-bottom: 1rem;
+}
+
+.ligungi-studies__likes::before {
+  margin-inline-end: 0.3em;
+  color: $c-bad;
+}
+
 .ligungi-study__title {
   margin: 0;
   color: $c-font-clear;
@@ -98,6 +108,21 @@
   color: $c-font;
   font-size: 0.92em;
   overflow-wrap: anywhere;
+}
+
+// The heart turns red once the viewer likes the study; for a guest it is a link to sign in, in the dim text color.
+.ligungi-study__like {
+  &[aria-pressed='true']::before {
+    color: $c-bad;
+  }
+
+  &:is(a) {
+    color: $c-font-dim;
+
+    &::before {
+      margin-inline-end: 0.4em;
+    }
+  }
 }
 
 .ligungi-study__chapters {

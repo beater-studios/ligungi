@@ -24,6 +24,7 @@ export const accountExport = (deps: AppDeps, user: UserRecord, sessionId: string
     })(),
     racer: racers.allResults(userId).map(({ score, at }) => ({ score, at: iso(at) })),
     bookmarks: games.bookmarks(userId).map((bookmark) => ({ game: bookmark.game.id, note: bookmark.note, bookmarkedAt: iso(bookmark.bookmarkedAt) })),
+    likedStudies: studies.likesBy(userId).map(({ studyId, at }) => ({ study: studyId, likedAt: iso(at) })),
     studies: studies.byOwner(userId).map((study) => ({
       id: study.id,
       title: study.title,

@@ -1,4 +1,5 @@
 import { ActivityHubView } from '../../discord/Hub.tsx';
+import { icons } from '../../icons.ts';
 import { Example, Section } from './parts.tsx';
 
 export const PageBlocksSection = () => (
@@ -35,6 +36,19 @@ export const PageBlocksSection = () => (
             Advanced
           </a>
         </nav>
+      </div>
+    </Example>
+    <Example label="Like toggle (study/StudyLike.tsx, .ligungi-study__like): a heart that turns red once pressed (aria-pressed), the count beside it, and for a guest a link to sign in">
+      <div class="ligungi-ds__row">
+        <button type="button" class="button button-empty text ligungi-study__like" aria-pressed="false" aria-label="Like this study (3 likes)" data-icon={icons.HeartOutline}>
+          3
+        </button>
+        <button type="button" class="button button-empty text ligungi-study__like" aria-pressed="true" aria-label="Like this study (4 likes)" data-icon={icons.Heart}>
+          4
+        </button>
+        <a class="ligungi-study__like" href="#pages" data-icon={icons.HeartOutline}>
+          3 likes
+        </a>
       </div>
     </Example>
     <Example label="Results table (.ligungi-search-table): a header row, then one link per row, every other one shaded; on phones the columns fold into two lines (game search)">

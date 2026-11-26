@@ -23,6 +23,8 @@ export const icons = {
   Download: '',
   Eye: '',
   FlagOutline: '',
+  Heart: '\ue068',
+  HeartOutline: '\ue064',
   Gear: '',
   Group: '',
   InfoCircle: '',

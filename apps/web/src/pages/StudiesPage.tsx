@@ -1,4 +1,4 @@
-import { STUDY_QUERY_MAX, type StudyList, type StudyListItem } from '@ligungi/protocol';
+import { STUDY_QUERY_MAX, type StudyList, type StudyListItem, type StudySort } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../core/api.ts';
 import { NewStudyModal } from '../study/StudyForms.tsx';
@@ -12,8 +12,8 @@ import { useStore } from '../core/store.ts';
 const SEARCH_DELAY_MS = 300;
 
 /**
- * The studies: the public ones, latest changed first, and with an account your own whatever their visibility. Cards
- * show text only, never a board, so a drawing is seen only inside the study.
+ * The studies: the public ones, latest changed or most liked first, and with an account the ones you like and your own
+ * whatever their visibility. Cards show text only, never a board, so a drawing is seen only inside the study.
  */
 export const StudiesPage = () => {
   const t = useT();
@@ -21,6 +21,8 @@ export const StudiesPage = () => {
   const { user } = useStore(session);
   const params = new URLSearchParams(search);
   const mine = params.get('list') === 'mine' && user !== null;
+  const liked = params.get('list') === 'liked' && user !== null;
+  const sort: StudySort = !mine && !liked && params.get('sort') === 'liked' ? 'liked' : 'updated';
   const [query, setQuery] = useState('');
   const [list, setList] = useState<StudyListItem[] | null>(null);
   const [more, setMore] = useState(false);
@@ -29,7 +31,11 @@ export const StudiesPage = () => {
   const [creating, setCreating] = useState(params.has('new'));
 
   const load = (pageToLoad: number, append: boolean) => {
-    const q = new URLSearchParams({ q: query.trim(), page: String(pageToLoad), ...(mine ? { list: 'mine' } : {}) });
+    const q = new URLSearchParams({
+      q: query.trim(),
+      page: String(pageToLoad),
+      ...(mine ? { list: 'mine' } : liked ? { list: 'liked' } : sort === 'liked' ? { sort } : {}),
+    });
     api
       .get<StudyList>(`/api/studies?${q.toString()}`)
       .then((result) => {
@@ -44,7 +50,7 @@ export const StudiesPage = () => {
   useEffect(() => {
     const timer = window.setTimeout(() => load(1, false), query ? SEARCH_DELAY_MS : 0);
     return () => window.clearTimeout(timer);
-  }, [query, mine]);
+  }, [query, mine, liked, sort]);
 
   return (
     <main class="ligungi-page ligungi-studies">
@@ -53,8 +59,11 @@ export const StudiesPage = () => {
           <h1>{t.study.title}</h1>
           {user && (
             <nav class="ligungi-segmented ligungi-studies__tabs" aria-label={t.study.title}>
-              <a href="/study" aria-current={mine ? undefined : 'page'} class={mine ? '' : 'active'}>
+              <a href="/study" aria-current={mine || liked ? undefined : 'page'} class={mine || liked ? '' : 'active'}>
                 {t.study.publicTab}
+              </a>
+              <a href="/study?list=liked" aria-current={liked ? 'page' : undefined} class={liked ? 'active' : ''}>
+                {t.study.likedTab}
               </a>
               <a href="/study?list=mine" aria-current={mine ? 'page' : undefined} class={mine ? 'active' : ''}>
                 {t.study.mineTab}
@@ -81,8 +90,18 @@ export const StudiesPage = () => {
           )}
         </div>
         <p class="ligungi-studies__intro">{t.study.intro}</p>
+        {!mine && !liked && (
+          <nav class="ligungi-segmented ligungi-studies__sort" aria-label={t.study.sort}>
+            <a href="/study" aria-current={sort === 'updated' ? 'page' : undefined} class={sort === 'updated' ? 'active' : ''}>
+              {t.study.sortUpdated}
+            </a>
+            <a href="/study?sort=liked" aria-current={sort === 'liked' ? 'page' : undefined} class={sort === 'liked' ? 'active' : ''}>
+              {t.study.sortLiked}
+            </a>
+          </nav>
+        )}
         {error && <p class="ligungi-error">{error}</p>}
-        {list && list.length === 0 && <p class="ligungi-empty">{query ? t.study.noMatch : mine ? t.study.noneMine : t.study.none}</p>}
+        {list && list.length === 0 && <p class="ligungi-empty">{query ? t.study.noMatch : mine ? t.study.noneMine : liked ? t.study.noneLiked : t.study.none}</p>}
         {list && list.length > 0 && (
           <ul class="ligungi-studies__list">
             {list.map((study) => (
@@ -92,6 +111,11 @@ export const StudiesPage = () => {
                   {study.description && <span class="ligungi-studies__description">{study.description}</span>}
                   <span class="ligungi-studies__meta">
                     <span>{t.study.chapterCount(study.chapters)}</span>
+                    {study.likes > 0 && (
+                      <span class="ligungi-studies__likes" data-icon={icons.Heart}>
+                        {t.study.likeCount(study.likes)}
+                      </span>
+                    )}
                     {!mine && <span>{t.study.by(study.owner.name)}</span>}
                     {mine && <span>{t.study.visibilities[study.visibility]}</span>}
                     {study.hidden && <span class="ligungi-studies__hidden">{t.study.hiddenTag}</span>}
@@ -114,7 +138,7 @@ export const StudiesPage = () => {
         <NewStudyModal
           onClose={() => {
             setCreating(false);
-            if (new URLSearchParams(search).has('new')) navigate(mine ? '/study?list=mine' : '/study', true);
+            if (new URLSearchParams(search).has('new')) navigate(mine ? '/study?list=mine' : liked ? '/study?list=liked' : '/study', true);
           }}
         />
       )}

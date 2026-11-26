@@ -5,6 +5,7 @@ import {
   type ModLogEntry,
   type ReportView,
   type StudyChapter,
+  type StudyLikes,
   type StudyList,
   type StudyNode,
   type StudyView,
@@ -244,5 +245,100 @@ describe('studies', () => {
     expect((await author.request('POST', '/api/account/delete', { password: 'segredo123' })).status).toBe(200);
     const left = server!.app.db.prepare('select (select count(*) from studies) as studies, (select count(*) from study_chapters) as chapters').get();
     expect(left).toEqual({ studies: 0, chapters: 0 });
+  });
+});
+
+describe('study likes', () => {
+  const like = (c: Client, id: string) => c.request<StudyLikes>('POST', `/api/studies/${id}/like`);
+  const unlike = (c: Client, id: string) => c.request<StudyLikes>('DELETE', `/api/studies/${id}/like`);
+
+  it('counts one like per player, takes it back, and asks for an account', async () => {
+    await start();
+    now -= 8 * DAY_MS;
+    const author = await signup('Kite');
+    const palm = await signup('Palm');
+    now += 8 * DAY_MS;
+    const study = await createStudy(author, 'public');
+    expect(study).toMatchObject({ likes: 0, liked: false });
+
+    expect((await like(palm, study.id)).data).toEqual({ likes: 1, liked: true });
+    expect((await like(palm, study.id)).data).toEqual({ likes: 1, liked: true });
+    expect((await like(author, study.id)).data).toEqual({ likes: 2, liked: true });
+    expect((await palm.request<StudyView>('GET', `/api/studies/${study.id}`)).data).toMatchObject({ likes: 2, liked: true });
+    expect((await unlike(palm, study.id)).data).toEqual({ likes: 1, liked: false });
+    expect((await palm.request<StudyView>('GET', `/api/studies/${study.id}`)).data).toMatchObject({ likes: 1, liked: false });
+
+    const anonymous = new Client(server!.base);
+    expect((await anonymous.request<StudyView>('GET', `/api/studies/${study.id}`)).data).toMatchObject({ likes: 1, liked: false });
+    expect((await like(anonymous, study.id)).status).toBe(401);
+    expect((await anonymous.request('GET', '/api/studies?list=liked')).status).toBe(401);
+  });
+
+  it('lists the most liked first and keeps each player a list of the studies they like', async () => {
+    await start();
+    now -= 8 * DAY_MS;
+    const author = await signup('Kite');
+    const fans = [await signup('Palm'), await signup('Ikalgo'), await signup('Meleoron')];
+    now += 8 * DAY_MS;
+    const quiet = await createStudy(author, 'public', 'Pouco visto');
+    const loved = await createStudy(author, 'public', 'Muito curtido');
+    const liked = await createStudy(author, 'public', 'Curtido');
+    now += 1000;
+    const latest = await createStudy(author, 'public', 'Mais novo');
+    for (const fan of fans) await like(fan, loved.id);
+    await like(fans[0]!, liked.id);
+
+    const titles = async (query: string, c: Client = author) => (await c.request<StudyList>('GET', `/api/studies${query}`)).data.studies.map((s) => s.title);
+    expect(await titles('')).toEqual(['Mais novo', 'Curtido', 'Muito curtido', 'Pouco visto']);
+    expect(await titles('?sort=liked')).toEqual(['Muito curtido', 'Curtido', 'Mais novo', 'Pouco visto']);
+    expect(await titles('?sort=nonsense')).toEqual(await titles(''));
+    expect((await author.request<StudyList>('GET', '/api/studies?sort=liked')).data.studies[0]).toMatchObject({ title: 'Muito curtido', likes: 3 });
+
+    expect(await titles('?list=liked', fans[0])).toEqual(['Curtido', 'Muito curtido']);
+    expect(await titles('?list=liked&q=muito', fans[0])).toEqual(['Muito curtido']);
+    expect(await titles('?list=liked', fans[1])).toEqual(['Muito curtido']);
+    expect(quiet.likes + latest.likes).toBe(0);
+  });
+
+  it('cannot like a study the player may not open, and leaves hidden ones out of the lists', async () => {
+    await start();
+    now -= 8 * DAY_MS;
+    const author = await signup('Kite');
+    const palm = await signup('Palm');
+    now += 8 * DAY_MS;
+    const draft = await createStudy(author, 'private', 'Rascunho');
+    expect((await like(palm, draft.id)).data).toMatchObject({ code: 'studyNotFound' });
+    const unlisted = await createStudy(author, 'unlisted', 'Pelo link');
+    expect((await like(palm, unlisted.id)).data).toEqual({ likes: 1, liked: true });
+
+    const study = await createStudy(author, 'public', 'Polêmico');
+    await like(palm, study.id);
+    server!.app.db.prepare('update studies set hidden = 1 where id = ?').run(study.id);
+    expect((await palm.request<StudyList>('GET', '/api/studies?sort=liked')).data.studies).toEqual([]);
+    expect((await palm.request<StudyList>('GET', '/api/studies?list=liked')).data.studies.map((s) => s.title)).toEqual(['Pelo link']);
+    expect((await like(palm, study.id)).data).toMatchObject({ code: 'studyNotFound' });
+  });
+
+  it('exports the likes with the account and forgets them with the account or the study', async () => {
+    await start();
+    now -= 8 * DAY_MS;
+    const author = await signup('Kite');
+    const palm = await signup('Palm');
+    const knuckle = await signup('Knuckle');
+    now += 8 * DAY_MS;
+    const study = await createStudy(author, 'public');
+    const other = await createStudy(author, 'public', 'Outro');
+    await like(palm, study.id);
+    await like(knuckle, study.id);
+    await like(knuckle, other.id);
+
+    const data = (await palm.request<{ likedStudies: Array<{ study: string; likedAt: string }> }>('GET', '/api/account/export')).data;
+    expect(data.likedStudies).toEqual([{ study: study.id, likedAt: new Date(now).toISOString() }]);
+
+    expect((await palm.request('POST', '/api/account/delete', { password: 'segredo123' })).status).toBe(200);
+    expect((await author.request<StudyView>('GET', `/api/studies/${study.id}`)).data.likes).toBe(1);
+    expect((await author.request('DELETE', `/api/studies/${other.id}`)).status).toBe(200);
+    const left = server!.app.db.prepare('select count(*) as n from study_likes where study_id = ?').get(other.id) as { n: number };
+    expect(left.n).toBe(0);
   });
 });

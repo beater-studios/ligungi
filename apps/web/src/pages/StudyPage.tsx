@@ -18,6 +18,7 @@ import { BoardView } from '../components/BoardView.tsx';
 import { DraftPanel, TowerPanel, TowerStrip } from '../components/Panels.tsx';
 import { ReportButton } from '../mod/ReportButton.tsx';
 import { ChapterSettingsModal, NewChapterModal, StudySettingsModal } from '../study/StudyForms.tsx';
+import { StudyLike } from '../study/StudyLike.tsx';
 import { StudyMoves } from '../study/StudyMoves.tsx';
 import { Field, Toggle } from '../components/ui.tsx';
 import { describeMove, describeShapes, isWord, normalize, parseDrawing, type Speaker } from '../blind/blind.ts';
@@ -223,6 +224,9 @@ export const StudyPage = ({ id }: { id: string }) => {
             </section>
             {study.hidden && <section class="ligungi-error">{t.study.hiddenNotice}</section>}
             {study.description && <section class="ligungi-study__description">{study.description}</section>}
+            <section class="ligungi-study__likes">
+              <StudyLike study={study} onChange={(likes) => setStudy({ ...study, ...likes })} />
+            </section>
             {editable && (
               <section>
                 <button type="button" class="button button-empty text" data-icon={icons.Gear} onClick={() => setModal('settings')}>

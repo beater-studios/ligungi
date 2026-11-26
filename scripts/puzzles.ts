@@ -6,7 +6,7 @@
  * - Material: one move wins material, clearly better than every other move at two search depths, and the line goes on
  *   while the solver keeps a single good move, until the material is won.
  *
- * Puzzles already in packages/content/src/puzzle-data.ts keep their ids, so running it again only adds new ones. The
+ * Puzzles already in packages/@ligungi/content/src/puzzle-data.ts keep their ids, so running it again only adds new ones. The
  * file is written every few games, so a long run can be stopped without losing what it found.
  *
  *   node scripts/puzzles.ts [--games 100] [--seed 1] [--workers 4]
@@ -16,12 +16,12 @@ import { writeFileSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
 import { parseArgs } from 'node:util';
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
-import { Searcher, chooseMove, evaluateForSideToMove, longestDefense, mateDistance, mateSolutions } from '../packages/bot/src/index.ts';
-import { VALUE } from '../packages/bot/src/search.ts';
-import { Game, MODES, applyMove, initialPosition, isMarshalAttacked, moveToString, opposite, parseFen, toFen } from '../packages/engine/src/index.ts';
-import type { Color, Position } from '../packages/engine/src/index.ts';
-import { PUZZLES } from '../packages/content/src/puzzle-data.ts';
-import type { Puzzle } from '../packages/content/src/puzzles.ts';
+import { Searcher, chooseMove, evaluateForSideToMove, longestDefense, mateDistance, mateSolutions } from '../packages/@ligungi/bot/src/index.ts';
+import { VALUE } from '../packages/@ligungi/bot/src/search.ts';
+import { Game, MODES, applyMove, initialPosition, isMarshalAttacked, moveToString, opposite, parseFen, toFen } from '../packages/@ligungi/engine/src/index.ts';
+import type { Color, Position } from '../packages/@ligungi/engine/src/index.ts';
+import { PUZZLES } from '../packages/@ligungi/content/src/puzzle-data.ts';
+import type { Puzzle } from '../packages/@ligungi/content/src/puzzles.ts';
 
 const MAX_MATE = 3;
 const MAX_PLIES = 400;
@@ -31,7 +31,7 @@ const GAP = 250;
 const MAX_SOLVER_MOVES = 3;
 /** Plies skipped after a material puzzle, so one game does not give the same tactic twice. */
 const MATERIAL_SPACING = 6;
-const OUTPUT = new URL('../packages/content/src/puzzle-data.ts', import.meta.url);
+const OUTPUT = new URL('../packages/@ligungi/content/src/puzzle-data.ts', import.meta.url);
 const WRITE_EVERY = 5;
 
 type Found = Omit<Puzzle, 'id'>;

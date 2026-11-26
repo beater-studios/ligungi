@@ -8,9 +8,9 @@
 import { availableParallelism } from 'node:os';
 import { parseArgs } from 'node:util';
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
-import { chooseMove, type BotLevel } from '../packages/bot/src/index.ts';
-import { Game, parseFen, repetitionKey } from '../packages/engine/src/index.ts';
-import { PRACTICE_LEVEL, PRACTICE_POSITIONS, practiceResult } from '../packages/content/src/practice.ts';
+import { chooseMove, type BotLevel } from '../packages/@ligungi/bot/src/index.ts';
+import { Game, parseFen, repetitionKey } from '../packages/@ligungi/engine/src/index.ts';
+import { PRACTICE_LEVEL, PRACTICE_POSITIONS, practiceResult } from '../packages/@ligungi/content/src/practice.ts';
 
 interface Job {
   readonly id: string;

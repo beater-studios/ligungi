@@ -18,15 +18,15 @@ reviews:
         Follow AGENTS.md and CONTRIBUTING.md. Code, identifiers, logs and repository docs are in English; only
         user-facing text is translated. Comments only for a why the code does not make clear. Markdown has no hard
         wraps and no em or en dashes.
-    - path: 'packages/engine/**'
+    - path: 'packages/@ligungi/engine/**'
       instructions: |
         The rules engine follows docs/rules.md, which follows the official 2022 rulebook, then the official
-        Universal Music FAQ. Flag any rule change without a cited source or without tests in packages/engine/test.
+        Universal Music FAQ. Flag any rule change without a cited source or without tests in packages/@ligungi/engine/test.
         Never suggest pre-2022 fan rules, gungi.io or Komugi behavior as a source.
     - path: 'apps/server/**'
       instructions: |
         Node runs the TypeScript directly, so only erasable syntax (no enum, namespace or parameter properties).
-        SQL always uses bound parameters. Errors are codes from packages/protocol/src/errors.ts, each with one status in ERROR_STATUS (apps/server/src/errors.ts). Schema changes are
+        SQL always uses bound parameters. Errors are codes from packages/@ligungi/protocol/src/errors.ts, each with one status in ERROR_STATUS (apps/server/src/errors.ts). Schema changes are
         new entries appended to MIGRATIONS in db.ts, never edits of an existing one. Do not weaken the checks in
         app.ts (JSON content type and same origin for writes, WebSocket origin, CSP) nor the rate limits (limits.ts) applied
         in routes/.

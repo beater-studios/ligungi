@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-25
+
 ### Added
 
 - Studies can be liked: a heart on each study shows how many like it, the list can show the most liked first, and a new tab keeps the studies you like.
@@ -395,7 +397,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.9.11...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/beater-studios/ligungi/compare/v0.9.11...v0.10.0
 [0.9.11]: https://github.com/beater-studios/ligungi/compare/v0.9.10...v0.9.11
 [0.9.10]: https://github.com/beater-studios/ligungi/compare/v0.9.9...v0.9.10
 [0.9.9]: https://github.com/beater-studios/ligungi/compare/v0.9.8...v0.9.9

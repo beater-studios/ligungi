@@ -76,6 +76,8 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('message', (event) => {
+  // Only the site's own pages talk to the worker; the browser already keeps it that way, this makes it explicit.
+  if (event.origin !== self.location.origin) return;
   if (event.data?.t === 'keep-offline') event.waitUntil(keepApp().catch(() => undefined));
 });
 

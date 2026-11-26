@@ -1,6 +1,6 @@
 # API
 
-The types of every response and message are in [packages/protocol/src](../packages/protocol/src), one file per area (games, lobby, players, account, moderation, socket messages, studies, puzzles and so on), all re-exported by `index.ts`.
+The types of every response and message are in [packages/@ligungi/protocol/src](../packages/@ligungi/protocol/src), one file per area (games, lobby, players, account, moderation, socket messages, studies, puzzles and so on), all re-exported by `index.ts`.
 
 The session is a `sid` cookie, created by `GET /api/me` or by the first write. Login, signup and logout replace it; anonymous games, seeks and challenges move to the new session, and WebSocket connections opened with the old one are closed with code `4001` so the client reconnects. Writes (`POST`, `DELETE`) need `Content-Type: application/json` (send `{}` even with an empty body) and cannot come from another origin.
 
@@ -8,7 +8,7 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 
 - Moves: `e3e4` (move), `e3e4=` (stack), `e3e4x` (capture), `Y*e3` (drop from the hand, piece letter in uppercase), `^` plus levels for betrayal (`e3e4=^12`), `done` to declare done in the draft. Squares `a1` to `i9`, with `a1` in White's left corner.
 - Piece letters: M Marshal, G General, L Lieutenant General, J Major General, S Samurai, N Lancer, R Knight, Y Ninja, F Fortress, P Soldier, C Cannon, A Archer, K Musketeer, T Tactician. Uppercase for White, lowercase for Black.
-- FEN: `<board> <turn> <hands> <mode> <phase> <first>`, described in `packages/engine/src/fen.ts`. A `+` at the end of the phase (`d+`, `p+`) means free draft.
+- FEN: `<board> <turn> <hands> <mode> <phase> <first>`, described in `packages/@ligungi/engine/src/fen.ts`. A `+` at the end of the phase (`d+`, `p+`) means free draft.
 
 ## HTTP
 
@@ -134,7 +134,7 @@ The session is a `sid` cookie, created by `GET /api/me` or by the first write. L
 
 Correspondence games: `daysPerMove` (1, 3, 7 or 14; omitted or `null` for a live game) with `timeControl: null`. Each player has that many days for every move, from the moment the opponent moved; the deadline is stored as a date, so a server restart does not extend it. Running out of time loses, except before both players have moved, when the game is aborted. Leaving is normal, so the opponent cannot claim victory, and there is no extra time button. They can be rated (same rating as live games of the mode), need an account to create and to accept (`correspondenceNeedsAccount`), and are created by challenge (from a profile or by link) or by seek in the lobby. A challenge to a player is not withdrawn when its sender leaves. Correspondence challenges and seeks are stored in the database (the `challenges` and `seeks` tables), so a restart keeps them; the account data export lists them, and deleting the account deletes them. `GameView` and `GameSummary` carry `daysPerMove` and `deadlineIn` (milliseconds the player to move had left when sent, `null` once the game is over); `GameSummary` also carries `turn`.
 
-Errors respond with an HTTP status and `{ error, code }`: `code` is a stable code (listed in `packages/protocol/src/errors.ts`) for the client to translate, and `error` is a Portuguese fallback message. Each code always comes with the same status (`ERROR_STATUS` in `apps/server/src/errors.ts`).
+Errors respond with an HTTP status and `{ error, code }`: `code` is a stable code (listed in `packages/@ligungi/protocol/src/errors.ts`) for the client to translate, and `error` is a Portuguese fallback message. Each code always comes with the same status (`ERROR_STATUS` in `apps/server/src/errors.ts`).
 
 ## WebSocket `/ws`
 

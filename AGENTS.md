@@ -8,11 +8,11 @@ ligungi is a lichess-style site to play Gungi (the HUNTER×HUNTER board game) wi
 
 | Path | What it is |
 |---|---|
-| `packages/engine` | Rules engine, no dependencies. Shared by browser and server. |
-| `packages/board` | Framework-free DOM board (like chessground). |
-| `packages/bot` | Computer opponent, runs in a Web Worker; its mate search also checks Puzzle Racer moves on the server. |
-| `packages/content` | Lessons, practice positions and puzzles, with the rules each one is judged by. |
-| `packages/protocol` | Types, validation and error codes shared by server and site. |
+| `packages/@ligungi/engine` | Rules engine, no dependencies. Shared by browser and server. |
+| `packages/@ligungi/board` | Framework-free DOM board (like chessground). |
+| `packages/@ligungi/bot` | Computer opponent, runs in a Web Worker; its mate search also checks Puzzle Racer moves on the server. |
+| `packages/@ligungi/content` | Lessons, practice positions and puzzles, with the rules each one is judged by. |
+| `packages/@ligungi/protocol` | Types, validation and error codes shared by server and site. |
 | `apps/server` | Node 24 server: `node:http`, `ws`, `node:sqlite`. |
 | `apps/web` | Preact site with lila's (lichess) markup and styles. |
 
@@ -38,7 +38,7 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 - `docs/rules.md` is the source of truth. If code and spec disagree, one of them is wrong: fix it, do not paper over it.
 - Source priority: official rulebook > official Universal Music FAQ > everything else. Never use pre-2022 fan rules, gungi.io or Komugi behavior as a source when they differ from the rulebook.
 - Do not change a rule without a cited source. Record any interpretation in section 11 of `docs/rules.md`.
-- Every rule change needs tests in `packages/engine/test`, ideally reproducing a rulebook or FAQ example.
+- Every rule change needs tests in `packages/@ligungi/engine/test`, ideally reproducing a rulebook or FAQ example.
 - Settled decisions (do not revisit without the maintainer): moves that expose your own Marshal are not offered and having no safe move is a loss; betrayal is all or nothing and also works on an own-topped tower with enemy pieces below; White always moves first (the rulebook draws who starts, but every mode is symmetric, so we follow the chess convention; see section 11 of `docs/rules.md`); the draft follows the rulebook (second player's "done" ends it), with "free draft" as a casual-only option.
 
 ## Conventions
@@ -59,7 +59,7 @@ A change is not done until `npm run typecheck`, `npm test` and `npm run build` p
 
 - Node runs the TypeScript source directly (type stripping), so use only erasable syntax: no `enum`, `namespace` or constructor parameter properties.
 - Runtime dependencies stay minimal (only `ws`). Do not add one without asking.
-- Errors are stable codes from `packages/protocol/src/errors.ts` (`HttpError(code)`, WebSocket `{ t: 'error', code, message }`). Each code has one HTTP status, in `ERROR_STATUS` (`apps/server/src/errors.ts`). Add new codes there and their English message in `apps/web/src/i18n/locales/en.json` (`errors`).
+- Errors are stable codes from `packages/@ligungi/protocol/src/errors.ts` (`HttpError(code)`, WebSocket `{ t: 'error', code, message }`). Each code has one HTTP status, in `ERROR_STATUS` (`apps/server/src/errors.ts`). Add new codes there and their English message in `apps/web/src/i18n/locales/en.json` (`errors`).
 - SQL always uses bound parameters. Never interpolate user input into SQL.
 - Schema changes are new entries appended to `MIGRATIONS` in `apps/server/src/db.ts`. Never edit an existing migration.
 - Do not weaken the security checks: JSON content type and same-origin for writes, origin check on WebSocket and CSP in `app.ts`, and the rate limits (defined in `limits.ts`, applied in `routes/`).

@@ -36,7 +36,7 @@ npm run build
 - Sources, in order of authority: the official rulebook, then the official Universal Music FAQ, then everything else (other engines, sites, fan rulesets). Pre-2022 fan rules are not used.
 - A rule change must cite its source (rulebook page or FAQ question) in the issue or pull request.
 - When a rule is ambiguous and we pick an interpretation, record it in section 11 of [docs/rules.md](docs/rules.md).
-- Every rule change needs engine tests in `packages/engine/test`, ideally reproducing the rulebook or FAQ example.
+- Every rule change needs engine tests in `packages/@ligungi/engine/test`, ideally reproducing the rulebook or FAQ example.
 
 ## Code conventions
 
@@ -46,7 +46,7 @@ npm run build
 - **Dependencies:** [.npmrc](.npmrc) pins exact versions, only installs releases at least 7 days old, never runs dependency install scripts and only accepts registry packages. Do not bypass these settings. A new dependency must work without install scripts and needs a reason in the pull request.
 - **Server dependencies:** the server has a single runtime dependency (`ws`). Discuss in an issue before adding another one, since each dependency is more surface to keep secure.
 - **Text shown to users** goes through the locale files in `apps/web/src/i18n/locales/`, one JSON file per language in [ICU MessageFormat](https://unicode-org.github.io/icu/userguide/format_parse/messages/). `en.json` is the source: a new text is a new key there, and a text that takes arguments (`{name}`, a plural, a select or a `<tag>` around a link) is also declared in `apps/web/src/i18n/schema.tsx`, with its arguments in the order the code passes them. Add the Portuguese and Spanish texts too when you can; otherwise leave them to the translators, and the site shows English until then.
-- **Server errors** are stable codes in `packages/protocol/src/errors.ts`, translated by the site. Never send free-form error text that the client has to display.
+- **Server errors** are stable codes in `packages/@ligungi/protocol/src/errors.ts`, translated by the site. Never send free-form error text that the client has to display.
 - **UI components:** forms use the shared components in `apps/web/src/components/ui.tsx`. Run the site and open `/design` to see every component, color and pattern before building a screen.
 - **Look and feel:** the site reuses lichess's styles. The SCSS in `apps/web/vendor/lila` is copied unmodified from lila (see its `NOTICE.md`). Our own styles live in the partials under `apps/web/src/styles/ligungi/`, one per area, imported in order by `apps/web/src/styles/ligungi.scss`.
 - **Assets:** never add HUNTER×HUNTER characters, artwork or logos, nor the lichess name, logo or favicon. Any new asset (image, font, sound) must have a license compatible with the AGPL.

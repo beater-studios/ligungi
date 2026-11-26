@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-26
+
 ### Added
 
 - Studies: authors pick up to three topics (game reviews, drafts and openings, strategy, tactics, mates and endgames, rules and basics), and the public list filters by topic, by the mode of the chapters and by author. Each card shows its topics and modes, and a player's profile lists their public studies.
@@ -421,7 +423,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/beater-studios/ligungi/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/beater-studios/ligungi/compare/v0.9.11...v0.10.0
 [0.9.11]: https://github.com/beater-studios/ligungi/compare/v0.9.10...v0.9.11
 [0.9.10]: https://github.com/beater-studios/ligungi/compare/v0.9.9...v0.9.10

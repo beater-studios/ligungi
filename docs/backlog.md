@@ -67,3 +67,9 @@ Size: **S** (hours to a day), **M** (a few days), **L** (a week or more), **XL**
 | Public API with personal tokens (and OAuth for third-party apps) | Lets the community build tools, bots and integrations | L | Medium | lichess |
 | Donations or patrons | Funding, if wanted | S | Low | lichess, lidraughts, lishogi |
 | Web push notifications with the site closed (correspondence turns, challenges) | Correspondence games last days, and today the turn notice (in the bell or as a browser notification) needs the site open in some tab. Needs a service worker, VAPID keys, a table of subscriptions and the server sending the messages (with `node:crypto`, or the `web-push` package, which would be a new dependency) | M | Medium | lichess |
+
+## Code
+
+| Item | Why | Size | Priority | Seen on |
+|---|---|---|---|---|
+| Split `packages/board/src/board.ts` (775 lines, one class doing state, input, interaction rules, drawing and animation): the HTML of pieces, towers and square titles into `render.ts`, the SVG of arrows and painted squares into `shapes.ts`, leaving the class with its state, input and coordination | Easier to find and change each part. Not a cut and paste: the class keeps its state in private fields, so each part that moves becomes a function taking what it read from `this`. The board tests cover behavior but not looks (arrows, the 3D view, animations), so it needs a check in the browser in both themes and orientations. Best done together with the next change to the board, which opens and checks it anyway | M | Low | internal |

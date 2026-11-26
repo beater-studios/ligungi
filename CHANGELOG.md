@@ -16,6 +16,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Fixed
 
+- The zen mode button no longer sits outside the bar of buttons over the move list: the seven buttons now share the row.
 - A practice result or a Puzzle Streak or Storm run that cannot reach your account (the connection dropped) is no longer lost: it waits in the browser and moves to your account on the next visit, as lesson stars already did.
 
 ## [0.9.11] - 2026-11-25

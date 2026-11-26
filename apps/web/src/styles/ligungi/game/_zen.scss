@@ -35,3 +35,10 @@ body.ligungi-zen {
     opacity: 1;
   }
 }
+
+// lila sizes the buttons over the move list for six (a sixth each); the zen mode button makes a seventh, so the buttons
+// share the row instead, or the last one would fall outside it.
+.rmoves .rbuttons .fbt {
+  flex: 1 1 0;
+  min-width: 0;
+}

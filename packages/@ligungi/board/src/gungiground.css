@@ -665,6 +665,63 @@
   z-index: 3;
 }
 
+/*
+ * The pieces under the top one (`towerContents`): small discs stacked in the bottom right corner, the base lowest and
+ * each tier above it in front, in place of the height. The square's `title` and the tower panel still name them.
+ */
+.gg-chip {
+  position: absolute;
+  right: 3%;
+  bottom: calc(3% + var(--chip) * 15%);
+  z-index: calc(3 + var(--chip));
+  width: 28%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  font-family: var(--gg-font);
+  font-weight: 700;
+  font-size: calc(100cqw / 9 * 0.17);
+  line-height: 1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.gg-chip.gg-white {
+  background: var(--gg-white-face);
+  color: var(--gg-white-ink);
+  border: 1px solid var(--gg-white-border);
+}
+
+.gg-chip.gg-black {
+  background: var(--gg-black-face);
+  color: var(--gg-black-ink);
+  border: 1px solid var(--gg-black-border);
+}
+
+.gg-chip .gg-letters {
+  font-size: 0.72em;
+  letter-spacing: -0.04em;
+}
+
+.gg-chip .gg-icon {
+  width: 86%;
+  height: 86%;
+}
+
+.gg-contents ~ .gg-height {
+  display: none;
+}
+
+/* Hidden pieces hide what is under the top too: the height comes back instead. */
+.gg-hidden-pieces .gg-board .gg-contents {
+  display: none;
+}
+
+.gg-hidden-pieces .gg-board .gg-contents ~ .gg-height {
+  display: block;
+}
+
 .gg-drag-origin .gg-piece.gg-top {
   opacity: 0.3;
 }

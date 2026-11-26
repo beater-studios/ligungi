@@ -10,6 +10,10 @@ Sí. Seguimos el libro de reglas de 2022 y las preguntas frecuentes oficiales de
 
 Es gratis y sin anuncios. Puedes jugar sin cuenta; con una juegas partidas puntuables, entras en la clasificación, sigues a tus amigos y guardas el historial en tu perfil.
 
+## ¿Hay app?
+
+ligungi funciona en el navegador en cualquier dispositivo, y el propio navegador también puede instalarlo como app: en el móvil, usa Añadir a la pantalla de inicio (o Instalar app); en el ordenador, el icono de instalar en la barra de direcciones. En Windows también está en la [Microsoft Store](microsoftStore). La app abre el mismo sitio, con tu cuenta, tus ajustes y tus partidas, y, una vez instalada, la computadora, las lecciones, el tablero de análisis y las reglas funcionan también sin conexión.
+
 ## ¿Se puede jugar con un lector de pantalla?
 
 Sí. Activa el modo para lectores de pantalla en Preferencias o arriba en la página de iniciar sesión. En las partidas, cada jugada se anuncia con palabras, y un campo acepta jugadas escritas (por ejemplo, 6-6 samurai) y preguntas sobre la posición, las manos, una casilla o los relojes, y hay un tablero que se recorre con las flechas. Funciona en todas las pantallas con tablero: partidas, TV, análisis, estudios, editor, lecciones, puzzles, práctica y entrenamiento de coordenadas. El tablero sigue en pantalla para quien esté ayudando.

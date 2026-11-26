@@ -20,6 +20,8 @@ export const BoardView = ({ training = false, ...props }: BoardProps & { readonl
   const last = useRef<Partial<Config>>({});
   const current = useStore(prefs);
   const { coordinates, animation, pieceStyle, notation, hidePieces, peekPieces } = current;
+  // The preference, unless the page shows the board one way on purpose (the design page).
+  const towerContents = props.towerContents ?? current.towerContents;
   const moveGuides = guidesShown(current);
   const hidden = training && hidePieces;
   // The reach of a hovered piece tells what it is, so hidden pieces show it only when peeking is allowed.
@@ -30,13 +32,13 @@ export const BoardView = ({ training = false, ...props }: BoardProps & { readonl
   const labels = useT().board;
 
   useEffect(() => {
-    board.current = Gungiground(element.current!, { ...props, pieceNames, moveGuides, pieceStyle, labels, coordinates, coordinateStyle, animation, hoverReach });
-    last.current = { ...props, pieceNames, moveGuides, pieceStyle, labels, coordinates, coordinateStyle, animation, hoverReach };
+    board.current = Gungiground(element.current!, { ...props, pieceNames, moveGuides, pieceStyle, labels, coordinates, coordinateStyle, animation, hoverReach, towerContents });
+    last.current = { ...props, pieceNames, moveGuides, pieceStyle, labels, coordinates, coordinateStyle, animation, hoverReach, towerContents };
     return () => board.current?.destroy();
   }, []);
 
   useEffect(() => {
-    const next: Partial<Config> = { ...props, pieceNames, moveGuides, pieceStyle, labels, coordinates, coordinateStyle, animation, hoverReach };
+    const next: Partial<Config> = { ...props, pieceNames, moveGuides, pieceStyle, labels, coordinates, coordinateStyle, animation, hoverReach, towerContents };
     const changed: Partial<Config> = {};
     for (const key of Object.keys(next) as Array<keyof Config>) {
       if (next[key] !== last.current[key]) (changed as Record<string, unknown>)[key] = next[key];

@@ -1301,10 +1301,11 @@
   },
   "beginner": {
     "title": "New to Gungi?",
-    "text": "Two aids to learn while you play. You can change them later in Preferences.",
+    "text": "Aids to learn while you play. You can change them later in Preferences.",
     "illustrated": "Use illustrated pieces instead of the kanji",
     "moveGuides": "Show how the pieces move",
     "hoverReach": "Show a piece's reach on hover, the opponent's included",
+    "towerContents": "Show the pieces under the top of each tower",
     "learn": "Learn the rules",
     "close": "Close"
   },
@@ -1652,6 +1653,8 @@
     "peekPiecesHelp": "Hovering a square shows its top piece and its reach, and the tower panel shows what it holds again.",
     "moveGuides": "Movement indicators",
     "moveGuidesHelp": "Marks around each piece show how it moves: a dot for each square of reach, an arrow for an unlimited line and a ring where jumping pieces land.",
+    "towerContents": "Pieces under each tower",
+    "towerContentsHelp": "Shows the pieces under the top one as a small stack in the corner of the square, the base lowest, instead of the tower's height. Hidden while the pieces are hidden for training.",
     "theme": "Theme",
     "light": "Light",
     "dark": "Dark",

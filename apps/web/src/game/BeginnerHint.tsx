@@ -15,10 +15,10 @@ const dismissed = (): boolean => {
   }
 };
 
-/** Beside the board until closed: the two learning aids, switchable in place, and a link to the rules. */
+/** Beside the board until closed: the learning aids, switchable in place, and a link to the rules. */
 export const BeginnerHint = () => {
   const t = useT();
-  const { moveGuides, hoverReach, pieceStyle } = useStore(prefs);
+  const { moveGuides, hoverReach, pieceStyle, towerContents } = useStore(prefs);
   const [hidden, setHidden] = useState(dismissed);
   if (hidden) return null;
   const close = () => {
@@ -43,6 +43,12 @@ export const BeginnerHint = () => {
         />
         <Checkbox id="beginner-guides" checked={moveGuides} onChange={(value) => updatePrefs({ moveGuides: value })} label={t.beginner.moveGuides} />
         <Checkbox id="beginner-reach" checked={hoverReach} onChange={(value) => updatePrefs({ hoverReach: value })} label={t.beginner.hoverReach} />
+        <Checkbox
+          id="beginner-tower-contents"
+          checked={towerContents}
+          onChange={(value) => updatePrefs({ towerContents: value })}
+          label={t.beginner.towerContents}
+        />
       </div>
       <a href="/learn">{t.beginner.learn}</a>
     </section>

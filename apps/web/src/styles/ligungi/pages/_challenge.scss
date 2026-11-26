@@ -102,7 +102,8 @@
   color: $c-font-dim;
 }
 
-.ligungi-challenge__actions {
+// Scoped to the page: the challenges in the header's bell use the same class for their small accept and decline buttons.
+.ligungi-challenge-page .ligungi-challenge__actions {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 0.6rem;

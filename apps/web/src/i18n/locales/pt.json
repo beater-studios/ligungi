@@ -1301,10 +1301,11 @@
   },
   "beginner": {
     "title": "Novo no Gungi?",
-    "text": "Duas ajudas para aprender jogando. Dá para mudar depois em Preferências.",
+    "text": "Ajudas para aprender jogando. Dá para mudar depois em Preferências.",
     "illustrated": "Usar peças ilustradas em vez do kanji",
     "moveGuides": "Mostrar como as peças andam",
     "hoverReach": "Mostrar o alcance ao passar o mouse, inclusive das peças do adversário",
+    "towerContents": "Mostrar as peças de baixo de cada torre",
     "learn": "Aprender as regras",
     "close": "Fechar"
   },
@@ -1652,6 +1653,8 @@
     "peekPiecesHelp": "Passar o mouse sobre uma casa mostra a peça do topo e o alcance dela, e o painel da torre volta a mostrar a composição.",
     "moveGuides": "Indicadores de movimento",
     "moveGuidesHelp": "Marcas em volta de cada peça mostram como ela anda: um ponto por casa de alcance, uma seta para linha ilimitada e um anel onde as peças que saltam aterrissam.",
+    "towerContents": "Peças de baixo das torres",
+    "towerContentsHelp": "Mostra as peças que estão sob o topo como uma pequena pilha no canto da casa, a base mais embaixo, no lugar da altura da torre. Fica escondido enquanto as peças estão escondidas para treino.",
     "theme": "Tema",
     "light": "Claro",
     "dark": "Escuro",

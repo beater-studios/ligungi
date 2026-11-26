@@ -70,6 +70,8 @@ export interface Prefs {
   readonly zoom: number;
   /** Mark the squares a hovered piece could reach. */
   readonly hoverReach: boolean;
+  /** Show the pieces under the top of each tower as a small stack in the corner of its square, instead of its height. */
+  readonly towerContents: boolean;
   /** Game pages add a text version of the board: announced moves and a field for typed moves and questions. */
   readonly screenReader: boolean;
   /** Game pages add a field under the board for typed moves. */
@@ -140,6 +142,7 @@ const DEFAULTS: Prefs = {
   animation: true,
   zoom: 80,
   hoverReach: true,
+  towerContents: false,
   soundSet: 'sfx',
   byoyomiCount: 'beep',
   screenReader: false,
@@ -198,6 +201,7 @@ const load = (): Prefs => {
       screenReader: stored.screenReader === true,
       keyboardMove: stored.keyboardMove === true,
       zen: stored.zen === true,
+      towerContents: stored.towerContents === true,
       notifications: stored.notifications === true,
       towerTap: oneOf(TOWER_TAPS, stored.towerTap, DEFAULTS.towerTap),
       confirmMove: oneOf(CONFIRM_MOVES, stored.confirmMove, DEFAULTS.confirmMove),

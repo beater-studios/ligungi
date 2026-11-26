@@ -173,6 +173,44 @@ describe('Gungiground', () => {
     expect(root.querySelector('.gg-inspector .gg-name')!.textContent).toBe('Hyō');
   });
 
+  it('shows only the height of a tower unless asked for the pieces under the top', () => {
+    mount(build({ e5: 'PRG' }), { movableColor: null });
+    expect(squareEl('e5').querySelector('.gg-height')!.textContent).toBe('3');
+    expect(squareEl('e5').querySelector('.gg-contents')).toBeNull();
+  });
+
+  it('stacks the pieces under the top in a corner, base first, each in its color and the piece style', () => {
+    mount(build({ e5: 'pRG', a1: 'M', d4: 'Ps' }), { movableColor: null, towerContents: true });
+    const chips = [...squareEl('e5').querySelectorAll('.gg-contents .gg-chip')];
+    expect(chips.map((chip) => chip.textContent)).toEqual(['兵', '馬']);
+    expect(chips.map((chip) => [...chip.classList].find((c) => c === 'gg-white' || c === 'gg-black'))).toEqual(['gg-black', 'gg-white']);
+    expect(chips.map((chip) => (chip as HTMLElement).style.getPropertyValue('--chip'))).toEqual(['0', '1']);
+    expect(squareEl('d4').querySelectorAll('.gg-chip')).toHaveLength(1);
+    expect(squareEl('a1').querySelector('.gg-contents')).toBeNull();
+    api!.set({ pieceStyle: 'letters' });
+    expect([...squareEl('e5').querySelectorAll('.gg-chip')].map((chip) => chip.textContent)).toEqual(['So', 'Kn']);
+  });
+
+  it('shows names and labels from translations as text, never as markup', () => {
+    const evil = '<img src="x" onerror="window.hacked = 1">';
+    const pieceNames = { ...JAPANESE_PIECE_NAMES, names: { ...JAPANESE_PIECE_NAMES.names, soldier: evil } };
+    mount(build({ e5: 'Pp' }, { hands: { white: { soldier: 1 } } }), { movableColor: null, pieceNames, labels: { tower: evil, level: evil } });
+    click('e5');
+    expect(root.querySelector('img')).toBeNull();
+    expect(root.querySelector('.gg-inspector .gg-name')!.textContent).toBe(evil);
+    expect(root.querySelector('.gg-inspector-title')!.textContent).toContain(evil);
+    expect(root.querySelector('.gg-hand-piece')!.getAttribute('title')).toBe(evil);
+  });
+
+  it('keeps a piece color it is given out of the markup unless it is white or black', () => {
+    const position = build({ e5: 'P' });
+    const board = [...position.board];
+    board[sq('e5')] = [{ role: 'soldier', color: 'white" data-evil="1' as 'white' }];
+    mount({ ...position, board }, { movableColor: null });
+    expect(root.querySelector('[data-evil]')).toBeNull();
+    expect(squareEl('e5').querySelector('.gg-piece.gg-white')).not.toBeNull();
+  });
+
   it('asks whether to stack or select when clicking an own piece in range', () => {
     const played = mount(build({ e5: 'P', e6: 'S' }));
     click('e5');

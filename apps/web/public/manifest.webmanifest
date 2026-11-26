@@ -12,6 +12,8 @@
   "background_color": "#161512",
   "theme_color": "#161512",
   "categories": ["games", "entertainment"],
+  "related_applications": [{ "platform": "windows", "url": "https://apps.microsoft.com/detail/9nf5zjpld95c", "id": "9NF5ZJPLD95C" }],
+  "prefer_related_applications": false,
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

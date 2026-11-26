@@ -10,6 +10,10 @@ Yes. We follow the 2022 rulebook and the official Universal Music FAQ. The sourc
 
 It is free, with no ads. You can play without an account; with one you play rated games, join the leaderboard, follow friends and keep your history on your profile.
 
+## Is there an app?
+
+ligungi works in the browser on any device, and the browser can also install it as an app: on a phone, use Add to Home Screen (or Install app); on a computer, the install icon in the address bar. On Windows it is also in the [Microsoft Store](microsoftStore). The app opens the same site, with your account, settings and games, and once installed the computer, the lessons, the analysis board and the rules also work without a connection.
+
 ## Can I play with a screen reader?
 
 Yes. Turn on screen reader mode in Settings or at the top of the sign in page. In games, every move is announced in words, and a field takes typed moves (for example, 6-6 samurai) and questions about the position, the hands, a square or the clocks, and there is a board you can move through with the arrow keys. It works on every screen with a board: games, TV, the analysis board, studies, the editor, lessons, puzzles, practice and the coordinate trainer. The board stays on screen for anyone helping.

@@ -10,6 +10,10 @@ Sim. Seguimos o livro de regras de 2022 e o FAQ oficial da Universal Music. As f
 
 É grátis, sem anúncios. Dá para jogar sem conta; com uma conta você joga partidas ranqueadas, entra no ranking, segue amigos e guarda o histórico no perfil.
 
+## Tem app?
+
+O ligungi funciona no navegador em qualquer aparelho, e o próprio navegador também consegue instalá-lo como app: no celular, use Adicionar à tela inicial (ou Instalar app); no computador, o ícone de instalar na barra de endereço. No Windows ele também está na [Microsoft Store](microsoftStore). O app abre o mesmo site, com a sua conta, as suas configurações e as suas partidas, e, depois de instalado, o computador, as lições, o tabuleiro de análise e as regras funcionam também sem conexão.
+
 ## Dá para jogar com um leitor de tela?
 
 Sim. Ative o modo para leitores de tela em Preferências ou no topo da página de entrar. Nas partidas, cada lance é anunciado em palavras, e um campo aceita lances digitados (por exemplo, 6-6 samurai) e perguntas sobre a posição, as mãos, uma casa ou os relógios, e há um tabuleiro navegável pelas setas. O modo vale em todas as telas com tabuleiro: partidas, TV, análise, estudos, editor, lições, puzzles, prática e treino de coordenadas. O tabuleiro continua na tela para quem estiver ajudando.

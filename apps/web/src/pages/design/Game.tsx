@@ -1,4 +1,4 @@
-import { initialPosition, legalMoves, parseFen, parseSquare } from '@ligungi/engine';
+import { fenFromTowers, initialPosition, legalMoves, parseFen, parseSquare } from '@ligungi/engine';
 import { FeedList } from '../../players/ActivityFeed.tsx';
 import { TowerStrip } from '../../components/Panels.tsx';
 import { BlindPanel } from '../../blind/BlindPanel.tsx';
@@ -14,6 +14,7 @@ import { Records } from '../../puzzles/Records.tsx';
 import { Example, Section } from './parts.tsx';
 
 const lessonPosition = parseFen('9/9/9/9/9/9/4P4/4S4/9 w - advanced p w');
+const towersPosition = parseFen(fenFromTowers({ e5: 'PRG', d4: 'pRt', f3: 'YP', a1: 'M', i9: 'm' }));
 
 export const GameSection = () => (
   <Section id="game" title="Game">
@@ -130,6 +131,11 @@ export const GameSection = () => (
     <Example label="Goal stars on the board (the board's targets option), on empty squares and above a piece">
       <div class="ligungi-ds__board">
         <BoardView position={lessonPosition} orientation="white" targets={[parseSquare('e5')!, parseSquare('e3')!]} />
+      </div>
+    </Example>
+    <Example label="Pieces under each tower (Settings > Board > Pieces under each tower, off by default): a small stack in the corner, the base lowest, each in its color and the piece style; off, the square shows the tower's height">
+      <div class="ligungi-ds__board">
+        <BoardView position={towersPosition} orientation="white" towerContents />
       </div>
     </Example>
     <Example label="Typed moves under the board (KeyboardMove, Settings > Preferences > Type moves): here from the Beginner start, try 6-8 general">

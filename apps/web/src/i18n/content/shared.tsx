@@ -29,6 +29,7 @@ export const LINKS = {
   alternativeTo: 'https://alternativeto.net/software/ligungi/about/',
   indieDb: 'https://www.indiedb.com/games/ligungi',
   twitch: 'https://www.twitch.tv/ligungi',
+  microsoftStore: 'https://apps.microsoft.com/detail/9nf5zjpld95c',
 } as const;
 
 /** External link, opened in a new tab. */

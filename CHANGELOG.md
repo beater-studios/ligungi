@@ -8,6 +8,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- Board: a setting shows the pieces under the top of each tower as a small stack in the corner of the square, the base lowest, in your piece style and colors, instead of only the tower's height. It is off by default; turn it on in Settings or in the "New to Gungi?" box beside the board.
+- The FAQ says how to install ligungi as an app, and that it is in the Microsoft Store on Windows.
 - Studies can be liked: a heart on each study shows how many like it, the list can show the most liked first, and a new tab keeps the studies you like.
 - Studies: reporting a study now points the moderators to the chapter and move you were on, and their link opens the study right there. Moderators hear of each new report on Discord, and can clear the drawings of a chapter without hiding the whole study.
 - Puzzle Racer (`/racer`): race other players on the same puzzles for 90 seconds. Each correct move scores a point, a mistake moves you on to the next puzzle, long combos score extra points, and you can skip one puzzle. Join the public race, create one to share by link, or race the people of a Discord call from the Activity's hub. A public race can bring back players of an earlier race over the same puzzles as ghosts, at the pace they had; a switch hides them. With an account, your best races of today, the week and all time are kept.
@@ -19,6 +21,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Fixed
 
+- The challenges in the notification bell show their accept and decline buttons side by side and small again, instead of a wide accept button that squeezed the challenge's details.
 - Lessons: in a position with no opposing Marshal, such as "Marshal in danger", a move that leaves your Marshal attacked is no longer offered, so the exercise to get the Marshal out of attack can no longer be passed by moving it along the attacker's line.
 - The zen mode button no longer sits outside the bar of buttons over the move list: the seven buttons now share the row.
 - A practice result or a Puzzle Streak or Storm run that cannot reach your account (the connection dropped) is no longer lost: it waits in the browser and moves to your account on the next visit, as lesson stars already did.

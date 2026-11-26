@@ -285,6 +285,7 @@ export const SettingsPage = () => {
                 onChange={(moveGuides) => updatePrefs({ moveGuides })}
               />
             </SettingRow>
+            {toggle('towerContents', s.towerContents, s.towerContentsHelp)}
             {toggle('coordinates', s.coordinates, s.coordinatesHelp)}
             {choice(
               'zoom',

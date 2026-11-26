@@ -116,7 +116,7 @@ const homeData = (t: Messages, lang: Lang): object => ({
       offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' },
       license: LINKS.agpl,
       codeRepository: SOURCE_URL,
-      sameAs: [SOURCE_URL, LINKS.alternativeTo, LINKS.discord, LINKS.indieDb, LINKS.twitch],
+      sameAs: [SOURCE_URL, LINKS.alternativeTo, LINKS.discord, LINKS.indieDb, LINKS.twitch, LINKS.microsoftStore],
       publisher: organization,
       // schema.org accessibility properties; only what the screen reader mode really offers is claimed.
       accessibilityAPI: 'ARIA',

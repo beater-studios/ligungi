@@ -30,6 +30,11 @@ export interface Config {
   moveGuides: boolean;
   /** What each piece shows: kanji, an icon, the icon as outlines or letters (see `PieceStyle`). */
   pieceStyle: PieceStyle;
+  /**
+   * The pieces under the top one as a small stack in a corner of the square, the base below and the next tier in front
+   * of it, in place of the tower's height.
+   */
+  towerContents: boolean;
   labels: Partial<Labels>;
   /** Called after the user picks a move. The board already shows the resulting position. */
   onMove: ((move: Move) => void) | null;

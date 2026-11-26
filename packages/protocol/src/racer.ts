@@ -1,4 +1,4 @@
-import { stormBonus } from './puzzles.ts';
+import { stormBonus } from '@ligungi/content';
 
 /**
  * Puzzle Racer, as on lichess: everyone in a race gets the same puzzles, getting harder, for 90 seconds. Each correct

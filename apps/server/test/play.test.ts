@@ -152,8 +152,8 @@ describe('playing online', () => {
     expect((res.data as { code?: string }).code).toBe('loginForRated');
   });
 
-  it('aborts, agrees draws and lets the remaining player claim victory', async () => {
-    server = await startServer({ claimAfterMs: 150, abortAfterMs: 200 });
+  it('aborts a game on request, and on its own when nobody moves in time', async () => {
+    server = await startServer({ abortAfterMs: 200 });
     const a = client();
     const b = client();
     let { id, view } = await startGame(a, b);
@@ -164,8 +164,15 @@ describe('playing online', () => {
     ({ id, view } = await startGame(a, b));
     const aborted = await a.waitGame(id, (g) => g.status === 'aborted', 2000);
     expect(aborted.moves).toHaveLength(0);
+  });
 
-    ({ id, view } = await startGame(a, b));
+  // The automatic abort keeps its default here: with it at a fraction of a second, a busy machine could abort these
+  // games before both players have moved.
+  it('agrees draws and lets the remaining player claim victory', async () => {
+    server = await startServer({ claimAfterMs: 150 });
+    const a = client();
+    const b = client();
+    let { id, view } = await startGame(a, b);
     view = await play(a, b, view);
     view = await play(b, a, view);
     a.send({ t: 'draw', game: id, action: 'offer' });

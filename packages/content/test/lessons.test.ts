@@ -1,6 +1,6 @@
 import { mateDistance } from '@ligungi/bot';
 import { legalMoves, parseFen, positionProblems, toFen } from '@ligungi/engine';
-import { LESSON_EXERCISES, LESSON_STAGES, lessonDone, lessonStars, playLesson, startLesson, type LessonExercise } from '@ligungi/protocol';
+import { LESSON_EXERCISES, LESSON_STAGES, lessonDone, lessonStars, playLesson, startLesson, type LessonExercise } from '../src/index.ts';
 import { describe, expect, it } from 'vitest';
 
 /** Fewest moves that reach a non-mate goal, by breadth-first search over the player's moves (the opponent stays still). */

@@ -1,22 +1,7 @@
 import type { Mode } from '@ligungi/engine';
-import {
-  type ActivityEvent,
-  PUZZLE_RUN_KINDS,
-  PUZZLE_RUN_RECENT_MS,
-  puzzleInfo,
-  type Puzzle,
-  type PuzzleRun,
-  type PuzzleRunKind,
-  type PuzzleRunsView,
-  type DailyPuzzle,
-  type PuzzleAttemptResult,
-  type PuzzleDashboard,
-  type PuzzleInfo,
-  type PuzzleRatingView,
-  type PuzzleTheme,
-  type PuzzleView,
-} from '@ligungi/protocol';
-import { PUZZLES } from '@ligungi/protocol/puzzles';
+import { type ActivityEvent, PUZZLE_RUN_KINDS, PUZZLE_RUN_RECENT_MS, type PuzzleRun, type PuzzleRunKind, type PuzzleRunsView, type DailyPuzzle, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleRatingView, type PuzzleView } from '@ligungi/protocol';
+import { puzzleInfo, type Puzzle, type PuzzleInfo, type PuzzleTheme } from '@ligungi/content';
+import { PUZZLES } from '@ligungi/content/puzzles';
 import type { Db } from './db.ts';
 import { DEFAULT_RATING, PROVISIONAL_DEVIATION, updateRating, type Rating } from './glicko.ts';
 

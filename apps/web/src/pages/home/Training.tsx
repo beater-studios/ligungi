@@ -1,8 +1,5 @@
-import {
-  LESSON_STAGES,
-  type DailyPuzzle,
-  type PuzzleRatingView,
-} from '@ligungi/protocol';
+import { type DailyPuzzle, type PuzzleRatingView } from '@ligungi/protocol';
+import { LESSON_STAGES } from '@ligungi/content';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../../core/api.ts';
 import { MiniBoard } from '../../components/MiniBoard.tsx';

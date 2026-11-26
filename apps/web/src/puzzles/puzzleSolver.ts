@@ -1,5 +1,5 @@
 import { applyMove, initialPosition, legalMoves, moveToString, parseFen, parseMove, toFen, type Move, type Position } from '@ligungi/engine';
-import { puzzleInfo, type Puzzle, type PuzzleInfo } from '@ligungi/protocol';
+import { puzzleInfo, type Puzzle, type PuzzleInfo } from '@ligungi/content';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { useLocalGame } from '../game/localGame.ts';
 import { moveSound } from '../blind/speech.ts';
@@ -19,7 +19,7 @@ let loading: Promise<PuzzleEntries> | null = null;
 
 /** Every puzzle, read once per visit: the collection loads on demand, as it is too big for the first page load. */
 const loadEntries = (): Promise<PuzzleEntries> =>
-  (loading ??= import('@ligungi/protocol/puzzles').then(({ PUZZLES }) => {
+  (loading ??= import('@ligungi/content/puzzles').then(({ PUZZLES }) => {
     const list = PUZZLES.map((puzzle) => ({ puzzle, info: puzzleInfo(puzzle), start: parseFen(puzzle.fen) }));
     return { list, byId: new Map(list.map((entry) => [entry.puzzle.id, entry])) };
   }));

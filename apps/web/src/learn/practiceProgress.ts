@@ -1,4 +1,5 @@
-import { PRACTICE_BATCH, PRACTICE_POSITIONS } from '@ligungi/protocol';
+import { PRACTICE_BATCH } from '@ligungi/protocol';
+import { PRACTICE_POSITIONS } from '@ligungi/content';
 import { useCallback } from 'preact/hooks';
 import { api } from '../core/api.ts';
 import { localJson, sendOrKeep, useAccountSync } from '../syncedProgress.ts';

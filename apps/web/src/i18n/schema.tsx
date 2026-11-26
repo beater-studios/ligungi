@@ -1,6 +1,6 @@
 import type { Color } from '@ligungi/engine';
 import type { ComponentChildren, VNode } from 'preact';
-import { LESSON_STAGE_IDS } from '@ligungi/protocol';
+import { LESSON_STAGE_IDS } from '@ligungi/content';
 import { STUDIO } from './content/shared.tsx';
 
 /**

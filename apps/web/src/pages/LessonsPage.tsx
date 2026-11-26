@@ -1,15 +1,5 @@
 import { applyMove, legalMoves, moveToString, parseMove, parseSquare, toFen, type Move, type Position } from '@ligungi/engine';
-import {
-  LESSON_STAGES,
-  LESSON_STARS_MAX,
-  lessonDone,
-  lessonStars,
-  playLesson,
-  startLesson,
-  type LessonExercise,
-  type LessonStage,
-  type LessonState,
-} from '@ligungi/protocol';
+import { LESSON_STAGES, LESSON_STARS_MAX, lessonDone, lessonStars, playLesson, startLesson, type LessonExercise, type LessonStage, type LessonState } from '@ligungi/content';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { BlindPanel } from '../blind/BlindPanel.tsx';
 import { BoardView } from '../components/BoardView.tsx';

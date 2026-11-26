@@ -5,10 +5,9 @@ import {
   legalMoves,
   moveToString,
   parseFen,
-  positionProblems,
+  phaseProblems,
   type Color,
   type Position,
-  type PositionProblem,
 } from '@ligungi/engine';
 import type { UserRef } from './users.ts';
 
@@ -135,20 +134,12 @@ export const studyText = (value: unknown, max: number, required: boolean): strin
   return text;
 };
 
-/**
- * Whether a problem of the board editor's check still applies. During the draft the Marshals may still be in hand or
- * missing from the board, and nothing can be captured, so a Marshal under attack means nothing yet.
- */
-const matters = (position: Position, problem: PositionProblem): boolean =>
-  position.phase === 'play' ||
-  !(problem.kind === 'marshalInHand' || problem.kind === 'waitingInCheck' || (problem.kind === 'marshalCount' && problem.count === 0));
-
 /** A start position a chapter may use: a valid FEN of a position the rules can reach, in the draft or in play. */
 export const studyStart = (fen: unknown): Position | null => {
   if (typeof fen !== 'string' || fen.length > 300) return null;
   try {
     const position = parseFen(fen);
-    return positionProblems(position).some((problem) => matters(position, problem)) ? null : position;
+    return phaseProblems(position).length > 0 ? null : position;
   } catch {
     return null;
   }

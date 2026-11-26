@@ -1,4 +1,4 @@
-import { LESSON_STARS_MAX } from '@ligungi/protocol';
+import { LESSON_STARS_MAX } from '@ligungi/content';
 
 /** Lesson stars drawn with CSS, filled up to `filled`; `label` says the score to screen readers and on hover. */
 export const Stars = ({ filled, label }: { filled: number; label: string }) => (

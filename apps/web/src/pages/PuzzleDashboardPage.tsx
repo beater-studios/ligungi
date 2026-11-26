@@ -1,4 +1,5 @@
-import { PUZZLE_RUN_KINDS, PUZZLE_THEMES, type PuzzleDashboard, type RatingPoint } from '@ligungi/protocol';
+import { PUZZLE_RUN_KINDS, type PuzzleDashboard, type RatingPoint } from '@ligungi/protocol';
+import { PUZZLE_THEMES } from '@ligungi/content';
 import { useEffect, useState } from 'preact/hooks';
 import { api } from '../core/api.ts';
 import { RatingHistoryChart } from '../players/RatingHistoryChart.tsx';

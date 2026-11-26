@@ -15,7 +15,7 @@ Proposed and built in November 2026: turning it on, the announcements, the comma
 
 ### On a game page
 
-The visual board stays on screen for a sighted helper, hidden from screen readers (`aria-hidden`). In its place the page gains its own region (`BlindPanel`, right under the board, with the cursor in its field on arrival) with three parts. The texts live in `t.blind` of the dictionaries, and the logic (descriptions, typed moves and commands) in `apps/web/src/blind/blind.ts`, tested in `apps/web/test/blind.test.ts`.
+The visual board stays on screen for a sighted helper, hidden from screen readers (`aria-hidden`). In its place the page gains its own region (`BlindPanel`, right under the board, with the cursor in its field on arrival) with three parts. The texts live in `t.blind` of the dictionaries, and the logic (descriptions, typed moves and commands) in `apps/web/src/blind/blind.ts`, tested in `apps/web/test/blind/blind.test.ts`.
 
 **1. Announcements** (a `role="log"` region, `aria-live="polite"`), read as they happen, with the piece names of the chosen language. The answers to the commands go to the same log.
 

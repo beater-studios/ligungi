@@ -1,5 +1,6 @@
 import {
   applyMove,
+  fenFromTowers,
   findMarshal,
   opposite,
   parseFen,
@@ -44,96 +45,66 @@ export interface LessonStage {
 
 export const LESSON_STARS_MAX = 3;
 
-/** Lesson results a player saves in one request. */
-export const LESSON_PROGRESS_BATCH = 100;
-
-/**
- * A position written by hand: pieces by square in machine notation, a tower written bottom to top (`{ e3: 'Ps' }` is a
- * White Soldier under a Black Samurai), White to move and the full game's rules unless said otherwise.
- */
-export const fen = (
-  pieces: Readonly<Record<string, string>>,
-  { hands = '-', mode = 'advanced', phase = 'p', first = 'w' }: { hands?: string; mode?: Mode; phase?: string; first?: 'w' | 'b' } = {},
-): string => {
-  const ranks: string[] = [];
-  for (let rank = 9; rank >= 1; rank--) {
-    let text = '';
-    let empty = 0;
-    for (const file of 'abcdefghi') {
-      const tower = pieces[`${file}${rank}`];
-      if (!tower) {
-        empty++;
-        continue;
-      }
-      if (empty) text += String(empty);
-      empty = 0;
-      text += tower.length > 1 ? `(${tower})` : tower;
-    }
-    ranks.push(empty ? text + String(empty) : text);
-  }
-  return `${ranks.join('/')} w ${hands} ${mode} ${phase} ${first}`;
-};
-
 const targets = (...squares: string[]): LessonGoal => ({ kind: 'targets', squares });
 
 export const LESSON_STAGES: readonly LessonStage[] = [
   {
     id: 'pieces',
     exercises: [
-      { id: 'pieces-marshal', fen: fen({ e2: 'M' }), goal: targets('e3', 'f4', 'e5'), par: 3 },
-      { id: 'pieces-general', fen: fen({ e2: 'G' }), goal: targets('e8', 'a8', 'b7'), par: 3 },
-      { id: 'pieces-lieutenant', fen: fen({ e2: 'L' }), goal: targets('a6', 'b6', 'd8'), par: 3 },
-      { id: 'pieces-major', fen: fen({ e2: 'J' }), goal: targets('f3', 'g3', 'g4'), par: 3 },
-      { id: 'pieces-samurai', fen: fen({ e2: 'S' }), goal: targets('d3', 'd4', 'e5'), par: 3 },
-      { id: 'pieces-lancer', fen: fen({ e2: 'N' }), goal: targets('e4', 'f5', 'f7'), par: 3 },
-      { id: 'pieces-knight', fen: fen({ e2: 'R' }), goal: targets('e4', 'f4', 'f6'), par: 3 },
-      { id: 'pieces-ninja', fen: fen({ e2: 'Y' }), goal: targets('g4', 'e6', 'c4'), par: 3 },
-      { id: 'pieces-fortress', fen: fen({ e2: 'F' }), goal: targets('e3', 'f3', 'e2'), par: 3 },
-      { id: 'pieces-soldier', fen: fen({ e2: 'P', e5: 'p' }), goal: targets('e5'), par: 3 },
-      { id: 'pieces-tactician', fen: fen({ e2: 'T' }), goal: targets('f3', 'g4', 'g3'), par: 3 },
+      { id: 'pieces-marshal', fen: fenFromTowers({ e2: 'M' }), goal: targets('e3', 'f4', 'e5'), par: 3 },
+      { id: 'pieces-general', fen: fenFromTowers({ e2: 'G' }), goal: targets('e8', 'a8', 'b7'), par: 3 },
+      { id: 'pieces-lieutenant', fen: fenFromTowers({ e2: 'L' }), goal: targets('a6', 'b6', 'd8'), par: 3 },
+      { id: 'pieces-major', fen: fenFromTowers({ e2: 'J' }), goal: targets('f3', 'g3', 'g4'), par: 3 },
+      { id: 'pieces-samurai', fen: fenFromTowers({ e2: 'S' }), goal: targets('d3', 'd4', 'e5'), par: 3 },
+      { id: 'pieces-lancer', fen: fenFromTowers({ e2: 'N' }), goal: targets('e4', 'f5', 'f7'), par: 3 },
+      { id: 'pieces-knight', fen: fenFromTowers({ e2: 'R' }), goal: targets('e4', 'f4', 'f6'), par: 3 },
+      { id: 'pieces-ninja', fen: fenFromTowers({ e2: 'Y' }), goal: targets('g4', 'e6', 'c4'), par: 3 },
+      { id: 'pieces-fortress', fen: fenFromTowers({ e2: 'F' }), goal: targets('e3', 'f3', 'e2'), par: 3 },
+      { id: 'pieces-soldier', fen: fenFromTowers({ e2: 'P', e5: 'p' }), goal: targets('e5'), par: 3 },
+      { id: 'pieces-tactician', fen: fenFromTowers({ e2: 'T' }), goal: targets('f3', 'g4', 'g3'), par: 3 },
     ],
   },
   {
     id: 'towers',
     exercises: [
-      { id: 'towers-stack', fen: fen({ e2: 'S', e3: 'P' }), goal: targets('e3'), par: 1 },
-      { id: 'towers-reach', fen: fen({ e2: 'PS' }), goal: targets('e4'), par: 1 },
-      { id: 'towers-reach-three', fen: fen({ e2: 'PPS' }), goal: targets('e5'), par: 1 },
-      { id: 'towers-taller', fen: fen({ d2: 'S', d3: 'P', e4: 'pp' }), goal: targets('e4'), par: 2 },
+      { id: 'towers-stack', fen: fenFromTowers({ e2: 'S', e3: 'P' }), goal: targets('e3'), par: 1 },
+      { id: 'towers-reach', fen: fenFromTowers({ e2: 'PS' }), goal: targets('e4'), par: 1 },
+      { id: 'towers-reach-three', fen: fenFromTowers({ e2: 'PPS' }), goal: targets('e5'), par: 1 },
+      { id: 'towers-taller', fen: fenFromTowers({ d2: 'S', d3: 'P', e4: 'pp' }), goal: targets('e4'), par: 2 },
     ],
   },
   {
     id: 'hand',
     exercises: [
-      { id: 'hand-drop', fen: fen({ a3: 'P' }, { hands: 'P' }), goal: targets('e3'), par: 1 },
-      { id: 'hand-zone', fen: fen({ a2: 'P' }, { hands: 'N' }), goal: targets('e4'), par: 2 },
-      { id: 'hand-stack', fen: fen({ e3: 'P' }, { hands: 'S' }), goal: targets('e3'), par: 1 },
-      { id: 'hand-attack', fen: fen({ a4: 'P', f5: 'p' }, { hands: 'S' }), goal: targets('f5'), par: 2 },
+      { id: 'hand-drop', fen: fenFromTowers({ a3: 'P' }, { hands: 'P' }), goal: targets('e3'), par: 1 },
+      { id: 'hand-zone', fen: fenFromTowers({ a2: 'P' }, { hands: 'N' }), goal: targets('e4'), par: 2 },
+      { id: 'hand-stack', fen: fenFromTowers({ e3: 'P' }, { hands: 'S' }), goal: targets('e3'), par: 1 },
+      { id: 'hand-attack', fen: fenFromTowers({ a4: 'P', f5: 'p' }, { hands: 'S' }), goal: targets('f5'), par: 2 },
     ],
   },
   {
     id: 'jumpers',
     exercises: [
-      { id: 'jumpers-cannon', fen: fen({ e1: 'C', e2: 'P', e3: 'p' }), goal: targets('e4'), par: 1 },
-      { id: 'jumpers-musketeer', fen: fen({ e1: 'K', e2: 'p' }), goal: targets('e3', 'd2'), par: 2 },
-      { id: 'jumpers-archer', fen: fen({ e1: 'A', d2: 'p', e2: 'p', f2: 'p' }), goal: targets('d3', 'e5'), par: 2 },
-      { id: 'jumpers-tall', fen: fen({ e1: 'C', d1: 'P', d2: 'pp' }), goal: targets('d5'), par: 2 },
+      { id: 'jumpers-cannon', fen: fenFromTowers({ e1: 'C', e2: 'P', e3: 'p' }), goal: targets('e4'), par: 1 },
+      { id: 'jumpers-musketeer', fen: fenFromTowers({ e1: 'K', e2: 'p' }), goal: targets('e3', 'd2'), par: 2 },
+      { id: 'jumpers-archer', fen: fenFromTowers({ e1: 'A', d2: 'p', e2: 'p', f2: 'p' }), goal: targets('d3', 'e5'), par: 2 },
+      { id: 'jumpers-tall', fen: fenFromTowers({ e1: 'C', d1: 'P', d2: 'pp' }), goal: targets('d5'), par: 2 },
     ],
   },
   {
     id: 'betrayal',
     exercises: [
-      { id: 'betrayal-move', fen: fen({ d2: 'T', e3: 'p' }, { hands: 'P' }), goal: { kind: 'betray', square: 'e3' }, par: 1 },
-      { id: 'betrayal-drop', fen: fen({ e3: 'pP' }, { hands: 'TP' }), goal: { kind: 'betray', square: 'e3' }, par: 1 },
-      { id: 'betrayal-tower', fen: fen({ d2: 'PT', e3: 'ps' }, { hands: 'PS' }), goal: { kind: 'betray', square: 'e3' }, par: 1 },
+      { id: 'betrayal-move', fen: fenFromTowers({ d2: 'T', e3: 'p' }, { hands: 'P' }), goal: { kind: 'betray', square: 'e3' }, par: 1 },
+      { id: 'betrayal-drop', fen: fenFromTowers({ e3: 'pP' }, { hands: 'TP' }), goal: { kind: 'betray', square: 'e3' }, par: 1 },
+      { id: 'betrayal-tower', fen: fenFromTowers({ d2: 'PT', e3: 'ps' }, { hands: 'PS' }), goal: { kind: 'betray', square: 'e3' }, par: 1 },
     ],
   },
   {
     id: 'marshal',
     exercises: [
-      { id: 'marshal-escape', fen: fen({ e2: 'M', e6: 'g' }), goal: { kind: 'escape' }, par: 1 },
-      { id: 'marshal-capture', fen: fen({ e2: 'M', d3: 'S', e4: 'n' }), goal: targets('e4'), par: 1 },
-      { id: 'marshal-block', fen: fen({ e1: 'M', e7: 'g', a3: 'P' }, { hands: 'F' }), goal: targets('e3'), par: 1 },
+      { id: 'marshal-escape', fen: fenFromTowers({ e2: 'M', e6: 'g' }), goal: { kind: 'escape' }, par: 1 },
+      { id: 'marshal-capture', fen: fenFromTowers({ e2: 'M', d3: 'S', e4: 'n' }), goal: targets('e4'), par: 1 },
+      { id: 'marshal-block', fen: fenFromTowers({ e1: 'M', e7: 'g', a3: 'P' }, { hands: 'F' }), goal: targets('e3'), par: 1 },
     ],
   },
   {
@@ -150,8 +121,8 @@ export const LESSON_STAGES: readonly LessonStage[] = [
     id: 'draft',
     exercises: [
       { id: 'draft-marshal', fen: '9/9/9/9/9/9/9/9/9 w MGL2J2S3N2R2Y2F4PC2AKTmgl2j2s3n2r2y2f4pc2akt advanced d w', goal: { kind: 'placeMarshal' }, par: 1 },
-      { id: 'draft-place', fen: fen({ e1: 'M' }, { hands: 'GL2J2S3N2R2Y2F4PC2AKT', phase: 'd' }), goal: targets('d2', 'f2'), par: 2 },
-      { id: 'draft-done', fen: fen({ e1: 'M', e9: 'm' }, { hands: 'G2S', phase: 'db', first: 'b' }), goal: { kind: 'finishDraft' }, par: 1 },
+      { id: 'draft-place', fen: fenFromTowers({ e1: 'M' }, { hands: 'GL2J2S3N2R2Y2F4PC2AKT', phase: 'd' }), goal: targets('d2', 'f2'), par: 2 },
+      { id: 'draft-done', fen: fenFromTowers({ e1: 'M', e9: 'm' }, { hands: 'G2S', phase: 'db', first: 'b' }), goal: { kind: 'finishDraft' }, par: 1 },
     ],
   },
 ];
@@ -215,18 +186,3 @@ export const lessonStars = (exercise: LessonExercise, moves: number, mistakes: n
 };
 
 export const opponentOf = (exercise: LessonExercise): Color => opposite(parseFen(exercise.fen).turn);
-
-const LESSON_IDS: ReadonlySet<string> = new Set(LESSON_EXERCISES.map((exercise) => exercise.id));
-
-/** Validates the lesson results a player sends: the stars of each exercise, by id, at most `LESSON_PROGRESS_BATCH`. */
-export const parseLessonProgress = (input: unknown): Record<string, number> | 'invalidLessonProgress' => {
-  if (typeof input !== 'object' || input === null || Array.isArray(input)) return 'invalidLessonProgress';
-  const entries = Object.entries(input);
-  if (entries.length > LESSON_PROGRESS_BATCH) return 'invalidLessonProgress';
-  const results: Record<string, number> = {};
-  for (const [id, stars] of entries) {
-    if (!LESSON_IDS.has(id) || typeof stars !== 'number' || !Number.isInteger(stars) || stars < 1 || stars > LESSON_STARS_MAX) return 'invalidLessonProgress';
-    results[id] = stars;
-  }
-  return results;
-};

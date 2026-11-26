@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { initialPosition, parseSquare, pieceLimits, positionProblems } from '../src/index.ts';
+import { initialPosition, parseSquare, phaseProblems, pieceLimits, positionProblems } from '../src/index.ts';
 import { build } from './helpers.ts';
 
 const sq = (name: string) => parseSquare(name)!;
@@ -37,5 +37,34 @@ describe('position problems (board editor)', () => {
     // White to move with a soldier next to the Black Marshal: Black's last move would have been illegal.
     expect(positionProblems(build({ i8: 'P' }, { turn: 'white' }))).toContainEqual({ kind: 'waitingInCheck', color: 'black' });
     expect(positionProblems(build({ i8: 'P' }, { turn: 'black' }))).toEqual([]);
+  });
+});
+
+describe('position problems in each phase (study start positions)', () => {
+  const draft = (towers: Record<string, string>) => ({
+    ...build(towers),
+    phase: 'draft' as const,
+    draftDone: { white: false, black: false },
+  });
+
+  it('lets the draft have its Marshals in hand or not placed yet, and attacked', () => {
+    const start = initialPosition('advanced');
+    expect(positionProblems(start).map((problem) => problem.kind)).toContain('marshalInHand');
+    expect(phaseProblems(start)).toEqual([]);
+    // A Marshal attacked during the draft means nothing: nothing can be captured until play starts.
+    const attacked = draft({ i8: 'P' });
+    expect(positionProblems({ ...attacked, phase: 'play' })).toContainEqual({ kind: 'waitingInCheck', color: 'black' });
+    expect(phaseProblems(attacked)).toEqual([]);
+  });
+
+  it('still refuses in the draft what no draft can reach', () => {
+    expect(phaseProblems(draft({ a1: 'M', b1: 'M' }))).toContainEqual({ kind: 'marshalCount', color: 'white', count: 2 });
+    expect(phaseProblems(draft({ a1: 'MP' }))).toContainEqual({ kind: 'marshalCovered', square: sq('a1') });
+    expect(phaseProblems(draft({ a2: 'P', b2: 'P', c2: 'P', d2: 'P', e2: 'P' }))).toContainEqual({ kind: 'tooMany', color: 'white', role: 'soldier', count: 5, max: 4 });
+  });
+
+  it('checks a play position exactly as the board editor does', () => {
+    const play = build({ i8: 'P' }, { turn: 'white' });
+    expect(phaseProblems(play)).toEqual(positionProblems(play));
   });
 });

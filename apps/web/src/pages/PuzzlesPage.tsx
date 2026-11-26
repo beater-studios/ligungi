@@ -1,11 +1,6 @@
 import { MODES, opposite, parseMove, type Color, type Mode } from '@ligungi/engine';
-import {
-  PUZZLE_THEMES,
-  type DailyPuzzle,
-  type PuzzleAttemptResult,
-  type PuzzleTheme,
-  type PuzzleView,
-} from '@ligungi/protocol';
+import { type DailyPuzzle, type PuzzleAttemptResult, type PuzzleView } from '@ligungi/protocol';
+import { PUZZLE_THEMES, type PuzzleTheme } from '@ligungi/content';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api } from '../core/api.ts';
 import { RoundLayout, type RoundPlayer } from '../game/RoundLayout.tsx';

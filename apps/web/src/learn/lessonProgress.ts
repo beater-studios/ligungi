@@ -1,4 +1,5 @@
-import { LESSON_EXERCISES, LESSON_PROGRESS_BATCH, LESSON_STARS_MAX } from '@ligungi/protocol';
+import { LESSON_PROGRESS_BATCH } from '@ligungi/protocol';
+import { LESSON_EXERCISES, LESSON_STARS_MAX } from '@ligungi/content';
 import { useCallback } from 'preact/hooks';
 import { api } from '../core/api.ts';
 import { localJson, sendOrKeep, useAccountSync } from '../syncedProgress.ts';

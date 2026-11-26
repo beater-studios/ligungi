@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ligungi/bot": "*",
+    "@ligungi/content": "*",
     "@ligungi/engine": "*",
     "@ligungi/protocol": "*",
     "ws": "8.23.0"

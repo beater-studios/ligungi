@@ -146,3 +146,30 @@ export const parseFen = (fen: string): Position => {
 
 /** Board, hands and side to move: the identity used for repetition. */
 export const repetitionKey = (position: Position): string => toFen(position).split(' ').slice(0, 3).join(' ');
+
+/**
+ * A position written by hand: pieces by square in machine notation, a tower written bottom to top (`{ e3: 'Ps' }` is a
+ * White Soldier under a Black Samurai), White to move and the full game's rules unless said otherwise.
+ */
+export const fenFromTowers = (
+  pieces: Readonly<Record<string, string>>,
+  { hands = '-', mode = 'advanced', phase = 'p', first = 'w' }: { hands?: string; mode?: Mode; phase?: string; first?: 'w' | 'b' } = {},
+): string => {
+  const ranks: string[] = [];
+  for (let rank = 9; rank >= 1; rank--) {
+    let text = '';
+    let empty = 0;
+    for (const file of 'abcdefghi') {
+      const tower = pieces[`${file}${rank}`];
+      if (!tower) {
+        empty++;
+        continue;
+      }
+      if (empty) text += String(empty);
+      empty = 0;
+      text += tower.length > 1 ? `(${tower})` : tower;
+    }
+    ranks.push(empty ? text + String(empty) : text);
+  }
+  return `${ranks.join('/')} w ${hands} ${mode} ${phase} ${first}`;
+};

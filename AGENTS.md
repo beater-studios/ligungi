@@ -11,6 +11,7 @@ ligungi is a lichess-style site to play Gungi (the HUNTER×HUNTER board game) wi
 | `packages/engine` | Rules engine, no dependencies. Shared by browser and server. |
 | `packages/board` | Framework-free DOM board (like chessground). |
 | `packages/bot` | Computer opponent, runs in a Web Worker; its mate search also checks Puzzle Racer moves on the server. |
+| `packages/content` | Lessons, practice positions and puzzles, with the rules each one is judged by. |
 | `packages/protocol` | Types, validation and error codes shared by server and site. |
 | `apps/server` | Node 24 server: `node:http`, `ws`, `node:sqlite`. |
 | `apps/web` | Preact site with lila's (lichess) markup and styles. |

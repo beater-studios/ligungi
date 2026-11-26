@@ -1,5 +1,6 @@
 import { opposite, type Color, type Move } from '@ligungi/engine';
-import { STORM_PENALTY_MS, STORM_TIME_MS, stormBonus, type PuzzleRunKind } from '@ligungi/protocol';
+import { type PuzzleRunKind } from '@ligungi/protocol';
+import { STORM_PENALTY_MS, STORM_TIME_MS, stormBonus } from '@ligungi/content';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { api } from '../core/api.ts';
 import { MiniBoard } from '../components/MiniBoard.tsx';

@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { LESSON_EXERCISES, LESSON_STARS_MAX, PRACTICE_POSITIONS, stormBonus } from '@ligungi/content';
 import {
-  LESSON_EXERCISES,
   LESSON_PROGRESS_BATCH,
-  LESSON_STARS_MAX,
-  PRACTICE_POSITIONS,
   PUZZLE_RUN_BATCH,
   discordTier,
   parseGameSearch,
@@ -11,7 +9,6 @@ import {
   parsePracticeProgress,
   parsePuzzleRuns,
   racerBonus,
-  stormBonus,
 } from '../src/index.ts';
 
 describe('training progress sent by the player', () => {

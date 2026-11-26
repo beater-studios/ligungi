@@ -5,8 +5,8 @@ import { ROLE_INFO } from './roles.ts';
 import { COLORS, ROLES, type Color, type Mode, type Position, type Role, type Square } from './types.ts';
 
 /**
- * Why a position set up by hand (the board editor) cannot come from a game. Only positions in the play phase are
- * checked: the draft is set up by playing it.
+ * Why a position set up by hand (the board editor, a study's start) cannot come from a game. `positionProblems` checks
+ * it as a play position; `phaseProblems` as a position of its own phase, draft or play.
  */
 export type PositionProblem =
   | { readonly kind: 'marshalCount'; readonly color: Color; readonly count: number }
@@ -55,3 +55,14 @@ export const positionProblems = (position: Position): PositionProblem[] => {
   if (marshals.white === 1 && marshals.black === 1 && isMarshalAttacked(position, waiting)) problems.push({ kind: 'waitingInCheck', color: waiting });
   return problems;
 };
+
+/** Problems the draft allows: the Marshals may still be in hand or not placed yet, and nothing can be captured. */
+const allowedInDraft = (problem: PositionProblem): boolean =>
+  problem.kind === 'marshalInHand' || problem.kind === 'waitingInCheck' || (problem.kind === 'marshalCount' && problem.count === 0);
+
+/**
+ * The problems that make a position impossible in its own phase: all of `positionProblems` in play, and during the draft
+ * only those the draft cannot reach either (too many pieces, towers too high, a covered Marshal, two Marshals).
+ */
+export const phaseProblems = (position: Position): PositionProblem[] =>
+  position.phase === 'play' ? positionProblems(position) : positionProblems(position).filter((problem) => !allowedInDraft(problem));

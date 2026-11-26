@@ -1,7 +1,8 @@
 import { applyMove, initialPosition, parseMove, toFen } from '@ligungi/engine';
 import { describe, expect, it } from 'vitest';
-import { puzzleInfo, type ExplorerView, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleRunsView, type PuzzleView } from '@ligungi/protocol';
-import { PUZZLES } from '@ligungi/protocol/puzzles';
+import { type ExplorerView, type PuzzleAttemptResult, type PuzzleDashboard, type PuzzleRunsView, type PuzzleView } from '@ligungi/protocol';
+import { puzzleInfo } from '@ligungi/content';
+import { PUZZLES } from '@ligungi/content/puzzles';
 import { signup, useServer, type TestServer } from './helpers.ts';
 
 const { start: startServer, client } = useServer();

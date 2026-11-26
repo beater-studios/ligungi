@@ -36,7 +36,8 @@ import { ExplorerPage } from './pages/ExplorerPage.tsx';
 import { TvChannelPage } from './pages/TvChannelPage.tsx';
 import { TvPage } from './pages/TvPage.tsx';
 import { MODES, type Mode } from '@ligungi/engine';
-import { LESSON_STAGE_IDS, SHORT_LINKS, TV_CHANNELS, type TvChannel } from '@ligungi/protocol';
+import { SHORT_LINKS, TV_CHANNELS, type TvChannel } from '@ligungi/protocol';
+import { LESSON_STAGE_IDS } from '@ligungi/content';
 import { navigate, type Route } from './core/router.ts';
 import { useStore } from './core/store.ts';
 

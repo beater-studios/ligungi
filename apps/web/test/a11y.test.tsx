@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { LESSON_STAGE_IDS, PRACTICE_POSITIONS } from '@ligungi/protocol';
+import { LESSON_STAGE_IDS, PRACTICE_POSITIONS } from '@ligungi/content';
 import axe from 'axe-core';
 import { describe, expect, it } from 'vitest';
 

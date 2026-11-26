@@ -1,6 +1,7 @@
 import type { AppDeps } from '../app.ts';
 import { MODES, parseFen } from '@ligungi/engine';
-import { isErrorCode, parseLessonProgress, parsePracticeProgress, parsePuzzleRuns, EXPLORER_BANDS, EXPLORER_MODES, PUZZLE_BATCH, PUZZLE_RUN_KINDS, PUZZLE_THEMES } from '@ligungi/protocol';
+import { isErrorCode, parseLessonProgress, parsePracticeProgress, parsePuzzleRuns, EXPLORER_BANDS, EXPLORER_MODES, PUZZLE_BATCH, PUZZLE_RUN_KINDS } from '@ligungi/protocol';
+import { PUZZLE_THEMES } from '@ligungi/content';
 import { HttpError, sendJson, type Router } from '../http.ts';
 import { requireUser } from './guards.ts';
 import { isPuzzle, PUZZLE_COUNT } from '../puzzles.ts';

@@ -8,3 +8,6 @@ export const escapeHtml = (text: string): string => text.replace(/[&<>"']/g, (ch
 
 /** A color for class names and attributes: the board is a library, so a value it is given is never trusted as markup. */
 export const safeColor = (value: string): Color => (value === 'black' ? 'black' : 'white');
+
+/** A whole number for inline styles (tower heights and levels), so nothing else can reach the markup. */
+export const safeInt = (value: number): number => (Number.isFinite(value) ? Math.trunc(value) : 0);

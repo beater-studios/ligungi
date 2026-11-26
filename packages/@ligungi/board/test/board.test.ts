@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ROLES, initialPosition, legalMoves, moveToString, type Move, type Position } from '@ligungi/engine';
 import { Gungiground, JAPANESE_PIECE_NAMES, PIECE_ICONS, guidesSvg, type Api, type Shape } from '../src/index.ts';
 import { build, sq } from '../../engine/test/helpers.ts';
+import { safeInt } from '../src/escape.ts';
 
 let api: Api | undefined;
 let root: HTMLElement;
@@ -215,6 +216,10 @@ describe('Gungiground', () => {
     api!.set({ towerContents: 'none' });
     expect(squareEl('e5').querySelector('.gg-contents')).toBeNull();
     expect(squareEl('e5').querySelector('.gg-height')!.textContent).toBe('3');
+  });
+
+  it('only writes whole numbers into inline styles', () => {
+    expect([safeInt(2), safeInt(1.7), safeInt(Number.NaN), safeInt(Number.POSITIVE_INFINITY)]).toEqual([2, 1, 0, 0]);
   });
 
   it('shows names and labels from translations as text, never as markup', () => {

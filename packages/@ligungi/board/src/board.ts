@@ -16,7 +16,7 @@ import {
   type Square,
 } from '@ligungi/engine';
 import { coordinateLabels, visualSquares } from './geometry.ts';
-import { escapeHtml, safeColor } from './escape.ts';
+import { escapeHtml, safeColor, safeInt } from './escape.ts';
 import { glyphClass, pieceGlyph } from './glyph.ts';
 import { DEFAULT_LABELS, ENGLISH_PIECE_NAMES, colorLabel, pieceName, type Labels } from './labels.ts';
 import type { Api, Config, Selection, Shape } from './types.ts';
@@ -400,7 +400,7 @@ export class Board implements Api {
       const ghost = this.#root.ownerDocument.createElement('div');
       ghost.className = 'gg-ghost';
       ghost.style.width = ghost.style.height = `${size}px`;
-      ghost.innerHTML = this.#pieceHtml(piece, 'gg-top');
+      ghost.innerHTML = this.#pieceHtml(piece, true);
       this.#wrap.appendChild(ghost);
       drag.ghost = ghost;
       this.#wrap.classList.add('gg-dragging');
@@ -574,19 +574,19 @@ export class Board implements Api {
     return topOf(this.#config.position.board[selection.square]!);
   }
 
-  #pieceHtml(piece: Piece, extra: string, level = 0): string {
+  #pieceHtml(piece: Piece, top: boolean, level = 0): string {
     const color = safeColor(piece.color);
     const flipped = color !== safeColor(this.#config.orientation) ? ' gg-flipped' : '';
     const { pieceStyle, moveGuides, pieceNames } = this.#config;
     const layout = glyphClass(pieceStyle, moveGuides);
-    return `<div class="gg-piece gg-${color}${flipped}${layout ? ` ${layout}` : ''} ${extra}" style="--level:${level}"><span>${pieceGlyph(piece.role, pieceStyle, moveGuides, pieceNames)}</span></div>`;
+    return `<div class="gg-piece gg-${color}${flipped}${layout ? ` ${layout}` : ''} ${top ? 'gg-top' : 'gg-under'}" style="--level:${safeInt(level)}"><span>${pieceGlyph(piece.role, pieceStyle, moveGuides, pieceNames)}</span></div>`;
   }
 
   #towerHtml(square: Square): string {
     const tower = this.#config.position.board[square]!;
     if (tower.length === 0) return '';
     const pieces = tower
-      .map((piece, level) => this.#pieceHtml(piece, level === tower.length - 1 ? 'gg-top' : 'gg-under', level))
+      .map((piece, level) => this.#pieceHtml(piece, level === tower.length - 1, level))
       .join('');
     const badge = tower.length > 1 ? `<span class="gg-height">${tower.length}</span>` : '';
     const mode = this.#config.towerContents === 'corners' ? 'corners' : 'stack';
@@ -597,14 +597,14 @@ export class Board implements Api {
             .map((piece, level) => this.#chipHtml(piece, level))
             .join('')}</span>`
         : '';
-    return `<div class="gg-tower" style="--height:${tower.length}">${pieces}${contents}${badge}</div>`;
+    return `<div class="gg-tower" style="--height:${safeInt(tower.length)}">${pieces}${contents}${badge}</div>`;
   }
 
   /** One piece under the top, in a corner: upright, in the piece style without guides, level 0 being the base. */
   #chipHtml(piece: Piece, level: number): string {
     const { pieceStyle, pieceNames } = this.#config;
     const layout = glyphClass(pieceStyle, false);
-    return `<span class="gg-chip gg-${safeColor(piece.color)}${layout ? ` ${layout}` : ''}" style="--chip:${level}">${pieceGlyph(piece.role, pieceStyle, false, pieceNames)}</span>`;
+    return `<span class="gg-chip gg-${safeColor(piece.color)}${layout ? ` ${layout}` : ''}" style="--chip:${safeInt(level)}">${pieceGlyph(piece.role, pieceStyle, false, pieceNames)}</span>`;
   }
 
   #squareTitle(square: Square): string {
@@ -729,7 +729,7 @@ export class Board implements Api {
           selection?.kind === 'hand' && selection.color === color && selection.role === role ? ' gg-selected' : '';
         const count = hand[role] > 1 ? `<span class="gg-count">${hand[role]}</span>` : '';
         const title = escapeHtml(pieceName(role, this.#config.pieceNames));
-        return `<div class="gg-hand-piece${selected}" data-color="${safeColor(color)}" data-role="${role}" title="${title}">${this.#pieceHtml({ role, color }, 'gg-top')}${count}</div>`;
+        return `<div class="gg-hand-piece${selected}" data-color="${safeColor(color)}" data-role="${role}" title="${title}">${this.#pieceHtml({ role, color }, true)}${count}</div>`;
       })
       .join('');
   }
@@ -787,7 +787,7 @@ export class Board implements Api {
       .reverse()
       .map(
         ({ piece, level }) =>
-          `<li>${this.#pieceHtml(piece, 'gg-top')}<span class="gg-name">${escapeHtml(pieceName(piece.role, this.#config.pieceNames))}</span><span class="gg-level">${escapeHtml(labels.level)} ${level + 1}</span></li>`,
+          `<li>${this.#pieceHtml(piece, true)}<span class="gg-name">${escapeHtml(pieceName(piece.role, this.#config.pieceNames))}</span><span class="gg-level">${escapeHtml(labels.level)} ${level + 1}</span></li>`,
       )
       .join('');
     node.innerHTML = `<div class="gg-inspector-title">${escapeHtml(labels.tower)} (${tower.length})</div><ol>${items}</ol>`;

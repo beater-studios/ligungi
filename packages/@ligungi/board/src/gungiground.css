@@ -666,8 +666,9 @@
 }
 
 /*
- * The pieces under the top one (`towerContents`): small discs stacked in the bottom right corner, the base lowest and
- * each tier above it in front, in place of the height. The square's `title` and the tower panel still name them.
+ * The pieces under the top one (`towerContents`), in place of the height: small discs stacked in the bottom right
+ * corner, the base lowest and each tier above it in front, or in `corners` the base bottom right and the tier under
+ * the top top right. The square's `title` and the tower panel still name them.
  */
 .gg-chip {
   position: absolute;
@@ -707,6 +708,15 @@
 .gg-chip .gg-icon {
   width: 86%;
   height: 86%;
+}
+
+.gg-contents-corners .gg-chip {
+  bottom: 3%;
+}
+
+.gg-contents-corners .gg-chip:nth-child(2) {
+  top: 3%;
+  bottom: auto;
 }
 
 .gg-contents ~ .gg-height {

@@ -45,8 +45,8 @@ export const BeginnerHint = () => {
         <Checkbox id="beginner-reach" checked={hoverReach} onChange={(value) => updatePrefs({ hoverReach: value })} label={t.beginner.hoverReach} />
         <Checkbox
           id="beginner-tower-contents"
-          checked={towerContents}
-          onChange={(value) => updatePrefs({ towerContents: value })}
+          checked={towerContents !== 'none'}
+          onChange={(value) => updatePrefs({ towerContents: value ? 'stack' : 'none' })}
           label={t.beginner.towerContents}
         />
       </div>

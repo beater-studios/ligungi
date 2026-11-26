@@ -48,7 +48,7 @@ const DEFAULTS: Config = {
   pieceNames: ENGLISH_PIECE_NAMES,
   moveGuides: false,
   pieceStyle: 'kanji',
-  towerContents: false,
+  towerContents: 'none',
   labels: {},
   onMove: null,
   premoveMoves: [],
@@ -586,9 +586,10 @@ export class Board implements Api {
       .map((piece, level) => this.#pieceHtml(piece, level === tower.length - 1 ? 'gg-top' : 'gg-under', level))
       .join('');
     const badge = tower.length > 1 ? `<span class="gg-height">${tower.length}</span>` : '';
+    const mode = this.#config.towerContents === 'corners' ? 'corners' : 'stack';
     const contents =
-      this.#config.towerContents && tower.length > 1
-        ? `<span class="gg-contents" aria-hidden="true">${tower
+      this.#config.towerContents !== 'none' && tower.length > 1
+        ? `<span class="gg-contents gg-contents-${mode}" aria-hidden="true">${tower
             .slice(0, -1)
             .map((piece, level) => this.#chipHtml(piece, level))
             .join('')}</span>`
@@ -596,7 +597,7 @@ export class Board implements Api {
     return `<div class="gg-tower" style="--height:${tower.length}">${pieces}${contents}${badge}</div>`;
   }
 
-  /** One piece under the top in the corner stack: upright, in the piece style without guides, the base lowest. */
+  /** One piece under the top, in a corner: upright, in the piece style without guides, level 0 being the base. */
   #chipHtml(piece: Piece, level: number): string {
     const { pieceStyle, pieceNames } = this.#config;
     const layout = glyphClass(pieceStyle, false);

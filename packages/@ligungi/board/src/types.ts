@@ -3,6 +3,10 @@ import type { CoordinateStyle } from './geometry.ts';
 import type { PieceStyle } from './glyph.ts';
 import type { Labels, PieceNames } from './labels.ts';
 
+/** How the board shows the pieces under the top of each tower (see `Config.towerContents`). */
+export const TOWER_CONTENTS = ['none', 'stack', 'corners'] as const;
+export type TowerContents = (typeof TOWER_CONTENTS)[number];
+
 export type Selection =
   | { readonly kind: 'square'; readonly square: Square }
   | { readonly kind: 'hand'; readonly color: Color; readonly role: Role };
@@ -31,10 +35,11 @@ export interface Config {
   /** What each piece shows: kanji, an icon, the icon as outlines or letters (see `PieceStyle`). */
   pieceStyle: PieceStyle;
   /**
-   * The pieces under the top one as a small stack in a corner of the square, the base below and the next tier in front
-   * of it, in place of the tower's height.
+   * The pieces under the top one, in place of the tower's height: `stack` piles them in the bottom right corner, the
+   * base below and the next tier in front of it; `corners` puts the base in the bottom right corner and the tier just
+   * under the top in the top right one.
    */
-  towerContents: boolean;
+  towerContents: TowerContents;
   labels: Partial<Labels>;
   /** Called after the user picks a move. The board already shows the resulting position. */
   onMove: ((move: Move) => void) | null;

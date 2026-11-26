@@ -1,7 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import { MoveListPreview } from '../prefs/MoveListPreview.tsx';
 import { PiecePreview } from '../prefs/PiecePreview.tsx';
-import { PIECE_STYLES } from '@ligungi/board';
+import { PIECE_STYLES, TOWER_CONTENTS } from '@ligungi/board';
 import { initialPosition, legalMoves, topOf } from '@ligungi/engine';
 import { customBoardStyle, DEFAULT_CUSTOM_BOARD, type BoardWarning } from '../prefs/boardColors.ts';
 import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type PieceWarning } from '../prefs/pieceColors.ts';
@@ -285,7 +285,7 @@ export const SettingsPage = () => {
                 onChange={(moveGuides) => updatePrefs({ moveGuides })}
               />
             </SettingRow>
-            {toggle('towerContents', s.towerContents, s.towerContentsHelp)}
+            {choice('towerContents', s.towerContents, TOWER_CONTENTS.map((mode) => [mode, s.towerContentsModes[mode]]), { help: s.towerContentsHelp })}
             {toggle('coordinates', s.coordinates, s.coordinatesHelp)}
             {choice(
               'zoom',

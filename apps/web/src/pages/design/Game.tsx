@@ -133,9 +133,14 @@ export const GameSection = () => (
         <BoardView position={lessonPosition} orientation="white" targets={[parseSquare('e5')!, parseSquare('e3')!]} />
       </div>
     </Example>
-    <Example label="Pieces under each tower (Settings > Board > Pieces under each tower, off by default): a small stack in the corner, the base lowest, each in its color and the piece style; off, the square shows the tower's height">
+    <Example label="Pieces under each tower, stacked (Settings > Appearance > Pieces under each tower, off by default): a small stack in the corner, the base lowest, each in its color and the piece style; off, the square shows the tower's height">
       <div class="ligungi-ds__board">
-        <BoardView position={towersPosition} orientation="white" towerContents />
+        <BoardView position={towersPosition} orientation="white" towerContents="stack" />
+      </div>
+    </Example>
+    <Example label="Pieces under each tower, in the corners: the base bottom right, the tier just under the top top right">
+      <div class="ligungi-ds__board">
+        <BoardView position={towersPosition} orientation="white" towerContents="corners" />
       </div>
     </Example>
     <Example label="Typed moves under the board (KeyboardMove, Settings > Preferences > Type moves): here from the Beginner start, try 6-8 general">

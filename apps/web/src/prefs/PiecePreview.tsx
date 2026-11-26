@@ -43,8 +43,8 @@ export const PiecePreview = () => {
                     dangerouslySetInnerHTML={{ __html: `<span>${pieceGlyph(role, pieceStyle, moveGuides, names)}</span>` }}
                   />
                 ))}
-                {towerContents && stack.length > 1 && (
-                  <span class="gg-contents">
+                {towerContents !== 'none' && stack.length > 1 && (
+                  <span class={`gg-contents gg-contents-${towerContents}`}>
                     {stack.slice(0, -1).map(([role, color], level) => (
                       <span
                         key={level}

@@ -1654,7 +1654,12 @@
     "moveGuides": "Indicadores de movimiento",
     "moveGuidesHelp": "Marcas alrededor de cada pieza muestran cómo se mueve: un punto por cada casilla de alcance, una flecha para una línea ilimitada y un anillo donde aterrizan las piezas que saltan.",
     "towerContents": "Piezas bajo cada torre",
-    "towerContentsHelp": "Muestra las piezas que están bajo la de arriba como una pequeña pila en la esquina de la casilla, la base más abajo, en lugar de la altura de la torre. Se oculta mientras las piezas están ocultas para entrenar.",
+    "towerContentsHelp": "Muestra las piezas que están bajo la de arriba en lugar de la altura de la torre. Apiladas: una pequeña pila en la esquina de la casilla, la base más abajo. En las esquinas: la base en la esquina de abajo y la pieza justo bajo la de arriba en la esquina de arriba. Se oculta mientras las piezas están ocultas para entrenar.",
+    "towerContentsModes": {
+      "none": "Desactivado",
+      "stack": "Apiladas",
+      "corners": "En las esquinas"
+    },
     "theme": "Tema",
     "light": "Claro",
     "dark": "Oscuro",

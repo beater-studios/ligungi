@@ -1654,7 +1654,12 @@
     "moveGuides": "Movement indicators",
     "moveGuidesHelp": "Marks around each piece show how it moves: a dot for each square of reach, an arrow for an unlimited line and a ring where jumping pieces land.",
     "towerContents": "Pieces under each tower",
-    "towerContentsHelp": "Shows the pieces under the top one as a small stack in the corner of the square, the base lowest, instead of the tower's height. Hidden while the pieces are hidden for training.",
+    "towerContentsHelp": "Shows the pieces under the top one instead of the tower's height. Stacked: a small pile in the corner of the square, the base lowest. In the corners: the base in the bottom corner and the piece just under the top in the top corner. Hidden while the pieces are hidden for training.",
+    "towerContentsModes": {
+      "none": "Off",
+      "stack": "Stacked",
+      "corners": "In the corners"
+    },
     "theme": "Theme",
     "light": "Light",
     "dark": "Dark",

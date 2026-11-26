@@ -1654,7 +1654,12 @@
     "moveGuides": "Indicadores de movimento",
     "moveGuidesHelp": "Marcas em volta de cada peça mostram como ela anda: um ponto por casa de alcance, uma seta para linha ilimitada e um anel onde as peças que saltam aterrissam.",
     "towerContents": "Peças de baixo das torres",
-    "towerContentsHelp": "Mostra as peças que estão sob o topo como uma pequena pilha no canto da casa, a base mais embaixo, no lugar da altura da torre. Fica escondido enquanto as peças estão escondidas para treino.",
+    "towerContentsHelp": "Mostra as peças que estão sob o topo no lugar da altura da torre. Empilhadas: uma pequena pilha no canto da casa, a base mais embaixo. Nos cantos: a base no canto de baixo e a peça logo abaixo do topo no canto de cima. Fica escondido enquanto as peças estão escondidas para treino.",
+    "towerContentsModes": {
+      "none": "Desligado",
+      "stack": "Empilhadas",
+      "corners": "Nos cantos"
+    },
     "theme": "Tema",
     "light": "Claro",
     "dark": "Escuro",

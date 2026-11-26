@@ -180,7 +180,7 @@ describe('Gungiground', () => {
   });
 
   it('stacks the pieces under the top in a corner, base first, each in its color and the piece style', () => {
-    mount(build({ e5: 'pRG', a1: 'M', d4: 'Ps' }), { movableColor: null, towerContents: true });
+    mount(build({ e5: 'pRG', a1: 'M', d4: 'Ps' }), { movableColor: null, towerContents: 'stack' });
     const chips = [...squareEl('e5').querySelectorAll('.gg-contents .gg-chip')];
     expect(chips.map((chip) => chip.textContent)).toEqual(['兵', '馬']);
     expect(chips.map((chip) => [...chip.classList].find((c) => c === 'gg-white' || c === 'gg-black'))).toEqual(['gg-black', 'gg-white']);
@@ -189,6 +189,16 @@ describe('Gungiground', () => {
     expect(squareEl('a1').querySelector('.gg-contents')).toBeNull();
     api!.set({ pieceStyle: 'letters' });
     expect([...squareEl('e5').querySelectorAll('.gg-chip')].map((chip) => chip.textContent)).toEqual(['So', 'Kn']);
+  });
+
+  it('can put the pieces under the top in two corners instead, and switch back to the height', () => {
+    mount(build({ e5: 'pRG' }), { movableColor: null, towerContents: 'corners' });
+    const contents = squareEl('e5').querySelector('.gg-contents')!;
+    expect(contents.classList.contains('gg-contents-corners')).toBe(true);
+    expect([...contents.querySelectorAll('.gg-chip')].map((chip) => chip.textContent)).toEqual(['兵', '馬']);
+    api!.set({ towerContents: 'none' });
+    expect(squareEl('e5').querySelector('.gg-contents')).toBeNull();
+    expect(squareEl('e5').querySelector('.gg-height')!.textContent).toBe('3');
   });
 
   it('shows names and labels from translations as text, never as markup', () => {

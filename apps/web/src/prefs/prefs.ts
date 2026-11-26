@@ -1,4 +1,4 @@
-import { PIECE_STYLES, type PieceStyle } from '@ligungi/board';
+import { PIECE_STYLES, TOWER_CONTENTS, type PieceStyle, type TowerContents } from '@ligungi/board';
 import { customBoardStyle, DEFAULT_CUSTOM_BOARD, isHexColor, type CustomBoard } from './boardColors.ts';
 import { customPieceStyle, DEFAULT_CUSTOM_PIECES, type CustomPieces } from './pieceColors.ts';
 import { isLang, LANGS, localeOf, matchLang, type Lang } from '../i18n/languages.ts';
@@ -70,8 +70,8 @@ export interface Prefs {
   readonly zoom: number;
   /** Mark the squares a hovered piece could reach. */
   readonly hoverReach: boolean;
-  /** Show the pieces under the top of each tower as a small stack in the corner of its square, instead of its height. */
-  readonly towerContents: boolean;
+  /** Show the pieces under the top of each tower, stacked in a corner of its square or in two corners, instead of its height. */
+  readonly towerContents: TowerContents;
   /** Game pages add a text version of the board: announced moves and a field for typed moves and questions. */
   readonly screenReader: boolean;
   /** Game pages add a field under the board for typed moves. */
@@ -142,7 +142,7 @@ const DEFAULTS: Prefs = {
   animation: true,
   zoom: 80,
   hoverReach: true,
-  towerContents: false,
+  towerContents: 'none',
   soundSet: 'sfx',
   byoyomiCount: 'beep',
   screenReader: false,
@@ -201,7 +201,8 @@ const load = (): Prefs => {
       screenReader: stored.screenReader === true,
       keyboardMove: stored.keyboardMove === true,
       zen: stored.zen === true,
-      towerContents: stored.towerContents === true,
+      // It started as a switch that showed the stack.
+      towerContents: oneOf(TOWER_CONTENTS, stored.towerContents, stored.towerContents === true ? 'stack' : DEFAULTS.towerContents),
       notifications: stored.notifications === true,
       towerTap: oneOf(TOWER_TAPS, stored.towerTap, DEFAULTS.towerTap),
       confirmMove: oneOf(CONFIRM_MOVES, stored.confirmMove, DEFAULTS.confirmMove),

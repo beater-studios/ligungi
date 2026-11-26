@@ -8,7 +8,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
-- Board: a setting shows the pieces under the top of each tower as a small stack in the corner of the square, the base lowest, in your piece style and colors, instead of only the tower's height. It is off by default; turn it on in Settings or in the "New to Gungi?" box beside the board.
+- Board: a setting shows the pieces under the top of each tower, in your piece style and colors, instead of only the tower's height. Choose between a small stack in the corner of the square, the base lowest, or the two corners, the base at the bottom and the piece just under the top at the top. It is off by default; turn it on in Settings, or turn on the stack in the "New to Gungi?" box beside the board.
 - The FAQ says how to install ligungi as an app, and that it is in the Microsoft Store on Windows.
 - Studies can be liked: a heart on each study shows how many like it, the list can show the most liked first, and a new tab keeps the studies you like.
 - Studies: reporting a study now points the moderators to the chapter and move you were on, and their link opens the study right there. Moderators hear of each new report on Discord, and can clear the drawings of a chapter without hiding the whole study.

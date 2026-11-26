@@ -29,8 +29,10 @@
   --gg-selected: rgba(20, 85, 30, 0.5);
   --gg-dest: rgba(20, 85, 30, 0.55);
   --gg-dest-hover: rgba(20, 85, 30, 0.3);
+  --gg-capture: rgba(200, 45, 30, 0.65);
   --gg-premove: rgba(30, 60, 160, 0.35);
   --gg-premove-dest: rgba(30, 60, 160, 0.55);
+  --gg-premove-capture: rgba(130, 40, 150, 0.6);
   --gg-reach: rgba(214, 110, 40, 0.28);
   --gg-reach-edge: rgba(214, 110, 40, 0.55);
   --gg-check: rgba(214, 40, 40, 0.85);
@@ -74,6 +76,7 @@
   --gg-selected: rgba(170, 225, 110, 0.5);
   --gg-dest: rgba(195, 240, 140, 0.8);
   --gg-dest-hover: rgba(170, 225, 110, 0.35);
+  --gg-capture: rgba(255, 150, 130, 0.85);
   --gg-reach: rgba(255, 165, 80, 0.35);
   --gg-reach-edge: rgba(255, 180, 100, 0.9);
 }
@@ -112,6 +115,8 @@
   --gg-selected: rgba(0, 80, 230, 0.5);
   --gg-dest: rgba(0, 60, 210, 0.9);
   --gg-dest-hover: rgba(0, 80, 230, 0.3);
+  /* Orange, since yellow already marks the last move here. */
+  --gg-capture: rgba(230, 110, 0, 0.95);
   --gg-reach: rgba(0, 80, 230, 0.15);
   --gg-reach-edge: rgba(0, 60, 210, 0.9);
 }
@@ -135,6 +140,7 @@
   --gg-selected: var(--gg-custom-selected, rgba(20, 85, 30, 0.5));
   --gg-dest: var(--gg-custom-dest, rgba(20, 85, 30, 0.55));
   --gg-dest-hover: var(--gg-custom-dest-hover, rgba(20, 85, 30, 0.3));
+  --gg-capture: var(--gg-custom-capture, rgba(200, 45, 30, 0.65));
   --gg-reach: var(--gg-custom-reach, rgba(214, 110, 40, 0.28));
   --gg-reach-edge: var(--gg-custom-reach-edge, rgba(214, 110, 40, 0.55));
 }
@@ -916,6 +922,43 @@
 }
 
 .gg-sq.gg-dest-occupied.gg-pre::after {
+  background: radial-gradient(transparent 0%, transparent 79%, var(--gg-premove-dest) 80%);
+}
+
+/*
+ * A click that captures with no menu (capturing is the only option there) gets corners in two bands and in the capture
+ * color, so it differs from a square that opens the menu by shape as well as by color.
+ */
+.gg-sq.gg-dest-occupied.gg-dest-capture::after {
+  background: radial-gradient(
+    transparent 0%,
+    transparent 77%,
+    var(--gg-capture) 77.5%,
+    var(--gg-capture) 84%,
+    transparent 84.5%,
+    transparent 88%,
+    var(--gg-capture) 88.5%
+  );
+}
+
+.gg-sq.gg-dest-occupied.gg-dest-capture.gg-pre::after {
+  background: radial-gradient(
+    transparent 0%,
+    transparent 77%,
+    var(--gg-premove-capture) 77.5%,
+    var(--gg-premove-capture) 84%,
+    transparent 84.5%,
+    transparent 88%,
+    var(--gg-premove-capture) 88.5%
+  );
+}
+
+/* With the pieces hidden for training, a lone enemy piece marked this way would give away its Marshal. */
+.gg-hidden-pieces .gg-board .gg-sq.gg-dest-occupied.gg-dest-capture::after {
+  background: radial-gradient(transparent 0%, transparent 79%, var(--gg-dest) 80%);
+}
+
+.gg-hidden-pieces .gg-board .gg-sq.gg-dest-occupied.gg-dest-capture.gg-pre::after {
   background: radial-gradient(transparent 0%, transparent 79%, var(--gg-premove-dest) 80%);
 }
 

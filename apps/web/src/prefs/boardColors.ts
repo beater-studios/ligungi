@@ -69,7 +69,7 @@ const over = (board: Rgb, [r, g, b, alpha]: Rgba): Rgb => [
 ];
 
 type Rgba = readonly [number, number, number, number];
-const MARK_NAMES = ['last', 'selected', 'dest', 'dest-hover', 'reach', 'reach-edge'] as const;
+const MARK_NAMES = ['last', 'selected', 'dest', 'dest-hover', 'capture', 'reach', 'reach-edge'] as const;
 type Marks = Readonly<Record<(typeof MARK_NAMES)[number], Rgba>>;
 
 /** The mark colors of the built-in themes: light wood, walnut and high contrast. */
@@ -79,6 +79,7 @@ const MARK_SETS: readonly Marks[] = [
     selected: [20, 85, 30, 0.5],
     dest: [20, 85, 30, 0.55],
     'dest-hover': [20, 85, 30, 0.3],
+    capture: [200, 45, 30, 0.65],
     reach: [214, 110, 40, 0.28],
     'reach-edge': [214, 110, 40, 0.55],
   },
@@ -87,6 +88,7 @@ const MARK_SETS: readonly Marks[] = [
     selected: [170, 225, 110, 0.5],
     dest: [195, 240, 140, 0.8],
     'dest-hover': [170, 225, 110, 0.35],
+    capture: [255, 150, 130, 0.85],
     reach: [255, 165, 80, 0.35],
     'reach-edge': [255, 180, 100, 0.9],
   },
@@ -95,6 +97,7 @@ const MARK_SETS: readonly Marks[] = [
     selected: [0, 80, 230, 0.5],
     dest: [0, 60, 210, 0.9],
     'dest-hover': [0, 80, 230, 0.3],
+    capture: [230, 110, 0, 0.95],
     reach: [0, 80, 230, 0.15],
     'reach-edge': [0, 60, 210, 0.9],
   },

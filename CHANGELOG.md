@@ -16,6 +16,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ### Changed
 
+- Board: after picking a piece, a square where the click captures at once (capturing is the only option, so no menu opens) is marked with corners in two bands and in a capture color of its own, red on the wood boards. The squares that open the menu to capture or stack keep the usual mark, and so does every square while the pieces are hidden for training.
 - Studies: each move can have up to 8 arrows and 8 painted squares (2 and 4 before), enough to show every direction of any piece.
 - Settings: the board preview stays in view while you scroll through the appearance options, beside them on a computer and as a smaller strip above them on a phone. It also shows the pieces under its tower when that setting is on.
 - API: each error code now always comes with the same HTTP status. A few responses changed: an unknown mode in a ranking, leaderboard or stats address is `400 invalidMode` (was 404); an account needed for rated or correspondence play is `401` (was 400 or 409); `tooManyChallenges` is always `429`, `notYourChallenge` and `notInActivity` `403`, and `activitySignInFailed` `401`.

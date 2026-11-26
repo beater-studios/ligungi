@@ -79,6 +79,9 @@ const GOAL_STAR =
   '<svg class="gg-goal" viewBox="-8 -12.5 116 116" aria-hidden="true" focusable="false">' +
   '<path d="M50 0 61 35H98L68 57 79 91 50 70 21 91 32 57 2 35H39Z"/></svg>';
 
+/** The only move onto a square is a capture, so a click there captures at once instead of opening the menu. */
+const capturesDirectly = (moves: readonly Move[]): boolean => moves.length === 1 && moves[0]!.kind === 'move' && moves[0]!.action === 'capture';
+
 export class Board implements Api {
   #config: Config;
   #selection: Selection | null = null;
@@ -644,7 +647,12 @@ export class Board implements Api {
       if (lastSquares.has(square)) classes.push('gg-last');
       if (premoveSquares.has(square)) classes.push('gg-premove');
       if (this.#selection?.kind === 'square' && this.#selection.square === square) classes.push('gg-selected');
-      if (dests.has(square)) classes.push(occupied ? 'gg-dest-occupied' : 'gg-dest', ...(premoving ? ['gg-pre'] : []));
+      const destMoves = dests.get(square);
+      if (destMoves) {
+        classes.push(occupied ? 'gg-dest-occupied' : 'gg-dest');
+        if (occupied && capturesDirectly(destMoves)) classes.push('gg-dest-capture');
+        if (premoving) classes.push('gg-pre');
+      }
       if (marshal === square) classes.push('gg-check');
       if (dragging === square) classes.push('gg-drag-origin');
       if (targets.has(square)) classes.push('gg-target');

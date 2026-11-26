@@ -15,6 +15,8 @@ import { Example, Section } from './parts.tsx';
 
 const lessonPosition = parseFen('9/9/9/9/9/9/4P4/4S4/9 w - advanced p w');
 const towersPosition = parseFen(fenFromTowers({ e5: 'PRG', d4: 'pRt', f3: 'YP', a1: 'M', i9: 'm' }));
+/** A General on a full tower beside a full black tower and the black Marshal (capture only) and two soldiers (the menu). */
+const capturePosition = parseFen(fenFromTowers({ e5: 'PRG', e6: 'pRp', d6: 'm', f6: 'p', d5: 'P', a1: 'M' }));
 
 export const GameSection = () => (
   <Section id="game" title="Game">
@@ -141,6 +143,11 @@ export const GameSection = () => (
     <Example label="Pieces under each tower, in the corners: the base bottom right, the tier just under the top top right">
       <div class="ligungi-ds__board">
         <BoardView position={towersPosition} orientation="white" towerContents="corners" />
+      </div>
+    </Example>
+    <Example label="Destinations of a selected piece (click the General): a dot on empty squares, the usual corners where the click opens the menu (capture or stack, stack or select), corners in two bands in the theme's capture color where the click captures at once">
+      <div class="ligungi-ds__board">
+        <BoardView position={capturePosition} orientation="white" moves={legalMoves(capturePosition)} movableColor="white" />
       </div>
     </Example>
     <Example label="Typed moves under the board (KeyboardMove, Settings > Preferences > Type moves): here from the Beginner start, try 6-8 general">

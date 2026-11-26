@@ -109,6 +109,22 @@ describe('Gungiground', () => {
     expect(squareEl('e6').querySelector('.gg-height')?.textContent).toBe('2');
   });
 
+  it('marks the squares where a click captures at once apart from those that open the menu', () => {
+    const played = mount(build({ e5: 'P', e6: 'm', a1: 'M', i9: 'p' }));
+    click('e5');
+    expect(squareEl('e6').classList.contains('gg-dest-capture')).toBe(true);
+    click('e6');
+    expect(root.querySelector('.gg-chooser button')).toBeNull();
+    expect(played.map(moveToString)).toEqual(['e5e6x']);
+
+    api!.destroy();
+    root.remove();
+    mount(build({ e5: 'P', e6: 'p' }));
+    click('e5');
+    expect(squareEl('e6').classList.contains('gg-dest-occupied')).toBe(true);
+    expect(squareEl('e6').classList.contains('gg-dest-capture')).toBe(false);
+  });
+
   it('offers betrayal when the tactician can turn a tower', () => {
     mount(build({ e5: 'PT', f6: 'p' }, { hands: { white: { soldier: 1 } } }));
     click('e5');

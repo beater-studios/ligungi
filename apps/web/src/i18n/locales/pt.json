@@ -267,6 +267,7 @@
     "challenges": "Desafios",
     "notifications": "Notificações",
     "noNotifications": "Nenhuma notificação.",
+    "newNotices": "{n, plural, one {# nova} other {# novas}}",
     "yourTurn": "Sua vez",
     "turnAgainst": "Sua vez contra {name}",
     "timeLeft": "faltam {time}",
@@ -576,6 +577,7 @@
     "waitingFor": "Aguardando {name} responder. Se você sair do site, o desafio é cancelado.",
     "declined": "Este desafio foi recusado.",
     "declinedBy": "{name} recusou o desafio.",
+    "youPlay": "{color, select, white {Você joga de Brancas} black {Você joga de Pretas} other {Cores sorteadas no início}}",
     "forSomeoneElse": "Este desafio é para outro jogador.",
     "loginToAnswer": "Entre na sua conta para responder a este desafio."
   },

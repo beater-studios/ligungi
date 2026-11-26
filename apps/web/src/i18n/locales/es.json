@@ -267,6 +267,7 @@
     "challenges": "Desafíos",
     "notifications": "Notificaciones",
     "noNotifications": "Ninguna notificación.",
+    "newNotices": "{n, plural, one {# nueva} other {# nuevas}}",
     "yourTurn": "Tu turno",
     "turnAgainst": "Tu turno contra {name}",
     "timeLeft": "quedan {time}",
@@ -576,6 +577,7 @@
     "waitingFor": "Esperando la respuesta de {name}. Si sales del sitio, el desafío se cancela.",
     "declined": "Este desafío fue rechazado.",
     "declinedBy": "{name} rechazó el desafío.",
+    "youPlay": "{color, select, white {Juegas con blancas} black {Juegas con negras} other {Colores sorteados al inicio}}",
     "forSomeoneElse": "Este desafío es para otro jugador.",
     "loginToAnswer": "Inicia sesión para responder a este desafío."
   },

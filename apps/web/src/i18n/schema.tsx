@@ -67,6 +67,7 @@ export const SCHEMA = {
 
   'nav.turnAgainst': text<[name: string]>('name'),
   'nav.timeLeft': text<[time: string]>('time'),
+  'nav.newNotices': text<[n: number]>('n'),
 
   'footer.studio': rich<[]>({ studio: external(STUDIO) }),
 
@@ -105,6 +106,7 @@ export const SCHEMA = {
   'challenge.ratedLogin': rich<[]>(AUTH),
   'challenge.waitingFor': text<[name: string]>('name'),
   'challenge.declinedBy': text<[name: string]>('name'),
+  'challenge.youPlay': text<[color: string]>('color'),
 
   'auth.pitchItems': lines,
   'auth.suspended': text<[until: string, reason: string]>('until', 'reason'),

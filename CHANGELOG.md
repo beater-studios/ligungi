@@ -4,7 +4,11 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
-## [0.10.0] - 2026-11-25
+### Changed
+
+- The notification bell was redesigned: each item has an icon in its own color (your turn, challenge, new follower, moderation, study), names stand out in bold, a challenge shows its mode, clock and rated or casual as separate tags and says which color you would play, the accept and decline buttons have labels, unread notices have a dot and a tinted background, and the time left in a correspondence game turns orange on its last day.
+
+## [0.10.0] - 2026-11-26
 
 ### Added
 

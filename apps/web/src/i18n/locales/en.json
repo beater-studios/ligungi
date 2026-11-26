@@ -267,6 +267,7 @@
     "challenges": "Challenges",
     "notifications": "Notifications",
     "noNotifications": "No notifications.",
+    "newNotices": "{n, plural, one {# new} other {# new}}",
     "yourTurn": "Your turn",
     "turnAgainst": "Your turn against {name}",
     "timeLeft": "{time} left",
@@ -576,6 +577,7 @@
     "waitingFor": "Waiting for {name} to answer. If you leave the site, the challenge is canceled.",
     "declined": "This challenge was declined.",
     "declinedBy": "{name} declined the challenge.",
+    "youPlay": "{color, select, white {You play White} black {You play Black} other {Colors drawn at the start}}",
     "forSomeoneElse": "This challenge is for another player.",
     "loginToAnswer": "Sign in to answer this challenge."
   },

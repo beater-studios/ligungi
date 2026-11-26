@@ -151,7 +151,7 @@ body:has(main.ligungi-auth) #clinput {
   }
 
   &__list {
-    width: 20rem;
+    width: 22rem;
     max-width: calc(100vw - 2rem);
     max-height: 70vh;
     overflow-y: auto;
@@ -168,49 +168,6 @@ body:has(main.ligungi-auth) #clinput {
     }
   }
 
-  &__empty {
-    padding: 1.5em 1em;
-    margin: 0;
-    color: $c-font-dim;
-    text-align: center;
-  }
-
-  &__heading {
-    margin: 0;
-    padding: 0.8em 1em 0.2em;
-    color: $c-font-dim;
-    font-size: 0.75em;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-}
-
-// A correspondence game waiting for the viewer's move, in the bell's dropdown.
-.ligungi-turn {
-  & + & {
-    border-top: $border;
-  }
-
-  a {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15em;
-    padding: 0.7em 1em;
-    color: $c-header-dropdown;
-
-    &:hover {
-      background: $c-bg-zebra;
-    }
-  }
-
-  &__name {
-    font-weight: 600;
-  }
-
-  small {
-    color: $c-font-dim;
-  }
 }
 
 // Two choices in one card (who may challenge, who may follow): the second legend needs air after the first help text.
@@ -218,83 +175,226 @@ body:has(main.ligungi-auth) #clinput {
   margin-top: 1.2em;
 }
 
-// A follower or a moderation decision, in the bell's dropdown.
-.ligungi-bell-notice {
-  & + & {
-    border-top: $border;
+// The bell's dropdown: one row per item, each with an icon in its tone (turn, challenge, follow, moderation, study),
+// the names in bold and the details in smaller, dimmer text.
+.ligungi-bell {
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  > a,
-  > div {
+  &__head {
     display: flex;
-    flex-direction: column;
-    gap: 0.15em;
-    padding: 0.7em 1em;
-    border-inline-start: 3px solid transparent;
-    color: $c-header-dropdown;
-  }
-
-  > a:hover {
-    background: $c-bg-zebra;
-  }
-
-  &--unread > a,
-  &--unread > div {
-    border-inline-start-color: $c-primary;
-  }
-
-  &--unread &__text {
+    align-items: center;
+    justify-content: space-between;
+    gap: 1em;
+    padding: 0.9em 1em 0.4em;
+    color: $c-font-clear;
     font-weight: 600;
   }
 
-  small {
+  &__count {
+    padding: 0.25em 0.6em;
+    border-radius: 1em;
+    background: color-mix(in srgb, #{$c-primary} 18%, transparent);
+    color: $c-primary;
+    font-size: 0.8em;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  &__heading {
+    margin: 0;
+    padding: 0.9em 1em 0.3em;
     color: $c-font-dim;
-  }
-}
-
-.ligungi-challenge {
-  display: flex;
-  align-items: center;
-  gap: 0.8em;
-  padding: 0.8em 1em;
-
-  & + & {
-    border-top: $border;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  &__info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15em;
-    flex: 1;
-    min-width: 0;
+  &__empty {
+    padding: 1.5em 1em;
+    margin: 0;
+    color: $c-font-dim;
+    text-align: center;
+  }
 
-    a {
+  &__item {
+    --tone: #{$c-font-dim};
+
+    position: relative;
+
+    & + & {
+      border-top: $border;
+    }
+
+    > a,
+    > div:not(.ligungi-bell__body),
+    &--challenge {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75em;
+      padding: 0.7em 1em;
       color: $c-header-dropdown;
     }
 
     > a:hover {
-      color: $c-link;
+      background: $c-bg-zebra;
+    }
+
+    &--turn {
+      --tone: #{$c-good};
+    }
+
+    &--challenge {
+      --tone: #{$c-primary};
+    }
+
+    &.is-unread {
+      background: color-mix(in srgb, #{$c-primary} 7%, transparent);
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset-inline-start: 0.35em;
+        top: 1.55em;
+        width: 0.4em;
+        height: 0.4em;
+        border-radius: 50%;
+        background: $c-primary;
+      }
+    }
+  }
+
+  &__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.2em;
+    height: 2.2em;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--tone) 16%, transparent);
+    color: var(--tone);
+    font-size: 0.95em;
+
+    &::before {
+      margin: 0;
+    }
+
+    &--follow {
+      --tone: var(--c-fancy);
+    }
+
+    &--mod {
+      --tone: var(--c-accent);
+    }
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+    line-height: 1.4;
+
+    strong {
+      color: $c-font-clear;
+      font-weight: 600;
     }
 
     small {
       color: $c-font-dim;
     }
+
+    .player-tag a {
+      color: $c-font-clear;
+      font-weight: 600;
+    }
+
+    .player-tag .rating {
+      margin-inline-start: 0.4em;
+      color: $c-font-dim;
+      font-size: 0.85em;
+    }
   }
 
-  &__actions {
+  &__urgent {
+    color: $c-warn;
+    font-weight: 600;
+  }
+
+  &__chips {
     display: flex;
-    gap: 0.4em;
+    flex-wrap: wrap;
+    gap: 0.35em;
+    color: inherit;
+  }
+
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    padding: 0.3em 0.55em;
+    border-radius: 4px;
+    background: $c-bg-zebra;
+    color: $c-font;
+    font-size: 0.8em;
+    font-weight: 500;
+
+    &::before {
+      margin: 0;
+      font-size: 0.9em;
+    }
+
+    &--rated {
+      background: color-mix(in srgb, #{$c-brag} 20%, transparent);
+      color: $c-brag;
+      font-weight: 600;
+    }
+  }
+
+  &__color {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 0.85em;
+  }
+
+  &__disc {
+    flex: none;
+    width: 0.9em;
+    height: 0.9em;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.7);
+
+    &--white {
+      background: #f3eee6;
+    }
+
+    &--black {
+      background: #232323;
+    }
+
+    &--random {
+      background: linear-gradient(90deg, #f3eee6 50%, #232323 50%);
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 0.5em;
+    margin-top: 0.2em;
 
     .button {
-      padding: 0.5em 0.7em;
+      flex: 1;
+      padding: 0.55em 0.6em;
+      font-size: 0.85em;
 
       &:not(.button-empty) {
         color: $c-over;
-      }
-
-      &::before {
-        margin: 0;
       }
     }
   }

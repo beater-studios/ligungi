@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ARENA_START_STREAK, arenaPerformance, arenaPoints, arenaPrizes, arenaSeason, arenaTopCount, nextArenaStart } from '../src/index.ts';
+import { ARENA_START_STREAK, arenaPerformance, arenaPoints, arenaPrizes, arenaSeason, arenaTopCount, isSeason, nextArenaStart, seasonCounted, seasonRange } from '../src/index.ts';
 
 describe('arena', () => {
   it('starts every Saturday at 18:00 UTC, from the first one announced', () => {
@@ -35,6 +35,22 @@ describe('arena', () => {
     expect(arenaPoints('draw', first.streak, 60).points).toBe(0);
     // A draw ends a win streak.
     expect(arenaPoints('draw', { wins: 3, drew: false }, 60).streak).toEqual({ wins: 0, drew: true });
+  });
+
+  it('gives a berserk win one more point once the play phase lasted 7 moves', () => {
+    expect(arenaPoints('win', ARENA_START_STREAK, 13, true)).toMatchObject({ points: 2, berserk: false });
+    expect(arenaPoints('win', ARENA_START_STREAK, 14, true)).toMatchObject({ points: 3, berserk: true });
+    expect(arenaPoints('win', { wins: 2, drew: false }, 30, true)).toMatchObject({ points: 5, doubled: true, berserk: true });
+    expect(arenaPoints('loss', ARENA_START_STREAK, 30, true).points).toBe(0);
+  });
+
+  it('names the seasons and their ranges, and counts the best half', () => {
+    expect(isSeason('S0')).toBe(true);
+    expect(isSeason('2027-Q4')).toBe(true);
+    expect(isSeason('2027-Q5')).toBe(false);
+    expect(seasonRange('2027-Q2')).toEqual({ from: Date.UTC(2027, 3, 1), to: Date.UTC(2027, 6, 1) });
+    expect(seasonRange('S0').to).toBe(Date.UTC(2027, 0, 1));
+    expect([1, 4, 13].map(seasonCounted)).toEqual([1, 2, 7]);
   });
 
   it('scales the trophies with the players who played', () => {

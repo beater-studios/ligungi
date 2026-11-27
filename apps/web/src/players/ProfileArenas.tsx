@@ -1,13 +1,35 @@
-import type { ArenaList, PlayerArenas } from '@ligungi/protocol';
+import type { ArenaList, PlayerArenas, PlayerSeason, TrophyView } from '@ligungi/protocol';
 import { useEffect, useState } from 'preact/hooks';
-import { arenaTime, trophyTitle } from '../arena/arena.ts';
+import { arenaTime, seasonLabel, trophyTitle } from '../arena/arena.ts';
 import { Trophy } from '../arena/Trophy.tsx';
 import { api } from '../core/api.ts';
-import { formatDate, useT } from '../i18n/index.ts';
+import { formatDate, useT, type Messages } from '../i18n/index.ts';
+
+const TrophyList = ({ t, trophies, size }: { t: Messages; trophies: readonly TrophyView[]; size: number }) => (
+  <ul class="ligungi-profile-arenas__list">
+    {trophies.map((trophy) => (
+      <li key={`${trophy.arena}-${trophy.kind}`}>
+        <a href={trophy.kind === 'seasonChampion' ? `/arena/season/${trophy.season}` : `/arena/${trophy.arena}`}>
+          <Trophy kind={trophy.kind} size={size} title={trophyTitle(t, trophy)} />
+          <span>{trophy.kind === 'seasonChampion' ? t.arena.trophies.seasonChampion : t.arena.place(trophy.place, trophy.players)}</span>
+          <small>{trophy.kind === 'seasonChampion' ? seasonLabel(t, trophy.season) : formatDate(t, trophy.at)}</small>
+        </a>
+      </li>
+    ))}
+  </ul>
+);
+
+/** One season's line: its name (Season 0 with the founders' mark), the player's place and points. */
+const SeasonName = ({ t, season }: { t: Messages; season: PlayerSeason }) => (
+  <>
+    <strong>{seasonLabel(t, season.season)}</strong>
+    {season.season === 'S0' && <span class="ligungi-season__founders">{t.arena.founders}</span>}
+  </>
+);
 
 /**
- * A player's tournaments on their profile: the trophy counts, the latest trophies (each with its place and date on
- * hover) and the latest Arenas played. Participation is a count, never an icon.
+ * A player's tournaments on their profile: the trophy counts, the season running now with its trophies, the past
+ * seasons folded (each with its trophies inside) and the latest Arenas played. Participation is a count, never an icon.
  */
 export const ProfileArenas = ({ name, own }: { name: string; own: boolean }) => {
   const t = useT();
@@ -34,6 +56,10 @@ export const ProfileArenas = ({ name, own }: { name: string; own: boolean }) => 
   }, [own, data]);
   if (!data) return null;
   const { counts } = data;
+  const bySeason = (season: string) => data.trophies.filter((trophy) => trophy.season === season);
+  // The season running now is open; the ones before are folded, so early players' trophies do not crowd the profile.
+  const current = data.seasons.find((season) => !season.over) ?? null;
+  const past = data.seasons.filter((season) => season !== current);
   if (counts.arenas === 0) {
     // Someone else's empty record says nothing worth a card; the player's own one points to the next Arena.
     if (!own) return null;
@@ -48,6 +74,7 @@ export const ProfileArenas = ({ name, own }: { name: string; own: boolean }) => 
     );
   }
   const summary = [
+    counts.seasons ? a.seasonChampions(counts.seasons) : null,
     counts.champion ? a.champions(counts.champion) : null,
     counts.podium ? a.podiums(counts.podium) : null,
     counts.top ? a.tops(counts.top) : null,
@@ -59,20 +86,41 @@ export const ProfileArenas = ({ name, own }: { name: string; own: boolean }) => 
         <h2>{a.profileTitle}</h2>
         <span>{summary.join(' · ')}</span>
       </div>
-      {data.trophies.length > 0 && (
-        <div class="ligungi-profile-arenas__trophies">
-          <h3>{a.recentTrophies}</h3>
-          <ul>
-            {data.trophies.map((trophy) => (
-              <li key={`${trophy.arena}-${trophy.kind}`}>
-                <a href={`/arena/${trophy.arena}`}>
-                  <Trophy kind={trophy.kind} size={56} title={trophyTitle(t, trophy)} />
-                  <span>{a.place(trophy.place, trophy.players)}</span>
-                  <small>{formatDate(t, trophy.at)}</small>
-                </a>
-              </li>
-            ))}
-          </ul>
+      {current && (
+        <div class="ligungi-profile-arenas__current">
+          <div class="ligungi-profile-arenas__current-head">
+            <span>
+              <SeasonName t={t} season={current} />
+              <span class="ligungi-season__live">{a.homeLive}</span>
+            </span>
+            <a href={`/arena/season/${current.season}`}>{a.seasonStandings}</a>
+          </div>
+          <p>{a.seasonPlace(current.rank, current.players, current.points, current.arenas)}</p>
+          {bySeason(current.season).length > 0 && <TrophyList t={t} trophies={bySeason(current.season)} size={56} />}
+        </div>
+      )}
+      {past.length > 0 && (
+        <div class="ligungi-profile-arenas__past">
+          <h3>{a.pastSeasons}</h3>
+          {past.map((season) => {
+            const trophies = bySeason(season.season);
+            const won = trophies.some((trophy) => trophy.kind === 'seasonChampion');
+            return (
+              <details key={season.season}>
+                <summary>
+                  {won && <Trophy kind="seasonChampion" size={28} />}
+                  <span class="ligungi-profile-arenas__past-name">
+                    <SeasonName t={t} season={season} />
+                    {' · '}
+                    {won ? `${a.trophies.seasonChampion} · ` : ''}
+                    {a.place(season.rank, season.players)}
+                  </span>
+                  <small>{a.trophyCount(trophies.length)}</small>
+                </summary>
+                {trophies.length > 0 ? <TrophyList t={t} trophies={trophies} size={48} /> : <p class="ligungi-arena__note">{a.seasonPlace(season.rank, season.players, season.points, season.arenas)}</p>}
+              </details>
+            );
+          })}
         </div>
       )}
       <div class="ligungi-profile-arenas__history">

@@ -172,7 +172,9 @@
     "raceStarted": "Essa corrida já começou.",
     "notRaceOwner": "Só quem criou a corrida pode iniciá-la.",
     "arenaNotFound": "Arena não encontrada.",
-    "arenaOver": "Essa Arena já terminou."
+    "arenaOver": "Essa Arena já terminou.",
+    "berserkUnavailable": "Só dá para usar o berserk numa partida da Arena, antes do seu primeiro lance.",
+    "seasonNotFound": "Temporada não encontrada."
   },
   "genericError": "Algo deu errado. Tente de novo.",
   "offline": "Sem conexão. Tentando reconectar...",
@@ -1829,7 +1831,8 @@
     "suspensionLifted": "A suspensão da sua conta foi retirada.",
     "arenaSoon": "A Arena semanal começa em 10 minutos.",
     "arenaResult": "Você terminou em {place}º de {players} na Arena semanal.",
-    "arenaTrophy": "Você terminou em {place}º de {players} na Arena semanal e ganhou um troféu."
+    "arenaTrophy": "Você terminou em {place}º de {players} na Arena semanal e ganhou um troféu.",
+    "seasonChampion": "Você é o campeão da temporada: {season}! O troféu está no seu perfil."
   },
   "notify": {
     "challenge": "{name} desafiou você",
@@ -2244,7 +2247,7 @@
     "minutes": "{n} minutos",
     "seasonZero": "Temporada 0",
     "howTitle": "Como funciona",
-    "how": "Entre a qualquer momento. Ao terminar uma partida, você é pareado com alguém livre perto de você na classificação.\nVitória vale 2 pontos, empate 1, derrota 0. Depois de duas vitórias seguidas, cada vitória vale o dobro.\nSair da página pausa você. Volte quando quiser.\nOs pareamentos fecham 8 minutos antes do fim. Partidas que não terminarem até o fim não contam.",
+    "how": "Entre a qualquer momento. Ao terminar uma partida, você é pareado com alguém livre perto de você na classificação.\nVitória vale 2 pontos, empate 1, derrota 0. Depois de duas vitórias seguidas, cada vitória vale o dobro.\nAntes do seu primeiro lance, dá para usar o berserk: metade do seu relógio e sem incremento, em troca de um ponto a mais se vencer.\nSair da página pausa você. Volte quando quiser.\nOs pareamentos fecham 8 minutos antes do fim. Partidas que não terminarem até o fim não contam.",
     "timezone": "Horários no seu fuso ({zone}).",
     "playersTitle": "Inscritos ({count})",
     "standings": "Classificação",
@@ -2259,7 +2262,7 @@
     "stateWaiting": "Na fila",
     "stateAway": "Ausente",
     "fire": "Em sequência: vitórias valem o dobro",
-    "legend": "Laranja: vitória em dobro, depois de duas seguidas. Bolinha: verde jogando, azul na fila, cinza ausente.",
+    "legend": "Laranja: vitória em dobro, depois de duas seguidas. Sublinhado: vitória com berserk (+1). Bolinha: verde jogando, azul na fila, cinza ausente.",
     "waitingBar": "Você está na fila. Sua próxima partida começa assim que houver alguém livre.",
     "pausedBar": "Você está pausado e não será pareado. Volte quando quiser.",
     "playingBar": "Você está em uma partida.",
@@ -2288,7 +2291,8 @@
       "arenaChampion": "Campeão da Arena",
       "arenaSecond": "2º lugar",
       "arenaThird": "3º lugar",
-      "arenaTop": "Top 10%"
+      "arenaTop": "Top 10%",
+      "seasonChampion": "Campeão da temporada"
     },
     "place": "{place}º de {players}",
     "trophyContext": "Arena semanal · {date}",
@@ -2312,6 +2316,31 @@
     "profileEmpty": "Ainda não jogou nenhuma Arena.",
     "profileEmptyYou": "Você ainda não jogou nenhuma Arena. A próxima é {date}.",
     "seeNext": "Ver a próxima Arena",
-    "back": "Voltar à Arena"
+    "back": "Voltar à Arena",
+    "berserk": "Berserk: metade do tempo, +1 ponto na vitória",
+    "berserkTitle": "Usou o berserk: metade do relógio, sem incremento",
+    "berserkWin": "Vitória com berserk: +1 ponto",
+    "seasonQuarter": "{year} · {quarter}º trimestre",
+    "founders": "Fundadores",
+    "seasonsNav": "Temporadas",
+    "seasonPlayed": "{done} de {total} Arenas",
+    "seasonRule": "Contam {counted, plural, one {a melhor Arena} other {as # melhores Arenas}} de cada jogador: metade das {total} encerradas até agora, arredondada para cima. Faltar até metade das semanas não pesa.",
+    "seasonChampion": "Campeão da temporada: {name}, com {points} pontos.",
+    "seasonNoChampion": "Sem troféu da temporada: menos de 4 jogadores jogaram.",
+    "seasonLeft": "{n, plural, one {Falta # Arena} other {Faltam # Arenas}}, a próxima em {date}. O campeão leva o troféu da temporada, com o 帥 no topo.",
+    "seasonEmpty": "Nenhuma Arena terminou nesta temporada ainda.",
+    "seasonStandings": "Classificação da temporada",
+    "seasonResults": "Resultados por Arena",
+    "seasonLegend": "Em destaque, as Arenas que contam; as outras aparecem apagadas. Um traço é uma Arena em que o jogador não jogou. Desempate: quem jogou mais Arenas, depois o melhor resultado único.",
+    "seasonChampions": "Campeão da temporada {n}×",
+    "seasonPlace": "{rank}º de {players} na temporada · {points} pontos · {arenas, plural, one {# Arena jogada} other {# Arenas jogadas}}",
+    "pastSeasons": "Temporadas anteriores",
+    "trophyCount": "{n, plural, =0 {nenhum troféu} one {# troféu} other {# troféus}}",
+    "shareImage": "Baixar imagem do pódio",
+    "imageFooter": "Todo sábado, 18:00 UTC · ligungi.org/arena",
+    "berserkTag": "Berserk",
+    "resultCounts": "conta",
+    "resultNotCounted": "não conta",
+    "resultMissing": "não jogou"
   }
 }

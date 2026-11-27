@@ -10,7 +10,10 @@ import {
   arenaPrizes,
   arenaSeason,
   arenaTopCount,
+  isSeason,
   nextArenaStart,
+  seasonCounted,
+  seasonRange,
   type ArenaList,
   type ArenaSheetEntry,
   type ArenaStanding,
@@ -20,6 +23,9 @@ import {
   type ErrorCode,
   type NoticeKind,
   type PlayerArenas,
+  type PlayerSeason,
+  type SeasonStanding,
+  type SeasonView,
   type TrophyKind,
   type TrophyView,
   type UserRef,
@@ -83,6 +89,8 @@ interface PairingRow {
   black_points: number | null;
   white_doubled: number;
   black_doubled: number;
+  white_berserk: number;
+  black_berserk: number;
   counted: number;
   created_at: number;
   ended_at: number | null;
@@ -101,7 +109,8 @@ export type ArenaEvent =
       readonly previousChampion: string | null;
       readonly next: number | null;
     }
-  | { readonly kind: 'canceled'; readonly arena: string; readonly joined: number; readonly next: number | null };
+  | { readonly kind: 'canceled'; readonly arena: string; readonly joined: number; readonly next: number | null }
+  | { readonly kind: 'season'; readonly season: string; readonly champion: UserRef; readonly points: number; readonly counted: number; readonly players: number };
 
 export interface ArenasOptions {
   readonly now: () => number;
@@ -188,6 +197,7 @@ export class Arenas {
   tick(): void {
     const now = this.#options.now();
     if (this.#options.schedule) this.#ensureUpcoming(now);
+    this.#awardSeasons(now);
     const rows = this.#db.prepare(`select * from arenas where status in ('created', 'started') order by starts_at`).all() as unknown as ArenaRow[];
     for (const row of rows) {
       if (row.status === 'created') this.#beforeStart(row, now);
@@ -245,7 +255,10 @@ export class Arenas {
       if (row) this.#options.changed(row.id);
       return;
     }
-    const points: Record<Color, { points: number; doubled: boolean }> = { white: { points: 0, doubled: false }, black: { points: 0, doubled: false } };
+    const points: Record<Color, { points: number; doubled: boolean; berserk: boolean }> = {
+      white: { points: 0, doubled: false, berserk: false },
+      black: { points: 0, doubled: false, berserk: false },
+    };
     for (const color of ['white', 'black'] as const) {
       const userId = color === 'white' ? pairing.white_user : pairing.black_user;
       if (!userId) continue;
@@ -253,8 +266,8 @@ export class Arenas {
       if (!player) continue;
       const winner = room.outcome?.winner ?? null;
       const result = winner === null ? 'draw' : winner === color ? 'win' : 'loss';
-      const scored = arenaPoints(result, { wins: player.streak, drew: player.drew === 1 }, room.boardMoves);
-      points[color] = { points: scored.points, doubled: scored.doubled };
+      const scored = arenaPoints(result, { wins: player.streak, drew: player.drew === 1 }, room.boardMoves, room.berserk[color]);
+      points[color] = { points: scored.points, doubled: scored.doubled, berserk: scored.berserk };
       this.#db
         .prepare(
           `update arena_players set score = score + ?1, games = games + 1, wins = wins + ?2, losses = losses + ?3, streak = ?4, drew = ?5,
@@ -265,9 +278,19 @@ export class Arenas {
     this.#db
       .prepare(
         `update arena_pairings set status = 'ended', winner = ?, white_points = ?, black_points = ?, white_doubled = ?, black_doubled = ?,
-         counted = 1, ended_at = ? where game_id = ?`,
+         white_berserk = ?, black_berserk = ?, counted = 1, ended_at = ? where game_id = ?`,
       )
-      .run(room.outcome?.winner ?? null, points.white.points, points.black.points, points.white.doubled ? 1 : 0, points.black.doubled ? 1 : 0, now, room.id);
+      .run(
+        room.outcome?.winner ?? null,
+        points.white.points,
+        points.black.points,
+        points.white.doubled ? 1 : 0,
+        points.black.doubled ? 1 : 0,
+        points.white.berserk ? 1 : 0,
+        points.black.berserk ? 1 : 0,
+        now,
+        room.id,
+      );
     this.#options.changed(row.id);
   }
 
@@ -299,10 +322,25 @@ export class Arenas {
   playerArenas(userId: string): PlayerArenas {
     const counts = this.#db
       .prepare(
-        `select sum(kind = 'arenaChampion') as champion, sum(kind in ('arenaSecond', 'arenaThird')) as podium, sum(kind = 'arenaTop') as top
+        `select sum(kind = 'arenaChampion') as champion, sum(kind in ('arenaSecond', 'arenaThird')) as podium, sum(kind = 'arenaTop') as top,
+           sum(kind = 'seasonChampion') as seasons
          from trophies where user_id = ?`,
       )
-      .get(userId) as { champion: number | null; podium: number | null; top: number | null };
+      .get(userId) as { champion: number | null; podium: number | null; top: number | null; seasons: number | null };
+    const seasonIds = (this.#db
+      .prepare(
+        `select distinct arenas.season from arena_players join arenas on arenas.id = arena_players.arena_id
+         where arena_players.user_id = ? and arena_players.games > 0 and arenas.status = 'finished' order by arenas.season desc`,
+      )
+      .all(userId) as Array<{ season: string }>).map((r) => r.season);
+    // Newest first by date: sorting the ids as text would put `S0` after every later season.
+    const seasons = seasonIds
+      .sort((a, b) => seasonRange(b).from - seasonRange(a).from)
+      .flatMap((id): PlayerSeason[] => {
+        const view = this.season(id);
+        const mine = view?.standings.find((s) => s.user.id === userId);
+        return view && mine ? [{ season: id, rank: mine.rank, players: view.standings.length, points: mine.points, arenas: mine.arenas, over: view.over }] : [];
+      });
     const arenas = this.#db
       .prepare(`select count(*) as n from arena_players join arenas on arenas.id = arena_players.arena_id where user_id = ? and games > 0 and arenas.status = 'finished'`)
       .get(userId) as { n: number };
@@ -317,10 +355,88 @@ export class Arenas {
       )
       .all(userId, PROFILE_ARENAS) as Array<{ id: string; starts_at: number; rank: number | null; games: number; score: number; players: number }>;
     return {
-      counts: { champion: counts.champion ?? 0, podium: counts.podium ?? 0, top: counts.top ?? 0, arenas: arenas.n },
+      counts: { champion: counts.champion ?? 0, podium: counts.podium ?? 0, top: counts.top ?? 0, arenas: arenas.n, seasons: counts.seasons ?? 0 },
+      seasons,
       trophies,
       history: history.map((h) => ({ arena: h.id, at: h.starts_at, rank: h.rank ?? 0, players: h.players, games: h.games, score: h.score })),
     };
+  }
+
+  /** The season running now (Season 0 until 2027). */
+  currentSeason(): string {
+    return arenaSeason(Math.max(this.#options.now(), ARENA.firstStart));
+  }
+
+  /**
+   * A season's standings: each player's best Arenas, half of the season's finished ones rounded up, summed. Ties go to
+   * who played more Arenas, then to the best single result. `null` for a malformed season.
+   */
+  season(id: string): SeasonView | null {
+    if (!isSeason(id)) return null;
+    const range = seasonRange(id);
+    const arenas = this.#db.prepare(`select id, starts_at from arenas where season = ? and status = 'finished' order by starts_at`).all(id) as Array<{ id: string; starts_at: number }>;
+    const upcoming = this.#db.prepare(`select id, starts_at from arenas where season = ? and status in ('created', 'started') order by starts_at`).all(id) as Array<{ id: string; starts_at: number }>;
+    const counted = seasonCounted(arenas.length);
+    const rows = this.#db
+      .prepare(
+        `select arena_players.arena_id, arena_players.user_id, arena_players.score, users.username from arena_players
+         join arenas on arenas.id = arena_players.arena_id join users on users.id = arena_players.user_id
+         where arenas.season = ? and arenas.status = 'finished' and arena_players.games > 0 and ${NOT_BANNED}`,
+      )
+      .all(id) as Array<{ arena_id: string; user_id: string; score: number; username: string }>;
+    const byUser = new Map<string, { user: UserRef; scores: Map<string, number> }>();
+    for (const row of rows) {
+      const entry = byUser.get(row.user_id) ?? { user: { id: row.user_id, name: row.username }, scores: new Map<string, number>() };
+      entry.scores.set(row.arena_id, row.score);
+      byUser.set(row.user_id, entry);
+    }
+    const champion = (this.#db.prepare('select champion_id from arena_seasons where season = ?').get(id) as { champion_id: string | null } | undefined)?.champion_id ?? null;
+    const standings = [...byUser.values()]
+      .map(({ user, scores }) => {
+        const best = [...scores.values()].sort((a, b) => b - a);
+        const chosen = best.slice(0, counted);
+        // Mark the counted results on the sheet, the higher first, one per counted score.
+        const left = [...chosen];
+        const results = arenas.map((arena) => {
+          const score = scores.get(arena.id) ?? null;
+          const at = score === null ? -1 : left.indexOf(score);
+          if (at >= 0) left.splice(at, 1);
+          return { score, counted: at >= 0 };
+        });
+        return { user, points: chosen.reduce((sum, x) => sum + x, 0), arenas: scores.size, best: best[0] ?? 0, results };
+      })
+      .sort((a, b) => b.points - a.points || b.arenas - a.arenas || b.best - a.best || a.user.name.localeCompare(b.user.name))
+      .map(({ best: _best, ...s }, i): SeasonStanding => ({ ...s, rank: i + 1, champion: s.user.id === champion }));
+    return {
+      season: id,
+      from: range.from,
+      to: range.to,
+      over: this.#options.now() >= range.to,
+      arenas: arenas.map((a) => ({ id: a.id, startsAt: a.starts_at })),
+      upcoming: upcoming.map((a) => ({ id: a.id, startsAt: a.starts_at })),
+      counted,
+      standings,
+    };
+  }
+
+  /** Once a season is over, its champion gets the season trophy, if at least `ARENA.minPlayers` played in it. */
+  #awardSeasons(now: number): void {
+    const due = (this.#db
+      .prepare(`select distinct season from arenas where status = 'finished' and season not in (select season from arena_seasons)`)
+      .all() as Array<{ season: string }>).filter(({ season }) => isSeason(season) && now >= seasonRange(season).to);
+    for (const { season } of due) {
+      const view = this.season(season)!;
+      const players = view.standings.length;
+      const winner = players >= ARENA.minPlayers ? view.standings[0] : undefined;
+      const last = view.arenas[view.arenas.length - 1]!;
+      this.#db.prepare('insert into arena_seasons (season, champion_id, players, awarded_at) values (?, ?, ?, ?)').run(season, winner?.user.id ?? null, players, now);
+      if (!winner) continue;
+      this.#db
+        .prepare(`insert into trophies (user_id, kind, arena_id, place, players, season, created_at) values (?, 'seasonChampion', ?, 1, ?, ?, ?)`)
+        .run(winner.user.id, last.id, players, season, now);
+      this.#options.notice(winner.user.id, 'seasonChampion', { subject: season });
+      this.#options.announce({ kind: 'season', season, champion: winner.user, points: winner.points, counted: view.counted, players });
+    }
   }
 
   /** The trophies in a data export. */
@@ -531,13 +647,16 @@ export class Arenas {
         if (!userId) continue;
         if (p.status === 'started') playing.set(userId, p.game_id);
         if (!p.counted) continue;
-        const entry = color === 'white' ? { points: p.white_points ?? 0, doubled: p.white_doubled === 1 } : { points: p.black_points ?? 0, doubled: p.black_doubled === 1 };
+        const entry =
+          color === 'white'
+            ? { points: p.white_points ?? 0, doubled: p.white_doubled === 1, berserk: p.white_berserk === 1 }
+            : { points: p.black_points ?? 0, doubled: p.black_doubled === 1, berserk: p.black_berserk === 1 };
         sheets.set(userId, [...(sheets.get(userId) ?? []), entry]);
         opponents.set(userId, [...(opponents.get(userId) ?? []), color === 'white' ? p.black_rating : p.white_rating]);
       }
     }
     const trophies = new Map(
-      (this.#db.prepare('select user_id, kind from trophies where arena_id = ?').all(row.id) as Array<{ user_id: string; kind: string }>).flatMap((t) => {
+      (this.#db.prepare(`select user_id, kind from trophies where arena_id = ? and kind != 'seasonChampion'`).all(row.id) as Array<{ user_id: string; kind: string }>).flatMap((t) => {
         const kind = TROPHY_KINDS.find((k) => k === t.kind);
         return kind ? [[t.user_id, kind] as const] : [];
       }),

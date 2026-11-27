@@ -634,7 +634,118 @@ $c-arena-fire: #e0691f;
   }
 }
 
-.ligungi-profile-arenas__trophies ul {
+/* Berserk: the button before the first move, the tag beside the name and the underline on the score sheet */
+$c-arena-berserk: #e0691f;
+
+.ligungi-berserk {
+  width: 100%;
+  margin: 0.5rem 0;
+  border: 1px solid color-mix(in srgb, #{$c-arena-berserk} 60%, transparent);
+  background: color-mix(in srgb, #{$c-arena-berserk} 12%, transparent);
+  color: $c-font-clear;
+}
+
+.ligungi-ruser__line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  min-width: 0;
+}
+
+.ligungi-berserk-tag {
+  flex: none;
+  color: $c-arena-berserk;
+  font-size: 0.85em;
+  font-weight: 700;
+
+  &::before {
+    margin-inline-end: 0.25em;
+  }
+}
+
+.ligungi-arena__sheet .is-berserk {
+  font-weight: 700;
+  text-decoration: underline 2px $c-arena-berserk;
+  text-underline-offset: 3px;
+}
+
+.ligungi-arena__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+/* Seasons */
+.ligungi-season__founders,
+.ligungi-season__live {
+  margin-inline-start: 0.5em;
+  padding: 0.25em 0.55em;
+  border-radius: 0.8em;
+  background: color-mix(in srgb, #f3cd5b 18%, transparent);
+  color: #b5861c;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.ligungi-season__live {
+  background: color-mix(in srgb, #{$c-good} 18%, transparent);
+  color: $c-good;
+}
+
+.ligungi-season__nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.ligungi-season__results {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+
+  a {
+    min-width: 2rem;
+    padding: 0.2em 0.45em;
+    border-radius: 4px;
+    color: $c-font-dimmer;
+    font-weight: 600;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .is-counted {
+    background: color-mix(in srgb, #{$c-primary} 18%, transparent);
+    color: $c-font-clear;
+  }
+}
+
+/* Profile, by season */
+.ligungi-profile-arenas__current {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: $box-radius-size;
+  background: color-mix(in srgb, #{$c-primary} 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #{$c-primary} 35%, transparent);
+
+  p {
+    margin: 0;
+  }
+}
+
+.ligungi-profile-arenas__current-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ligungi-profile-arenas__list {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -651,6 +762,72 @@ $c-arena-fire: #e0691f;
     color: $c-font-clear;
     font-size: 0.8em;
     text-align: center;
+  }
+
+  small {
+    color: $c-font-dim;
+  }
+}
+
+.ligungi-profile-arenas__past details {
+  border-top: $border;
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    cursor: pointer;
+
+    small {
+      margin-inline-start: auto;
+      color: $c-font-dim;
+    }
+  }
+
+  .ligungi-profile-arenas__list {
+    padding: 0.25rem 0 1rem 1.5rem;
+  }
+}
+
+.ligungi-profile-arenas__past-name strong {
+  color: $c-font-clear;
+}
+
+/* The podium image download */
+.ligungi-share-image {
+  position: relative;
+  display: inline-flex;
+}
+
+.ligungi-share-image__menu {
+  position: absolute;
+  inset-inline-start: 0;
+  top: calc(100% + 0.4rem);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 14rem;
+  border-radius: $box-radius-size;
+  background: $c-bg-popup;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: 0;
+    background: transparent;
+    color: $c-font;
+    cursor: pointer;
+
+    &:hover {
+      background: $c-bg-zebra;
+    }
   }
 
   small {

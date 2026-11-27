@@ -60,6 +60,10 @@ export interface GameView {
   readonly draftQueue: readonly string[];
   /** The Arena this game was paired in, if any. */
   readonly arena: string | null;
+  /** Arena games: who went berserk (half the clock, no increment). */
+  readonly berserk: Readonly<Record<Color, boolean>>;
+  /** Whether the viewer may go berserk now (an Arena game, before their first move). */
+  readonly canBerserk: boolean;
   readonly createdAt: number;
   readonly endedAt: number | null;
 }

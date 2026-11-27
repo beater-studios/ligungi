@@ -125,4 +125,6 @@ export const ERROR_STATUS: Readonly<Record<ErrorCode, number>> = {
   notRaceOwner: 409,
   arenaNotFound: 404,
   arenaOver: 409,
+  berserkUnavailable: 400,
+  seasonNotFound: 404,
 };

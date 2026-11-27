@@ -10,6 +10,12 @@ export interface ArenaMessage {
 
 const ORDINALS = ['1st', '2nd', '3rd'];
 
+/** A season's name in English: "Season 0", then "the Q1 2027 season". */
+const seasonName = (season: string): string => {
+  const quarter = /^(\d{4})-Q([1-4])$/.exec(season);
+  return quarter ? `the Q${quarter[2]} ${quarter[1]} season` : 'Season 0';
+};
+
 /** Discord shows `<t:…:F>` in each reader's own time zone and language. */
 const when = (at: number, style: 'F' | 't' = 'F') => `<t:${Math.floor(at / 1000)}:${style}>`;
 
@@ -18,7 +24,6 @@ const when = (at: number, style: 'F' | 't' = 'F') => `<t:${Math.floor(at / 1000)
  * mentioned; the others are named as on the site. `discordId` returns the linked account, if any.
  */
 export const arenaMessage = (event: ArenaEvent, origin: string, roleId: string | null, discordId: (userId: string) => string | null): ArenaMessage => {
-  const link = `${origin}/arena/${event.arena}`;
   const users: string[] = [];
   const name = (user: UserRef) => {
     const id = discordId(user.id);
@@ -26,6 +31,17 @@ export const arenaMessage = (event: ArenaEvent, origin: string, roleId: string |
     users.push(id);
     return `<@${id}>`;
   };
+  if (event.kind === 'season') {
+    const champion = name(event.champion);
+    const best = event.counted === 1 ? 'their best Arena' : `their best ${event.counted} Arenas`;
+    const title = seasonName(event.season);
+    return {
+      content: `${title.charAt(0).toUpperCase()}${title.slice(1)} is over! ${champion} is the season champion, with ${event.points} points from ${best}, among ${event.players} players.\nFull standings: ${origin}/arena/season/${event.season}`,
+      roles: [],
+      users,
+    };
+  }
+  const link = `${origin}/arena/${event.arena}`;
   switch (event.kind) {
     case 'soon': {
       const ping = roleId ? `<@&${roleId}> ` : '';

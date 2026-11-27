@@ -172,7 +172,9 @@
     "raceStarted": "This race has already started.",
     "notRaceOwner": "Only whoever created the race can start it.",
     "arenaNotFound": "Arena not found.",
-    "arenaOver": "This Arena is over."
+    "arenaOver": "This Arena is over.",
+    "berserkUnavailable": "Berserk is only for Arena games, before your first move.",
+    "seasonNotFound": "Season not found."
   },
   "genericError": "Something went wrong. Try again.",
   "offline": "No connection. Trying to reconnect...",
@@ -1829,7 +1831,8 @@
     "suspensionLifted": "The suspension of your account was lifted.",
     "arenaSoon": "The Weekly Arena starts in 10 minutes.",
     "arenaResult": "You finished {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of {players} in the Weekly Arena.",
-    "arenaTrophy": "You finished {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of {players} in the Weekly Arena and won a trophy."
+    "arenaTrophy": "You finished {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of {players} in the Weekly Arena and won a trophy.",
+    "seasonChampion": "You're the champion of {season}! The season trophy is on your profile."
   },
   "notify": {
     "challenge": "{name} challenged you",
@@ -2244,7 +2247,7 @@
     "minutes": "{n} minutes",
     "seasonZero": "Season 0",
     "howTitle": "How it works",
-    "how": "Join anytime. When a game ends, you're paired with someone free near you in the standings.\nA win is worth 2 points, a draw 1, a loss 0. After two wins in a row, each win counts double.\nLeaving the page pauses you. Come back whenever you like.\nPairings close 8 minutes before the end. Games still running at the end don't count.",
+    "how": "Join anytime. When a game ends, you're paired with someone free near you in the standings.\nA win is worth 2 points, a draw 1, a loss 0. After two wins in a row, each win counts double.\nBefore your first move you may go berserk: half your clock and no increment, for one more point if you win.\nLeaving the page pauses you. Come back whenever you like.\nPairings close 8 minutes before the end. Games still running at the end don't count.",
     "timezone": "Times in your time zone ({zone}).",
     "playersTitle": "Players ({count})",
     "standings": "Standings",
@@ -2259,7 +2262,7 @@
     "stateWaiting": "Waiting for a game",
     "stateAway": "Away",
     "fire": "On a streak: wins count double",
-    "legend": "Orange: a doubled win, after two in a row. Dot: green playing, blue waiting, grey away.",
+    "legend": "Orange: a doubled win, after two in a row. Underlined: a berserk win (+1). Dot: green playing, blue waiting, grey away.",
     "waitingBar": "You're waiting for a game. The next one starts as soon as someone is free.",
     "pausedBar": "You're paused and won't be paired. Come back whenever you like.",
     "playingBar": "You're in a game.",
@@ -2288,7 +2291,8 @@
       "arenaChampion": "Arena champion",
       "arenaSecond": "2nd place",
       "arenaThird": "3rd place",
-      "arenaTop": "Top 10%"
+      "arenaTop": "Top 10%",
+      "seasonChampion": "Season champion"
     },
     "place": "{place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of {players}",
     "trophyContext": "Weekly Arena · {date}",
@@ -2312,6 +2316,31 @@
     "profileEmpty": "Hasn't played an Arena yet.",
     "profileEmptyYou": "You haven't played an Arena yet. The next one is {date}.",
     "seeNext": "See the next Arena",
-    "back": "Back to the Arena"
+    "back": "Back to the Arena",
+    "berserk": "Berserk: half the time, +1 point for a win",
+    "berserkTitle": "Went berserk: half the clock, no increment",
+    "berserkWin": "Berserk win: +1 point",
+    "seasonQuarter": "{year} · Q{quarter}",
+    "founders": "Founders",
+    "seasonsNav": "Seasons",
+    "seasonPlayed": "{done} of {total} Arenas",
+    "seasonRule": "Each player's best {counted, plural, one {Arena counts} other {# Arenas count}}: half of the {total} finished so far, rounded up. Missing up to half of the weeks costs nothing.",
+    "seasonChampion": "Season champion: {name}, with {points} points.",
+    "seasonNoChampion": "No season trophy: fewer than 4 players played.",
+    "seasonLeft": "{n, plural, one {# Arena left} other {# Arenas left}}, the next on {date}. The champion takes the season trophy, with the 帥 on top.",
+    "seasonEmpty": "No Arena has finished in this season yet.",
+    "seasonStandings": "Season standings",
+    "seasonResults": "Results by Arena",
+    "seasonLegend": "Highlighted: the Arenas that count; the others are dimmed. A dash is an Arena the player didn't play. Ties go to who played more Arenas, then to the best single result.",
+    "seasonChampions": "Season champion {n}×",
+    "seasonPlace": "{rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of {players} in the season · {points} points · {arenas, plural, one {# Arena played} other {# Arenas played}}",
+    "pastSeasons": "Past seasons",
+    "trophyCount": "{n, plural, =0 {no trophies} one {# trophy} other {# trophies}}",
+    "shareImage": "Download podium image",
+    "imageFooter": "Every Saturday, 18:00 UTC · ligungi.org/arena",
+    "berserkTag": "Berserk",
+    "resultCounts": "counts",
+    "resultNotCounted": "does not count",
+    "resultMissing": "not played"
   }
 }

@@ -67,6 +67,8 @@ export interface GameRow {
   /** Correspondence draft queues, `{ white, black }` as JSON; `null` when neither player has one. */
   draft_queue: string | null;
   arena_id: string | null;
+  /** Arena berserk: `w`, `b` or both; `null` when nobody went berserk. */
+  berserk: string | null;
 }
 
 /** A game search with its player names resolved to ids and its days to milliseconds. */

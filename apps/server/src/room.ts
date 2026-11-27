@@ -43,6 +43,8 @@ export interface RoomInit {
   readonly draftQueue?: Readonly<Record<Color, readonly string[]>> | null;
   /** The Arena that paired this game, if any. */
   readonly arena?: string | null;
+  /** Arena games: who went berserk. */
+  readonly berserk?: Readonly<Record<Color, boolean>> | null;
 }
 
 export interface RoomHooks {
@@ -132,7 +134,7 @@ export class GameRoom {
     const now = hooks.now();
     this.#turnStartedAt = now;
     this.#absentSince = { white: now, black: now };
-    this.clock = init.timeControl ? new Clock(init.timeControl, init.clock ?? undefined) : null;
+    this.clock = init.timeControl ? new Clock(init.timeControl, init.clock ?? undefined, init.berserk ?? undefined) : null;
     if (this.clock && init.clock?.running && this.status === 'started') this.clock.start(init.clock.running, now);
     this.daysPerMove = init.daysPerMove ?? null;
     this.deadline = this.daysPerMove && this.status === 'started' ? (init.deadline ?? now + this.daysPerMove * DAY_MS) : null;
@@ -335,6 +337,25 @@ export class GameRoom {
   }
 
   /** Not with byo-yomi, where extra seconds would turn into periods. */
+  /** Who went berserk in this Arena game. */
+  get berserk(): Readonly<Record<Color, boolean>> {
+    return this.clock?.berserk ?? { white: false, black: false };
+  }
+
+  /** Berserk is for Arena games with a Fischer clock, before the player's first move (placement or done). */
+  canBerserk(color: Color): boolean {
+    if (!this.arena || !this.clock || isByoyomi(this.timeControl) || this.status !== 'started' || this.clock.berserk[color]) return false;
+    const positions = this.game.positions;
+    return !this.game.moves.some((_, i) => positions[i]!.turn === color);
+  }
+
+  goBerserk(color: Color): ErrorCode | null {
+    if (!this.canBerserk(color)) return 'berserkUnavailable';
+    this.clock!.goBerserk(color, this.#hooks.now());
+    this.#changed();
+    return null;
+  }
+
   canGiveTime(_color: Color): boolean {
     return this.status === 'started' && this.clock !== null && !isByoyomi(this.timeControl);
   }
@@ -483,6 +504,8 @@ export class GameRoom {
       canGiveTime: you !== null && this.canGiveTime(you),
       draftQueue: you ? this.draftQueue[you] : [],
       arena: this.arena,
+      berserk: this.berserk,
+      canBerserk: you !== null && this.canBerserk(you),
       createdAt: this.createdAt,
       endedAt: this.endedAt,
     };

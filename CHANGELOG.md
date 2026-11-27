@@ -9,6 +9,9 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 - Weekly Arena: a tournament every Saturday at 18:00 UTC, Advanced at 5+3 for 90 minutes, rated. Join anytime, get paired again as soon as a game ends, and score 2 for a win (double after two wins in a row) and 1 for a draw. It starts with at least 4 players.
 - Arena trophies, shaped as towers of discs: the champion from 4 players, the whole podium from 8 and the top 10% from 16, for players with at least 3 games. Profiles show the trophies, how many Arenas a player played and their latest results.
 - The next Arena on the home page, a reminder in the bell 10 minutes before, the result in the bell afterwards, and the Arena in the Play menu.
+- Arena seasons: Season 0 runs through December 2026, then one season per quarter. Each player's best half of the season's Arenas add up, and the champion takes the season trophy. Profiles show the current season and fold the past ones.
+- Berserk in the Arena: before your first move, halve your clock (no increment) for one more point if you win.
+- A finished Arena's podium as an image for Instagram or X, made in the browser.
 
 ## [0.11.0] - 2026-11-26
 

@@ -427,6 +427,17 @@ const MIGRATIONS = [
   create index trophies_user on trophies(user_id, created_at);
   alter table games add column arena_id text;
   `,
+  `
+  alter table games add column berserk text;
+  alter table arena_pairings add column white_berserk integer not null default 0;
+  alter table arena_pairings add column black_berserk integer not null default 0;
+  create table arena_seasons (
+    season text primary key,
+    champion_id text,
+    players integer not null,
+    awarded_at integer not null
+  );
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

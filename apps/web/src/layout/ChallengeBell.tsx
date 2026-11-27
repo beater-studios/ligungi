@@ -24,6 +24,7 @@ const NOTICE_LOOK: Record<NoticeView['kind'], { readonly icon: string; readonly 
   studyDrawingsCleared: { icon: icons.StudyBoard, tone: 'study' },
   arenaSoon: { icon: icons.Trophy, tone: 'arena' },
   arenaResult: { icon: icons.Trophy, tone: 'arena' },
+  seasonChampion: { icon: icons.Trophy, tone: 'arena' },
 };
 
 /** The text with the first mention of `name` (a player or a study) in bold, so it stands out from the sentence. */

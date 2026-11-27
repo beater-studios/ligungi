@@ -357,6 +357,7 @@ export class Games {
       voided: row.voided === 1,
       draftQueue: draftQueueFrom(row.draft_queue),
       arena: row.arena_id,
+      berserk: row.berserk ? { white: row.berserk.includes('w'), black: row.berserk.includes('b') } : null,
     };
     return new GameRoom(init, this.#hooks());
   }
@@ -372,14 +373,14 @@ export class Games {
           white_session, white_user, white_name, white_rating, white_provisional, white_diff,
           black_session, black_user, black_name, black_rating, black_provisional, black_diff,
           moves, status, winner, reason, clock_white, clock_black, clock_running, days_per_move, deadline, rematch_id,
-          created_at, ended_at, updated_at, board_moves, draft_queue, arena_id)
-         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          created_at, ended_at, updated_at, board_moves, draft_queue, arena_id, berserk)
+         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          on conflict (id) do update set white_session = excluded.white_session, black_session = excluded.black_session,
           white_diff = excluded.white_diff, black_diff = excluded.black_diff,
           moves = excluded.moves, status = excluded.status, winner = excluded.winner, reason = excluded.reason,
           clock_white = excluded.clock_white, clock_black = excluded.clock_black, clock_running = excluded.clock_running,
           deadline = excluded.deadline, rematch_id = excluded.rematch_id, ended_at = excluded.ended_at, updated_at = excluded.updated_at,
-          board_moves = excluded.board_moves, draft_queue = excluded.draft_queue`,
+          board_moves = excluded.board_moves, draft_queue = excluded.draft_queue, berserk = excluded.berserk`,
       )
       .run(
         room.id,
@@ -419,6 +420,7 @@ export class Games {
         room.status === 'ended' ? room.boardMoves : null,
         room.draftQueue.white.length || room.draftQueue.black.length ? JSON.stringify(room.draftQueue) : null,
         room.arena,
+        `${room.berserk.white ? 'w' : ''}${room.berserk.black ? 'b' : ''}` || null,
       );
   }
 }

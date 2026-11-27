@@ -1,6 +1,7 @@
 import { ARENA, type ArenaStanding, type ArenaSummary, type ArenaView } from '@ligungi/protocol';
 import { useState } from 'preact/hooks';
-import { arenaTime, countdown, prizeKey, timeZone, useArena, useNow } from '../arena/arena.ts';
+import { arenaTime, countdown, prizeKey, seasonLabel, timeZone, useArena, useNow } from '../arena/arena.ts';
+import { ShareImage } from '../arena/ShareImage.tsx';
 import { Trophy } from '../arena/Trophy.tsx';
 import { MiniBoard } from '../components/MiniBoard.tsx';
 import { api } from '../core/api.ts';
@@ -55,7 +56,11 @@ const Standings = ({ view, youId }: { view: ArenaView; youId: string | null }) =
                 <td>
                   <span class="ligungi-arena__sheet">
                     {s.sheet.map((entry, i) => (
-                      <span key={i} class={entry.doubled ? 'is-double' : entry.points === 0 ? 'is-zero' : ''}>
+                      <span
+                        key={i}
+                        class={`${entry.doubled ? 'is-double' : entry.points === 0 ? 'is-zero' : ''}${entry.berserk ? ' is-berserk' : ''}`}
+                        title={entry.berserk ? a.berserkWin : undefined}
+                      >
                         {entry.points}
                       </span>
                     ))}
@@ -219,7 +224,9 @@ export const ArenaPage = ({ id }: { id?: string }) => {
                 <dt>{a.durationLabel}</dt>
                 <dd>{a.minutes(view.durationMinutes)}</dd>
                 <dt>{a.seasonLabel}</dt>
-                <dd>{view.season === 'S0' ? a.seasonZero : view.season}</dd>
+                <dd>
+                  <a href={`/arena/season/${view.season}`}>{seasonLabel(t, view.season)}</a>
+                </dd>
               </dl>
               <p class="ligungi-arena__note">{a.timezone(timeZone())}</p>
             </section>
@@ -334,7 +341,7 @@ export const ArenaPage = ({ id }: { id?: string }) => {
                   ))}
                 </ul>
               )}
-              <p class="ligungi-arena__note">{t.arena.how[3]}</p>
+              <p class="ligungi-arena__note">{t.arena.how[t.arena.how.length - 1]}</p>
             </section>
           </aside>
         </div>
@@ -354,10 +361,14 @@ export const ArenaPage = ({ id }: { id?: string }) => {
           <p class="ligungi-arena__note">{view.players >= ARENA.minPlayers ? a.trophyNote(prizeKey(view.players), view.players) : a.noTrophies}</p>
         </>
       )}
-      <p>
+      <p class="ligungi-arena__actions">
         <a class="button" href="/arena">
           {a.seeNext}
         </a>
+        <a class="button button-empty" href={`/arena/season/${view.season}`}>
+          {a.seasonStandings}
+        </a>
+        {view.status === 'finished' && view.players >= ARENA.minPlayers && <ShareImage view={view} />}
       </p>
       {!id && <RecentList recent={recent} />}
     </main>

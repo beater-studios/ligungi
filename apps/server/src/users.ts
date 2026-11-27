@@ -158,6 +158,7 @@ export class Users {
       // Final places stay stored with each remaining player, so the others keep theirs.
       this.#db.prepare('delete from arena_players where user_id = ?').run(userId);
       this.#db.prepare('delete from trophies where user_id = ?').run(userId);
+      this.#db.prepare('update arena_seasons set champion_id = null where champion_id = ?').run(userId);
       this.#db.prepare('update arena_pairings set white_user = null where white_user = ?').run(userId);
       this.#db.prepare('update arena_pairings set black_user = null where black_user = ?').run(userId);
       this.#db.prepare('delete from users where id = ?').run(userId);

@@ -244,6 +244,7 @@ export const GamePage = ({ id, tv }: { id: string; tv?: ComponentChildren }) => 
       ratingDiff: p.ratingDiff,
       online: p.online,
       first: view.firstPlayer === color,
+      berserk: view.berserk[color],
     };
   };
 

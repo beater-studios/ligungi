@@ -30,12 +30,13 @@ export const DataSection = () => (
         }))}
       />
     </Example>
-    <Example label="Arena trophies (Trophy): the tower is the place (3 discs for the champion, 2 for second, 1 for third) and the top 10% a smaller blue disc; shape and color change together; sizes 72, 48, 32 and 22">
+    <Example label="Arena trophies (Trophy): the tower is the place (3 discs for the champion, 2 for second, 1 for third), the top 10% a smaller blue disc and the season champion the gold tower with the Marshal's red disc on top; shape and color change together; sizes 72, 48, 32 and 22">
       <div class="ligungi-ds__row">
         <Trophy kind="arenaChampion" size={72} />
         <Trophy kind="arenaSecond" size={72} />
         <Trophy kind="arenaThird" size={72} />
         <Trophy kind="arenaTop" size={72} />
+        <Trophy kind="seasonChampion" size={72} />
         <Trophy kind="arenaChampion" size={48} />
         <Trophy kind="arenaChampion" size={32} />
         <Trophy kind="arenaChampion" size={22} />

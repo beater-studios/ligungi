@@ -141,6 +141,11 @@ export const GameControls = ({
         {{ draw: t.game.drawDeclined, takeback: t.game.takebackDeclined, rematch: t.game.rematchDeclined }[declined]}
       </p>
     )}
+    {view.canBerserk && (
+      <button type="button" class="button ligungi-berserk" data-icon={icons.Swords} onClick={() => socket.send({ t: 'berserk', game: view.id })}>
+        {t.arena.berserk}
+      </button>
+    )}
     {view.canClaimVictory && (
       <div class="suggestion">
         <p>{t.game.opponentLeft}</p>

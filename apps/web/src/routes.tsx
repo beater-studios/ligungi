@@ -3,6 +3,7 @@ import { useEffect } from 'preact/hooks';
 import { useT } from './i18n/index.ts';
 import { AnalysisPage } from './pages/AnalysisPage.tsx';
 import { ArenaPage } from './pages/ArenaPage.tsx';
+import { SeasonPage } from './pages/SeasonPage.tsx';
 import { AuthPage } from './pages/AuthPage.tsx';
 import { ChallengePage } from './pages/ChallengePage.tsx';
 import { ComputerPage } from './pages/ComputerPage.tsx';
@@ -80,6 +81,8 @@ export const ROUTES: Route<VNode>[] = [
   { pattern: /^\/streak$/, render: () => <PuzzleRunPage key="streak" kind="streak" /> },
   { pattern: /^\/storm$/, render: () => <PuzzleRunPage key="storm" kind="storm" /> },
   { pattern: /^\/arena$/, render: () => <ArenaPage /> },
+  { pattern: /^\/arena\/season$/, render: () => <SeasonPage /> },
+  { pattern: /^\/arena\/season\/(S0|\d{4}-Q[1-4])$/, render: ([id]) => <SeasonPage key={id} id={id!} /> },
   { pattern: /^\/arena\/([A-Za-z0-9]{8})$/, render: ([id]) => <ArenaPage key={id} id={id!} /> },
   { pattern: /^\/racer$/, render: () => <RacerPage /> },
   { pattern: /^\/racer\/([A-Za-z0-9]{8})$/, render: ([id]) => <RacePage key={id} id={id!} /> },

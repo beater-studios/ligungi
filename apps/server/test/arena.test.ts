@@ -132,7 +132,11 @@ describe('weekly arena', () => {
     const ana = running.standings[0]!;
     expect(ana.user.name).toBe('ana');
     // Two wins, then a doubled third.
-    expect(ana.sheet).toEqual([{ points: 2, doubled: false }, { points: 2, doubled: false }, { points: 4, doubled: true }]);
+    expect(ana.sheet).toEqual([
+      { points: 2, doubled: false, berserk: false },
+      { points: 2, doubled: false, berserk: false },
+      { points: 4, doubled: true, berserk: false },
+    ]);
     expect(ana.score).toBe(8);
     expect(ana.fire).toBe(true);
 
@@ -144,7 +148,7 @@ describe('weekly arena', () => {
     // Four players: only the champion gets a trophy.
     expect(finished.standings.map((s) => s.trophy)).toEqual(['arenaChampion', null, null, null]);
     const profile = (await players[1]!.request<PlayerArenas>('GET', '/api/users/ana/arenas')).data;
-    expect(profile.counts).toEqual({ champion: 1, podium: 0, top: 0, arenas: 1 });
+    expect(profile.counts).toEqual({ champion: 1, podium: 0, top: 0, arenas: 1, seasons: 0 });
     expect(profile.trophies[0]).toMatchObject({ kind: 'arenaChampion', place: 1, players: 4, season: 'S0' });
     await players[0]!.waitFor((m) => m.t === 'notices' && m.notices.some((n: NoticeView) => n.kind === 'arenaResult' && n.subject === '1/4/arenaChampion' && n.ref === id));
     // A rematch is not offered in an Arena game.
@@ -184,6 +188,108 @@ describe('weekly arena', () => {
     expect(p1.games).toBe(0);
     expect(p1.state).toBe('away');
     expect(server.app.db.prepare("select paused from arena_players join users on users.id = arena_players.user_id where users.username = 'pa1'").get()).toEqual({ paused: 1 });
+  });
+
+  it('lets a player go berserk before their first move only, in Arena games only', async () => {
+    let clock = Date.UTC(2026, 11, 5, 18, 0);
+    const server = await start({ now: () => clock });
+    const arenas = server.app.arenas;
+    const id = arenas.create(clock);
+    const players: Client[] = [];
+    for (const name of ['zk1', 'zk2', 'zk3', 'zk4']) {
+      const c = client();
+      await signup(c, name);
+      await c.connect();
+      c.send({ t: 'sub', topic: `arena:${id}` });
+      await c.waitFor((m) => m.t === 'arena');
+      await c.request('POST', `/api/arena/${id}/join`);
+      players.push(c);
+    }
+    const redirects = players.map((c) => c.waitFor((m): m is Extract<ServerMessage, { t: 'redirect' }> => m.t === 'redirect'));
+    arenas.tick();
+    const gameId = (await redirects[0]!).path.slice(1);
+    const pair = [];
+    for (let i = 0; i < players.length; i++) if ((await redirects[i]!).path.slice(1) === gameId) pair.push(players[i]!);
+    for (const c of pair) c.send({ t: 'sub', topic: `game:${gameId}` });
+    const views = await Promise.all(pair.map((c) => c.waitGame(gameId)));
+    const white = pair[views.findIndex((v) => v.you === 'white')]!;
+    const black = pair[views.findIndex((v) => v.you === 'black')]!;
+    expect(views[0]!.canBerserk).toBe(true);
+    white.send({ t: 'berserk', game: gameId });
+    const after = await white.waitGame(gameId, (g) => g.berserk.white);
+    expect(after.clock?.white).toBe(150_000);
+    expect(after.canBerserk).toBe(false);
+    // White moves; Black may still go berserk, but not once Black has moved.
+    white.send({ t: 'move', game: gameId, move: firstMove(after), ply: 0 });
+    const moved = await black.waitGame(gameId, (g) => g.moves.length === 1);
+    expect(moved.canBerserk).toBe(true);
+    black.send({ t: 'move', game: gameId, move: firstMove(moved), ply: 1 });
+    await black.waitGame(gameId, (g) => g.moves.length === 2);
+    black.send({ t: 'berserk', game: gameId });
+    await black.waitFor((m) => m.t === 'error' && m.code === 'berserkUnavailable');
+    // The halved clock and the flag survive a reload of the stored game.
+    const stored = server.app.db.prepare('select berserk, clock_white from games where id = ?').get(gameId) as { berserk: string; clock_white: number };
+    expect(stored.berserk).toBe('w');
+    expect(stored.clock_white).toBeLessThanOrEqual(150_000);
+    // A quick win after berserk scores no extra point.
+    black.send({ t: 'resign', game: gameId });
+    await white.waitGame(gameId, (g) => g.status === 'ended');
+    const me = arenas.view(id, null)!.standings.find((s) => s.games === 1 && s.score > 0)!;
+    expect(me.sheet).toEqual([{ points: 2, doubled: false, berserk: false }]);
+  });
+
+  it('ranks a season by the best half of its Arenas and crowns the champion once it is over', async () => {
+    let clock = Date.UTC(2026, 11, 27, 12, 0);
+    const server = await start({ now: () => clock });
+    const db = server.app.db;
+    const names = ['sa1', 'sa2', 'sa3', 'sa4', 'sa5'];
+    const ids: string[] = [];
+    for (const name of names) {
+      const c = client();
+      await signup(c, name);
+      ids.push((db.prepare('select id from users where username = ?').get(name) as { id: string }).id);
+    }
+    // Four finished Arenas in Season 0: two of them count for each player.
+    const scores = [
+      [10, 2, 8, 3],
+      [6, 9, null, null],
+      [4, 4, 4, 4],
+      [null, null, null, 12],
+      [1, 1, 1, 1],
+    ];
+    for (let a = 0; a < 4; a++) {
+      const arenaId = `season${a}x`.slice(0, 8);
+      const at = Date.UTC(2026, 11, 5 + a * 7, 18);
+      db.prepare(`insert into arenas (id, status, mode, clock_initial, clock_increment, duration, min_players, starts_at, started_at, finished_at, season, created_at) values (?, 'finished', 'advanced', 300, 3, 90, 4, ?, ?, ?, 'S0', ?)`).run(arenaId, at, at, at + 5_400_000, at);
+      scores.forEach((row, p) => {
+        const score = row[a];
+        if (score === null || score === undefined) return;
+        db.prepare('insert into arena_players (arena_id, user_id, rating, score, games, scored_at, joined_at) values (?, ?, 1500, ?, 4, ?, ?)').run(arenaId, ids[p]!, score, at, at);
+      });
+    }
+    const season = server.app.arenas.season('S0')!;
+    expect(season.counted).toBe(2);
+    expect(season.standings.map((s) => [s.user.name, s.points])).toEqual([['sa1', 18], ['sa2', 15], ['sa4', 12], ['sa3', 8], ['sa5', 2]]);
+    expect(season.standings[0]!.results.map((r) => r.counted)).toEqual([true, false, true, false]);
+    expect(season.standings[0]!.arenas).toBe(4);
+    // Not over yet: no trophy.
+    server.app.arenas.tick();
+    expect(db.prepare(`select count(*) as n from trophies where kind = 'seasonChampion'`).get()).toEqual({ n: 0 });
+    clock = Date.UTC(2027, 0, 1, 0, 0, 5);
+    server.app.arenas.tick();
+    server.app.arenas.tick();
+    expect(db.prepare(`select user_id, place, players, season from trophies where kind = 'seasonChampion'`).all()).toEqual([{ user_id: ids[0], place: 1, players: 5, season: 'S0' }]);
+    const after = server.app.arenas.season('S0')!;
+    expect(after.over).toBe(true);
+    // The season trophy hangs on the last Arena of the season, but that Arena's standings show only its own trophies.
+    expect(server.app.arenas.view(after.arenas[3]!.id, null)!.standings.every((s) => s.trophy !== 'seasonChampion')).toBe(true);
+    expect(after.standings[0]!.champion).toBe(true);
+    const c = client();
+    const profile = (await c.request<PlayerArenas>('GET', '/api/users/sa1/arenas')).data;
+    expect(profile.counts.seasons).toBe(1);
+    expect(profile.seasons[0]).toMatchObject({ season: 'S0', rank: 1, players: 5, points: 18, over: true });
+    expect((await c.request('GET', '/api/arena/season/S9')).status).toBe(404);
+    expect((await c.request<{ season: string }>('GET', '/api/arena/season/S0')).data.season).toBe('S0');
   });
 
   it('waits for missing players, then cancels', async () => {

@@ -16,6 +16,8 @@ export type ClientMessage =
   | { readonly t: 'draw' | 'rematch' | 'takeback'; readonly game: string; readonly action: 'offer' | 'accept' | 'decline' }
   /** Adds `EXTRA_TIME_SECONDS` to the opponent's clock. */
   | { readonly t: 'moretime'; readonly game: string }
+  /** In an Arena game, before the player's first move: halves their clock and drops its increment for a bonus point on a win. */
+  | { readonly t: 'berserk'; readonly game: string }
   /** Correspondence draft: the placements (and "done") to play on the sender's next turns, replacing any queue before. */
   | { readonly t: 'queue'; readonly game: string; readonly moves: readonly string[] }
   /** A move in a Puzzle Racer race, on the puzzle at `puzzle` in the race's list; `skip` gives up that puzzle once per race. */

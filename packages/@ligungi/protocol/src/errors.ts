@@ -123,6 +123,8 @@ export const ERROR_MESSAGES = {
   notRaceOwner: 'Só quem criou a corrida pode iniciá-la.',
   arenaNotFound: 'Arena não encontrada.',
   arenaOver: 'Essa Arena já terminou.',
+  berserkUnavailable: 'Só dá para usar o berserk numa partida da Arena, antes do seu primeiro lance.',
+  seasonNotFound: 'Temporada não encontrada.',
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

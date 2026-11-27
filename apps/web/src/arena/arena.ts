@@ -18,6 +18,29 @@ export const countdown = (ms: number): string => {
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
 };
 
+/** A season's name: "Season 0", then "2027 · Q1" in the reader's language. */
+export const seasonLabel = (t: Messages, season: string): string => {
+  const quarter = /^(\d{4})-Q([1-4])$/.exec(season);
+  return quarter ? t.arena.seasonQuarter(Number(quarter[1]), Number(quarter[2])) : t.arena.seasonZero;
+};
+
+/** The season before, `null` before Season 0. */
+export const previousSeason = (season: string): string | null => {
+  const quarter = /^(\d{4})-Q([1-4])$/.exec(season);
+  if (!quarter) return null;
+  const [year, q] = [Number(quarter[1]), Number(quarter[2])];
+  if (year === 2027 && q === 1) return 'S0';
+  return q === 1 ? `${year - 1}-Q4` : `${year}-Q${q - 1}`;
+};
+
+/** The season after. */
+export const nextSeason = (season: string): string => {
+  const quarter = /^(\d{4})-Q([1-4])$/.exec(season);
+  if (!quarter) return '2027-Q1';
+  const [year, q] = [Number(quarter[1]), Number(quarter[2])];
+  return q === 4 ? `${year + 1}-Q1` : `${year}-Q${q + 1}`;
+};
+
 /** The reader's time zone, as the browser names it. */
 export const timeZone = (): string => {
   try {

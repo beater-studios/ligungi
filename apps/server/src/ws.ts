@@ -131,6 +131,7 @@ export const createSocketHandler = (deps: AppDeps, closing: () => boolean) => {
         else if (message.t === 'abort') result = room.abort(color);
         else if (message.t === 'claim') result = room.claim(color);
         else if (message.t === 'moretime') result = room.giveTime(color);
+        else if (message.t === 'berserk') result = room.goBerserk(color);
         else if (message.t === 'queue') {
           result = Array.isArray(message.moves) && message.moves.every((move) => typeof move === 'string')
             ? room.queue(color, message.moves)

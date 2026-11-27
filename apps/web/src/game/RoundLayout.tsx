@@ -23,6 +23,8 @@ export interface RoundPlayer {
   readonly ratingDiff?: number | null;
   readonly online?: boolean;
   readonly first?: boolean;
+  /** Went berserk in an Arena game. */
+  readonly berserk?: boolean;
 }
 
 export interface RoundClock {
@@ -203,11 +205,18 @@ const UserBox = ({ player, color, position, myTurn = false }: { player: RoundPla
             </span>
           )}
         </span>
-        {myTurn ? (
-          <span class="ligungi-ruser__status ligungi-ruser__status--turn">{t.common.yourTurn}</span>
-        ) : (
-          presence && <span class="ligungi-ruser__status">{presence}</span>
-        )}
+        <span class="ligungi-ruser__line">
+          {player.berserk && (
+            <span class="ligungi-berserk-tag" data-icon={icons.Swords} title={t.arena.berserkTitle}>
+              {t.arena.berserkTag}
+            </span>
+          )}
+          {myTurn ? (
+            <span class="ligungi-ruser__status ligungi-ruser__status--turn">{t.common.yourTurn}</span>
+          ) : (
+            presence && <span class="ligungi-ruser__status">{presence}</span>
+          )}
+        </span>
       </span>
     </div>
   );

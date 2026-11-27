@@ -1,5 +1,6 @@
 import { opposite } from '@ligungi/engine';
 import type { ChallengeView, GameSummary, NoticeView } from '@ligungi/protocol';
+import { seasonLabel } from '../arena/arena.ts';
 import { formatClock, getT, playerName, settingsText, type Messages } from '../i18n/index.ts';
 import { notify } from '../notify.ts';
 import { session } from '../core/session.ts';
@@ -39,6 +40,8 @@ export const noticeText = (t: Messages, notice: NoticeView): string => {
     case 'suspensionLifted':
     case 'arenaSoon':
       return n[notice.kind];
+    case 'seasonChampion':
+      return n.seasonChampion(seasonLabel(getT(), subject));
     case 'arenaResult': {
       // `place/players`, with `/trophy` when the place earned one.
       const [place, players, trophy] = subject.split('/');
@@ -55,6 +58,7 @@ export const noticePath = (notice: NoticeView): string | null => {
   if (notice.kind === 'gameVoided') return notice.ref ? `/${notice.ref}` : null;
   if (notice.kind === 'studyHidden' || notice.kind === 'studyRestored' || notice.kind === 'studyDrawingsCleared') return notice.ref ? `/study/${notice.ref}` : null;
   if (notice.kind === 'arenaSoon' || notice.kind === 'arenaResult') return notice.ref ? `/arena/${notice.ref}` : '/arena';
+  if (notice.kind === 'seasonChampion') return notice.subject ? `/arena/season/${notice.subject}` : '/arena/season';
   return null;
 };
 

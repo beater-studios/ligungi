@@ -4,6 +4,10 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Komugi, a neural network opponent, at Play against the computer: Advanced games with the rulebook draft, in four strengths (Casual, Focused, Sharp and Awakened), each with a cap on its thinking time per move. It runs in the browser. It is offered only for Advanced with the rulebook draft (greyed out in the other formats), and when it cannot make a move the game says why and offers to try again. The server must have its network and runtime installed (`scripts/komugi-assets.sh` downloads the published model release); otherwise the option is shown disabled.
+
 ## [0.12.0] - 2026-11-27
 
 ### Added

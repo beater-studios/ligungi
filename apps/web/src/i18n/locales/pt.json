@@ -704,7 +704,41 @@
       "5": "Pensa até 3 s por lance."
     },
     "start": "Começar",
-    "bot": "Computador · nível {level}"
+    "bot": "Computador · nível {level}",
+    "opponent": "Adversário",
+    "opponents": {
+      "builtin": "Integrado",
+      "komugi": "Komugi"
+    },
+    "opponentHints": {
+      "builtin": "Cinco níveis, todos os modos.",
+      "komugi": "Uma rede neural, só no Avançado."
+    },
+    "komugiMissing": "A rede da Komugi não está instalada neste servidor, então só os níveis integrados podem jogar.",
+    "komugiDownload": "A Komugi roda no seu navegador. A primeira partida baixa a rede e o runtime dela, de 20 a 50 MB.",
+    "komugiAdvancedOnly": "A Komugi só joga o Avançado, com o draft do regulamento e as brancas começando.",
+    "komugiRulebookDraft": "A Komugi só joga com o draft do regulamento, sem a opção acima.",
+    "strength": "Força",
+    "strengths": {
+      "casual": "Casual",
+      "focused": "Concentrada",
+      "sharp": "Afiada",
+      "awakened": "Desperta"
+    },
+    "strengthHints": {
+      "casual": "Joga rápido, até {seconds} s por lance.",
+      "focused": "Calcula adiante, até {seconds} s por lance.",
+      "sharp": "Pune os erros, até {seconds} s por lance.",
+      "awakened": "Força máxima, até {seconds} s por lance."
+    },
+    "komugiBot": "Komugi · {strength}",
+    "komugiFailed": "A Komugi não conseguiu fazer o lance dela.",
+    "komugiFailedReasons": {
+      "model": "A rede dela não carregou.",
+      "time": "O tempo dela acabou.",
+      "engine": "O motor dela falhou."
+    },
+    "retry": "Tentar de novo"
   },
   "analysis": {
     "importTitle": "Importar partida",

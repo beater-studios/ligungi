@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1270 760" width="1270" height="760">
+  <defs>
+    <radialGradient id="glow" cx="72%" cy="60%" r="75%">
+      <stop offset="0" stop-color="#2b2723"/>
+      <stop offset="1" stop-color="#161512"/>
+    </radialGradient>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M60 0H0V60" fill="none" stroke="#ffffff" stroke-opacity="0.04" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <rect width="1270" height="760" fill="url(#glow)"/>
+  <rect width="1270" height="760" fill="url(#grid)"/>
+  <g transform="translate(-30 0)">
+  <g transform="translate(576.4000000000001 349.20000000000005) scale(3.4)">
+    <ellipse cx="32" cy="60" rx="22" ry="3" fill="#000" opacity="0.3"/>
+    <ellipse cx="32" cy="50.0" rx="24" ry="8.5" fill="#959ca5"/>
+    <rect x="8" y="41.5" width="48" height="8.5" fill="#959ca5"/>
+    <ellipse cx="32" cy="41.5" rx="24" ry="8.5" fill="#e4e7eb"/>
+    <ellipse cx="25" cy="39.5" rx="8" ry="2.4" fill="#fff" opacity="0.32"/>
+    <ellipse cx="32" cy="38.0" rx="24" ry="8.5" fill="#959ca5"/>
+    <rect x="8" y="29.5" width="48" height="8.5" fill="#959ca5"/>
+    <ellipse cx="32" cy="29.5" rx="24" ry="8.5" fill="#e4e7eb"/>
+    <ellipse cx="25" cy="27.5" rx="8" ry="2.4" fill="#fff" opacity="0.32"/>
+    </g>
+  <g transform="translate(821.2 349.20000000000005) scale(3.4)">
+    <ellipse cx="32" cy="60" rx="22" ry="3" fill="#000" opacity="0.3"/>
+    <ellipse cx="32" cy="50.0" rx="24" ry="8.5" fill="#b5861c"/>
+    <rect x="8" y="41.5" width="48" height="8.5" fill="#b5861c"/>
+    <ellipse cx="32" cy="41.5" rx="24" ry="8.5" fill="#f3cd5b"/>
+    <ellipse cx="25" cy="39.5" rx="8" ry="2.4" fill="#fff" opacity="0.32"/>
+    <ellipse cx="32" cy="38.0" rx="24" ry="8.5" fill="#b5861c"/>
+    <rect x="8" y="29.5" width="48" height="8.5" fill="#b5861c"/>
+    <ellipse cx="32" cy="29.5" rx="24" ry="8.5" fill="#f3cd5b"/>
+    <ellipse cx="25" cy="27.5" rx="8" ry="2.4" fill="#fff" opacity="0.32"/>
+    <ellipse cx="32" cy="26.0" rx="24" ry="8.5" fill="#b5861c"/>
+    <rect x="8" y="17.5" width="48" height="8.5" fill="#b5861c"/>
+    <ellipse cx="32" cy="17.5" rx="24" ry="8.5" fill="#f3cd5b"/>
+    <ellipse cx="25" cy="15.5" rx="8" ry="2.4" fill="#fff" opacity="0.32"/>
+    </g>
+  <g transform="translate(1066.0 349.20000000000005) scale(3.4)">
+    <ellipse cx="32" cy="60" rx="22" ry="3" fill="#000" opacity="0.3"/>
+    <ellipse cx="32" cy="50.0" rx="24" ry="8.5" fill="#975a2a"/>
+    <rect x="8" y="41.5" width="48" height="8.5" fill="#975a2a"/>
+    <ellipse cx="32" cy="41.5" rx="24" ry="8.5" fill="#e3a46c"/>
+    <ellipse cx="25" cy="39.5" rx="8" ry="2.4" fill="#fff" opacity="0.32"/>
+    </g>
+  </g>
+  <g font-family="'Noto Sans', sans-serif">
+    <text x="60" y="72" font-size="40" font-weight="700" fill="#e8e6e3">Weekly Arena, every Saturday</text>
+    <text x="60" y="114" font-size="22" fill="#a8a29b">A tournament for everyone, the first on December 5.</text>
+    <g font-size="27" fill="#c9c4bd">
+      <text x="60" y="250"><tspan fill="#f3cd5b" font-weight="600">90 minutes</tspan> at 18:00 UTC</text>
+      <text x="60" y="300">Advanced · 5+3 · rated</text>
+      <text x="60" y="380"><tspan fill="#f3cd5b" font-weight="600">Join anytime</tspan>, play as</text>
+      <text x="60" y="415">many games as you can</text>
+      <text x="60" y="495"><tspan fill="#f3cd5b" font-weight="600">Berserk</tspan>: half your clock,</text>
+      <text x="60" y="530">one more point for a win</text>
+      <text x="60" y="610"><tspan fill="#f3cd5b" font-weight="600">Trophies and seasons</tspan></text>
+      <text x="60" y="645">on your profile</text>
+    </g>
+    <text x="900" y="660" font-size="30" text-anchor="middle" fill="#e8e6e3">ligungi.org/arena</text>
+  </g>
+</svg>

@@ -22,6 +22,10 @@ Sí. Activa el modo para lectores de pantalla en Preferencias o arriba en la pá
 
 Usamos Glicko-2, con una puntuación distinta para cada modo. Mientras la puntuación aún es incierta aparece con "?" y el jugador no entra en la clasificación. Las partidas casuales no cambian la puntuación.
 
+## ¿Hay torneos?
+
+Sí: la [Arena semanal](/arena), cada sábado a las 18:00 UTC, 90 minutos en el modo Avanzado a 5+3, con puntuación. Entra cuando quieras y juega todas las partidas que puedas: al terminar una, te emparejan de nuevo con alguien cerca de ti en la clasificación. La victoria vale 2 puntos (4 después de dos victorias seguidas) y las tablas 1, y usar el berserk antes de tu primera jugada (la mitad del reloj) da un punto más si ganas. Los trofeos van a tu perfil, y el campeón de cada temporada se lleva el trofeo de la temporada. Los avisos y resultados se publican en nuestro [servidor de Discord](discord).
+
 ## ¿Por qué no puedo hacer una jugada que pone en peligro a mi Mariscal?
 
 Según el libro, quien deja capturar a su Mariscal pierde. En lugar de permitir la jugada y esperar la captura, el sitio simplemente no la ofrece. Si no tienes ninguna jugada que deje a salvo a tu Mariscal, la partida termina en mate, aunque no esté atacado en ese momento.

@@ -188,8 +188,8 @@ describe('long pages', () => {
       const t = messagesFor(lang);
       return t.info.updated(new Date(`${LEGAL_UPDATED}T12:00:00Z`).toLocaleDateString(t.locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }));
     };
-    expect(date('en')).toBe('Last updated: November 23, 2026.');
-    expect(date('pt')).toBe('Última atualização: 23 de novembro de 2026.');
-    expect(date('es')).toBe('Última actualización: 23 de noviembre de 2026.');
+    expect(date('en')).toBe('Last updated: November 27, 2026.');
+    expect(date('pt')).toBe('Última atualização: 27 de novembro de 2026.');
+    expect(date('es')).toBe('Última actualización: 27 de noviembre de 2026.');
   });
 });

@@ -4,6 +4,8 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-27
+
 ### Added
 
 - Weekly Arena: a tournament every Saturday at 18:00 UTC, Advanced at 5+3 for 90 minutes, rated. Join anytime, get paired again as soon as a game ends, and score 2 for a win (double after two wins in a row) and 1 for a draw. It starts with at least 4 players.
@@ -12,6 +14,7 @@ Notable changes to ligungi. The format follows [Keep a Changelog](https://keepac
 - Arena seasons: Season 0 runs through December 2026, then one season per quarter. Each player's best half of the season's Arenas add up, and the champion takes the season trophy. Profiles show the current season and fold the past ones.
 - Berserk in the Arena: before your first move, halve your clock (no increment) for one more point if you win.
 - A finished Arena's podium as an image for Instagram or X, made in the browser.
+- The FAQ answers "Are there tournaments?", and the privacy policy covers what the Weekly Arena shows and posts.
 
 ## [0.11.0] - 2026-11-26
 
@@ -432,7 +435,8 @@ First public version.
 - Interface in Portuguese, English and Spanish.
 - Lichess-based look (lila's styles), shared form components and a design system page at `/design`.
 
-[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/beater-studios/ligungi/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/beater-studios/ligungi/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/beater-studios/ligungi/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/beater-studios/ligungi/compare/v0.9.11...v0.10.0
 [0.9.11]: https://github.com/beater-studios/ligungi/compare/v0.9.10...v0.9.11

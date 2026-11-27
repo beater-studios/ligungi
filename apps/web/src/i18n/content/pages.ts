@@ -7,7 +7,7 @@ export const LONG_PAGES = ['about', 'faq', 'contact', 'sites', 'terms', 'privacy
 export type LongPage = (typeof LONG_PAGES)[number];
 
 /** Date of the terms and privacy policy in force, shown at their top. */
-export const LEGAL_UPDATED = '2026-11-23';
+export const LEGAL_UPDATED = '2026-11-27';
 
 const ENGLISH = import.meta.glob<string>('./en/*.md', { query: '?raw', import: 'default', eager: true });
 const FILES = import.meta.glob<string>(['./*/*.md', '!./en/*.md'], { query: '?raw', import: 'default' });

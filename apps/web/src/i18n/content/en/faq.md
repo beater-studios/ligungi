@@ -22,6 +22,10 @@ Yes. Turn on screen reader mode in Settings or at the top of the sign in page. I
 
 We use Glicko-2, with a separate rating for each mode. While a rating is still uncertain it shows a "?" and the player is not on the leaderboard. Casual games do not change ratings.
 
+## Are there tournaments?
+
+Yes: the [Weekly Arena](/arena), every Saturday at 18:00 UTC, 90 minutes in the Advanced mode at 5+3, rated. Join anytime and play as many games as you can: when a game ends, you are paired again with someone near you in the standings. A win is worth 2 points (4 after two wins in a row) and a draw 1, and going berserk before your first move (half your clock) gives one more point for a win. Trophies go on your profile, and each season's champion takes the season trophy. Reminders and results are posted on our [Discord server](discord).
+
 ## Why can I not make a move that puts my Marshal in danger?
 
 By the rulebook, whoever lets their Marshal be captured loses. Instead of allowing the move and waiting for the capture, the site simply does not offer it. If you have no move that keeps your Marshal safe, the game ends in mate, even if it is not under attack at that moment.

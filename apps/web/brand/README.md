@@ -38,6 +38,9 @@ Images for listings outside the site are rendered to the git-ignored `/media` fo
 | `x-banner.svg` | `x/banner-1500x500.png` | 1500×500 | X header (the profile picture covers the bottom left corner, so the text starts in the middle) |
 | `../src/assets/logo.svg` (at 75% on a radial `#6a6158` to `#4a443e`, so the black tier stands out) | `x/profile-400.png`, `instagram/profile-400.png` | 400×400 | X and Instagram profile picture |
 | `igdb/keyart-logo-1920x1080.png` and boards captured from ligungi.org (1280 wide at 2x, English, dark theme), with a title over the dark background (rendered from HTML) | `instagram/post1-slide1` to `post1-slide5` (`-1080x1350.png`) | 1080×1350 | Instagram first carousel |
+| `arena-post.svg` (Noto Sans from `../src/assets/font`, rendered from an HTML page that loads it) | `arena/arena-post-1080x1350.png` | 1080×1350 | Instagram post announcing the Weekly Arena |
+| `arena-wide.svg` (same) | `arena/arena-wide-1200x675.png` | 1200×675 | X post announcing the Weekly Arena |
+| `arena-event.svg` (same) | `arena/arena-event-1600x640.png` | 1600×640 | Cover of the recurring Weekly Arena event on Discord |
 
 Text uses Noto Sans, bundled in `src/assets/font` (license in its [README](../src/assets/font/README.md)).
 

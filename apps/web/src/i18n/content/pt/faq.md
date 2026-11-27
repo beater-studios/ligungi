@@ -22,6 +22,10 @@ Sim. Ative o modo para leitores de tela em Preferências ou no topo da página d
 
 Usamos o Glicko-2, com um rating separado para cada modo. Enquanto o rating ainda é incerto, ele aparece com "?" e o jogador não entra no ranking. Partidas casuais não mudam o rating.
 
+## Tem torneios?
+
+Tem: a [Arena semanal](/arena), todo sábado às 18:00 UTC (15:00 em Brasília), 90 minutos no modo Avançado em 5+3, ranqueada. Entre quando quiser e jogue quantas partidas conseguir: ao terminar uma, você é pareado de novo com alguém perto de você na classificação. Vitória vale 2 pontos (4 depois de duas vitórias seguidas) e empate 1, e usar o berserk antes do seu primeiro lance (metade do relógio) dá um ponto a mais na vitória. Os troféus vão para o seu perfil, e o campeão de cada temporada leva o troféu da temporada. Os avisos e resultados saem no nosso [servidor do Discord](discord).
+
 ## Por que não consigo fazer um lance que deixa meu Marechal em perigo?
 
 Pelo livro, quem deixa o Marechal ser capturado perde. Em vez de permitir o lance e esperar a captura, o site simplesmente não oferece esse lance. Se você não tem nenhum lance que deixe o Marechal a salvo, a partida acaba em mate, mesmo que ele não esteja sendo atacado naquele momento.

@@ -82,8 +82,10 @@ const DISCORD_FRAMES = 'https://discord.com https://*.discord.com https://discor
 const contentSecurityPolicy = (analytics: boolean, embedded = false): string =>
   [
     "default-src 'self'",
-    `script-src 'self'${analytics ? ` ${ANALYTICS_SCRIPT}` : ''}`,
-    `connect-src 'self'${analytics ? ` ${ANALYTICS_REPORT}` : ''}`,
+    // 'wasm-unsafe-eval' lets the Komugi opponent compile onnxruntime-web's WebAssembly; it allows no JavaScript eval.
+    `script-src 'self' 'wasm-unsafe-eval'${analytics ? ` ${ANALYTICS_SCRIPT}` : ''}`,
+    // blob: lets the Komugi worker read the model the page has downloaded and checked (a blob: URL); it allows no other origin.
+    `connect-src 'self' blob:${analytics ? ` ${ANALYTICS_REPORT}` : ''}`,
     // Inside Discord the call's people show with their Discord avatars.
     `img-src 'self' data:${embedded ? ' https://cdn.discordapp.com' : ''}`,
     "style-src 'self' 'unsafe-inline'",

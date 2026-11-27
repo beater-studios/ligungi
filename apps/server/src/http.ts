@@ -134,6 +134,9 @@ export const readJson = (req: IncomingMessage): Promise<unknown> =>
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.wasm': 'application/wasm',
+  '.onnx': 'application/octet-stream',
   '.css': 'text/css; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.ogg': 'audio/ogg',
@@ -261,6 +264,12 @@ export const serveStatic = (
  */
 const cacheControl = (pathname: string, file: string): string => {
   if (pathname.startsWith('/assets/')) return 'public, max-age=31536000, immutable';
+  // Komugi engine files (scripts/komugi-assets.sh): the runtime sits in a versioned ort-<version>/ directory, so it can
+  // be cached for a year; the release JSON and the model keep fixed names across releases, so they must revalidate.
+  if (pathname.startsWith('/komugi/')) {
+    if (/^\/komugi\/ort-\d[^/]*\//.test(pathname)) return 'public, max-age=31536000, immutable';
+    if (['.json', '.onnx'].includes(extname(file))) return 'no-cache';
+  }
   // The service worker has a fixed name and changes with a deploy; a cached copy would keep the old one installed.
   if (pathname === '/sw.js') return 'no-cache';
   // no-transform: CDNs must not rewrite the page (Cloudflare would inject its analytics beacon before consent).

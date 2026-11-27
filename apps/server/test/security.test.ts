@@ -236,6 +236,30 @@ describe('static files', () => {
     expect((await head('/preview.gif'))[1]).toBe('image/gif');
     expect(await head('/.well-known/windows-app-web-link')).toEqual(['public, max-age=86400', 'application/json']);
   });
+
+  it('serves the Komugi engine files with their types', async () => {
+    const staticDir = mkdtempSync(join(tmpdir(), 'ligungi-static-'));
+    dirs.push(staticDir);
+    // The layout scripts/komugi-assets.sh writes.
+    mkdirSync(join(staticDir, 'komugi', 'ort-1.31.1'), { recursive: true });
+    writeFileSync(join(staticDir, 'index.html'), '<!doctype html>');
+    writeFileSync(join(staticDir, 'komugi', 'ort-1.31.1', 'ort-wasm-simd-threaded.wasm'), 'x');
+    writeFileSync(join(staticDir, 'komugi', 'ort-1.31.1', 'ort-wasm-simd-threaded.mjs'), 'x');
+    writeFileSync(join(staticDir, 'komugi', 'komugi-c6-s1-0123abcd.onnx'), 'x');
+    for (const name of ['komugi-c6-s1-0123abcd.card.json', 'models.json', 'ort-assets.json']) writeFileSync(join(staticDir, 'komugi', name), '{}');
+    server = await startServer({ staticDir });
+    const type = async (path: string) => (await raw(path)).headers.get('content-type');
+    expect(await type('/komugi/ort-1.31.1/ort-wasm-simd-threaded.wasm')).toBe('application/wasm');
+    expect(await type('/komugi/ort-1.31.1/ort-wasm-simd-threaded.mjs')).toBe('text/javascript; charset=utf-8');
+    expect(await type('/komugi/komugi-c6-s1-0123abcd.onnx')).toBe('application/octet-stream');
+    for (const name of ['komugi-c6-s1-0123abcd.card.json', 'models.json', 'ort-assets.json']) expect(await type(`/komugi/${name}`)).toBe('application/json');
+    const cache = async (path: string) => (await raw(path)).headers.get('cache-control');
+    expect(await cache('/komugi/ort-1.31.1/ort-wasm-simd-threaded.wasm')).toBe('public, max-age=31536000, immutable');
+    expect(await cache('/komugi/ort-1.31.1/ort-wasm-simd-threaded.mjs')).toBe('public, max-age=31536000, immutable');
+    expect(await cache('/komugi/komugi-c6-s1-0123abcd.onnx')).toBe('no-cache');
+    for (const name of ['komugi-c6-s1-0123abcd.card.json', 'models.json', 'ort-assets.json']) expect(await cache(`/komugi/${name}`)).toBe('no-cache');
+    expect((await raw('/komugi/absent.json')).status).toBe(404);
+  });
 });
 
 describe('prerendered pages', () => {
@@ -305,19 +329,28 @@ describe('version', () => {
 });
 
 describe('headers', () => {
-  it('sends a CSP that only allows connections to the same origin', async () => {
+  it('sends a CSP that only allows connections to the same origin (and to blob: URLs the page made)', async () => {
     server = await startServer();
     const csp = (await raw('/')).headers.get('content-security-policy') ?? '';
-    expect(csp).toContain("connect-src 'self';");
+    expect(csp).toContain("connect-src 'self' blob:;");
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");
     expect(csp).not.toContain('cloudflareinsights');
   });
 
+  it('lets WebAssembly compile, for the Komugi opponent, without allowing JavaScript eval', async () => {
+    server = await startServer();
+    const csp = (await raw('/')).headers.get('content-security-policy') ?? '';
+    const scriptSrc = csp.split('; ').find((directive) => directive.startsWith('script-src '));
+    expect(scriptSrc).toBe("script-src 'self' 'wasm-unsafe-eval'");
+    expect(csp).not.toContain("'unsafe-eval'");
+    expect(csp).toContain("worker-src 'self' blob:");
+  });
+
   it('lets the Cloudflare Web Analytics beacon through only when enabled', async () => {
     server = await startServer({ cloudflareWebAnalytics: true });
     const csp = (await raw('/')).headers.get('content-security-policy') ?? '';
-    expect(csp).toContain("script-src 'self' https://static.cloudflareinsights.com;");
-    expect(csp).toContain("connect-src 'self' https://cloudflareinsights.com;");
+    expect(csp).toContain("script-src 'self' 'wasm-unsafe-eval' https://static.cloudflareinsights.com;");
+    expect(csp).toContain("connect-src 'self' blob: https://cloudflareinsights.com;");
   });
 });

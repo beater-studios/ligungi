@@ -28,6 +28,13 @@ Posted:
 | 2026-11-21 | r/WebGames | https://www.reddit.com/r/WebGames/comments/1y2e33f/ligungi_play_gungi_the_towerstacking_strategy/ |
 | 2026-11-23 | r/playmygame | https://www.reddit.com/r/playmygame/comments/1y3fe60/ligungi_an_online_version_of_gungi_the/ |
 
+Coverage written by others (independent sources, which also count toward the Wikipedia bar below):
+
+| Date | Where | What |
+|---|---|---|
+| 2026-11-26 | [Keyboard Knights](https://kknights.com/posts/6192-vyshel-ligungi-besplatnyi-brauzernyi-sait-dlia-igry-v-gungi-iz-hunterxhunter) (Russian gaming news) | A news article on the launch, based on the IndieDB article: the official 2022 rules, play online or against the computer, lessons, puzzles, studies, no ads, AGPL, Discord and GitHub, and that it is a fan project. Links to ligungi.org |
+| 2026-11 | [GamerGeek](https://gamergeek.com.br/calendario/novembro/2026) (Brazilian release calendar) | Listed as a Web release on 2026-11-12 in its November 2026 calendar, with a game page of its own (`gamergeek.com.br/jogo/ligungi`); probably taken from IGDB, which has the same date. A listing, not an article |
+
 The shared texts, in English:
 
 - **Short:** Free, open source site to play Gungi (軍儀), the strategy board game from HUNTER×HUNTER, with the official 2022 rules: rated and casual games, play against the computer, puzzles, lessons, studies and an analysis board. A fan project, not officially affiliated with the rights holders.

@@ -175,7 +175,7 @@ Pages tell browser integrations what the player is doing through `data-activity-
 | Page | Attributes |
 |---|---|
 | A game (`/<id>`) | `kind` `game`, `mode`, `status` (`started`, `ended`, `aborted`), `role` (`player` or `spectator`), `color` (the player's own, only for a player), `white` and `black` (names, empty for an anonymous player), `rated` and `correspondence` (`true` or `false`). |
-| The computer (`/computer`, once a game is set up) | `kind` `computer`, `mode`, `level` (1 to 5), `color`, `status` (`started` or `ended`). |
+| The computer (`/computer`, once a game is set up) | `kind` `computer`, `mode`, `level` (1 to 5) or, against Komugi, `opponent` `komugi` and `strength` (`casual`, `focused`, `sharp` or `awakened`), `color`, `status` (`started` or `ended`). |
 
 Changing a key or a value breaks the integrations that read it, including the Discord status of the [Discord Activity](#discord-activity).
 

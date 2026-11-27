@@ -40,6 +40,8 @@ const PATHS = [
   '/sites',
   '/terms',
   '/privacy',
+  '/arena',
+  '/arena/abcd1234',
   '/abcd1234',
   '/@/someone',
   '/nowhere',

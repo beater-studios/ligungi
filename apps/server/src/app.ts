@@ -15,10 +15,13 @@ import {
   sessionCookie,
   type Session,
 } from './auth.ts';
+import { arenaMessage } from './arena-announce.ts';
+import { Arenas } from './arenas.ts';
 import { ActivityHalls } from './discordActivity.ts';
 import { Racers } from './racer.ts';
 import { registerAuthRoutes } from './routes/auth.ts';
 import { registerAccountRoutes } from './routes/account.ts';
+import { registerArenaRoutes } from './routes/arena.ts';
 import { registerDiscordActivityRoutes } from './routes/discordActivity.ts';
 import { registerDiscordRoutes } from './routes/discord.ts';
 import { registerModerationRoutes } from './routes/moderation.ts';
@@ -65,6 +68,10 @@ const CHALLENGE_SWEEP_MS = 60_000;
 /** Live games listed for the TV and the home page. */
 const TV_GAMES = 24;
 const TV_PUBLISH_MS = 500;
+/** How often the Arena schedule runs: reminders, start, pairings and the end. */
+const ARENA_TICK_MS = 2_000;
+/** Changes to an Arena (a game ending, a player joining) are gathered and sent at most this often. */
+const ARENA_PUBLISH_MS = 250;
 /** Cloudflare Web Analytics: no cookies, aggregate only; its edge injects this script into the HTML. */
 const ANALYTICS_SCRIPT = 'https://static.cloudflareinsights.com';
 const ANALYTICS_REPORT = 'https://cloudflareinsights.com';
@@ -93,6 +100,7 @@ export interface App {
   readonly db: Db;
   readonly games: Games;
   readonly discord: DiscordLinks;
+  readonly arenas: Arenas;
   close(): Promise<void>;
 }
 
@@ -108,7 +116,7 @@ const createDeps = (config: ServerConfig) => {
   const users = new Users(db, config.now);
   const notices = new Notices(db, config.now);
   const hub = new Hub();
-  const { authLimiter, loginFailures, sessionLimiter, exportLimiter, reportLimiter, discordLimiter, studyLimiter, searchLimiter, activityLimiter, raceLimiter, activityRoomsLimiter } = createLimits(config.now);
+  const { authLimiter, loginFailures, sessionLimiter, exportLimiter, reportLimiter, discordLimiter, studyLimiter, searchLimiter, activityLimiter, raceLimiter, activityRoomsLimiter, arenaLimiter } = createLimits(config.now);
   const csp = contentSecurityPolicy(config.cloudflareWebAnalytics);
   const activityCsp = contentSecurityPolicy(config.cloudflareWebAnalytics, true);
 
@@ -159,6 +167,50 @@ const createDeps = (config: ServerConfig) => {
     claimAfterMs: config.claimAfterMs,
     broadcast: publishGame,
     ratingsChanged: (userIds) => discord.ratingsChanged(userIds),
+    finished: (room) => arenas.gameFinished(room),
+  });
+
+  /** The session of a client where a player has an Arena, or their last Arena game, open; `null` when away. */
+  const arenaPresence = (arenaId: string, userId: string, lastGame: string | null): string | null => {
+    for (const client of hub.clients()) {
+      if (client.player.userId !== userId) continue;
+      if (client.topics.has(`arena:${arenaId}`) || (lastGame !== null && client.topics.has(`game:${lastGame}`))) return client.player.sessionId;
+    }
+    return null;
+  };
+  const arenaTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  const publishArena = (arenaId: string): void => {
+    if (arenaTimers.has(arenaId)) return;
+    const timer = setTimeout(() => {
+      arenaTimers.delete(arenaId);
+      const view = arenas.viewer(arenaId);
+      hub.publish(`arena:${arenaId}`, (client) =>
+        view ? { t: 'arena', arena: view(client.player.userId) } : { t: 'error', code: 'arenaNotFound', message: ERROR_MESSAGES.arenaNotFound },
+      );
+    }, ARENA_PUBLISH_MS);
+    timer.unref();
+    arenaTimers.set(arenaId, timer);
+  };
+  const stopArenaPublishing = () => {
+    for (const timer of arenaTimers.values()) clearTimeout(timer);
+    arenaTimers.clear();
+  };
+  const arenas: Arenas = new Arenas(db, games, users, {
+    now: config.now,
+    random: Math.random,
+    schedule: config.arenas,
+    presence: arenaPresence,
+    busy: (userId) => games.live().some((room) => Object.values(room.seats).some((seat) => seat.userId === userId)),
+    changed: publishArena,
+    gameStarted: (room) => {
+      for (const seat of Object.values(room.seats)) hub.toSession(seat.sessionId, seat.userId, { t: 'redirect', path: `/${room.id}` });
+    },
+    notice: (userId, kind, details) => notice(userId, kind, details),
+    announce: (event) => {
+      const origin = discord.siteOrigin ?? 'https://ligungi.org';
+      void discord.postArena(arenaMessage(event, origin, discord.arenaRoleId, (userId) => discord.linkedDiscordId(userId)));
+      if (event.kind === 'finished' && event.champion) void discord.passArenaChampion(event.previousChampion, event.champion.id);
+    },
   });
 
   const tv = new Tv(games, config.now);
@@ -378,6 +430,10 @@ const createDeps = (config: ServerConfig) => {
     activityLimiter,
     raceLimiter,
     activityRoomsLimiter,
+    arenas,
+    arenaLimiter,
+    publishArena,
+    stopArenaPublishing,
     ACTIVITY_INSTANCE,
     activityCaller,
     sendIncoming,
@@ -395,6 +451,7 @@ export const createApp = (config: ServerConfig): App => {
   const router = new Router();
   registerAuthRoutes(router, deps);
   registerAccountRoutes(router, deps);
+  registerArenaRoutes(router, deps);
   registerDiscordActivityRoutes(router, deps);
   registerDiscordRoutes(router, deps);
   registerModerationRoutes(router, deps);
@@ -529,17 +586,32 @@ export const createApp = (config: ServerConfig): App => {
   const challengeSweep = setInterval(() => lobby.sweep(), CHALLENGE_SWEEP_MS);
   challengeSweep.unref();
 
+  const runArenas = () => {
+    // The schedule must never stop the server: a failure is logged and the next tick tries again.
+    try {
+      deps.arenas.tick();
+    } catch (error) {
+      console.error('arena tick failed', error);
+    }
+  };
+  runArenas();
+  const arenaTick = setInterval(runArenas, ARENA_TICK_MS);
+  arenaTick.unref();
+
   return {
     server,
     db,
     games,
     discord,
+    arenas: deps.arenas,
     close: () =>
       new Promise<void>((resolve) => {
         closing = true;
         clearInterval(heartbeat);
         clearInterval(sessionSweep);
         clearInterval(challengeSweep);
+        clearInterval(arenaTick);
+        deps.stopArenaPublishing();
         for (const client of hub.clients()) client.socket.terminate();
         wss.close();
         server.close(() => {

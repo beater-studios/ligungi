@@ -1,3 +1,4 @@
+import type { ArenaView } from './arena.ts';
 import type { ErrorCode } from './errors.ts';
 import type { GameSummary, GameView } from './games.ts';
 import type { ChallengeView, LobbyView } from './lobby.ts';
@@ -5,7 +6,7 @@ import type { NoticeView } from './notices.ts';
 import type { RaceView } from './racer.ts';
 
 /** `tv`: the live games the TV and the home page show, sent on subscribing and again whenever one of them changes. */
-export type Topic = 'lobby' | 'tv' | `game:${string}` | `challenge:${string}` | `race:${string}`;
+export type Topic = 'lobby' | 'tv' | `game:${string}` | `challenge:${string}` | `race:${string}` | `arena:${string}`;
 
 export type ClientMessage =
   | { readonly t: 'sub'; readonly topic: Topic }
@@ -25,6 +26,8 @@ export type ClientMessage =
 export type ServerMessage =
   | { readonly t: 'game'; readonly game: GameView }
   | { readonly t: 'race'; readonly race: RaceView }
+  /** An Arena's standings and games, on subscribing to `arena:<id>` and after every change. */
+  | { readonly t: 'arena'; readonly arena: ArenaView }
   | { readonly t: 'lobby'; readonly lobby: LobbyView }
   /** Live games with at least one move, strongest first (as `GET /api/tv`). */
   | { readonly t: 'tv'; readonly games: readonly GameSummary[] }

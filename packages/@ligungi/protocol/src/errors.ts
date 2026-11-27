@@ -121,6 +121,8 @@ export const ERROR_MESSAGES = {
   raceFull: 'Essa corrida está cheia.',
   raceStarted: 'Essa corrida já começou.',
   notRaceOwner: 'Só quem criou a corrida pode iniciá-la.',
+  arenaNotFound: 'Arena não encontrada.',
+  arenaOver: 'Essa Arena já terminou.',
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

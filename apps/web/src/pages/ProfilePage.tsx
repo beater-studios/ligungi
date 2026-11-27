@@ -19,6 +19,7 @@ import { ModPanel } from '../mod/ModPanel.tsx';
 import { Crosstable } from '../game/Crosstable.tsx';
 import { ProfileAbout } from '../players/ProfileAbout.tsx';
 import { ActivityTimeline } from '../players/ActivityFeed.tsx';
+import { ProfileArenas } from '../players/ProfileArenas.tsx';
 import { ProfileStudies } from '../players/ProfileStudies.tsx';
 import { RatingHistory } from '../players/RatingHistory.tsx';
 import { ReportButton } from '../mod/ReportButton.tsx';
@@ -427,6 +428,8 @@ export const ProfilePage = ({ name }: { name: string }) => {
       <RatingHistory profile={profile} />
 
       <ActivityTimeline name={profile.user.name} />
+
+      <ProfileArenas name={profile.user.name} own={isMe} />
 
       <ProfileStudies name={profile.user.name} />
 

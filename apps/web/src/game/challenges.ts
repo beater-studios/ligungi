@@ -37,7 +37,13 @@ export const noticeText = (t: Messages, notice: NoticeView): string => {
     case 'profileCleared':
     case 'gameVoided':
     case 'suspensionLifted':
+    case 'arenaSoon':
       return n[notice.kind];
+    case 'arenaResult': {
+      // `place/players`, with `/trophy` when the place earned one.
+      const [place, players, trophy] = subject.split('/');
+      return (trophy ? n.arenaTrophy : n.arenaResult)(Number(place), Number(players));
+    }
   }
 };
 
@@ -48,6 +54,7 @@ export const noticePath = (notice: NoticeView): string | null => {
   if (notice.kind === 'profileCleared') return '/account';
   if (notice.kind === 'gameVoided') return notice.ref ? `/${notice.ref}` : null;
   if (notice.kind === 'studyHidden' || notice.kind === 'studyRestored' || notice.kind === 'studyDrawingsCleared') return notice.ref ? `/study/${notice.ref}` : null;
+  if (notice.kind === 'arenaSoon' || notice.kind === 'arenaResult') return notice.ref ? `/arena/${notice.ref}` : '/arena';
   return null;
 };
 

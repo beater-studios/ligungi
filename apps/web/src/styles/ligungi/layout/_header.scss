@@ -290,6 +290,11 @@ body:has(main.ligungi-auth) #clinput {
     &--mod {
       --tone: var(--c-accent);
     }
+
+    // The gold of the Arena trophies, darker on the light theme so the icon keeps its contrast.
+    &--arena {
+      --tone: #b5861c;
+    }
   }
 
   &__body {

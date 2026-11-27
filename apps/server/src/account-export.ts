@@ -7,7 +7,7 @@ import type { UserRecord } from './users.ts';
  * session asking, marked as the current one.
  */
 export const accountExport = (deps: AppDeps, user: UserRecord, sessionId: string) => {
-  const { challengeStore, config, discord, games, moderation, notices, puzzles, racers, seekStore, sessions, studies, twoFactor, users } = deps;
+  const { arenas, challengeStore, config, discord, games, moderation, notices, puzzles, racers, seekStore, sessions, studies, twoFactor, users } = deps;
 
   const userId = user.id;
   const iso = (ms: number) => new Date(ms).toISOString();
@@ -58,6 +58,7 @@ export const accountExport = (deps: AppDeps, user: UserRecord, sessionId: string
       recoveryCodesLeft,
     }))(twoFactor.state(userId)),
     ratings: users.ratings(userId),
+    trophies: arenas.exportFor(userId).map(({ at, ...trophy }) => ({ ...trophy, date: iso(at) })),
     discord: discord.exportFor(userId),
     following: users.social.following(userId).map((entry) => entry.name),
     followers: users.social.followers(userId).map((entry) => entry.name),

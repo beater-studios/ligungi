@@ -55,6 +55,7 @@ export const Header = () => {
               <a href="/?create=lobby">{t.nav.createGame}</a>
               <a href="/?create=friend">{t.nav.playFriend}</a>
               <a href="/computer">{t.nav.playComputer}</a>
+              <a href="/arena">{t.nav.arena}</a>
             </div>
           </section>
           <section>

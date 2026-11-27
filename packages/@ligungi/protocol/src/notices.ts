@@ -5,7 +5,8 @@ export type FollowPolicy = (typeof FOLLOW_POLICIES)[number];
 /**
  * What the bell tells a player besides challenges and games: a new follower, and what moderation decided about
  * them (`renamed`, `profileCleared`, `gameVoided`, the study ones, `suspensionLifted`) or about a report they sent
- * (`reportClosed`).
+ * (`reportClosed`), and the weekly Arena: `arenaSoon` (it starts in a few minutes, for those who joined) and
+ * `arenaResult` (their place, with `subject` as `place/players` or `place/players/trophy`).
  */
 export const NOTICE_KINDS = [
   'follow',
@@ -18,6 +19,8 @@ export const NOTICE_KINDS = [
   'studyDeleted',
   'studyDrawingsCleared',
   'suspensionLifted',
+  'arenaSoon',
+  'arenaResult',
 ] as const;
 export type NoticeKind = (typeof NOTICE_KINDS)[number];
 

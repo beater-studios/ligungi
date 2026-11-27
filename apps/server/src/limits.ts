@@ -27,4 +27,6 @@ export const createLimits = (now: () => number) => ({
   raceLimiter: new RateLimiter(30, 60_000, now),
   /** Views of a call's rooms per session: the page asks every few seconds what the call has going on, so this allows more. */
   activityRoomsLimiter: new RateLimiter(120, 60_000, now),
+  /** Joining and pausing an Arena per session: a player toggles it a few times at most. */
+  arenaLimiter: new RateLimiter(30, 60_000, now),
 });

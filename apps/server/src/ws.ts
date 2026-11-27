@@ -19,10 +19,10 @@ const MAX_TOPICS_PER_CLIENT = 32;
  * nothing.
  */
 export const createSocketHandler = (deps: AppDeps, closing: () => boolean) => {
-  const { games, hub, lobby, lobbyView, publishLobby, racers, seatsBlocked, sendIncoming, sendNotices, sendTurns, tvGames, updatePresence } = deps;
+  const { arenas, games, hub, lobby, lobbyView, publishArena, publishLobby, racers, seatsBlocked, sendIncoming, sendNotices, sendTurns, tvGames, updatePresence } = deps;
 
   const validTopic = (topic: unknown): topic is Topic =>
-    typeof topic === 'string' && (topic === 'lobby' || topic === 'tv' || /^(game|challenge|race):[A-Za-z0-9]{1,16}$/.test(topic));
+    typeof topic === 'string' && (topic === 'lobby' || topic === 'tv' || /^(game|challenge|race|arena):[A-Za-z0-9]{1,16}$/.test(topic));
 
   const onConnection = (socket: WebSocket, player: Player) => {
     const client: Client = { socket, player, topics: new Set(), alive: true };
@@ -39,7 +39,8 @@ export const createSocketHandler = (deps: AppDeps, closing: () => boolean) => {
         if (topic.startsWith('game:')) {
           const room = games.get(topic.slice(5));
           if (room) updatePresence(room);
-        }
+          if (room?.arena) publishArena(room.arena);
+        } else if (topic.startsWith('arena:')) publishArena(topic.slice(6));
       }
       if (!hub.hasSession(player.sessionId)) {
         lobby.removeSeeksOf(player.sessionId);
@@ -83,6 +84,13 @@ export const createSocketHandler = (deps: AppDeps, closing: () => boolean) => {
           if (!race) return error('raceNotFound');
           hub.subscribe(client, topic);
           hub.send(client, { t: 'race', race });
+        } else if (kind === 'arena' && id) {
+          const arena = arenas.view(id, client.player.userId);
+          if (!arena) return error('arenaNotFound');
+          hub.subscribe(client, topic);
+          hub.send(client, { t: 'arena', arena });
+          // Being on the page is what makes a player available for pairing.
+          publishArena(id);
         } else if (kind === 'challenge' && id) {
           const challenge = lobby.challenge(id);
           if (!challenge) return error('challengeNotFound');
@@ -97,7 +105,7 @@ export const createSocketHandler = (deps: AppDeps, closing: () => boolean) => {
         if (message.topic.startsWith('game:')) {
           const room = games.get(message.topic.slice(5));
           if (room) updatePresence(room);
-        }
+        } else if (message.topic.startsWith('arena:')) publishArena(message.topic.slice(6));
         return;
       }
       case 'raceMove':

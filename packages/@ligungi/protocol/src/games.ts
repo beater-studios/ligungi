@@ -58,6 +58,8 @@ export interface GameView {
    * Empty for everyone else: the queue is the player's plan, never shown to the opponent.
    */
   readonly draftQueue: readonly string[];
+  /** The Arena this game was paired in, if any. */
+  readonly arena: string | null;
   readonly createdAt: number;
   readonly endedAt: number | null;
 }
@@ -82,6 +84,8 @@ export interface GameSummary {
   /** Whose move it is; `null` once the game is over. */
   readonly turn: Color | null;
   readonly voided: boolean;
+  /** The Arena this game was paired in, if any. */
+  readonly arena: string | null;
 }
 
 /** TV channels: the strongest live game of the site, and of each mode. */

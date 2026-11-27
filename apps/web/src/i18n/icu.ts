@@ -1,6 +1,6 @@
 /**
  * A small ICU MessageFormat interpreter for the translations: `{name}` arguments, `{n, plural, =0 {…} one {…} other {…}}`
- * with `#` for the number, `{x, select, a {…} other {…}}`, and `<tag>…</tag>` around a part of the text, which the
+ * with `#` for the number, `{n, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}` for places, `{x, select, a {…} other {…}}`, and `<tag>…</tag>` around a part of the text, which the
  * caller turns into markup. Apostrophes quote as in ICU: `''` is one apostrophe, `'{'` a literal brace.
  * Numbers are written as the code passes them (no thousands separators), as the site always did.
  */
@@ -9,7 +9,7 @@ type Node =
   | { readonly kind: 'text'; readonly value: string }
   | { readonly kind: 'arg'; readonly name: string }
   | { readonly kind: 'pound' }
-  | { readonly kind: 'plural' | 'select'; readonly name: string; readonly branches: ReadonlyMap<string, Node[]> }
+  | { readonly kind: 'plural' | 'selectordinal' | 'select'; readonly name: string; readonly branches: ReadonlyMap<string, Node[]> }
   | { readonly kind: 'tag'; readonly name: string; readonly children: Node[] };
 
 export class IcuError extends Error {}
@@ -92,7 +92,7 @@ const parse = (source: string): Node[] => {
     if (source[i] !== ',') fail('expected , or }');
     i++;
     const type = word();
-    if (type !== 'plural' && type !== 'select') return fail(`unknown type ${type}`);
+    if (type !== 'plural' && type !== 'selectordinal' && type !== 'select') return fail(`unknown type ${type}`);
     skipSpace();
     if (source[i] !== ',') fail('expected ,');
     i++;
@@ -107,7 +107,7 @@ const parse = (source: string): Node[] => {
       skipSpace();
       if (source[i] !== '{') fail(`expected { after ${key}`);
       i++;
-      branches.set(key, parseText(type === 'plural' || inPlural, (c) => c === '}'));
+      branches.set(key, parseText(type !== 'select' || inPlural, (c) => c === '}'));
       if (source[i] !== '}') fail('unclosed branch');
       i++;
     }
@@ -142,9 +142,9 @@ const namesOf = (source: string, kind: 'arg' | 'tag'): string[] => {
   };
   const walk = (nodes: readonly Node[]) => {
     for (const node of nodes) {
-      if (kind === 'arg' && (node.kind === 'arg' || node.kind === 'plural' || node.kind === 'select')) add(node.name);
+      if (kind === 'arg' && (node.kind === 'arg' || node.kind === 'plural' || node.kind === 'selectordinal' || node.kind === 'select')) add(node.name);
       if (kind === 'tag' && node.kind === 'tag') add(node.name);
-      if (node.kind === 'plural' || node.kind === 'select') for (const branch of node.branches.values()) walk(branch);
+      if (node.kind === 'plural' || node.kind === 'selectordinal' || node.kind === 'select') for (const branch of node.branches.values()) walk(branch);
       if (node.kind === 'tag') walk(node.children);
     }
   };
@@ -175,9 +175,10 @@ const run = <T>(nodes: readonly Node[], args: Args, locale: string, tags: Tags<T
     else if (node.kind === 'arg') {
       const value = args[node.name];
       push(value === null || value === undefined ? '' : typeof value === 'string' || typeof value === 'number' ? String(value) : (value as T));
-    } else if (node.kind === 'plural') {
+    } else if (node.kind === 'plural' || node.kind === 'selectordinal') {
       const n = Number(args[node.name]);
-      const branch = node.branches.get(`=${n}`) ?? node.branches.get(new Intl.PluralRules(locale).select(n)) ?? node.branches.get('other')!;
+      const rules = new Intl.PluralRules(locale, { type: node.kind === 'plural' ? 'cardinal' : 'ordinal' });
+      const branch = node.branches.get(`=${n}`) ?? node.branches.get(rules.select(n)) ?? node.branches.get('other')!;
       for (const part of run(branch, args, locale, tags, n)) push(part);
     } else if (node.kind === 'select') {
       const value = args[node.name];

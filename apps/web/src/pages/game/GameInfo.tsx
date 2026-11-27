@@ -18,6 +18,12 @@ export const GameInfo = ({ view, notice, premove }: { view: GameView; notice: st
   <section class="ligungi-card ligungi-game-info">
     <p class="ligungi-game-info__setup">
       {t.modes[view.mode]} · {speedText(t, view)} · {view.rated ? t.rated : t.casual}
+      {view.arena && (
+        <>
+          {' · '}
+          <a href={`/arena/${view.arena}`}>{t.arena.title}</a>
+        </>
+      )}
     </p>
     {view.freeDraft && <p class="ligungi-notice">{t.freeDraftHint}</p>}
     {!started && <p class="ligungi-game-info__status">{outcomeText(t, view.outcome, view.status === 'aborted')}</p>}

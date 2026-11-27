@@ -41,6 +41,8 @@ export interface RoomInit {
   readonly endedAt?: number | null;
   readonly voided?: boolean;
   readonly draftQueue?: Readonly<Record<Color, readonly string[]>> | null;
+  /** The Arena that paired this game, if any. */
+  readonly arena?: string | null;
 }
 
 export interface RoomHooks {
@@ -53,6 +55,8 @@ export interface RoomHooks {
   readonly onEnd: (room: GameRoom) => void;
   /** Both players asked for a rematch: create it and return its id. */
   readonly onRematch: (room: GameRoom) => string;
+  /** The game is over, ended or aborted, after the final broadcast. */
+  readonly onFinish?: (room: GameRoom) => void;
 }
 
 export type Action = 'offer' | 'accept' | 'decline';
@@ -95,6 +99,8 @@ export class GameRoom {
    * only gives up reacting to the opponent's next placements. Emptied when the draft ends.
    */
   draftQueue: Record<Color, readonly string[]>;
+  /** The Arena that paired this game: no rematch (the Arena pairs the next game). */
+  readonly arena: string | null;
   readonly #absentSince: Record<Color, number | null>;
   readonly #hooks: RoomHooks;
   #turnStartedAt: number;
@@ -122,6 +128,7 @@ export class GameRoom {
     this.endedAt = init.endedAt ?? null;
     this.voided = init.voided ?? false;
     this.draftQueue = { white: [...(init.draftQueue?.white ?? [])], black: [...(init.draftQueue?.black ?? [])] };
+    this.arena = init.arena ?? null;
     const now = hooks.now();
     this.#turnStartedAt = now;
     this.#absentSince = { white: now, black: now };
@@ -347,7 +354,7 @@ export class GameRoom {
   }
 
   rematch(color: Color, action: Action): ErrorCode | null {
-    if (this.status !== 'ended' || this.rematchId) return 'rematchUnavailable';
+    if (this.status !== 'ended' || this.rematchId || this.arena) return 'rematchUnavailable';
     const opponentOffered = this.rematchOffer === opposite(color);
     if ((action === 'offer' || action === 'accept') && opponentOffered) {
       this.rematchOffer = null;
@@ -475,6 +482,7 @@ export class GameRoom {
       canTakeback: you !== null && this.canTakeback(you),
       canGiveTime: you !== null && this.canGiveTime(you),
       draftQueue: you ? this.draftQueue[you] : [],
+      arena: this.arena,
       createdAt: this.createdAt,
       endedAt: this.endedAt,
     };
@@ -503,6 +511,7 @@ export class GameRoom {
       deadlineIn: this.deadline === null ? null : Math.max(0, this.deadline - this.#hooks.now()),
       turn: this.status === 'started' ? this.game.position.turn : null,
       voided: this.voided,
+      arena: this.arena,
     };
   }
 
@@ -552,6 +561,7 @@ export class GameRoom {
     this.dispose();
     if (status === 'ended') this.#hooks.onEnd(this);
     this.#hooks.onChange(this);
+    this.#hooks.onFinish?.(this);
   }
 
   #changed(): void {

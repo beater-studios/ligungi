@@ -26,6 +26,8 @@ export interface NewGame {
   readonly daysPerMove: number | null;
   readonly freeDraft: boolean;
   readonly players: Record<Color, Player>;
+  /** The Arena pairing this game, if any. */
+  readonly arena?: string;
 }
 
 export interface GamesOptions {
@@ -36,6 +38,8 @@ export interface GamesOptions {
   readonly broadcast: (room: GameRoom) => void;
   /** Called after players' ratings change: a rated game ended or one was voided. */
   readonly ratingsChanged?: (userIds: readonly string[]) => void;
+  /** A game is over, ended or aborted, after it was saved and broadcast. */
+  readonly finished?: (room: GameRoom) => void;
 }
 
 /** Finished games kept in memory after being loaded, for quick access (views, rematch offers). */
@@ -114,6 +118,7 @@ export class Games {
         freeDraft: game.freeDraft,
         seats: { white: seat('white'), black: seat('black') },
         createdAt: this.#options.now(),
+        arena: game.arena ?? null,
       },
       this.#hooks(),
     );
@@ -297,6 +302,7 @@ export class Games {
       },
       onEnd: (room: GameRoom) => this.#rate(room),
       onRematch: (room: GameRoom) => this.#rematch(room).id,
+      onFinish: (room: GameRoom) => this.#options.finished?.(room),
     };
   }
 
@@ -350,6 +356,7 @@ export class Games {
       endedAt: row.ended_at,
       voided: row.voided === 1,
       draftQueue: draftQueueFrom(row.draft_queue),
+      arena: row.arena_id,
     };
     return new GameRoom(init, this.#hooks());
   }
@@ -365,8 +372,8 @@ export class Games {
           white_session, white_user, white_name, white_rating, white_provisional, white_diff,
           black_session, black_user, black_name, black_rating, black_provisional, black_diff,
           moves, status, winner, reason, clock_white, clock_black, clock_running, days_per_move, deadline, rematch_id,
-          created_at, ended_at, updated_at, board_moves, draft_queue)
-         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          created_at, ended_at, updated_at, board_moves, draft_queue, arena_id)
+         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          on conflict (id) do update set white_session = excluded.white_session, black_session = excluded.black_session,
           white_diff = excluded.white_diff, black_diff = excluded.black_diff,
           moves = excluded.moves, status = excluded.status, winner = excluded.winner, reason = excluded.reason,
@@ -411,6 +418,7 @@ export class Games {
         now,
         room.status === 'ended' ? room.boardMoves : null,
         room.draftQueue.white.length || room.draftQueue.black.length ? JSON.stringify(room.draftQueue) : null,
+        room.arena,
       );
   }
 }

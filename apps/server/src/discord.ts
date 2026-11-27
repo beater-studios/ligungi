@@ -172,6 +172,55 @@ export class DiscordLinks {
     }
   }
 
+  /** The Discord account a player linked, to mention them in Arena posts; null when not linked or paused. */
+  linkedDiscordId(userId: string): string | null {
+    if (!this.#config?.arena) return null;
+    const row = this.#row(userId);
+    return row && row.paused === 0 ? row.discord_id : null;
+  }
+
+  /** The role mentioned an hour before each Arena, if set. */
+  get arenaRoleId(): string | null {
+    return this.#config?.arena?.roleId ?? null;
+  }
+
+  /** Posts in the Arena channel, when one is set, mentioning only the roles and users given; links show no preview. */
+  async postArena(message: { readonly content: string; readonly roles: readonly string[]; readonly users: readonly string[] }): Promise<void> {
+    const arena = this.#config?.arena;
+    if (!arena) return;
+    try {
+      await this.#call('POST', `/channels/${arena.channelId}/messages`, {
+        bot: arena.token,
+        json: { content: message.content.slice(0, 2000), allowed_mentions: { parse: [], roles: message.roles, users: message.users }, flags: 4 },
+      });
+    } catch (error) {
+      logFailure('arena post', error);
+    }
+  }
+
+  /** Moves the Weekly Champion role from the previous champion to the new one; either may be missing or not linked. */
+  async passArenaChampion(previousUserId: string | null, nextUserId: string | null): Promise<void> {
+    const arena = this.#config?.arena;
+    if (!arena?.championRoleId) return;
+    const role = (discordId: string) => `/guilds/${arena.guildId}/members/${discordId}/roles/${arena.championRoleId}`;
+    const previous = previousUserId && previousUserId !== nextUserId ? this.#row(previousUserId)?.discord_id : undefined;
+    const next = nextUserId ? this.#row(nextUserId)?.discord_id : undefined;
+    if (previous) {
+      try {
+        await this.#call('DELETE', role(previous), { bot: arena.token });
+      } catch (error) {
+        if (!(error instanceof DiscordError && error.status === 404)) logFailure('arena champion role', error);
+      }
+    }
+    if (next) {
+      try {
+        await this.#call('PUT', role(next), { bot: arena.token });
+      } catch (error) {
+        logFailure('arena champion role', error);
+      }
+    }
+  }
+
   view(userId: string): DiscordLinkView {
     const row = this.#config ? this.#row(userId) : undefined;
     return {

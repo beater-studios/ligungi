@@ -123,4 +123,6 @@ export const ERROR_STATUS: Readonly<Record<ErrorCode, number>> = {
   raceFull: 409,
   raceStarted: 409,
   notRaceOwner: 409,
+  arenaNotFound: 404,
+  arenaOver: 409,
 };

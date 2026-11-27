@@ -151,7 +151,11 @@ export const GameControls = ({
     )}
     {!started && (
       <div class="follow-up">
-        {view.rematchId ? (
+        {view.arena ? (
+          <a class="fbt strong glowing" href={`/arena/${view.arena}`}>
+            {t.arena.back}
+          </a>
+        ) : view.rematchId ? (
           <a class="fbt strong glowing" href={`/${view.rematchId}`}>
             {t.game.goToRematch}
           </a>

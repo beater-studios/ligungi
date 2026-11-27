@@ -235,6 +235,7 @@ export const PageBlocksSection = () => (
               deadlineIn: null,
               turn: 'white',
               voided: false,
+              arena: null,
             },
           ],
           race: { id: 'design4', status: 'waiting', players: 2 },

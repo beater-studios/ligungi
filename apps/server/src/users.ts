@@ -155,6 +155,11 @@ export class Users {
       this.#db.prepare('delete from study_likes where user_id = ?').run(userId);
       this.#db.prepare('delete from studies where owner_id = ?').run(userId);
       this.#db.prepare('delete from discord_links where user_id = ?').run(userId);
+      // Final places stay stored with each remaining player, so the others keep theirs.
+      this.#db.prepare('delete from arena_players where user_id = ?').run(userId);
+      this.#db.prepare('delete from trophies where user_id = ?').run(userId);
+      this.#db.prepare('update arena_pairings set white_user = null where white_user = ?').run(userId);
+      this.#db.prepare('update arena_pairings set black_user = null where black_user = ?').run(userId);
       this.#db.prepare('delete from users where id = ?').run(userId);
       this.#db.exec('commit');
     } catch (error) {

@@ -19,6 +19,7 @@ import { useStore } from '../core/store.ts';
 import { FollowFeed, OnlineFriends } from './home/Friends.tsx';
 import { Leaders } from './home/Leaders.tsx';
 import { Live } from './home/Live.tsx';
+import { NextArena } from './home/NextArena.tsx';
 import { QUICK_MODE_KEY, QuickGame, SeekRow, storedQuickMode } from './home/QuickGame.tsx';
 import { DailyPuzzleCard, Training } from './home/Training.tsx';
 
@@ -163,6 +164,7 @@ export const HomePage = () => {
         </div>
 
         <div class="ligungi-home__side">
+          <NextArena />
           <div class="ligungi-home__actions">
             <button type="button" class="button ligungi-button-good" onClick={() => setCreate('lobby')}>
               {t.nav.createGame}

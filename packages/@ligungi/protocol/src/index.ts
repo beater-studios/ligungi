@@ -20,3 +20,4 @@ export * from './insights.ts';
 export * from './notices.ts';
 export * from './links.ts';
 export * from './discord.ts';
+export * from './arena.ts';

@@ -84,6 +84,15 @@ Sending the full view on every change is simpler than sending diffs and solves r
 - Strict CSP on the site: `default-src 'self'`, `connect-src 'self'` (no WebSocket to other hosts), no plugins, no framing.
 - The Discord Activity is the only exception to the origin and framing rules, and only while the Discord variables are set: writes and the WebSocket also accept `https://<DISCORD_CLIENT_ID>.discordsays.com`, and a page loaded with Discord's `frame_id` (or as an iframe) may be framed by Discord's own domains. See [Discord Activity](#discord-activity).
 
+### Weekly Arena
+
+One tournament a week (`ARENA` in `packages/@ligungi/protocol/src/arena.ts`): Saturday at 18:00 UTC, Advanced at 5+3, 90 minutes, rated. `Arenas` (`apps/server/src/arenas.ts`) keeps them in `arenas`, `arena_players`, `arena_pairings` and `trophies`, and a timer runs its schedule every 2 seconds (`tick`): it creates the next Arena when none is open (`ARENAS=off` turns that off), reminds the joined players in the bell 10 minutes before, posts in Discord an hour before, starts with at least 4 joined players (or waits 10 minutes and cancels), pairs and finishes.
+
+- Pairing, as in lichess's Arena: every tick, the players who joined, are not paused, have the Arena page (or their last Arena game) open, are not in another live game and rested 8 seconds after their last game are paired by the standings, avoiding the opponent just played and balancing colors. With an odd number, whoever has been free the shortest time waits (`pairCandidates`). No new pairings in the last 8 minutes. When a game is aborted because someone never moved, a player who is no longer on the page is paused until they come back.
+- Scoring (`arenaPoints`): a win 2, 4 on a streak of two or more wins; a draw 1, nothing before 10 moves of the play phase or right after another draw; a loss 0. Aborted games and games that end after the Arena do not count. Arena games have no rematch (`GameRoom.arena`).
+- Trophies scale with the players who played at least one game: from 4 the champion, from 8 the podium, from 16 also the top 10%. A trophy needs 3 games; if a top place has fewer, the trophy goes to the next player who has them, without changing the standings. Each trophy stores its place, the number of players and the season (`S0` until 2026, then quarters). Banned accounts leave the standings and their trophies stop showing, as on the leaderboards.
+- Discord (optional, `DISCORD_ARENA_CHANNEL_ID`, with `DISCORD_ROLE_TOURNAMENTS` and `DISCORD_ROLE_WEEKLY_CHAMPION`): the bot posts the reminder, the start, the result and a cancellation in English (`arena-announce.ts`), mentions the players who linked their Discord account, and moves the Weekly Champion role from the last champion to the new one.
+
 ### Discord ranks
 
 Linking a Discord account is optional and off unless the Discord variables of the README are set. A linked player gets one rank role from their best established rating across the modes (`DISCORD_TIERS` in `packages/@ligungi/protocol/src/discord.ts`), given and moved by the bot after each rated game; a provisional rating gives no rank.

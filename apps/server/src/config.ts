@@ -30,6 +30,18 @@ export interface DiscordConfig {
   readonly bot: DiscordBotConfig | null;
   /** Where the bot posts each new report for the moderators (`DISCORD_REPORTS_CHANNEL_ID`); off without it. */
   readonly reports?: { readonly token: string; readonly channelId: string } | null;
+  /**
+   * The weekly Arena on the server: the channel the bot posts in (`DISCORD_ARENA_CHANNEL_ID`), the optional role it
+   * mentions an hour before (`DISCORD_ROLE_TOURNAMENTS`) and the one it gives the champion until the next Arena
+   * (`DISCORD_ROLE_WEEKLY_CHAMPION`); off without the channel.
+   */
+  readonly arena?: {
+    readonly token: string;
+    readonly guildId: string;
+    readonly channelId: string;
+    readonly roleId: string | null;
+    readonly championRoleId: string | null;
+  } | null;
 }
 
 export interface ServerConfig {
@@ -49,6 +61,8 @@ export interface ServerConfig {
   readonly claimAfterMs: number;
   readonly now: () => number;
   readonly discord: DiscordConfig | null;
+  /** Creates the weekly Arena on its own (`ARENAS=off` turns it off). */
+  readonly arenas: boolean;
   /** How the server reaches Discord; tests replace it. */
   readonly fetch: typeof fetch;
 }
@@ -77,7 +91,11 @@ const parseDiscord = (env: NodeJS.ProcessEnv): DiscordConfig | null => {
   const bot = token && guildId && Object.values(roles).every(Boolean) ? { token, guildId, tierRoles: roles } : null;
   const channelId = env.DISCORD_REPORTS_CHANNEL_ID;
   const reports = token && channelId ? { token, channelId } : null;
-  return { clientId, clientSecret, redirectUri, tokenKey, bot, reports };
+  const arenaChannel = env.DISCORD_ARENA_CHANNEL_ID;
+  const arena = token && guildId && arenaChannel
+    ? { token, guildId, channelId: arenaChannel, roleId: env.DISCORD_ROLE_TOURNAMENTS || null, championRoleId: env.DISCORD_ROLE_WEEKLY_CHAMPION || null }
+    : null;
+  return { clientId, clientSecret, redirectUri, tokenKey, bot, reports, arena };
 };
 
 export const loadConfig = (env: NodeJS.ProcessEnv = process.env): ServerConfig => ({
@@ -92,5 +110,6 @@ export const loadConfig = (env: NodeJS.ProcessEnv = process.env): ServerConfig =
   claimAfterMs: Number(env.CLAIM_AFTER_MS ?? 30_000),
   now: Date.now,
   discord: parseDiscord(env),
+  arenas: env.ARENAS !== 'off',
   fetch: (input, init) => fetch(input, init),
 });

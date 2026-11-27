@@ -1,3 +1,4 @@
+import { Trophy } from '../../arena/Trophy.tsx';
 import { RaceTrack } from '../../puzzles/RaceTrack.tsx';
 import { Flag } from '../../players/Flag.tsx';
 import { PlayerTag } from '../../players/PlayerTag.tsx';
@@ -28,6 +29,17 @@ export const DataSection = () => (
           gameId: `example${i}`,
         }))}
       />
+    </Example>
+    <Example label="Arena trophies (Trophy): the tower is the place (3 discs for the champion, 2 for second, 1 for third) and the top 10% a smaller blue disc; shape and color change together; sizes 72, 48, 32 and 22">
+      <div class="ligungi-ds__row">
+        <Trophy kind="arenaChampion" size={72} />
+        <Trophy kind="arenaSecond" size={72} />
+        <Trophy kind="arenaThird" size={72} />
+        <Trophy kind="arenaTop" size={72} />
+        <Trophy kind="arenaChampion" size={48} />
+        <Trophy kind="arenaChampion" size={32} />
+        <Trophy kind="arenaChampion" size={22} />
+      </div>
     </Example>
     <Example label="Players (PlayerTag)">
       <div class="ligungi-ds__row">

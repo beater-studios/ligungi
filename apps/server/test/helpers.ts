@@ -28,6 +28,7 @@ export const startServer = async (overrides: Partial<ServerConfig> = {}): Promis
     claimAfterMs: 30_000,
     now: Date.now,
     discord: null,
+    arenas: false,
     fetch: () => Promise.reject(new Error('no network in tests')),
     ...overrides,
   });

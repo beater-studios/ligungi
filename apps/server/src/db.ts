@@ -361,6 +361,72 @@ const MIGRATIONS = [
   `
   alter table studies add column topics text not null default '';
   `,
+  `
+  create table arenas (
+    id text primary key,
+    status text not null,
+    mode text not null,
+    clock_initial integer not null,
+    clock_increment integer not null,
+    duration integer not null,
+    min_players integer not null,
+    starts_at integer not null,
+    started_at integer,
+    finished_at integer,
+    season text not null,
+    announced integer not null default 0,
+    reminded integer not null default 0,
+    created_at integer not null
+  );
+  create index arenas_status on arenas(status, starts_at);
+  create table arena_players (
+    arena_id text not null references arenas(id),
+    user_id text not null references users(id),
+    rating integer not null,
+    score integer not null default 0,
+    games integer not null default 0,
+    wins integer not null default 0,
+    losses integer not null default 0,
+    streak integer not null default 0,
+    drew integer not null default 0,
+    paused integer not null default 0,
+    rank integer,
+    scored_at integer not null,
+    joined_at integer not null,
+    primary key (arena_id, user_id)
+  );
+  create index arena_players_user on arena_players(user_id);
+  create table arena_pairings (
+    game_id text primary key,
+    arena_id text not null references arenas(id),
+    white_user text,
+    black_user text,
+    white_rating integer not null,
+    black_rating integer not null,
+    status text not null,
+    winner text,
+    white_points integer,
+    black_points integer,
+    white_doubled integer not null default 0,
+    black_doubled integer not null default 0,
+    counted integer not null default 0,
+    created_at integer not null,
+    ended_at integer
+  );
+  create index arena_pairings_arena on arena_pairings(arena_id, created_at);
+  create table trophies (
+    id integer primary key,
+    user_id text not null references users(id),
+    kind text not null,
+    arena_id text not null references arenas(id),
+    place integer not null,
+    players integer not null,
+    season text not null,
+    created_at integer not null
+  );
+  create index trophies_user on trophies(user_id, created_at);
+  alter table games add column arena_id text;
+  `,
 ];
 
 export const openDatabase = (path: string): Db => {

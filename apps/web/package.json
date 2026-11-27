@@ -13,11 +13,13 @@
   },
   "dependencies": {
     "@discord/embedded-app-sdk": "2.5.0",
+    "@komugi-ai/engine": "file:../../vendor/komugi-ai-engine-0.1.0-6d27b166.tgz",
     "@ligungi/board": "*",
     "@ligungi/bot": "*",
     "@ligungi/content": "*",
     "@ligungi/engine": "*",
     "@ligungi/protocol": "*",
+    "onnxruntime-web": "1.31.1",
     "preact": "11.2.0"
   },
   "devDependencies": {

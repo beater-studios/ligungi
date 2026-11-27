@@ -7,6 +7,8 @@ ENV LIGUNGI_COMMIT=$LIGUNGI_COMMIT \
     VITE_CF_ANALYTICS_TOKEN=$VITE_CF_ANALYTICS_TOKEN
 WORKDIR /app
 COPY package.json package-lock.json .npmrc tsconfig.base.json ./
+# Package tarballs installed with file: dependencies (vendor/README.md).
+COPY vendor ./vendor
 COPY packages ./packages
 COPY apps ./apps
 COPY scripts ./scripts

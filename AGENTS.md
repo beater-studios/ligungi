@@ -15,6 +15,7 @@ ligungi is a lichess-style site to play Gungi (the HUNTER×HUNTER board game) wi
 | `packages/@ligungi/protocol` | Types, validation and error codes shared by server and site. |
 | `apps/server` | Node 24 server: `node:http`, `ws`, `node:sqlite`. |
 | `apps/web` | Preact site with lila's (lichess) markup and styles. |
+| `vendor` | Package tarballs installed with `file:` dependencies: `@komugi-ai/engine`, the Komugi opponent (see `vendor/README.md` and `docs/architecture.md`). Never edit them. |
 
 Read [docs/architecture.md](docs/architecture.md) before structural changes, [docs/rules.md](docs/rules.md) before touching game logic and [docs/api.md](docs/api.md) before changing routes or messages.
 

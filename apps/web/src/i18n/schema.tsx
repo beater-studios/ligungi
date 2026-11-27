@@ -122,6 +122,11 @@ export const SCHEMA = {
 
   'computer.fromPosition': text<[mode: string, turn: Color]>('mode', 'turn'),
   'computer.bot': text<[level: number]>('level'),
+  'computer.strengthHints.casual': text<[seconds: number]>('seconds'),
+  'computer.strengthHints.focused': text<[seconds: number]>('seconds'),
+  'computer.strengthHints.sharp': text<[seconds: number]>('seconds'),
+  'computer.strengthHints.awakened': text<[seconds: number]>('seconds'),
+  'computer.komugiBot': text<[strength: string]>('strength'),
   'discordActivity.youPlay': text<[color: string]>('color'),
   'discordActivity.moves': text<[plies: number]>('plies'),
   'discordActivity.openSite': text<[site: string]>('site'),

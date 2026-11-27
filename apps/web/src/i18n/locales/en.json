@@ -704,7 +704,41 @@
       "5": "Thinks up to 3 s per move."
     },
     "start": "Start",
-    "bot": "Computer · level {level}"
+    "bot": "Computer · level {level}",
+    "opponent": "Opponent",
+    "opponents": {
+      "builtin": "Built-in",
+      "komugi": "Komugi"
+    },
+    "opponentHints": {
+      "builtin": "Five levels, every mode.",
+      "komugi": "A neural network, Advanced only."
+    },
+    "komugiMissing": "Komugi's network is not installed on this server, so only the built-in levels can play.",
+    "komugiDownload": "Komugi runs in your browser. Its first game downloads its network and runtime, 20 to 50 MB.",
+    "komugiAdvancedOnly": "Komugi plays only Advanced, with the rulebook draft and White moving first.",
+    "komugiRulebookDraft": "Komugi plays only the rulebook draft, without the option above.",
+    "strength": "Strength",
+    "strengths": {
+      "casual": "Casual",
+      "focused": "Focused",
+      "sharp": "Sharp",
+      "awakened": "Awakened"
+    },
+    "strengthHints": {
+      "casual": "Plays quickly, up to {seconds} s per move.",
+      "focused": "Reads ahead, up to {seconds} s per move.",
+      "sharp": "Punishes mistakes, up to {seconds} s per move.",
+      "awakened": "Full strength, up to {seconds} s per move."
+    },
+    "komugiBot": "Komugi · {strength}",
+    "komugiFailed": "Komugi could not make its move.",
+    "komugiFailedReasons": {
+      "model": "Its network could not be loaded.",
+      "time": "It ran out of time.",
+      "engine": "Its engine failed."
+    },
+    "retry": "Try again"
   },
   "analysis": {
     "importTitle": "Import a game",

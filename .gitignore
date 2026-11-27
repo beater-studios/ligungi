@@ -39,6 +39,9 @@ apps/server/data/
 npm-debug.log*
 *.eml
 
+# The Komugi model and runtime, installed locally by scripts/komugi-assets.sh
+apps/web/public/komugi/
+
 # Third-party reference material (only the index is versioned)
 references/*
 !references/README.md

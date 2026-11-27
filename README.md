@@ -43,6 +43,8 @@ npm test
 npm run typecheck
 ```
 
+The Komugi opponent comes from the npm package [`@komugi-ai/engine`](https://www.npmjs.com/package/@komugi-ai/engine) (MIT), which `npm install` installs. Its network and runtime files are not committed: after `npm install`, run `scripts/komugi-assets.sh` to download the published model release from GitHub and install it into `apps/web/public/komugi/` (git-ignored), before `npm run dev` or `npm run build`. To install a release you already have, pass its directory (`scripts/komugi-assets.sh <release-dir>`) or set `KOMUGI_RELEASE_DIR`. Without these files the site shows Komugi disabled. See [docs/architecture.md](docs/architecture.md#komugi-opponent-komugi-aiengine).
+
 ## Production
 
 ```sh
